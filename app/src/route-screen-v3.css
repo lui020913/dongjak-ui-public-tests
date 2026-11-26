@@ -154,4 +154,4 @@ button:focus-visible,input:focus-visible{outline:3px solid #62a99d;outline-offse
 *::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;}
 
 /* 2026-11-26: pill action buttons inside the isolated route shadow root. */
-.action,.switch,.tools button,.recent-head button,.recent-list button,.search-recent-head button,.search-recent-tools button{border-radius:999px!important}
+.action,.switch,.tools button,.recent-head button,.recent-list button,.search-recent-head button,.search-history button,.search-head button{border-radius:999px!important}
