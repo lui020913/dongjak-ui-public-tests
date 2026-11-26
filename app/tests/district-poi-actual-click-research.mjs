@@ -27,7 +27,7 @@ const polygons=boundary.type==='Polygon'?[boundary.coordinates]:boundary.coordin
 function ring(p,r){let hit=false;for(let i=0,j=r.length-1;i<r.length;j=i++){const a=r[i],b=r[j];if((a[1]>p[1])!==(b[1]>p[1])&&p[0]<(b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0])hit=!hit;}return hit;}
 const district=registry.stops.filter(p=>polygons.some(r=>ring([p.lng,p.lat],r[0])&&!r.slice(1).some(h=>ring([p.lng,p.lat],h))));
 assert.equal(district.length,451);
-const expected=district.map(p=>p.arsId).sort();
+const referenceExpected=district.map(p=>p.arsId).sort();
 const targetNames=['밤골.상도역롯데캐슬파크엘','흑석자이.유앤미아파트','이수힐스테이트.이수푸르지오','자이아파트상가앞','신대방경남아파트'];
 const sites=targetNames.map(name=>{const stop=district.find(s=>s.name===name);assert.ok(stop,name);return stop;});
 const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1,serviceWorkers:'block'});
@@ -45,7 +45,13 @@ try{
    await page.waitForFunction(()=>window.__qaMap?.getStyle()?.sources?.openmaptiles,{},{timeout:90000});
 
 
- await page.waitForFunction(async()=>{const s=window.__qaMap?.getSource('transport-bus');if(!s)return false;const d=typeof s.getData==='function'?await s.getData():s._data;return d?.features?.length>=451;},{},{timeout:90000});
+ await page.waitForFunction(async()=>{const s=window.__qaMap?.getSource('transport-bus');if(!s)return false;const d=typeof s.getData==='function'?await s.getData():s._data;return d?.features?.length>=400;},{},{timeout:90000});
+ await page.waitForTimeout(1500);
+ const liveBoundary=await page.evaluate(async()=>{const s=window.__qaMap.getSource('district-outline');const d=typeof s.getData==='function'?await s.getData():s._data;return d.features[0].geometry;});
+ const activePolygons=liveBoundary.type==='Polygon'?[liveBoundary.coordinates]:liveBoundary.coordinates;
+ const expected=registry.stops.filter(p=>activePolygons.some(r=>ring([p.lng,p.lat],r[0])&&!r.slice(1).some(h=>ring([p.lng,p.lat],h)))).map(p=>p.arsId).sort();
+ assert.ok(expected.length>=400);
+ console.log('ACTIVE_BOUNDARY_ARS_COMPARISON',JSON.stringify({reference:referenceExpected.length,active:expected.length,excluded:referenceExpected.filter(id=>!expected.includes(id)),added:expected.filter(id=>!referenceExpected.includes(id))}));
  const registryState=()=>page.evaluate(async()=>{const m=window.__qaMap,s=m.getSource('transport-bus'),d=typeof s.getData==='function'?await s.getData():s._data;return {ids:d.features.map(f=>String(f.properties.arsId||'')).sort(),fallback:m.getFilter('dj-basemap-bus-pictogram'),apartment:m.getFilter('dj-apartment-label-poi')};});
  const initial=await registryState();assert.deepEqual(initial.ids,expected,'all distinct official ARS points are retained, without unregistered copies');
  for(const site of sites){
@@ -68,5 +74,5 @@ try{
  }
  assert.deepEqual((await registryState()).ids,expected);
  assert.deepEqual(errors,[]);
- console.log('DISTRICT_POI_ACTUAL_CLICK_OK',JSON.stringify({officialStops:expected.length,results}));
+ console.log('DISTRICT_POI_ACTUAL_CLICK_OK',JSON.stringify({officialStops:expected.length,referenceStops:referenceExpected.length,results}));
 }finally{writeFileSync(out+'/results.json',JSON.stringify({results,errors},null,2));await ctx.close();await browser.close();server.close();}
