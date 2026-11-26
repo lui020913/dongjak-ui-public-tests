@@ -4,6 +4,7 @@ on:
     paths:
       - 'app/src/reviewed-base-road-layer.mjs'
       - 'app/src/reviewed-road-display-assets.mjs'
+      - 'app/src/reviewed-native-tile-guard.mjs'
       - 'app/tests/e2e/reviewed-base-road-qa.spec.js'
       - '.github/workflows/actual-app-reviewed-base-road.yml'
 permissions:
@@ -21,14 +22,19 @@ jobs:
           node-version: '24'
           cache: npm
           cache-dependency-path: app/package-lock.json
+      - name: Require exact source snapshot re-audit success
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run watch 45786891095 --repo "${{ github.repository }}" --exit-status --interval 15
       - uses: actions/download-artifact@v4
         with:
           name: dongjak-reaudited-road-display-assets
           path: app/public/data/road-display-review
-          run-id: 45784568908
+          run-id: 45786891095
           github-token: ${{ github.token }}
       - run: |
           jq -e '.surface_count==12045 and .quarantine.count==9 and (.tiles|length)==90 and .native_reaudit.eligible_ids==258 and .operational_enabled==false' app/public/data/road-display-review/manifest.json
+          jq -e '(.audited_tiles|length)>0 and (.tilejson_sha256|length)==64' app/public/data/road-display-review/native-id-eligibility.json
       - working-directory: app
         run: npm ci
       - working-directory: app
