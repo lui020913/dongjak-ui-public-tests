@@ -15,7 +15,7 @@ const icons={
 };
 const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+icons[name]+'</svg>';
 const railLabel=line=>line==='신림'?'신림선':line+'호선';
-const routeMetric=(plan,result,done)=>plan.kind==='rail'&&Number.isFinite(plan.indicativeMinutes)?'이동 약 '+Math.ceil(plan.indicativeMinutes)+'분':result?'도보 '+result.walkMinutes+'분':done?'전체 시간 미확인':'도보 조회 중';
+const routeMetric=(plan,result,done)=>plan.kind==='rail'&&Number.isFinite(plan.indicativeMinutes)?'열차 약 '+Math.ceil(plan.indicativeMinutes)+'분':result?'도보 '+result.walkMinutes+'분':done?'전체 시간 미확인':'도보 조회 중';
 const legLabel=p=>p.kind==='bus'?p.route:[...new Set(p.lines)].map(railLabel).join(' · ');
 const nameOf=p=>p?.name||p?.label||'선택한 장소';
 export function mountTransitComparison({doc,win,shadow,host,view,app}){
@@ -72,7 +72,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   if(!plans.length){const p=doc.createElement('p');p.className='tr-note';p.textContent='조회 범위에서 확인된 이동안이 없습니다.';list.append(p);}
   for(const plan of plans){
    const card=doc.createElement('button');card.type='button';card.className='tr-card';const lead=plan.legs?.[0]||plan;card.style.setProperty('--route-color',lead.kind==='bus'?busRouteColor(lead.routeType):subwayLineColor(railLabel(lead.lines[0])));
-   const metrics=doc.createElement('div');metrics.className='tr-metrics';const metric=doc.createElement('strong');metric.textContent=routeMetric(plan,reviewed.get(plan),reviewed.has(plan));const fare=doc.createElement('span');fare.className='tr-fare-compact';fare.textContent=transitFareText(plan).replace('기본운임','기본운임');metrics.append(metric,fare);
+   const metrics=doc.createElement('div');metrics.className='tr-metrics';const metric=doc.createElement('strong');metric.textContent=routeMetric(plan,reviewed.get(plan),reviewed.has(plan));const fare=doc.createElement('span');fare.className='tr-fare-compact';fare.textContent=transitFareText(plan);metrics.append(metric,fare);
    const head=doc.createElement('div');head.className='tr-row';
    const mark=doc.createElement('span');mark.className='tr-bus-icon';mark.innerHTML=icon(lead.kind);
    const title=doc.createElement('strong');title.textContent=plan.legs?plan.legs.map(legLabel).join(' + '):plan.kind==='bus'?plan.route+' · 직행버스':legLabel(plan);
@@ -83,7 +83,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
    const legs=plan.legs||[plan];let count=0;
    for(const leg of legs){for(const line of leg.kind==='bus'?[leg.route]:[...new Set(leg.lines||[])]){if(count++){const arrow=doc.createElement('span');arrow.className='tr-badge-arrow';arrow.textContent='›';track.append(arrow);}const badge=doc.createElement('span');badge.className='tr-line-badge';badge.textContent=leg.kind==='bus'?line:railLabel(line);badge.style.setProperty('--line-color',leg.kind==='bus'?busRouteColor(leg.routeType):subwayLineColor(railLabel(line)));track.append(badge);}}
    card.append(metrics,head,track,detail,meta);
-   const summary=doc.createElement('small');summary.className='tr-review-result';summary.textContent=formatTransitReview(reviewed.get(plan),reviewed.has(plan));card.append(summary);reviewLabels.set(plan,{summary,metric});
+   const summary=doc.createElement('small');summary.className='tr-review-result';summary.textContent=formatTransitReview(reviewed.get(plan),reviewed.has(plan));if(plan.kind==='rail'&&reviewed.get(plan))summary.textContent+=' · 도보 '+reviewed.get(plan).walkMinutes+'분';summary.hidden=!reviewed.has(plan)&&plan.kind!=='rail';card.append(summary);reviewLabels.set(plan,{summary,metric});
    card.addEventListener('click',async()=>{
     if(busy)return;if(key(points())!==pointKey){close();return;}
     const seq=generation;const request=new AbortController();previewController=request;stopReview();setBusy(true);cached={key:pointKey,options,filter,reviewed,preferPri};
@@ -101,7 +101,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   try{
    await reviewAllTransitCandidates(plans,{signal:request.signal,concurrency:2,review:plan=>new Promise((resolve,reject)=>win.dispatchEvent(new CustomEvent('dongjak:transit-candidate-review',{detail:{plan,signal:request.signal,preferPri:policy,walkCache,resolve,reject}}))),onResult:(plan,summary)=>{
     if(seq!==generation||request.signal.aborted||reviewController!==request)return;
-    reviewed.set(plan,summary);const label=reviewLabels.get(plan);if(label){label.summary.textContent=formatTransitReview(summary,true);label.metric.textContent=routeMetric(plan,summary,true);}
+    reviewed.set(plan,summary);const label=reviewLabels.get(plan);if(label){label.summary.textContent=formatTransitReview(summary,true);if(plan.kind==='rail'&&summary)label.summary.textContent+=' · 도보 '+summary.walkMinutes+'분';label.summary.hidden=false;label.metric.textContent=routeMetric(plan,summary,true);}
    }});
   }finally{if(reviewController===request)reviewController=null;}
  }
