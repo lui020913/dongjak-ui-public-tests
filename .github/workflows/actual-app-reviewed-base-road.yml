@@ -1,0 +1,45 @@
+name: Actual app reviewed base road QA
+on:
+  pull_request:
+    paths:
+      - 'app/src/reviewed-base-road-layer.mjs'
+      - 'app/src/reviewed-road-display-assets.mjs'
+      - 'app/tests/e2e/reviewed-base-road-qa.spec.js'
+      - '.github/workflows/actual-app-reviewed-base-road.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  qa:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'fix/operational-road-display-adapter-20261126'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-operational-road-display-assets
+          path: app/public/data/road-display-review
+          run-id: 45782401894
+          github-token: ${{ github.token }}
+      - run: |
+          jq -e '.surface_count==12045 and .quarantine.count==9 and (.tiles|length)==90 and .operational_enabled==false' app/public/data/road-display-review/manifest.json
+      - working-directory: app
+        run: npm ci
+      - working-directory: app
+        run: npx playwright install --with-deps chromium
+      - working-directory: app
+        env:
+          DONGJAK_ROAD_REVIEW_QA: '1'
+        run: npx playwright test --project=mobile tests/e2e/reviewed-base-road-qa.spec.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: actual-app-reviewed-base-road-qa
+          path: app/test-results/
+          retention-days: 7
