@@ -5,49 +5,41 @@ on:
 permissions:
   contents: read
   actions: read
+concurrency:
+  group: green-building-render-research
+  cancel-in-progress: true
 jobs:
   render:
     runs-on: ubuntu-24.04
     container:
       image: mcr.microsoft.com/playwright:v1.65.1-noble
       options: --ipc=host
-    timeout-minutes: 18
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: ceacc5985f88a1dfb1bffb95015d6dbedf930d5e
+          path: actual
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - uses: actions/download-artifact@v4
-        with:
-          name: fix-phone-build-45746716101-a2e1078179c6da6c2bf310c692bd15de74b696a9
-          run-id: 45746716101
-          github-token: ${{ github.token }}
-          path: build-input
-      - uses: actions/download-artifact@v4
-        with:
-          name: dongjak-green-building-audit
-          run-id: 45745321396
-          github-token: ${{ github.token }}
-          path: audit-input
-      - name: Verify exact tested build and prepare offline map
+      - name: Instrument the exact production candidate only inside this runner
         run: |
-          cd build-input
-          sha256sum -c SHA256SUMS
-          test "$(cat SOURCE_SHA)" = a2e1078179c6da6c2bf310c692bd15de74b696a9
-          tar -xzf dist.tar.gz -C ../app
-          cd ..
-          python -m pip install --quiet shapely==2.1.2
-          python scripts/research/green_building_render_fixture.py
-          npm ci --prefix app
+          test "$(git -C actual rev-parse HEAD)" = ceacc5985f88a1dfb1bffb95015d6dbedf930d5e
+          node --input-type=module -e "import fs from 'node:fs';const p='actual/app/src/main.js',s=fs.readFileSync(p,'utf8'),needle='installSolidMapLines(map);';if(s.split(needle).length!==2)throw Error('unexpected map entry');fs.writeFileSync(p,s.replace(needle,'globalThis.__qaMap=map;'+needle));"
+          cp app/tests/green-building-render-research.mjs actual/app/tests/green-building-render-research.mjs
+      - working-directory: actual/app
+        run: npm ci
+      - working-directory: actual/app
+        run: npm run build
       - name: Compare actual app 2D and 3D rendering
+        working-directory: actual
         run: node app/tests/green-building-render-research.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: green-building-render-comparison
-          path: audit-render-output/
+          path: actual/audit-render-output/
           if-no-files-found: warn
           retention-days: 14
