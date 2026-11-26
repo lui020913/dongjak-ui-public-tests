@@ -2445,7 +2445,19 @@ const pedestrianTools=initPedestrianTools({
     clearCommunityLocationPick();
     communityComposerFromMap=window.matchMedia('(max-width:699px)').matches;
     if(!communityComposerFromMap)navigate('participate');
-    else if(app.dataset.tab!=='map')navigate('map',{suppressOverview:true});
+    else {
+      if(communityComposerPortal?.isOpen())return;
+      // Always reconcile the map tab, even if it was already selected.
+      // An interrupted legacy transition can leave the feed painted while
+      // data-tab is still map. Never use the feed as an intermediate surface.
+      const feed=document.getElementById('participation-panel');
+      window.DongjakWindowMotion?.cancel?.(feed);
+      delete feed.dataset.djTabOutgoing;
+      delete feed.dataset.djPrimaryTransition;
+      navigate('map',{suppressOverview:true});
+      feed.hidden=true;
+      for(const key of ['display','visibility','opacity','pointer-events','animation','transition','will-change','z-index'])feed.style.removeProperty(key);
+    }
     document.getElementById('community-category').value='보행 불편';
     syncIssueDetails();
     openCommunityComposer(true,{animate:true});
