@@ -641,8 +641,11 @@ const map = new maplibregl.Map({
 // Keep source credits in '지도 옵션 > 지도 데이터 출처'; do not overlay the map.
 
 installSolidMapLines(map);
-// Reviewed ground road display: only show when the pinned assets and actual native source pass all guards.
-installReviewedBaseRoads({map,app,enabled:true,requireSelective:true});
+// Keep the original ground-road style during both movement and idle.
+// The reviewed polygon fill was activated after moveend and could paint wide
+// white surfaces over the native map. Retain its assets for offline review;
+// building footprint trims are independent and remain enabled.
+installReviewedBaseRoads({map,app,enabled:false,requireSelective:true});
 const djRenderBudget=installPhoneRenderBudget({map,app,phone:djPhone,initial:djInitialBudget,normalRatio:djNormalPixelRatio});
 installSupabaseSafetyAi({map,maplibregl,app});
 installPriMap({map,maplibregl,app,restoreMode:themeReloadState?.priMode});
