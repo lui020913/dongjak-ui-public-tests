@@ -2187,6 +2187,7 @@ const communityForm = document.getElementById('community-form');
 const communityPhotoInput = document.getElementById('community-photo-input');
 communityComposerPortal=createCommunityComposerPortal(communityForm);
 let communityComposerFromMap=false;
+let communityPickerReturnTab=null;
 function openCommunityComposer(open,{animate=true}={}) {
   const motion=window.DongjakWindowMotion;
   const phone=window.matchMedia('(max-width:699px)').matches;
@@ -2207,7 +2208,13 @@ function openCommunityComposer(open,{animate=true}={}) {
   if(!communityComposerPortal?.isOpen())return;
   communityComposerPortal.dismiss({animate});
 }
-document.getElementById('community-compose-toggle').addEventListener('click',()=>{communityComposerFromMap=false;openCommunityComposer(communityForm.hidden);});
+document.getElementById('community-compose-toggle').addEventListener('click',()=>{
+  if(communityComposerPortal?.isOpen())return;
+  cancelCommunityTabMotion();
+  if(app.dataset.tab!=='participate')navigate('participate');
+  communityComposerFromMap=false;
+  openCommunityComposer(communityForm.hidden);
+});
 document.getElementById('community-compose-close').addEventListener('click',()=>openCommunityComposer(false));
 for (const chip of document.querySelectorAll('.community-filter[data-community-filter]')) {
   chip.addEventListener('click',()=>{
@@ -2278,6 +2285,7 @@ function syncCommunityPickerDock(){
   }
 }
 function clearCommunityLocationPick(){
+  communityPickerReturnTab=null;
   communityPickMode=false;
   communityPickMarker?.remove();communityPickMarker=null;
   communityPickCandidate=null;
@@ -2299,8 +2307,10 @@ function cancelCommunityTabMotion(){
   window.dispatchEvent(new Event('dongjak:cancel-tab-transition'));
 }
 function resumeCommunityLocationDraft(){
+  const returnTab=communityPickerReturnTab;
   clearCommunityLocationPick();
   cancelCommunityTabMotion();
+  if(returnTab)communityComposerFromMap=returnTab==='map';
   if(!communityComposerFromMap||!window.matchMedia('(max-width:699px)').matches)navigate('participate',{resumeCommunityDraft:true});
   openCommunityComposer(true);
 }
@@ -2336,6 +2346,8 @@ function confirmCommunityLocation(){
 }
 document.getElementById('community-map-accept').addEventListener('click',confirmCommunityLocation);
 document.getElementById('community-map-pick').addEventListener('click',()=>{
+  // Capture the actual editor destination before the tab is changed to map.
+  communityPickerReturnTab=app.dataset.tab==='participate'?'participate':communityComposerFromMap?'map':'participate';
   if(routePickMode){routePickMode=null;closeTransitRouteConfirmation();syncRoutePresentation();}
   // Keep the draft but return the live form to its original parent before
   // switching tabs. It will be portaled again after the map pick finishes.
@@ -2452,6 +2464,8 @@ const pedestrianTools=initPedestrianTools({
   onToast:toast,
   onShowMap:()=>{if(app.dataset.tab!=='map')navigate('map');},
   onReport:()=>{
+    // A late duplicate map action must not overwrite the open draft's origin.
+    if(communityComposerPortal?.isOpen()||communityPickMode)return;
     // On phones the body-level editor opens directly over the live map.
     // The legacy feed is only needed for the wide-screen inline editor.
     cancelCommunityTabMotion();
