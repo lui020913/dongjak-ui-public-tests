@@ -13,7 +13,7 @@ test('native pavement polygons use a distinct color without altering linear road
  for(const layer of [{id:'highway-primary',type:'line','source-layer':'transportation'},{id:'highway-area-pier',type:'fill','source-layer':'transportation'},{id:'rail-area',type:'fill','source-layer':'transportation'},{id:'building',type:'fill','source-layer':'building'},{id:'campus',type:'fill','source-layer':'landuse'},{id:'dj-pri-risk',type:'fill',source:'pri'}])assert.equal(nativePavedAreaFill(layer),false);
  assert.equal(roadColorRole({id:'highway-primary',type:'line','source-layer':'transportation'}),'surface');
  assert.notEqual(LIGHT_PAVED_AREA_COLOR,'#ffffff');
- assert.deepEqual(nativePavedAreaPaint('#ffffff'),['case',['all',['==',['get','class'],'path'],['in',['get','subclass'],['literal',['pedestrian','footway','path']]]],LIGHT_PAVED_AREA_COLOR,'#ffffff']);
+ assert.deepEqual(nativePavedAreaPaint('#ffffff'),['match',['coalesce',['get','class'],''],['path','pedestrian','footway','cycleway','steps'],LIGHT_PAVED_AREA_COLOR,'#ffffff']);
 });
 test('one building visibility owner, no frame-time fallback to 2D',()=>{
  const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
