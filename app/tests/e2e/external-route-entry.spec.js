@@ -127,7 +127,8 @@ test('real transit detail buttons navigate to the visible route editor, includin
    expect(await register('end',outside)).toBe(false);
    const denied=page.locator('#dj832-dongjak-boundary');
    await expect(denied).toBeVisible();
-   await denied.locator('.dj832-boundary-confirm').click();
+   expect(await denied.evaluate(el=>el.parentElement===document.body)).toBe(true);
+   await denied.locator('.dj832-boundary-confirm').click({timeout:10000});
    await expect(denied).toBeHidden();
 
   }

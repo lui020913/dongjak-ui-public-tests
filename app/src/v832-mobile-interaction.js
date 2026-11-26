@@ -18,7 +18,9 @@ export function installMobile832(doc=document,win=window){
     <p id="dj832-boundary-body">동작구 밖의 장소는 출발지·도착지·경유지로 지정할 수 없습니다.</p>
     <button class="dj832-boundary-confirm" type="button">확인</button>
   </div>`;
-  app.append(modal);
+  // Route V3 is mounted directly under body, above the app stacking context.
+  // The modal must be its sibling, not a high-z child trapped under that context.
+  doc.body.append(modal);
   const close=()=>{if(modal.hidden)return;const finish=()=>{modal.hidden=true;};if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(modal,finish);else finish();};
   const onDenied=e=>{
     const msg=modal.querySelector('#dj832-boundary-body');
@@ -40,7 +42,9 @@ export function installMobile832(doc=document,win=window){
     const n=nav?.getBoundingClientRect();
     const h=search?.getBoundingClientRect();
     if(n?.height){
-      app.style.setProperty('--dj832-nav-inset',Math.max(0,a.bottom-n.top+8)+'px');
+      const inset=Math.max(0,a.bottom-n.top+8)+'px';
+      app.style.setProperty('--dj832-nav-inset',inset);
+      modal.style.setProperty('--dj832-nav-inset',inset);
       prompt?.style.setProperty('--dj832-signin-nav-offset',Math.max(0,win.innerHeight-n.top+9)+'px');
     }
     if(h?.height)app.style.setProperty('--dj832-search-edge',Math.max(0,h.bottom-a.top+7)+'px');
