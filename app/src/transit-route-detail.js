@@ -128,9 +128,9 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   const box=el('div','dj-tr-fare');
   const walks=detail.walks||[detail.first,detail.last];
   const meters=walks.reduce((sum,w)=>sum+(w?.meters||0),0),minutes=walks.reduce((sum,w)=>sum+(w?.minutes||0),0);
-  box.append(el('strong','','도보 합계 '+meters+'m · 약 '+minutes+'분'),el('small','',transitFareText(detail)+' · 일반 성인 교통카드'));
+  box.append(el('strong','','도보 '+meters+'m · 약 '+minutes+'분'),el('small','',transitFareText(detail)));
   const source=el('a','dj-tr-fare-source','서울시 공식 운임 안내');source.href=TRANSIT_FARE_SOURCE;source.target='_blank';source.rel='noopener noreferrer';
-  box.append(el('small','','통합환승 조건과 이용거리에 따라 달라지며, 할인·실제 청구액은 미확인입니다.'),source);
+  source.textContent='운임 기준';source.setAttribute('aria-label','서울시 공식 운임 안내 · 거리 및 환승 조건에 따라 실제 요금은 달라질 수 있습니다.');box.append(source);
   return box;
  }
  function busHours(board,leg){
