@@ -11,6 +11,10 @@ on:
       - 'app/src/v815-place-store.js'
       - 'app/index.html'
       - 'app/tests/global-neutral-focus-browser.mjs'
+      - 'app/tests/tip-search-crossfade-browser.mjs'
+      - 'app/src/map-toolbar-crossfade.js'
+      - 'app/src/v854-tip-marquee.js'
+      - 'app/src/map-quick-search.js'
       - 'app/tests/global-neutral-focus-tip-20261126.test.mjs'
       - 'app/src/route-screen-v3.css'
       - 'app/src/route-screen-v3.js'
@@ -55,3 +59,4 @@ jobs:
       - run: node tests/map-hud-collision-browser.mjs
       - run: node tests/expanded-detail-header-browser.mjs
       - run: node tests/global-neutral-focus-browser.mjs
+      - run: node tests/tip-search-crossfade-browser.mjs
