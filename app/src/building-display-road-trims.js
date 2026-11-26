@@ -1,0 +1,26 @@
+// Display-only trims are generated from intersecting official road polygons
+// and verified ground centerlines. Original features remain the identity for
+// greenery review, source auditing and native building coverage.
+export function applyBuildingDisplayTrims(sheet,kind,source,features,pack){
+ const result=new Map();
+ if(pack?.schema!==1)return result;
+ const record=pack.sheets?.[sheet+':'+kind];
+ if(!record||record.source!==source||record.source_count!==features.length||!Array.isArray(record.edits))return result;
+ const seen=new Set();
+ for(const edit of record.edits){
+  const f=features[edit.row];
+  if(!Number.isInteger(edit.row)||seen.has(edit.row)||!f||JSON.stringify(f.geometry)!==JSON.stringify(edit.original))return new Map();
+  if(!['Polygon','MultiPolygon'].includes(edit.display?.type)||!Array.isArray(edit.display.coordinates)||edit.display.coordinates.length===0)return new Map();
+  seen.add(edit.row);result.set(f,edit.display);
+ }
+ return result;
+}
+let packPromise=null;
+export function loadBuildingDisplayTrimPack(){
+ if(!packPromise)packPromise=fetch('/data/building-display-road-trims.json',{cache:'force-cache'}).then(async r=>{
+  if(!r.ok)throw Error('building display trims unavailable');
+  const pack=await r.json();if(pack?.schema!==1||!pack.sheets)throw Error('invalid building display trims');
+  return pack;
+ }).catch(()=>{packPromise=null;return null;});
+ return packPromise;
+}
