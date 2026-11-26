@@ -1,7 +1,7 @@
 """Compare the actual OpenFreeMap vector basemap with independent local GIS.
 Produces evidence and reversible alignment experiments, not production edits.
 """
-import json, math, pathlib, sys, urllib.request, urllib.parse, gzip
+import json, math, pathlib, sys, urllib.request, urllib.parse, gzip, hashlib
 from collections import Counter, defaultdict
 from pyproj import Transformer
 from shapely.geometry import shape, Point, LineString, box
@@ -10,7 +10,7 @@ from shapely.affinity import translate
 from shapely.strtree import STRtree
 from shapely.prepared import prep
 from mapbox_vector_tile import decode
-from dongjak_road_building_audit import PUBLIC, TO_M, metric, feature, fc
+from dongjak_road_building_audit import PUBLIC, TO_M, metric, feature, fc, grade_flag, TO_WGS
 
 STYLE="https://tiles.openfreemap.org/styles/bright"
 MERC=20037508.342789244
@@ -111,15 +111,72 @@ def main(out):
         if kind!="native_fragment":
             records.append(feature(g,{**meta,"source_kind":kind,"centerline_inside_m":round(crossing.length,2),"official_overlap_m2":round(area,2),"building_m2":round(g.area,2)}))
     manifest=json.loads((PUBLIC/"buildings/manifest.json").read_text())
+    originals=[]
     for sheet in manifest["sheets"]:
         for kind in ("file","supplement"):
-            for i,f in enumerate(json.loads((PUBLIC/sheet[kind].lstrip("/")).read_text())["features"]):
+            raw=(PUBLIC/sheet[kind].lstrip("/")).read_bytes()
+            digest=hashlib.sha256(raw).hexdigest()
+            for i,f in enumerate(json.loads(raw)["features"]):
                 p=f.get("properties",{});x,y=p.get("x"),p.get("y")
                 if not isinstance(x,(int,float)) or not isinstance(y,(int,float)) or not scope.covers(Point(x,y)):continue
                 g=metric(f["geometry"])
-                if not g.is_empty and g.area>0:inspect(g,kind,{"sheet":sheet["sheet"],"row":i})
+                if not g.is_empty and g.area>0:
+                    meta={"sheet":sheet["sheet"],"row":i,"source_kind":kind,"source_sha256":digest}
+                    inspect(g,kind,meta)
+                    originals.append((g,meta,p))
     for i,g in enumerate(native):
         if boundary.covers(g.representative_point()):inspect(g,"native_fragment",{"fragment":i})
+    # Shape-preserving alignment candidate, not automatically deployed.
+    # Require a unique, similar native footprint and independent road evidence.
+    native_tree=STRtree(native)
+    originals_tree=STRtree([v[0] for v in originals])
+    walk_graph=json.loads((PUBLIC/"data/safety/walk/dongjak_walk_graph.json").read_text())
+    walk=[transform(TO_M,LineString(e[6])) for e in walk_graph["edges"] if e[5]==0 and e[4]=="1111" and len(e[6])>=2]
+    walk_tree=STRtree(walk)
+    corrections=[]; rejected=Counter()
+    for i,(g,meta,p) in enumerate(originals):
+        road_hits=official_tree.query(g.buffer(4),predicate="intersects")
+        if not len(road_hits):continue
+        local_roads=unary_union([official[int(k)] for k in road_hits])
+        old_overlap=g.intersection(local_roads).area
+        if old_overlap<1:continue
+        if grade_flag(p) or any(p.get(k) for k in ("name","name:ko","building_name","amenity","public_service","healthcare")):
+            rejected["protected"]+=1;continue
+        matches=[]
+        for k in native_tree.query(g.buffer(4),predicate="intersects"):
+            n=native[int(k)]
+            if not .8<=n.area/g.area<=1.25:continue
+            dx,dy=n.centroid.x-g.centroid.x,n.centroid.y-g.centroid.y
+            if not .35<=math.hypot(dx,dy)<=3:continue
+            moved=translate(g,xoff=dx,yoff=dy)
+            score=moved.intersection(n).area/moved.union(n).area
+            if score>=.85 and score-(g.intersection(n).area/g.union(n).area)>=.03:
+                matches.append((score,dx,dy,moved))
+        if not matches:rejected["no_similar_reference"]+=1;continue
+        matches.sort(key=lambda m:m[0],reverse=True)
+        score,dx,dy,moved=matches[0]
+        # Multiple clipped/duplicated vector tiles may contain the same object;
+        # reject materially different shifts rather than guessing.
+        if any(math.hypot(a-dx,b-dy)>.4 for _,a,b,_ in matches[1:]):
+            rejected["ambiguous_reference"]+=1;continue
+        new_overlap=moved.intersection(local_roads).area
+        if new_overlap>.01:rejected["remaining_road_overlap"]+=1;continue
+        if any(moved.intersection(lines[int(k)]).length>.05 for k in line_tree.query(moved,predicate="intersects")):
+            rejected["native_road_conflict"]+=1;continue
+        if any(moved.intersection(walk[int(k)]).length>.05 for k in walk_tree.query(moved,predicate="intersects")):
+            rejected["independent_road_conflict"]+=1;continue
+        if any(int(k)!=i and moved.intersection(originals[int(k)][0]).area>g.intersection(originals[int(k)][0]).area+.05
+               for k in originals_tree.query(moved,predicate="intersects")):
+            rejected["new_building_conflict"]+=1;continue
+        # Check the transformed display shape round-trip before exporting.
+        candidate=feature(moved,{**p,**meta,"dx_m":round(dx,4),"dy_m":round(dy,4),
+                            "reference_iou":round(score,5),"overlap_before_m2":round(old_overlap,4),
+                            "overlap_after_m2":round(new_overlap,4),"review_required":True})
+        if metric(candidate["geometry"]).intersection(local_roads).area>.01:
+            rejected["roundtrip_overlap"]+=1;continue
+        corrections.append(candidate)
+    (out/"shape-preserving-alignment-candidates.geojson").write_text(json.dumps(fc(corrections),ensure_ascii=False))
+    print("ALIGNMENT_CANDIDATES",json.dumps({"count":len(corrections),"rejected":dict(rejected),"review_required":True}))
     summary={"style":STYLE,"source_name":names[0],"tile_zoom":z,"tiles":tile_log,"road_line_fragments":len(lines),
              "native_building_fragments":len(native),"counts":{k:dict(v) for k,v in counts.items()},
              "centerline_translation_diagnostic_m":{k:{a:round(b,2) for a,b in v.items()} for k,v in shift_scores.items()},
