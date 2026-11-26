@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.188",
+  "application_version": "9.2.189",
   "public_work_branch": "main",
-  "purpose": "Six phone regression fixes: keyboard focus shield, road-name fallback, unverified old police POI suppression, speech watchdog and result recovery, stable search anchor, preserved transit close geometry. Require source CI and protected Preview and Production. Also dock all active layer release buttons vertically above the right edge of the phone tab bar, avoiding TIP and bus route controls. Keep GIS 2D footprints independent of 3D toggle, replace only extruded polygons, and suppress conservatively matched native footprints. Make 224 unassessed shared-road candidates distinguishable from ordinary unknown roads; use the common PRI stroke width for speed links and remove duplicate speed-link rendering. Restore all 237 original clipped PDF shared-road reference lines in the unified PRI mode; retain matched evidence in details, no unverified scores or duplicate candidate centerlines.",
-  "attempt": 420,
+  "purpose": "Preserve native 2D buildings and retry incomplete GIS sheets; suppress native footprint only for actually rendered 3D extrusion; use official route stop coordinates for selected route marker and labels, restore baseline stops after route clear; hide active release dock during PRI and other sheets. Protected preview and production.",
+  "attempt": 421,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
