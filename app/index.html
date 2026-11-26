@@ -6,7 +6,8 @@
     <style>
       @layer dj-interaction-focus;
       @layer dj-interaction-focus {
-        :root { --dj-neutral-focus: #596368; }
+        :root { --dj-neutral-focus: #596368; --dj-route-focus-outline: 2px solid var(--dj-neutral-focus); }
+        :root[data-dj-focus-input="pointer"] { --dj-route-focus-outline: none; }
         :root:has(#app[data-theme="dark"]) { --dj-neutral-focus: #b9c2c6; }
         :is(button,[role="button"],[role="tab"],[role="switch"],[role="option"],[role="checkbox"],[role="radio"],[tabindex],a[href],summary,input,textarea,select) {
           -webkit-tap-highlight-color: transparent !important;
