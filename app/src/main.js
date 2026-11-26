@@ -3892,7 +3892,7 @@ window.addEventListener('dongjak:transit-route-points',event=>{
 });
 // Review candidates without changing map state or entering navigation.
 window.addEventListener('dongjak:transit-candidate-review',event=>{
- const {plan,signal,preferPri,resolve,reject}=event.detail||{};
+ const {plan,signal,preferPri,walkCache,resolve,reject}=event.detail||{};
  if(!plan||typeof resolve!=='function'||typeof reject!=='function')return;
  void (async()=>{
   const from=routeStart,to=routeEnd,gen=routeRequestGeneration;
@@ -3906,9 +3906,13 @@ window.addEventListener('dongjak:transit-candidate-review',event=>{
   for(const [a,b] of pairs){
    if(!current())throw new Error('경로 조건이 변경됐습니다.');
    if(a.lng===b.lng&&a.lat===b.lat){walks.push({kilometers:0,seconds:0});continue;}
-   const pair=await fetchTransitPedestrianPair(a,b,signal);
-   if(!current())throw new Error('경로 조건이 변경됐습니다.');
-   const walk=await selectTransitWalk(pair,preferPri);
+   const cacheKey=[a.lng,a.lat,b.lng,b.lat,Boolean(preferPri)].join(',');
+   let pending=walkCache?.get(cacheKey);
+   if(!pending){
+    pending=(async()=>{const pair=await fetchTransitPedestrianPair(a,b,signal);if(!current())throw new Error('경로 조건이 변경됐습니다.');return selectTransitWalk(pair,preferPri);})();
+    walkCache?.set(cacheKey,pending);
+   }
+   const walk=await pending;
    if(!current()||!walk)throw new Error('도보 연결 확인 불가');
    walks.push(walk);
   }

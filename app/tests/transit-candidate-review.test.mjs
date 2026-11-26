@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {summarizeTransitWalks,recommendReviewedTransit,transitReviewPairs} from '../src/transit-candidate-review.mjs';
+import {summarizeTransitWalks,recommendReviewedTransit,transitReviewPairs,reviewAllTransitCandidates,formatTransitReview} from '../src/transit-candidate-review.mjs';
 const walk=(m,r,c)=>({kilometers:m/1000,seconds:m,transitPri:r===null?null:{risk:r,coverage:c}});
 test('aggregate walking PRI weights observed distance, not vehicle travel',()=>{
  const s=summarizeTransitWalks([walk(100,20,1),walk(300,60,.8)]);
@@ -26,3 +26,19 @@ test('three transit legs produce four independent walking links',()=>{
 });
 
 test('tiny observed links do not expose a null risk as a comparable score',()=>{assert.equal(summarizeTransitWalks([walk(10,20,1)]).comparable,false);});
+
+test('all fourteen candidates are reviewed once with bounded parallelism and incremental results',async()=>{
+ const plans=Array.from({length:14},(_,i)=>i),seen=[];let active=0,peak=0;
+ await reviewAllTransitCandidates(plans,{review:async p=>{active++;peak=Math.max(active,peak);await Promise.resolve();active--;if(p===3)throw Error('unavailable');return {walkM:p};},onResult:(p,s)=>seen.push([p,s])});
+ assert.equal(seen.length,14);assert.equal(new Set(seen.map(x=>x[0])).size,14);assert.equal(peak,2);assert.equal(seen.find(x=>x[0]===3)[1],null);
+});
+test('cancellation prevents stale review results and further requests',async()=>{
+ const c=new AbortController(),seen=[];let calls=0;
+ await reviewAllTransitCandidates([1,2,3,4],{signal:c.signal,review:async()=>{calls++;c.abort();return {};},onResult:x=>seen.push(x)});
+ assert.equal(calls,1);assert.deepEqual(seen,[]);
+});
+test('pending, unavailable and unobserved walking evidence stay distinct',()=>{
+ assert.match(formatTransitReview(undefined,false),/조회 중/);
+ assert.equal(formatTransitReview(null,true),'도보 연결 확인 불가');
+ assert.match(formatTransitReview({walkM:366,walkMinutes:5,coverage:0,comparable:false},true),/안전 미평가/);
+});
