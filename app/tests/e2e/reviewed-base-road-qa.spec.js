@@ -12,7 +12,7 @@ test('reviewed base roads load at '+site.key+' and return to original on zoom ou
  test.setTimeout(240000);
  await page.addInitScript((location)=>localStorage.setItem('dongjak_safety_community_v15_posts',JSON.stringify([{id:'qa-road-campus',title:'도로 검증 위치',body:'기본 지도 검증',nickname:'검증 주민',category:'동네 질문',dong:'상도1동',created:Date.now(),location,comments:[],likes:0}])),{lng:site.lng,lat:site.lat});
  const requested=new Set(),failed=[];
- page.on('response',r=>{const u=new URL(r.url());if(u.pathname.startsWith('/data/road-display-review/')){if(r.ok())requested.add(u.pathname);else failed.push(u.pathname+':'+r.status())}});
+ page.on('response',r=>{const u=new URL(r.url());if((u.pathname.startsWith('/data/road-display-review/')||u.pathname.startsWith('/data/road-display-repair/'))){if(r.ok())requested.add(u.pathname);else failed.push(u.pathname+':'+r.status())}});
  await page.goto('/',{waitUntil:'domcontentloaded'});
  const menu=page.locator('#dj-install-menu');await expect(menu).toBeAttached({timeout:20000});
  if(await menu.isVisible()){await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();await expect(menu).toBeHidden();}
@@ -32,6 +32,7 @@ test('reviewed base roads load at '+site.key+' and return to original on zoom ou
  await page.locator('#dj-community-location-card').getByRole('button',{name:'제보 위치 닫기'}).click();
  expect(failed).toEqual([]);
  expect(requested.has('/data/road-display-review/manifest.json')).toBe(true);
+ if(process.env.DONGJAK_RECOVERED_ROADS_QA==='1')expect(requested.has('/data/road-display-repair/recovered-surfaces.geojson')).toBe(true);
  const count=[...requested].filter(p=>/\/road-\d+-\d+-\d+\.geojson$/.test(p)).length;
  expect(count).toBeGreaterThan(0);expect(count).toBeLessThan(90);
  await page.screenshot({path:'test-results/reviewed-base-'+site.key+'.png'});
