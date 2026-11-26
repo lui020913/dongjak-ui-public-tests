@@ -22,7 +22,7 @@ test('light map labels have dark text with a pale halo, dark theme is reversed',
   assert.equal(dark.text,'#cbd6d3');
   assert.equal(dark.halo,'#172a30');
   const theme=read('src/ui-environment.js');
-  assert.ok(theme.includes("const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:1.6});"));
+  assert.ok(theme.includes("const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:LABEL_HALO_MAX_PX});"));
   assert.ok(theme.includes('semanticSymbolPattern'));
   assert.ok(theme.includes('themeState.value===\'dark\''));
   assert.ok(theme.includes("'text-color':mapLabelLightPaint.color"));
