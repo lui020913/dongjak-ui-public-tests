@@ -3,6 +3,16 @@
 </style></head><body><div id="map"></div><div class="top"><div class="panel"><div class="brand">동작(動作)하는 안전지도 <span class="badge">도로 표현 실험 · 운영 미반영</span></div><div class="controls"><button id="old" aria-pressed="true">기존 지도</button><button id="raw" aria-pressed="false">실폭도로 원본</button><button id="new" aria-pressed="false">개선 시안</button><button id="corridor" aria-pressed="false" hidden>연속 도로 보정</button><button id="unresolved" aria-pressed="false" hidden>미해결 구간</button><button id="conflict" aria-pressed="false">중첩 보기</button><button id="pitch" aria-pressed="false">3D</button></div><div class="controls" id="overlay-controls" hidden style="display:none"><select id="overlay-select" aria-label="도로 레이어"><option value="">도로 레이어 없음</option></select><button id="overlay-original" aria-pressed="false">원본 선형</button><button id="overlay-corrected" aria-pressed="true">보정 선형</button><span id="overlay-info" style="font-size:11px;align-self:center"></span></div><div class="status" id="status" role="status">지도 데이터 불러오는 중…</div></div></div><div class="note panel"><div class="legend"><span><i class="swatch" style="background:#D2DCDB"></i>건물</span><span><i class="swatch" style="background:#fff"></i>도로</span><span><i class="swatch" style="background:#e57b58"></i>중첩·검토 대상</span></div><div>표시용 공간 보정안입니다. 도로가 끊기는 구간은 실측 확인이 필요하며 길찾기에는 적용하지 않습니다.</div></div><script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script><script>
 (async()=>{const status=document.getElementById('status');try{
  const manifest=await fetch('./manifest.json').then(r=>{if(!r.ok)throw Error('manifest');return r.json()});
+ const chunks=await fetch('./geojson-chunks.json').then(r=>r.ok?r.json():{}).catch(()=>({}));
+ async function fetchGeo(file){
+   const load=async name=>fetch('./'+name).then(r=>{if(!r.ok)throw Error(name);return r.json()});
+   const index=chunks[file];if(!index)return load(file);
+   const result={type:'FeatureCollection',features:[]};
+   for(const part of index.parts){const data=await load(part);if(data.type!=='FeatureCollection')throw Error(part);for(const feature of data.features)result.features.push(feature)}
+   if(result.features.length!==index.count)throw Error('Incomplete geometry: '+file);
+   return result;
+ }
+ const sourceData=async file=>chunks[file]?await fetchGeo(file):'./'+file;
  const map=new maplibregl.Map({container:'map',style:'https://tiles.openfreemap.org/styles/bright',center:[126.949,37.502],zoom:16.2,maxZoom:19,pitch:0});
  map.addControl(new maplibregl.NavigationControl({showCompass:true}),'top-right');
  const review=await fetch('./corridor-summary.json').then(r=>r.ok?r.json():null).catch(()=>null);
@@ -23,16 +33,16 @@
  if(l.type==='fill'&&/landuse|landcover/.test(id)&&!/park|wood|forest|grass|water/.test(id))map.setPaintProperty(id,'fill-color','#e1e4dc');
  if(l.type==='line'&&nativeRoads.includes(id)&&!/casing|outline/.test(id))map.setPaintProperty(id,'line-color','#ffffff');}
  for(const [id,file,color] of [['preview-raw','road-original.geojson','#ffffff'],['preview-clean','road-display.geojson','#ffffff'],['preview-conflict','conflicts.geojson','#e57b58']]){
- map.addSource(id,{type:'geojson',data:'./'+file,tolerance:0,maxzoom:19});map.addLayer({id,type:'fill',source:id,layout:{visibility:'none'},paint:{'fill-color':color,'fill-opacity':id==='preview-conflict'?.8:1,'fill-antialias':true}},symbol);}
+ map.addSource(id,{type:'geojson',data:await sourceData(file),tolerance:0,maxzoom:19});map.addLayer({id,type:'fill',source:id,layout:{visibility:'none'},paint:{'fill-color':color,'fill-opacity':id==='preview-conflict'?.8:1,'fill-antialias':true}},symbol);}
  if(review){
- map.addSource('preview-corridor',{type:'geojson',data:'./corridor-surfaces.geojson',tolerance:0,maxzoom:19});
+ map.addSource('preview-corridor',{type:'geojson',data:await sourceData('corridor-surfaces.geojson'),tolerance:0,maxzoom:19});
  map.addLayer({id:'preview-corridor',type:'fill',source:'preview-corridor',layout:{visibility:'none'},paint:{'fill-color':'#ffffff','fill-antialias':true}},symbol);
- map.addSource('preview-unresolved',{type:'geojson',data:'./corridor-unresolved.geojson',tolerance:0,maxzoom:19});
+ map.addSource('preview-unresolved',{type:'geojson',data:await sourceData('corridor-unresolved.geojson'),tolerance:0,maxzoom:19});
  map.addLayer({id:'preview-unresolved',type:'line',source:'preview-unresolved',layout:{visibility:'none'},paint:{'line-color':'#e57b58','line-width':3,'line-dasharray':[2,2]}},symbol);
  document.getElementById('unresolved').onclick=()=>{showUnresolved=!showUnresolved;update();if(showUnresolved)map.moveLayer('preview-unresolved',symbol);};
  }
  const loaded=new Set(),pending=new Set();async function loadBuildings(){const b=map.getBounds();for(const f of manifest.building_files){if(loaded.has(f.file)||pending.has(f.file)||f.bbox[2]<b.getWest()||f.bbox[0]>b.getEast()||f.bbox[3]<b.getSouth()||f.bbox[1]>b.getNorth())continue;pending.add(f.file);
- try{const data=await fetch('./'+f.file).then(r=>{if(!r.ok)throw Error(f.file);return r.json()});const id='preview-'+f.file.replace('.geojson','');map.addSource(id,{type:'geojson',data,tolerance:0,maxzoom:19});map.addLayer({id:id+'-2d',type:'fill',source:id,paint:{'fill-color':'#D2DCDB','fill-opacity':1,'fill-antialias':false}},symbol);map.addLayer({id:id+'-3d',type:'fill-extrusion',source:id,paint:{'fill-extrusion-color':'#D2DCDB','fill-extrusion-height':['get','h'],'fill-extrusion-base':0,'fill-extrusion-opacity':1}},symbol);buildingIds.push(id);loaded.add(f.file);update()}catch(e){status.textContent='건물 로딩 실패: '+e.message}finally{pending.delete(f.file)}}}
+ try{const data=await fetchGeo(f.file);const id='preview-'+f.file.replace('.geojson','');map.addSource(id,{type:'geojson',data,tolerance:0,maxzoom:19});map.addLayer({id:id+'-2d',type:'fill',source:id,paint:{'fill-color':'#D2DCDB','fill-opacity':1,'fill-antialias':false}},symbol);map.addLayer({id:id+'-3d',type:'fill-extrusion',source:id,paint:{'fill-extrusion-color':'#D2DCDB','fill-extrusion-height':['get','h'],'fill-extrusion-base':0,'fill-extrusion-opacity':1}},symbol);buildingIds.push(id);loaded.add(f.file);update()}catch(e){status.textContent='건물 로딩 실패: '+e.message}finally{pending.delete(f.file)}}}
  for(const id of buttons)document.getElementById(id).onclick=()=>{mode=id;update()};document.getElementById('conflict').onclick=()=>{showConflict=!showConflict;update()};document.getElementById('pitch').onclick=()=>{is3d=!is3d;map.easeTo({pitch:is3d?45:0,duration:450});update()};map.on('moveend',loadBuildings);await loadBuildings();update();
  // Put conflict diagnostics above building fills only when explicitly selected.
  const orig=update;document.getElementById('conflict').onclick=()=>{showConflict=!showConflict;orig();if(showConflict)map.moveLayer('preview-conflict',symbol)};
@@ -51,7 +61,7 @@
      if(!entry){info.textContent='';return}
      info.textContent='불러오는 중…';
      try{
-       const data=await fetch('./overlay-'+entry.id+'-'+side+'.geojson').then(r=>{if(!r.ok)throw Error('overlay');return r.json()});
+       const data=await fetchGeo('overlay-'+entry.id+'-'+side+'.geojson');
        if(t!==token)return;
        activeId='preview-active-overlay';map.addSource(activeId,{type:'geojson',data,tolerance:0,maxzoom:19});
        const colors=['case',['==',['get','review_status'],'aligned'],'#27898b',['==',['get','review_status'],'original'],'#647681','#df8a57'];
