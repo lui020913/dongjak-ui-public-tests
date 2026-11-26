@@ -1865,7 +1865,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const allBuses=osmTransport.filter(x=>x.kind==='bus'&&isDongjak(x.lng,x.lat)===true);
     // One map marker per physical bus stop. Do not merge official opposite-side
     // stops with distinct five-digit ARS IDs.
-    const buses=deduplicateBusStops(allBuses);
+    // Once the complete district ARS registry is available, only identified
+    // boarding points are shown. Unidentified map copies are fallback-only.
+    const buses=deduplicateBusStops(officialStaticStopCount>=400?allBuses.filter(p=>/^\d{5}$/.test(String(p.arsId||''))):allBuses);
     const stations=new Map();
     // OSM 목록은 공식 역사 마스터에 없는 최근 개통역을 보충하는 용도입니다.
     for(const place of osmTransport.filter(x=>x.kind==='subway')){
@@ -1893,7 +1895,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(!map.getLayer?.('dj-basemap-bus-pictogram')||!map.setFilter)return;
     const center=map.getCenter?.();
     const filter=busFilterInsideDistrict(
-      busTileFallbackFilter(currentVisibleBusStops,center),getDistrictGeometry());
+      officialStaticStopCount>=400?['==',1,0]:busTileFallbackFilter(currentVisibleBusStops,center),getDistrictGeometry());
     const signature=JSON.stringify(filter);
     if(lastTileFallbackFilter===signature)return;
     try{map.setFilter('dj-basemap-bus-pictogram',filter);lastTileFallbackFilter=signature;}
@@ -1957,7 +1959,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       const place=baseMapTransitPlace({...f,layer:{id:'poi_transit','source-layer':'poi'}});
       if(!place || (place.kind!=='bus' && place.name.startsWith('이름 미등록')))continue;
       if(place.kind==='subway' && !withinMetroRadius(place.lng,place.lat))continue;
-      if(place.kind==='bus' && isDongjak(place.lng,place.lat)!==true)continue;
+      if(place.kind==='bus' && (officialStaticStopCount>=400||isDongjak(place.lng,place.lat)!==true))continue;
       const key=`${place.kind}/${normalizeStationQueryName(place.name)}/${place.lng.toFixed(3)}/${place.lat.toFixed(3)}`;
       if(known.has(key))continue;
       // 기본 역사 중 같은 역은 공식 좌표가 기준이며 중복 마커를 만들지 않습니다.
@@ -3038,7 +3040,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     );
     const candidates=nearby.map(f=>baseMapTransitPlace(f,event.lngLat)).filter(Boolean)
       .filter(p=>(p.kind==='bus'
-        ? !busRouteOverlay.hasVisibleRouteStops() && (map.getZoom?.()??16)>=15 && isDongjak(p.lng,p.lat)===true
+        ? officialStaticStopCount<400 && !busRouteOverlay.hasVisibleRouteStops() && (map.getZoom?.()??16)>=15 && isDongjak(p.lng,p.lat)===true
         : isDongjak(p.lng,p.lat)===true||isNearBoundary(p.lng,p.lat)));
     if(!candidates.length)return false;
     // 지도 클릭 지점과 실제 아이콘 좌표 사이의 거리로 가까운 정류소를 선택합니다.
