@@ -75,7 +75,7 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
   registerFacilityIcons(map);
   const hidden=[...Object.values(CIVIC_POI_TYPES).flat(),'hospital','clinic','doctor','doctors','pharmacy','restaurant','cafe','fast_food','food','convenience','supermarket','bakery','park','garden','nature_reserve','playground','social_facility','nursing_home','community_centre','community_center','senior_centre','senior_center','public_building','government','sports_hall','swimming_pool'];
   for(const native of map.getStyle().layers){
-    if(!['symbol','circle'].includes(native.type)||native.source!==source||native['source-layer']!=='poi'||native.id.startsWith('dj-'))continue;
+    if(!['symbol','circle'].includes(native.type)||native.source!==source||native['source-layer']!=='poi'||(native.id.startsWith('dj-')||native.id==='dongjak-park-names'))continue;
     try{
       const original=map.getFilter(native.id);
       const exclude=['!', ['any',['in',['get','class'],['literal',hidden]],['in',['get','subclass'],['literal',hidden]]]];
@@ -97,7 +97,7 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
           'icon-size':['interpolate',['linear'],['zoom'],14.3,.65,16,.78,18,.90],
           'icon-anchor':'center','icon-allow-overlap':false,'icon-ignore-placement':false,'icon-padding':5,
           'icon-optional':false,
-          'text-field':['step',['zoom'],'',safety?14.8:['school','civic','park','welfare'].includes(type)?15.2:16.2,verifiedFacilityLabelExpression(placeDisplayName)],
+          'text-field':type==='park'?'':['step',['zoom'],'',safety?14.8:['school','civic','park','welfare'].includes(type)?15.2:16.2,verifiedFacilityLabelExpression(placeDisplayName)],
           'text-font':['Noto Sans Regular','Open Sans Regular'],
           'text-size':['interpolate',['linear'],['zoom'],14.5,10.3,17,12.2],
           'text-anchor':'top','text-offset':[0,1.25],'text-max-width':15,

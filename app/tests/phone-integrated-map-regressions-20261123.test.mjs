@@ -28,6 +28,12 @@ test('only park map label owner writes park names; supplementary layers retain c
  assert.match(safety,/filter:\['!=',\['get','kind'\],'park'\]/);
  assert.match(official,/'text-field':\['case',\['==',\['get','category'\],'공원'\],''/);
  assert.match(official,/map\.on\('click',id,click\)/);
+ const civic=read('src/civic-facility-layer.js');
+ assert.match(civic,/native\.id==='dongjak-park-names'/);
+ assert.match(civic,/'text-field':type==='park'\?'':/);
+ const points=safety.slice(safety.indexOf("id:'public-points'"),safety.indexOf("id:'public-glyphs'"));
+ assert.match(points,/'circle-opacity':0,'circle-stroke-opacity':0/);
+ assert.match(safety,/id:'public-glyphs'[\s\S]*?'icon-size':\['interpolate',\['linear'\],\['zoom'\],13\.1,\.60/);
 });
 
 test('map settings retain detail/back animation without advanced tools',()=>{

@@ -137,14 +137,14 @@ export function installSafetyLayers({map,maplibregl,isDongjak,canOpen=()=>true})
   addLayer({id:'public-points',type:'circle',source:'dongjak-public-places',minzoom:13.1,
     layout:{visibility:'none'},paint:{'circle-radius':['interpolate',['linear'],['zoom'],13.1,4.8,16.5,8.3],
       'circle-color':['match',['get','kind'],...Object.entries(categoryColors).filter(([key])=>['government','district_office','administrative_center','senior_center','daycare','school','park'].includes(key)).flat(),'#638c77'],
-      'circle-stroke-color':'#fff','circle-stroke-width':1.8,'circle-opacity':0.92}});
+      'circle-stroke-color':'#fff','circle-stroke-width':1.8,'circle-opacity':0,'circle-stroke-opacity':0}});
   addLayer({id:'public-glyphs',type:'symbol',source:'dongjak-public-places',minzoom:13.1,
     layout:{visibility:'none',
       'icon-image':['match',['get','kind'],'daycare',iconName('school'),
         'school',iconName('school'),'park',iconName('park'),iconName('civic')],
-      'icon-size':['interpolate',['linear'],['zoom'],13.1,.36,16,.52,18,.66],
+      'icon-size':['interpolate',['linear'],['zoom'],13.1,.60,16,.78,18,.90],
       'icon-anchor':'center','icon-allow-overlap':false,'icon-ignore-placement':false,
-      'icon-padding':3,'icon-optional':false,'icon-pitch-alignment':'viewport',
+      'icon-padding':1,'icon-optional':false,'icon-pitch-alignment':'viewport',
       'icon-rotation-alignment':'viewport'}});
   addLayer({id:'public-names',type:'symbol',source:'dongjak-public-places',minzoom:15.2,
     // Park labels already have one canonical vector owner.

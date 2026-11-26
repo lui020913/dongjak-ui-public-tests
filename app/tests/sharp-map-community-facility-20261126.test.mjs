@@ -36,8 +36,10 @@ test('facility detail keeps actions and disclosure while allowing content height
  const main=read('place-details.js'),css=read('mobile-first-layout.css');
  assert.match(main,/installPlaceReviews\(body,p\)/);
  assert.match(main,/dj-place-ai-disclaimer/);
- assert.match(main,/saveButton\.append\(text\('span','저장'/);
- assert.match(main,/shareButton\.append\(text\('span','공유'/);
+ assert.doesNotMatch(main,/saveButton\.append\(text\('span','저장'/);
+ assert.match(main,/saveButton\.innerHTML='<svg/);
+ assert.doesNotMatch(main,/shareButton\.append\(text\('span','공유'/);
+ assert.match(main,/shareButton\.innerHTML='<svg/);
  assert.match(css,/\.dj-place-detail-popup \.maplibregl-popup-content\{/);
  assert.match(css,/\.dj-place-body > \*\{flex:0 0 auto!important/);
  assert.doesNotMatch(main,/root\.append\(folderSection\)/);
