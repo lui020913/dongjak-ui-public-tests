@@ -8,7 +8,7 @@ import {analyzeOcclusion,occlusionLineFeatures} from '../src/night-occlusion.js'
 
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('light overhead remains opaque, dark footprints translucent; 2D plan stops at 3D pitch',()=>{
+test('light overhead remains opaque, dark footprints translucent; GIS plan switches by extrusion eligibility',()=>{
   assert.equal(buildingPlanVisibility(0),1);
   assert.equal(buildingPlanVisibility(3),1);
   assert.ok(buildingPlanVisibility(12)<0.26);
@@ -20,7 +20,8 @@ test('light overhead remains opaque, dark footprints translucent; 2D plan stops 
     assert.equal(buildingFootprintOutlinePaint(theme,35)['line-opacity'],0);
   }
   const main=read('src/main.js');
-  assert.match(main,/visibleBuilding2D\(\) && \(movementIsSlow \|\| buildingPlanVisibility\(pitch\)>0\)/);
+  assert.match(main,/const fillVisible=visibleBuilding2D\(\)/);
+  assert.match(main,/buildingFootprintFilter\(show\)/);
   assert.match(main,/movementIsSlow\?\{'fill-opacity':0\.65\}/);
   assert.match(main,/promoteNightAnalysisLayers\(map\)/);
 });

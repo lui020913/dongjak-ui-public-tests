@@ -18,7 +18,7 @@ test('v5.12.4: overhead footprints remain visible and fade substantially at high
   assert.notEqual(BUILDING_VISUAL_PALETTE.dark.footprint,BUILDING_VISUAL_PALETTE.light.footprint);
 });
 
-test('v5.12.4: base map only changes building footprints when map pitch changes',()=>{
+test('v5.12.4: unmatched native footprints remain visible across pitch changes',()=>{
   const changed=[];const handlers={};let pitch=0;
   const map={getPitch:()=>pitch,getStyle:()=>({layers:[{type:'fill',id:'building'},{type:'fill',id:'dj-night-reach-fill'},{type:'line',id:'street'}]}),
     getLayer:id=>({id}),setPaintProperty:(...args)=>changed.push(args),on:(name,fn)=>{handlers[name]=fn;}};
@@ -28,10 +28,10 @@ test('v5.12.4: base map only changes building footprints when map pitch changes'
     installBaseBuildingPalette({map,app:{dataset:{theme:'dark'}}});
     pitch=55;handlers.pitch();
   } finally{globalThis.document=previous;}
-  assert.equal(changed.length,6);
+  assert.equal(changed.length,3);
   assert.ok(changed.every(x=>x[0]==='building'));
-  assert.deepEqual(changed[4][2],['interpolate',['linear'],['zoom'],13,0,15,0]);
-  assert.deepEqual(changed[5],['building','fill-antialias',false]);
+  assert.deepEqual(changed[1][2],['interpolate',['linear'],['zoom'],13,0,15,['case',['boolean',['feature-state','djGisCovered'],false],0,.74]]);
+  assert.deepEqual(changed[2],['building','fill-antialias',false]);
 });
 
 test('v5.12.4: night panel and options use shared theme colors and version menu button is absent',()=>{
