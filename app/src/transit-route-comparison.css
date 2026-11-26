@@ -40,3 +40,5 @@
 .tr-pri-preference[aria-pressed=true]{color:var(--tr-ink);background:var(--tr-soft);border-color:var(--tr-primary)}
 .tr-pri-preference:disabled{opacity:.65}
 @media(prefers-reduced-motion:reduce){.tr-pri-preference{transition:none}}
+
+.tr-multi-track{height:auto;min-height:19px;flex-wrap:wrap}.tr-multi-track span{min-height:19px;flex-shrink:1}.tr-multi-track span[data-vehicle=true]{min-width:35px}
