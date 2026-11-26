@@ -47,3 +47,8 @@
 #app .dj-tr-gps-toggle[aria-pressed=true]{background:var(--walk-primary,#137e65);color:white;border-color:transparent}
 
 #app .dj-tr-multi-order{height:auto;min-height:20px;flex-wrap:wrap}#app .dj-tr-multi-order span{min-height:20px}#app .dj-tr-multi-order span.dj-tr-vehicle{min-width:35px}
+
+#app .dj-tr-rail-arrival{display:grid;gap:4px;min-width:0}
+#app .dj-tr-rail-rows{display:grid;gap:4px}
+#app .dj-tr-rail-row{display:grid;gap:3px;padding:7px 9px;border-radius:11px;background:var(--walk-soft,#eaf5ef);min-width:0}
+#app .dj-tr-rail-row strong{font-size:12px;font-weight:700;overflow-wrap:anywhere}

@@ -10,7 +10,7 @@ export function summarizeTransitWalks(walks){
   if(p.coverage<.65)allObserved=false;
   const observed=meters*p.coverage;covered+=observed;riskSum+=observed*p.risk;
  }
- return {walkM:Math.round(total),walkMinutes:Math.ceil(seconds/60),coverage:total?covered/total:0,risk:covered>=20?riskSum/covered:null,comparable:allObserved&&total>0&&covered/total>=.65};
+ return {walkM:Math.round(total),walkMinutes:Math.ceil(seconds/60),coverage:total?covered/total:0,risk:covered>=20?riskSum/covered:null,comparable:allObserved&&total>0&&covered>=20&&covered/total>=.65};
 }
 export function recommendReviewedTransit(entries){
  const valid=entries.filter(x=>x.summary&&x.summary.comparable&&Number.isFinite(x.summary.risk));

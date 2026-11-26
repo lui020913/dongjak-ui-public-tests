@@ -3,6 +3,7 @@ import {subwayLineColor} from './transport-map.js';
 import {revealSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 import './transit-route-detail.css';
 import {transitProximity} from './transit-guide-proximity.mjs';
+import {transitRailArrival} from './transit-rail-arrival.mjs';
 const labels={walk:'도보',bus:'버스',rail:'지하철'};
 const paths={
  walk:'<circle cx="13" cy="4" r="2"/><path d="m7 21 3-7 3 2 3 5M11 8l-2 5-4 2m6-7 4 4 4 1"/>',
@@ -71,6 +72,31 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   if(step===null)stopGps();
   if(step!==null){progress.textContent=(step+1)+' / '+rows.length+' · 직접 단계 선택';guide.querySelector('[data-step-prev]').disabled=step===0;guide.querySelector('[data-step-next]').textContent=step===rows.length-1?'안내 종료':'다음 단계';rows[step]?.scrollIntoView?.({block:'nearest',behavior:'instant'});}
  }
+ function appendRailArrival(board,station,lineId){
+  if(!station||!lineId)return;
+  const line=railLabel(lineId);
+  const arrival=el('div','dj-tr-rail-arrival');
+  const bar=el('div','dj-tr-arrival');
+  const message=el('small','',line+' 승차역 도착정보');
+  const rows=el('div','dj-tr-rail-rows');
+  const refresh=button('','dj-tr-refresh',async()=>{
+   if(arrivalRequest)return;
+   const controller=new AbortController();arrivalRequest=controller;
+   const timer=win.setTimeout(()=>controller.abort(),10000);
+   refresh.disabled=true;rows.replaceChildren();message.textContent='도착정보 조회 중…';
+   try{
+    const base=String(import.meta.env?.VITE_TRANSPORT_API_BASE||'/api/transport').replace(/\/$/,'');
+    const res=await fetch(base+'/subway?'+new URLSearchParams({station,line}),{signal:controller.signal,cache:'no-store'});
+    if(!res.ok)throw Error('조회 실패');const data=await res.json();
+    if(arrivalRequest!==controller)return;
+    const result=transitRailArrival(data,line);
+    message.textContent=result.note;
+    for(const item of result.rows){const row=el('div','dj-tr-rail-row');row.append(el('small','',item.direction),el('strong','',item.message));rows.append(row);}
+   }catch{if(arrivalRequest===controller)message.textContent='검증된 도착정보를 확인하지 못했습니다.';}
+   finally{win.clearTimeout(timer);if(arrivalRequest===controller){arrivalRequest=null;refresh.disabled=false;}}
+  });refresh.innerHTML=icon('refresh');refresh.setAttribute('aria-label',line+' 승차역 도착정보 새로고침');
+  bar.append(message,refresh);arrival.append(bar,rows);board.append(arrival);
+ }
  function render(detail){
   if(!detail){stopGps();arrivalRequest?.abort();arrivalRequest=null;current=null;step=null;root.hidden=true;root.replaceChildren();cancelSurfaceMotion(root);return;}
   if(same(current,detail)){current=detail;updatePri();return;}
@@ -108,9 +134,10 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
      const item=String(data.arsId)===String(detail.arsId)&&data.items?.find(x=>String(x.routeId)===String(detail.routeId));
      message.textContent=item?(item.message||'도착정보 없음')+(data.checkedAt?' · '+data.checkedAt+' 조회':''):'해당 노선 도착정보 없음';
     }catch{if(arrivalRequest===controller)message.textContent='도착정보를 확인하지 못했습니다.';}
-    finally{win.clearTimeout(timer);if(arrivalRequest===controller)refresh.disabled=false;}
+    finally{win.clearTimeout(timer);if(arrivalRequest===controller){arrivalRequest=null;refresh.disabled=false;}}
    }
   }
+  if(kind==='rail')appendRailArrival(board,detail.stops?.[0],detail.lines?.[0]);
   const last=row('walk',detail.alight+' 하차','도보 '+detail.last.meters+'m · 약 '+detail.last.minutes+'분');
   const lastPri=el('span','dj-tr-pri');lastPri.dataset.priLeg='last';last.append(lastPri);
   row('end',detail.to,'목적지');
@@ -166,6 +193,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
      finally{win.clearTimeout(timer);if(arrivalRequest===controller){arrivalRequest=null;refresh.disabled=false;}}
     });refresh.innerHTML=icon('refresh');refresh.setAttribute('aria-label',label(leg)+' 도착정보 새로고침');arrival.append(message,refresh);board.append(arrival);
    }
+   if(leg.kind==='rail')appendRailArrival(board,leg.stops?.[0],leg.lines?.[0]);
    walkRow(i+1,leg.destination+' 하차'+(i<detail.legs.length-1?' · 환승':''));
   }
   row('end',detail.to,'목적지');

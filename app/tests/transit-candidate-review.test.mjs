@@ -24,3 +24,5 @@ test('three transit legs produce four independent walking links',()=>{
  const legs=[{origin:'a',destination:'b'},{origin:'c',destination:'d'},{origin:'e',destination:'f'}];
  assert.deepEqual(transitReviewPairs({legs},'start','end'),[['start','a'],['b','c'],['d','e'],['f','end']]);
 });
+
+test('tiny observed links do not expose a null risk as a comparable score',()=>{assert.equal(summarizeTransitWalks([walk(10,20,1)]).comparable,false);});
