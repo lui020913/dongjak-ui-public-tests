@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.218",
+  "application_version": "9.2.219",
   "public_work_branch": "main",
-  "purpose": "Protected release of PR #590: shared safety/transit map with temporary district mask and bounds relaxation, restored home camera, stable common symbols/building layers, selected route casing and transit stops, single guide CTA, complete preview overlay cleanup, capped 2.5x high-density rendering, bounded offscreen building cache, cancellable PRI work, and regression coverage. Preserve existing geometry and safety evaluation; require source CI, mobile overlay compatibility, Preview, full phone QA, Production and APK.",
-  "attempt": 453,
+  "purpose": "Protect report-location map return from stale community panel writes and animations. Release feed lock only upon explicit community navigation; preserve ordinary tab dissolve, marker and report card. Require repeated real browser regression, source CI, protected mobile QA, Production and APK.",
+  "attempt": 454,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
