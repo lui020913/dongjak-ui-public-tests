@@ -858,7 +858,7 @@ async function loadOneBuildingSheet(sheet){
   if(existing?.complete||buildingLoading.has(sheet.sheet)||(buildingRetryAfter.get(sheet.sheet)||0)>Date.now())return;
   buildingLoading.add(sheet.sheet);
   try {
-    const {features, reviewCandidates, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet);
+    const {features, reviewCandidates, displayGeometries, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet);
     for(const problem of errors) console.warn(`[동작하는 안전지도] ${sheet.sheet}번 ${problem.label} 로딩 실패:`,problem.error);
     if(!boundaryGeometry)return;
     // Tile-native buildings are incomplete in parts of Sangdo 1-dong. The
@@ -867,7 +867,7 @@ async function loadOneBuildingSheet(sheet){
       isDongjak(f.properties.x,f.properties.y)===true&&['Polygon','MultiPolygon'].includes(f.geometry?.type));
     const {visible:eligible,excluded}=partitionDisplayBuildings(districtBuildings);
     const {visible,reviewExcluded}=partitionGreenReview(eligible,reviewCandidates,greenBuildingFilterEnabled(globalThis.location?.search));
-    const within=visible.map(f=>({...f,properties:{...f.properties,_render3d:true}}));
+    const within=visible.map(f=>({...f,geometry:displayGeometries.get(f)||f.geometry,properties:{...f.properties,_render3d:true}}));
     const sourceId=`dongjak-buildings-data-${sheet.sheet}`;
     const layerId=`dongjak-buildings-3d-${sheet.sheet}`;
     const footprintFillId=`dongjak-buildings-footprint-${sheet.sheet}`;
