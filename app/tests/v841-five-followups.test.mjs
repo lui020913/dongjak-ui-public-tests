@@ -49,10 +49,10 @@ test('layer switches call the original source rather than changing shortcut pref
  assert.doesNotMatch(toolbar,/title\.textContent='상단 표시'/);
  assert.match(css,/\.dj834-feature-line:has\(>\.dj834-shortcut-switch\[hidden\]\)/);
 });
-test('TIP is bold, cycles at 5 seconds, hides over popups and appears in help',()=>{
+test('TIP is bold, cycles after reading, hides over popups and appears in help',()=>{
  assert.ok(MAP_TIP_MESSAGES.length>=5);
  assert.match(tips,/tipMark\.textContent='TIP'/);
- assert.match(tips,/\},10000\)/);
+ assert.match(tips,/Date\.now\(\)<Number\(label\.dataset\.djTipReadUntil\)/);
  assert.match(core,/'route-map-card','nav-live-card','route-pick-hint','map-gesture-guide'/);
  assert.match(tips,/tipGuide\.id='dj841-guide-tips'/);
  assert.match(css,/#dj840-map-tip strong/);
