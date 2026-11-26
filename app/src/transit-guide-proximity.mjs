@@ -1,6 +1,6 @@
 /** Foreground advisory only. GPS proximity never proves boarding or alighting. */
 export function transitProximity(position,target,previousCount=0){
- const p=position?.coords,lat=Number(p?.latitude),lng=Number(p?.longitude),accuracy=Number(p?.accuracy);
+ const p=position?.coords,lat=p?.latitude,lng=p?.longitude,accuracy=p?.accuracy;
  if(!p||!target||!Number.isFinite(lat)||!Number.isFinite(lng)||!Number.isFinite(accuracy)||accuracy<0||accuracy>35||!Number.isFinite(target.lat)||!Number.isFinite(target.lng))return {state:'uncertain',count:0,meters:null};
  const r=Math.PI/180;
  const a=Math.sin((target.lat-lat)*r/2)**2+Math.cos(lat*r)*Math.cos(target.lat*r)*Math.sin((target.lng-lng)*r/2)**2;
