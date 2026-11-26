@@ -3,7 +3,7 @@ import {chromium} from 'playwright';
 const browser=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 try{
  const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});
- const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('crash',()=>console.error('ROAD_PREVIEW_PAGE_CRASH'));page.on('framenavigated',f=>{if(f===page.mainFrame())console.log('ROAD_PREVIEW_NAVIGATION',f.url())});
  page.on('console',m=>{if(m.type()==='error'||m.type()==='warning')console.log('BROWSER',m.text().slice(0,500))});
  await page.goto('http://127.0.0.1:8193/',{waitUntil:'domcontentloaded',timeout:60000});
  await page.waitForFunction(()=>Boolean(window.__roadPreview?.selective),{},{timeout:180000});
@@ -23,7 +23,11 @@ try{
  const restored=await page.evaluate(()=>window.__roadPreview.map.getStyle().layers.filter(l=>l['source-layer']==='transportation').map(l=>[l.id,window.__roadPreview.map.getFilter(l.id)??null]));
  assert.deepEqual(restored,initial.filters);
  await page.locator('#selective').click();
- await page.evaluate(()=>window.__roadPreview.map.jumpTo({zoom:15,pitch:0}));
+ console.log('SELECTIVE_RESTORE_BEFORE_ZOOM_OK',JSON.stringify({changedLayers:changed.length,protectedLayers:initial.filters.length-changed.length,threeD:true}));
+ // jumpTo returns the live Map object. Never serialize its WebGL context,
+ // worker state, or DOM graph through Playwright's evaluate result.
+ await page.evaluate(()=>{window.__roadPreview.map.jumpTo({zoom:15,pitch:0});});
+ await page.waitForFunction(()=>window.__roadPreview.map.getZoom()===15&&window.__roadPreview.map.getPitch()===0);
  await page.waitForFunction(()=>document.getElementById('status').textContent.includes('원본 유지'),{},{timeout:20000});
  const low=await page.evaluate(()=>{const {map}=window.__roadPreview;return {filters:map.getStyle().layers.filter(l=>l['source-layer']==='transportation').map(l=>[l.id,map.getFilter(l.id)??null]),hybrid:map.getLayoutProperty('preview-hybrid','visibility')}});
  assert.deepEqual(low.filters,initial.filters);assert.equal(low.hybrid,'none');
