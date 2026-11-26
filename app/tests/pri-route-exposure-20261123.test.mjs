@@ -52,9 +52,10 @@ test('an extreme low-score detour is not silently recommended as a better route'
 test('route UI explains that PRI is partial and never treats unknown roads as safe',()=>{
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  const css=readFileSync(new URL('../src/v841-route-and-tips.css',import.meta.url),'utf8');
- assert.match(main,/evaluateCompositePriRouteCandidates\(\{standard,gentle\}\)/);
+ assert.match(main,/evaluateCompositePriRouteCandidates\(\{standard,gentle\},\{factors\}\)/);
  const worker=readFileSync(new URL('../src/workers/pri-route-worker.mjs',import.meta.url),'utf8');
- assert.match(worker,/compareCompositePriRoutes\(routes,bundle\)/);
+ assert.match(worker,/compareCompositePriRoutes\(routes,bundle,factors\)/);
+ assert.match(worker,/visualizeCompositePriRoutes\(routes,bundle,factors\)/);
  assert.match(main,/미평가 도로는 안전한 도로로 계산하지 않습니다/);
  assert.match(main,/comparison\?\.recommendation&&!priVariantChosenManually/);
  assert.match(css,/\.dj-pri-route-advice:not\(\[hidden\]\)/);
