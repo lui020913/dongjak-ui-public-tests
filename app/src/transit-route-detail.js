@@ -25,6 +25,23 @@ export function transitPriText(value){
 export function mountTransitDetail({doc,win,app,mapCard,actions}){
  const root=doc.createElement('section');root.id='dj-transit-detail';root.hidden=true;root.setAttribute('aria-label','대중교통 경로 상세');actions?.before(root);
  let current=null,arrivalRequest=null,step=null,gps=null,nearCount=0,lastStep=null,lastPosition=null,notifiedStep=null,reminder=false;
+ // Explicit inline hiding wins over legacy mobile !important action docks.
+ // Restore only the attributes this presenter owns on departure.
+ const nativeActionState=new Map();
+ function hideNativeActions(){
+  const start=doc.getElementById('route-guide-start');
+  for(const node of new Set([actions,start].filter(Boolean))){
+   if(!nativeActionState.has(node))nativeActionState.set(node,{display:node.style.getPropertyValue('display'),priority:node.style.getPropertyPriority('display'),hidden:node.hidden,inert:node.inert});
+   node.hidden=true;node.inert=true;node.style.setProperty('display','none','important');
+  }
+ }
+ function restoreNativeActions(){
+  for(const [node,state] of nativeActionState){
+   if(state.display)node.style.setProperty('display',state.display,state.priority);else node.style.removeProperty('display');
+   node.hidden=state.hidden;node.inert=state.inert;
+  }
+  nativeActionState.clear();
+ }
  const el=(tag,cls,text)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
  const button=(text,cls,fn)=>{const b=el('button',cls,text);b.type='button';b.addEventListener('click',fn);return b;};
  const same=(a,b)=>a&&b&&JSON.stringify(a.legs||[])===JSON.stringify(b.legs||[])&&a.kind===b.kind&&a.routeId===b.routeId&&a.from===b.from&&a.to===b.to&&a.board===b.board&&a.alight===b.alight&&JSON.stringify(a.lines)===JSON.stringify(b.lines)&&JSON.stringify(a.stops)===JSON.stringify(b.stops);
@@ -127,9 +144,9 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   root.append(fixed,body,footer);
  }
  function render(detail){
-  if(!detail){if(actions)actions.hidden=false;stopGps();arrivalRequest?.abort();arrivalRequest=null;current=null;step=null;root.hidden=true;root.replaceChildren();cancelSurfaceMotion(root);return;}
+  if(!detail){restoreNativeActions();stopGps();arrivalRequest?.abort();arrivalRequest=null;current=null;step=null;root.hidden=true;root.replaceChildren();cancelSurfaceMotion(root);return;}
   if(same(current,detail)){current=detail;updatePri();return;}
-  if(actions)actions.hidden=true;
+  hideNativeActions();
   stopGps();reminder=false;arrivalRequest?.abort();arrivalRequest=null;current=detail;step=null;root.replaceChildren();root.hidden=false;
   if(detail.legs){renderMulti(detail);return;}
   const kind=detail.kind,color=kind==='bus'?busRouteColor(detail.routeType):subwayLineColor(railLabel(detail.lines[0]));root.style.setProperty('--tr-line-color',color);
@@ -243,5 +260,5 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
  }
 
  const listener=e=>render(e.detail);win.addEventListener('dongjak:transit-detail',listener);
- return ()=>{if(actions)actions.hidden=false;stopGps();doc.removeEventListener('visibilitychange',pauseGps);win.removeEventListener('pagehide',pagehide);win.removeEventListener('dongjak:transit-detail',listener);arrivalRequest?.abort();cancelSurfaceMotion(root);root.remove();};
+ return ()=>{restoreNativeActions();stopGps();doc.removeEventListener('visibilitychange',pauseGps);win.removeEventListener('pagehide',pagehide);win.removeEventListener('dongjak:transit-detail',listener);arrivalRequest?.abort();cancelSurfaceMotion(root);root.remove();};
 }

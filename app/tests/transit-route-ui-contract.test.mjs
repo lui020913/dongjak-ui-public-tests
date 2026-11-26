@@ -17,7 +17,7 @@ test('PRI and transit arrival are scoped to verified walking legs and matching r
  const main=read('main.js'),detail=read('transit-route-detail.js');
  assert.ok(main.includes('evaluateCompositePriRouteCandidates(candidates'));
  assert.ok(main.includes('chooseTransitWalk(candidates,assessment'));
- assert.ok(main.includes('selectTransitWalk(result,preferPri)'));
+ assert.ok(main.includes('selectTransitWalk(result,preferPri,signal)'));
  assert.ok(read('transit-route-comparison.js').includes('tr-pri-preference'));
  assert.ok(detail.includes('value.coverage<.65'));
  assert.ok(detail.includes('String(data.arsId)===String(detail.arsId)'));
@@ -32,4 +32,18 @@ test('all transit cards show automatic walking review and no redundant global di
  assert.match(code,/formatTransitReview\(reviewed\.get\(plan\),reviewed\.has\(plan\)\)/);
  assert.match(code,/void reviewCandidates\(\)/);
  for(const file of ['transit-route-comparison.js','transit-route-detail.js','route-screen-v3.js'])assert.match(read(file),/WALK_ICON_PATH/);
+});
+
+test('transit cancellation reaches the PRI worker and does not cancel an unrelated active request',async()=>{
+ const original=globalThis.Worker,instances=[];
+ globalThis.Worker=class {constructor(){instances.push(this);}postMessage(data){this.last=data;}terminate(){this.terminated=true;}};
+ try{
+  const {evaluateCompositePriRouteCandidates:evaluate}=await import('../src/pri-route-client.js');
+  const a=new AbortController(),b=new AbortController();
+  const first=evaluate({},{signal:a.signal}),second=evaluate({},{signal:b.signal});
+  a.abort();await assert.rejects(first,{name:'AbortError'});assert.ok(!instances[0].terminated);
+  b.abort();await assert.rejects(second,{name:'AbortError'});assert.equal(instances[0].terminated,true);
+  const c=new AbortController();const third=evaluate({},{signal:c.signal});assert.equal(instances.length,2);
+  c.abort();await assert.rejects(third,{name:'AbortError'});
+ }finally{if(original===undefined)delete globalThis.Worker;else globalThis.Worker=original;}
 });

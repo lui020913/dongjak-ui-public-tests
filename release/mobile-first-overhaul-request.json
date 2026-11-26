@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.217",
+  "application_version": "9.2.218",
   "public_work_branch": "main",
-  "purpose": "Protected integrated release of #588 (eaefa824) and #589 (17a3a7a3): consistent walking icon, compact transparent Nodeulseom label, automatic walking distance/time/PRI review for every transit route with bounded concurrency and cached links, remove separate review button and long global note while preserving unknown-state and reference fare disclosure. Fix community draft origin when canceling map picker, the failed v9.2.216 mobile shard 6 case. Preserve #587 map rendering and responsiveness improvements. Both source CI 38/38, route/picker regressions and overlay compatibility passed. Full protected Preview, mobile QA including prior failed case, Production and APK required.",
-  "attempt": 452,
+  "purpose": "Protected release of PR #590: shared safety/transit map with temporary district mask and bounds relaxation, restored home camera, stable common symbols/building layers, selected route casing and transit stops, single guide CTA, complete preview overlay cleanup, capped 2.5x high-density rendering, bounded offscreen building cache, cancellable PRI work, and regression coverage. Preserve existing geometry and safety evaluation; require source CI, mobile overlay compatibility, Preview, full phone QA, Production and APK.",
+  "attempt": 453,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
