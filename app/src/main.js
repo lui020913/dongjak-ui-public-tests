@@ -742,6 +742,7 @@ function syncTiltWithBuildings() {
   const pitch=map.getPitch();
   is3D=pitch>=PITCH_BUILDING_START;
   const show=visibleBuilding3D();
+  buildingCoverage?.setExtruding(show);
   const theme=visualTheme.currentTheme();
   const appearance=nightOcclusionBuildingPaint(
     buildingExtrusionAppearance(theme,pitch,PITCH_BUILDING_START,PITCH_BUILDING_FULL),
