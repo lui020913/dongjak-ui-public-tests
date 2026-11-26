@@ -29,7 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           req=release/road-surface-preview-request.json
-          jq -e '.kind=="ISOLATED_ROAD_REVIEW_NOT_PRODUCTION" and .accepted_road_count==7845 and .unresolved_road_count==426 and .review_run_id==45763031345 and .run_id==45765041438 and .artifact_id==15091631321 and (.artifact_sha256|test("^[0-9a-f]{64}$"))' "$req" >/dev/null
+          jq -e '.kind=="ISOLATED_ROAD_REVIEW_NOT_PRODUCTION" and .accepted_road_count==7850 and .unresolved_road_count==421 and .review_run_id==45765644207 and .run_id==45766391932 and .artifact_id==15091913080 and (.artifact_sha256|test("^[0-9a-f]{64}$"))' "$req" >/dev/null
           run="$(jq -r .run_id "$req")"
           artifact="$(jq -r .artifact_id "$req")"
           digest="$(jq -r .artifact_sha256 "$req")"
@@ -52,8 +52,8 @@ jobs:
           m=json.loads((p/'manifest.json').read_text())
           c=json.loads((p/'corridor-summary.json').read_text())
           a=json.loads((p/'alignment-summary.json').read_text())
-          assert m['preview'] and m['review_run_id']==45763031345
-          assert c['candidate_links']==a['accepted_road_count']==7845 and c['unresolved_links']==426
+          assert m['preview'] and m['review_run_id']==45765644207
+          assert c['candidate_links']==a['accepted_road_count']==7850 and c['unresolved_links']==421
           assert c['graph_sha256']==a['source_graph_sha256']
           assert len(json.loads((p/'overlay-manifest.json').read_text()))==9
           for name,entry in json.loads((p/'geojson-chunks.json').read_text()).items():
@@ -109,7 +109,7 @@ jobs:
           case "$url" in https://*.dongjak-walk-safety-preview.pages.dev) ;; *) echo "::error::Exact Preview URL missing";exit 1;; esac
           verified=0
           for n in $(seq 1 12);do
-            if curl -fsSL --max-time 25 "$url/manifest.json?verify=$GITHUB_RUN_ID-$n" -o "$RUNNER_TEMP/manifest.json" && cmp -s review-dist/manifest.json "$RUNNER_TEMP/manifest.json" && curl -fsSL --max-time 25 "$url/corridor-summary.json?verify=$GITHUB_RUN_ID-$n" | jq -e '.candidate_links==7845 and .unresolved_links==426' >/dev/null;then
+            if curl -fsSL --max-time 25 "$url/manifest.json?verify=$GITHUB_RUN_ID-$n" -o "$RUNNER_TEMP/manifest.json" && cmp -s review-dist/manifest.json "$RUNNER_TEMP/manifest.json" && curl -fsSL --max-time 25 "$url/corridor-summary.json?verify=$GITHUB_RUN_ID-$n" | jq -e '.candidate_links==7850 and .unresolved_links==421' >/dev/null;then
               verified=1;break
             fi
             sleep 5
