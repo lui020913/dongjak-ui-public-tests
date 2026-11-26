@@ -13,7 +13,7 @@ export function bindReliablePopupClose(button,onClose,win=globalThis.window){
     if(disposed||closed)return;
     closed=true;clear();onClose();
   };
-  const onClick=event=>{event.stopPropagation?.();invoke();};
+  const onClick=event=>{event?.stopPropagation?.();invoke();};
   const onPointerUp=event=>{
     if(disposed||closed||event.isPrimary===false||event.button!==undefined&&event.button!==0)return;
     event.stopPropagation?.();
