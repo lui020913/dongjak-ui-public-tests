@@ -137,8 +137,10 @@ export function installCompactFacilityPopups(doc=globalThis.document,win=globalT
       const naturalBody=visible.reduce((total,node)=>total+node.getBoundingClientRect().height,0)
         +Math.max(0,visible.length-1)*gap+padding;
       const viewport=win.visualViewport?.height||win.innerHeight;
+      const folder=popup.querySelector('.dj-shared-favorite-row:not([hidden])');
+      const footerHeight=folder&&win.getComputedStyle(folder).display!=='none'?folder.getBoundingClientRect().height:0;
       const height=compactFacilityHeight({
-        header:head.getBoundingClientRect().height,body:naturalBody,viewport
+        header:head.getBoundingClientRect().height+footerHeight,body:naturalBody,viewport
       })+'px';
       if(popup.style.getPropertyValue('--dj9251-facility-content-height')!==height)
         popup.style.setProperty('--dj9251-facility-content-height',height);

@@ -202,16 +202,16 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
 
   // Browser-local saves; desktop reveals folder selection only after saving.
   const personalActions=document.createElement('div');personalActions.className='dj815-place-actions';
-  const folderSection=document.createElement('section');folderSection.className='dj-place-favorites-section';
-  const folderHeading=text('strong','즐겨찾기 설정','dj-place-section-heading');
+  const folderSection=document.createElement('section');folderSection.className='dj-place-favorites-section dj-shared-favorite-row';
+  const folderHeading=text('strong','즐겨찾기 그룹','dj-place-section-heading');
   const folderWrap=document.createElement('label');folderWrap.className='dj815-place-folder';
-  folderWrap.append(text('span','저장 폴더','dj-place-folder-label'));
-  const folderSelect=document.createElement('select');
+  folderWrap.append(text('span','즐겨찾기 그룹','dj-place-folder-label'));
+  const folderSelect=document.createElement('select');folderSelect.classList.add('dj-shared-favorite-select');folderSelect.setAttribute('aria-label','즐겨찾기 그룹');
   for(const name of getPlaceFolders()){const option=document.createElement('option');option.value=name;option.textContent=name;folderSelect.append(option);}
   folderSelect.value=savedPlaces().find(item=>placeKey(item)===placeKey(p))?.folder||'즐겨찾기';
   folderWrap.append(folderSelect);folderWrap.hidden=!isPlaceSaved(p);
-  folderHeading.classList.add('dj-place-redundant-folder-heading');
-  folderSection.append(folderHeading,folderWrap);folderSection.hidden=folderWrap.hidden;body.append(folderSection);
+  folderHeading.classList.add('dj-place-redundant-folder-heading');folderHeading.hidden=true;
+  folderSection.append(folderHeading,folderWrap);folderSection.hidden=folderWrap.hidden;root.append(folderSection);
 
   const saveButton=document.createElement('button');saveButton.type='button';saveButton.className='dj854-place-favorite';
   saveButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>';
@@ -255,7 +255,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
     if(window.DongjakWindowMotion){window.DongjakWindowMotion.close(motion,finish);return;}
     finish();
   });
-  headerActions.append(closeButton);
+  header.append(closeButton);
   // Dispose the tap fallback with the native MapLibre popup lifecycle.
 
   folderSelect.addEventListener('change',()=>{
@@ -263,7 +263,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
     setSavedPlaceFolder(p,folderSelect.value);
   });
   if(!layerContent)recordRecentPlace(p);
-  const reviewController=layerContent?null:installPlaceReviews(body,p);
+  
   const aiSection=document.createElement('section');aiSection.className='dj-place-ai-section';if(!layerContent)body.append(aiSection);
   aiSection.append(text('strong','AI 시설 안내','dj-place-ai-heading'));
   const fallbackDescription=facilityFallbackDescription(p.name,p.type);
@@ -273,6 +273,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
   const retry=document.createElement('button');retry.type='button';retry.className='dj-place-action dj-place-ai';
   retry.textContent='AI 설명 다시 시도';retry.hidden=true;actions.append(retry);
   aiSection.append(text('small','확인된 공개정보를 중심으로 설명합니다. 실제 운영·접근성·현장 안전 수준은 별도 확인이 필요합니다.','dj-place-ai-disclaimer'));
+  const reviewController=layerContent?null:installPlaceReviews(body,p);
   const aiEndpoint=String(import.meta.env?.VITE_PLACE_AI_API_URL||'/api/place-insight');
   const controllerAI=new AbortController();
   popup=new maplibregl.Popup({offset:22,maxWidth:'min(520px, calc(100vw - 24px))',closeButton:false,anchor:'top',className:'dj-place-detail-popup'})

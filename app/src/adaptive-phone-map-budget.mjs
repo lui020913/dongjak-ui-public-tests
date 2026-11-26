@@ -9,7 +9,7 @@ export function phoneProfile({ua='',memory,cores,phone=false,saveData=false}={})
 export function normalMapPixelRatio({phone=false,ua='',memory,cores,deviceRatio=1}={}){
   const modernApple=/iPhone.*OS (?:1[89]|[2-9]\d)_/i.test(ua);
   const highEnd=modernApple||Number(memory)>=6||Number(cores)>=8;
-  return Math.min(phone?(highEnd?3:2):1.5,Math.max(1,Number(deviceRatio)||1));
+  return Math.min(phone?(highEnd?2.5:2):1.5,Math.max(1,Number(deviceRatio)||1));
 }
 export function nextBudget({streak=0,fast=0,level='normal'}={},ms){
   if(!Number.isFinite(ms)||ms<4||ms>1000)return {streak:0,fast:0,level};

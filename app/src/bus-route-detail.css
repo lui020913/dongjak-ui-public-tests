@@ -105,5 +105,17 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
  .dj-bus-detail-vehicle-slot .dj-bus-detail-vehicle::before{display:none;}
  .dj-bus-detail-vehicle-slot .dj-bus-detail-bus{top:calc(50% - 9px);}
  .dj-bus-detail-vehicle-slot .dj-bus-detail-vehicle-label{background:#fff;max-height:48px;padding:2px 3px;gap:1px;}
- .dj-bus-detail-vehicle-slot [data-position-accuracy=interval] .dj-bus-detail-bus{outline:1px dashed var(--dj-bus-detail-line,#3566c1);outline-offset:1px;}
+ .dj-bus-detail-vehicle-slot [data-position-accuracy=interval] .dj-bus-detail-bus{outline:none;}
 }
+
+/* Historical arrivals: a compact filter row and readable hour-by-hour times. */
+.dj-bus-detail[data-view=history] .dj-bus-detail-list{display:flex;flex-direction:column;gap:10px}
+.dj-bus-detail .dj-bus-history-controls{margin:0;gap:8px}
+.dj-bus-detail .dj-bus-history-controls :is(select,input,button){min-height:42px;box-sizing:border-box;border-radius:999px;padding:8px 12px;font-size:14px}
+.dj-bus-detail .dj-bus-history-controls select{font-size:14px}
+.dj-bus-detail .dj-bus-history-result{display:grid;gap:8px;min-width:0}
+.dj-bus-detail .dj-bus-history-hour{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:start;gap:8px;padding:10px 0}
+.dj-bus-detail .dj-bus-history-hour strong{font-size:13px}
+.dj-bus-detail .dj-bus-history-hour span{display:flex;flex-wrap:wrap;gap:5px;font-size:12px}
+.dj-bus-detail .dj-bus-history-hour time{padding:4px 7px;border:1px solid var(--dj800-border,#d4e0da);border-radius:999px;font-variant-numeric:tabular-nums}
+.dj-bus-detail .dj-bus-history-result p{margin:0;font-size:12px;line-height:1.5}

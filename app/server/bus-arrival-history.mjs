@@ -27,12 +27,17 @@ export function extractRows(body){
  if(body&&typeof body==='object'&&('routeId' in body||'route_id' in body))return [body];
  throw new Error('HISTORY_FORMAT');
 }
-export async function fetchArrivalHistory(query,key,{fetcher=globalThis.fetch,pageSize=1000,maxPages=10,timeout=18000}={}){
+export async function fetchArrivalHistory(query,key,{fetcher=globalThis.fetch,pageSize=5000,maxPages=10,timeout=24000}={}){
  const all=[];const signatures=new Set();let complete=false;
  const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),timeout);
  try{
-  for(let i=0;i<maxPages&&1+i*pageSize<=9999;i++){
-   const url=new URL(ENDPOINT);url.search=new URLSearchParams({apikey:key,startRow:String(1+i*pageSize),rowCnt:String(pageSize),stdrDe:query.date,routeId:query.routeId});
+  let startRow=1;
+  for(let i=0;i<maxPages&&startRow<=9999;i++){
+   // Official T-DATA supports route/date and a four-digit startRow, not
+   // station filters. Read larger route-day pages and filter exact stop/seq.
+   // The last accessible request can cover records beyond row 9999.
+   const requested=Math.min(10000,Math.max(1,pageSize));
+   const url=new URL(ENDPOINT);url.search=new URLSearchParams({apikey:key,startRow:String(startRow),rowCnt:String(requested),stdrDe:query.date,routeId:query.routeId});
    let res;
    try{res=await fetcher(url,{signal:ctrl.signal,headers:{Accept:'application/json'},redirect:'manual'});
      if([301,302,303,307,308].includes(res.status)){
@@ -52,7 +57,8 @@ export async function fetchArrivalHistory(query,key,{fetcher=globalThis.fetch,pa
    const signature=JSON.stringify([rows.length,rows[0],rows.at(-1)]);
    if(signatures.has(signature))break;
    signatures.add(signature);all.push(...normalizeArrivals(rows,query));
-   if(rows.length<pageSize){complete=true;break;}
+   if(rows.length<requested){complete=true;break;}
+   startRow+=rows.length;
   }
  }finally{clearTimeout(timer);}
  const arrivals=[...new Map(all.map(a=>[JSON.stringify(a),a])).values()].sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));

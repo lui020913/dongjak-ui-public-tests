@@ -49,7 +49,7 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,vehi
     try{
       if(!map.getSource(BUS_ROUTE_SOURCE)){
         if(!geometry.features.length)return;
-        map.addSource(BUS_ROUTE_SOURCE,{type:'geojson',data:mapVisible?geometry:empty()});
+        map.addSource(BUS_ROUTE_SOURCE,{type:'geojson',data:mapVisible?geometry:empty(),tolerance:0,buffer:128,maxzoom:19});
       }
       const anchor=map.getLayer('transport-bus-stop')?'transport-bus-stop':undefined;
       for(const [id,paint] of [[CASE,{'line-color':'#ffffff','line-width':CASING_WIDTH,'line-opacity':0.8}],[LINE,{'line-color':['get','color'],'line-width':BUS_ROUTE_LINE_WIDTH,'line-opacity':0.92}]]){

@@ -1318,6 +1318,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       if(url)void shareMapUrl(url,`${selected.name||'대중교통 시설'} · 동작지도`);
     });
     transportFolder.id='transport-save-folder';
+    transportFolder.classList.add('dj-shared-favorite-select');
     transportFolder.disabled=true;
     transportFolder.setAttribute('aria-label','교통 장소 저장 그룹');
     const favoritesRow=document.createElement('div');
