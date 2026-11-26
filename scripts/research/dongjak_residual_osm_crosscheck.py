@@ -16,23 +16,43 @@ def read(p):return json.loads(p.read_text())
 def write(p,d):p.write_text(json.dumps(d,ensure_ascii=False,separators=(',',':')))
 def fetch(out):
     elements={};metadata=[]
-    for south,north in ((37.47,37.50),(37.50,37.53)):
-      for west,east in ((126.89,126.945),(126.945,127.00)):
-        bbox=f'{south},{west},{north},{east}'
-        query=f'[out:json][timeout:90];(wr["building"]({bbox});way["highway"]({bbox}););out geom;'
-        for attempt in range(3):
-          try:
-            req=Request('https://overpass-api.de/api/interpreter',data=urlencode({'data':query}).encode(),headers={'User-Agent':'DongjakSafetyMap/source-review/1.0','Accept':'application/json'})
-            with urlopen(req,timeout=120) as r:d=json.load(r)
-            if d.get('remark') or not isinstance(d.get('elements'),list):raise RuntimeError('Incomplete OSM response')
-            break
-          except (HTTPError,URLError,TimeoutError,RuntimeError):
-            if attempt==2:raise
-            time.sleep(15*(attempt+1))
-        for e in d['elements']:elements[(e['type'],e['id'])]=e
-        metadata.append({'bbox':bbox,'timestamp':d.get('osm3s',{}).get('timestamp_osm_base'),'count':len(d['elements'])})
-        print('OSM_SOURCE_TILE',bbox,len(d['elements']),flush=True)
-        time.sleep(3)
+    endpoints=('https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter')
+    def request_tile(bbox,kind):
+        selector='wr["building"]' if kind=='building' else 'way["highway"]'
+        query=f'[out:json][timeout:45];{selector}({bbox});out geom;'
+        last=None
+        for attempt in range(4):
+            endpoint=endpoints[attempt%len(endpoints)]
+            try:
+                req=Request(endpoint+'?'+urlencode({'data':query}),headers={'User-Agent':'DongjakSafetyMap/source-review/1.0','Accept':'application/json'})
+                with urlopen(req,timeout=65) as r:d=json.load(r)
+                if d.get('remark') or not isinstance(d.get('elements'),list):raise RuntimeError('Incomplete OSM response')
+                return d,endpoint
+            except (HTTPError,URLError,TimeoutError,RuntimeError,ValueError) as e:
+                last=e
+                print('OSM_SOURCE_RETRY',bbox,kind,attempt+1,str(e),flush=True)
+                time.sleep(5*(attempt+1))
+        raise RuntimeError(f'No complete source for {bbox} {kind}') from last
+    def tile(s,w,n,e,depth=0):
+        bbox=f'{s:.6f},{w:.6f},{n:.6f},{e:.6f}'
+        try:
+            chunks=[(kind,*request_tile(bbox,kind)) for kind in ('building','highway')]
+        except RuntimeError:
+            if depth>=1:raise
+            print('OSM_SOURCE_SUBDIVIDE',bbox,flush=True)
+            midlat=(s+n)/2;midlon=(w+e)/2
+            for a,b in ((s,midlat),(midlat,n)):
+                for c,d in ((w,midlon),(midlon,e)):tile(a,c,b,d,depth+1)
+            return
+        for kind,d,endpoint in chunks:
+            for el in d['elements']:elements[(el['type'],el['id'])]=el
+            metadata.append({'bbox':bbox,'kind':kind,'endpoint':endpoint,'timestamp':d.get('osm3s',{}).get('timestamp_osm_base'),'count':len(d['elements'])})
+            print('OSM_SOURCE_TILE',bbox,kind,len(d['elements']),flush=True)
+        time.sleep(2)
+    # Cover the complete previous district extent, in smaller requests.
+    for a in range(4):
+        for b in range(4):
+            tile(37.47+a*.015,126.89+b*.0275,37.47+(a+1)*.015,126.89+(b+1)*.0275)
     result={'elements':list(elements.values()),'metadata':metadata}
     write(out/'osm-source-response.json',result);return result
 def coords(el):return [(p['lon'],p['lat']) for p in el.get('geometry',[])]
