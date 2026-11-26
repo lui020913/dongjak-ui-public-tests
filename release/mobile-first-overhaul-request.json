@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.192",
+  "application_version": "9.2.193",
   "public_work_branch": "main",
-  "purpose": "Apply common 20 square metre minimum building footprint display threshold and narrow-shape rule to GIS 2D and 3D, retain named buildings, suppress matching small native footprints conservatively, preserve real buildings on green land; simplify displayed GeoJSON at tile zooms. Protected mobile Preview and Production.",
-  "attempt": 424,
+  "purpose": "Remove redundant Later action and its styles from browser welcome; preserve explicit web entry, app downloads, PWA and guidebook. Protected mobile Preview and Production.",
+  "attempt": 425,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
