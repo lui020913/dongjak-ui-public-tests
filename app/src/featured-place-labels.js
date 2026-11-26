@@ -1,3 +1,4 @@
+import {hasTransportPoiHit} from './poi-click-identity.js';
 import {nightOwnsLayerOrder} from './v913-night-poi-isolation.js';
 import {promoteReadable3DLabelLayers} from './readable-3d-labels.js';
 /**
@@ -161,6 +162,7 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
   }
   let lastTheme=app?.dataset?.theme||'light';
   function openFeature(evt){
+    if(hasTransportPoiHit(map,evt))return;
     const properties=evt.features?.[0]?.properties||{};
     const place=IMPORTANT_PLACES.find(p=>p.name===properties.name);
     if(!place)return;
