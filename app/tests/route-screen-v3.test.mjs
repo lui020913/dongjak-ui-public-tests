@@ -53,7 +53,7 @@ test('route search isolates map controls and drops safe-area padding only while 
  assert.ok(source.includes('searchLayoutHeight-top-height>100'));
  assert.ok(source.includes("listen(win.visualViewport,'scroll',syncViewport)"));
  assert.ok(source.includes('if(!active||searching)return;'));
- assert.ok(css.includes('.canvas[data-search-open="true"] > :not(.search-screen){visibility:hidden;pointer-events:none}'));
+ assert.match(css,/\.canvas\[data-search-open="true"\] > :not\(\.search-screen\)\{opacity:0;visibility:hidden;pointer-events:none;transition:opacity 180ms/);
  assert.ok(css.includes('.search-screen[data-keyboard="open"]{padding-bottom:4px}'));
  assert.ok(css.includes('top:var(--v3-search-top,0px)'));
 });
