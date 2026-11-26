@@ -131,12 +131,12 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
   let lastViewportKey='';
   const markDirty=()=>{dedupDirty=true;};
   const scheduleReconcile=()=>{
-    if(!dedupDirty||dedupTimer||map.isMoving?.())return;
+    if(app?.dataset?.djTransitExterior==='true'||!dedupDirty||dedupTimer||map.isMoving?.())return;
     dedupTimer=setTimeout(()=>{dedupTimer=0;reconcileOfficialDuplicates();},180);
   };
   const identityName=p=>String(normalizeFacilityRecord(p).name||'').normalize('NFKC').toLowerCase().replace(/[\s\-‐‑–’']/g,'');
   const reconcileOfficialDuplicates=()=>{
-    if(map.isMoving?.()||!dedupDirty)return;
+    if(app?.dataset?.djTransitExterior==='true'||map.isMoving?.()||!dedupDirty)return;
     dedupDirty=false;
     if(!officialByName.size&&!lastDedupSignature)return;
     let features=[];try{features=map.querySourceFeatures(source,{sourceLayer:'poi'})||[];}catch{return;}

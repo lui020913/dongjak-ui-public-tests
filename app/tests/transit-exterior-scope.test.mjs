@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {transitEndpointPolicy,transitCoordinatesInScope,transitPointInScope,exteriorMapActive,transitWalkStyle,transitContextBounds,transitContextLayer,createTransitContextLayers} from '../src/transit-exterior-scope.mjs';
 const a={lng:126.95,lat:37.50},b={lng:127.01,lat:37.55},c={lng:127.1,lat:37.6};
 const inside=(lng,lat)=>lng===a.lng&&lat===a.lat;
@@ -62,4 +63,12 @@ test('initial camera keeps about 750 metres of context and ignores unrelated ras
  assert.ok(district[1][1]-bounds[1][1]<.007);
  assert.equal(transitContextLayer({id:'unrelated-raster',type:'raster'}),false);
  assert.equal(transitContextLayer({id:'osm-emergency-base',type:'raster'}),true);
+});
+
+test('non-route DOM markers and heavy facility refresh are suspended during transit',()=>{
+ const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
+ const css=read('transit-exterior-scope.css');
+ assert.match(css,/data-dj-transit-exterior="true"\] \.dongjak-landmark/);
+ assert.match(css,/\.dongjak-education-marker/);
+ for(const file of ['civic-facility-layer.js','education-layer.js','landmark-layer.js','readable-3d-labels.js','ui-environment.js','transport-map.js'])assert.match(read(file),/djTransitExterior/);
 });

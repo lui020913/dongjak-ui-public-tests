@@ -2127,6 +2127,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       && Number.isFinite(item.lng)&&Number.isFinite(item.lat);
   }
   function drainOfficialBusQueue(){
+    if(transitContextActive())return;
     if(officialStaticStopCount>0 || officialBusAuthDisabled || (officialBusErrorAt && Date.now()-officialBusErrorAt<45000))return;
     while(officialBusInFlight<2 && officialBusQueue.length){
       const cell=officialBusQueue.shift();officialBusQueued.delete(cell.key);

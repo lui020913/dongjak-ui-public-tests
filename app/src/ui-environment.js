@@ -183,6 +183,7 @@ export function initTheme({map,app}){
   const stationSize=['interpolate',['linear'],['zoom'],13.3,10,16,11.6,17.15,11.7,20,11.7];
   let labelStyleSignature='';
   function syncMapLabelContrast(force=false){
+    if(app.dataset.djTransitExterior==='true')return;
     if(map.isMoving?.()){scheduleMapLabelContrast();return;}
     const layers=map.getStyle?.()?.layers;
     if(!Array.isArray(layers))return;
@@ -222,7 +223,7 @@ export function initTheme({map,app}){
   }
   let labelSyncTimer=null;
   function scheduleMapLabelContrast(){
-    if(labelSyncTimer!==null||map.isMoving?.())return;
+    if(app.dataset.djTransitExterior==='true'||labelSyncTimer!==null||map.isMoving?.())return;
     labelSyncTimer=setTimeout(()=>{labelSyncTimer=null;if(!map.isMoving?.())syncMapLabelContrast();},180);
   }
   map.on('styledata',scheduleMapLabelContrast);

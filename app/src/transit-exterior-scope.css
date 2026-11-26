@@ -1,0 +1,6 @@
+/* DOM-backed fallback facilities are separate from MapLibre style layers. */
+#app[data-dj-transit-exterior="true"] .dongjak-landmark,
+#app[data-dj-transit-exterior="true"] .dongjak-education-marker {
+  display: none !important;
+  pointer-events: none !important;
+}

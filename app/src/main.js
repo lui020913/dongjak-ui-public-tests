@@ -9,6 +9,7 @@ import {installMobileMapControls} from './mobile-map-controls.js';
 import {phoneProfile,normalMapPixelRatio,installPhoneRenderBudget,offscreenEvictionIds} from './adaptive-phone-map-budget.mjs';
 import {baseMapRecoveryDecision,BASE_STYLE_INITIAL_WAIT_MS} from './map-basemap-recovery.mjs';
 import './adaptive-phone-map-budget.css';
+import './transit-exterior-scope.css';
 import './button-material.css';
 import './browser-install-menu.css';
 import {installMobileLayoutCoordinator,installBottomTabNavigation} from './mobile-ui/index.js';
