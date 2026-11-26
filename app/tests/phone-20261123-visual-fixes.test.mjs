@@ -21,7 +21,8 @@ test('PRI evaluated and unassessed roads share restrained zoom widths without ch
  const map=read('src/pri-map.js');
  assert.match(map,/11\.5,1,13,1\.5,15,2\.35,17,3\.6,19,5\.2/);
  assert.match(map,/UNKNOWN_OPACITY=\.58/);
- assert.match(map,/11\.5,1\.4,13,2\.4,15,3\.8,17,5\.7,19,7\.8/);
+ assert.match(map,/map\.setPaintProperty\(SPEED_LINE,'line-width',roadWidth\)/);
+ assert.doesNotMatch(map,/11\.5,1\.4,13,2\.4,15,3\.8,17,5\.7,19,7\.8/);
 });
 
 test('live train forward illumination is a feathered warm-white radial beam',()=>{
