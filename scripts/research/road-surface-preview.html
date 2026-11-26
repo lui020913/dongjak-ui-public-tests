@@ -29,8 +29,8 @@
  const campus=await fetch('./campus-summary.json').then(r=>r.ok?r.json():null).catch(()=>null);
  const buttons=['old','raw','new'];if(hybrid){buttons.push('hybrid');document.getElementById('hybrid').hidden=false;}if(hybrid&&eligibility){buttons.push('selective');document.getElementById('selective').hidden=false;}if(campus){document.getElementById('campus').hidden=false;document.getElementById('campus').onclick=()=>{const b=campus.review_window_wgs84;map.fitBounds([[b[0],b[1]],[b[2],b[3]]],{padding:48,duration:350});};}if(review){buttons.push('corridor');document.getElementById('corridor').hidden=false;document.getElementById('unresolved').hidden=false;}
  let mode='old',showConflict=false,showUnresolved=false,is3d=false;const nativeRoads=[],buildingIds=[];
- const set=(id,v)=>{if(map.getLayer(id))map.setLayoutProperty(id,'visibility',v?'visible':'none')};
- function update(){const selectiveCount=selective?.update(mode==='selective')||0;for(const id of nativeRoads)set(id,mode==='old'||mode==='selective');set('preview-raw',mode==='raw');set('preview-clean',mode==='new');set('preview-conflict',showConflict);set('preview-corridor',mode==='corridor');set('preview-hybrid',mode==='hybrid'||(mode==='selective'&&selectiveCount>0));set('preview-unresolved',showUnresolved);
+ const set=(id,v)=>{if(map.getLayer(id)&&map.getLayoutProperty(id,'visibility')!==(v?'visible':'none'))map.setLayoutProperty(id,'visibility',v?'visible':'none')};
+ function update(){const selectiveVisible=mode==='selective'&&selective?.valid&&map.getZoom()>=eligibility.minimum_display_zoom;set('preview-hybrid',mode==='hybrid'||selectiveVisible);const selectiveCount=selective?.update(mode==='selective')||0;for(const id of nativeRoads)set(id,mode==='old'||mode==='selective');set('preview-raw',mode==='raw');set('preview-clean',mode==='new');set('preview-conflict',showConflict);set('preview-corridor',mode==='corridor');set('preview-unresolved',showUnresolved);
  for(const id of buildingIds){set(id+'-2d',!is3d);set(id+'-3d',is3d)}
  for(const id of buttons)document.getElementById(id).setAttribute('aria-pressed',String(id===mode));
  document.getElementById('conflict').setAttribute('aria-pressed',String(showConflict));document.getElementById('pitch').setAttribute('aria-pressed',String(is3d));
@@ -61,7 +61,7 @@
  if(hybrid&&eligibility){
    const boundary=await fetchGeo('boundary.geojson');
    selective=createSelectiveRoadReview(map,eligibility,boundary.features[0]?.geometry,verifiedStyle&&eligibility.source_graph_sha256===hybrid.source_graph_sha256);
-   map.on('zoomend',()=>{if(mode==='selective')update()});
+   map.on('zoomend',()=>{if(mode==='selective')update()});map.on('moveend',()=>{if(mode==='selective')update()});
    map.on('sourcedata',e=>{if(mode==='selective'&&e.sourceId==='preview-hybrid'&&e.isSourceLoaded)update()});
  }
  const loaded=new Set(),pending=new Set();async function loadBuildings(){const b=map.getBounds();for(const f of manifest.building_files){if(loaded.has(f.file)||pending.has(f.file)||f.bbox[2]<b.getWest()||f.bbox[0]>b.getEast()||f.bbox[3]<b.getSouth()||f.bbox[1]>b.getNorth())continue;pending.add(f.file);
