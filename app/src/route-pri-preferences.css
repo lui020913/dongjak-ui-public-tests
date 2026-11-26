@@ -1,0 +1,29 @@
+/* Top layer is independent of map sheets, tab animations and shadow roots. */
+#dj-route-pri-dialog:not([open]){display:none!important}
+#dj-route-pri-dialog{
+  --pri-bg:#fff;--pri-ink:#203d32;--pri-muted:#50695f;--pri-border:#d3e2da;--pri-tint:#edf4ef;--pri-accent:#138873;
+  box-sizing:border-box;position:fixed;inset:0;margin:auto;width:min(420px,calc(100vw - 28px));max-width:calc(100vw - 28px);
+  max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 28px);
+  padding:0;border:1px solid var(--pri-border);border-radius:24px;overflow:hidden;background:var(--pri-bg);color:var(--pri-ink);
+  box-shadow:0 16px 52px rgba(20,55,43,.2);font-family:inherit;
+}
+#dj-route-pri-dialog::backdrop{background:rgba(25,48,39,.32)}
+#dj-route-pri-dialog .dj-route-pri-card{display:flex;flex-direction:column;max-height:inherit;min-height:0}
+#dj-route-pri-dialog header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 16px 12px;flex:none}
+#dj-route-pri-dialog h2{font-size:19px;line-height:1.3;margin:0 0 6px;font-weight:760}
+#dj-route-pri-dialog p{font-size:13px;line-height:1.55;margin:0;color:var(--pri-muted);overflow-wrap:anywhere}
+#dj-route-pri-dialog button{appearance:none;min-width:44px;min-height:44px;border:1px solid var(--pri-border);border-radius:999px;background:var(--pri-tint);color:var(--pri-ink);font:inherit;font-size:13px;font-weight:700;padding:8px 13px;white-space:nowrap;cursor:pointer}
+#dj-route-pri-dialog button[data-pri-close]{flex:0 0 44px;width:44px;height:44px;padding:0;font-size:24px;line-height:1}
+#dj-route-pri-dialog button:disabled{opacity:.5;cursor:default}
+#dj-route-pri-dialog .dj-route-pri-body{padding:0 16px 14px;overflow-y:auto;overscroll-behavior:contain;min-height:0;flex:1 1 auto}
+#dj-route-pri-dialog .dj-route-pri-summary{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;font-size:12px;color:var(--pri-muted)}
+#dj-route-pri-dialog .dj-route-pri-factors{display:grid;gap:7px}
+#dj-route-pri-dialog .dj-route-pri-factors label{display:flex;align-items:center;gap:10px;min-height:44px;box-sizing:border-box;border:1px solid var(--pri-border);border-radius:999px;padding:8px 12px;font-size:13px;font-weight:650;line-height:1.4;cursor:pointer}
+#dj-route-pri-dialog .dj-route-pri-factors label:has(input:checked){background:var(--pri-tint);border-color:var(--pri-accent)}
+#dj-route-pri-dialog input{margin:0;width:18px;height:18px;flex:0 0 18px;accent-color:var(--pri-accent)}
+#dj-route-pri-dialog .dj-route-pri-note{margin-top:12px;font-size:11px}
+#dj-route-pri-dialog footer{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px 16px;border-top:1px solid var(--pri-border)}
+#dj-route-pri-dialog [data-pri-apply]{background:var(--pri-accent);border-color:var(--pri-accent);color:#fff}
+#dj-route-pri-dialog :is(button,input):focus-visible{outline:2px solid var(--pri-accent);outline-offset:2px}
+html[data-theme=dark] #dj-route-pri-dialog,body:has(#app[data-theme=dark]) #dj-route-pri-dialog{--pri-bg:#20332f;--pri-ink:#e6f1ec;--pri-muted:#b5c8be;--pri-border:#47635a;--pri-tint:#2a4640;--pri-accent:#208b76}
+#app :is(#route-map-card,#route-summary,.route-card) .dj-route-pri-trigger{display:flex;align-items:center;justify-content:center;min-height:44px;width:100%;box-sizing:border-box;border:1px solid var(--dj800-border,#d3e2da);border-radius:999px;background:var(--dj800-surface,#fff);color:var(--dj800-text,#203d32);font:inherit;font-size:13px;font-weight:700;line-height:1.4;padding:7px 12px}
