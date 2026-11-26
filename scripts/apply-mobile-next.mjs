@@ -63,14 +63,14 @@ replace(main,"  } catch(error) {\n    if(requestGeneration!==routeRequestGenerat
 // The PRI route review owns the source label on ordinary and gentle routes.
  // Add the release-only balanced label without restoring the obsolete
  // pre-PRI two-line textContent branch (which no longer exists in main).
-replace(main,"    document.getElementById('route-map-source').textContent=transitPreview?'지하철 연계 · 배차·대기 미반영':(routeResult?.source==='seoul-pedestrian-graph'","    document.getElementById('route-map-source').textContent=transitPreview?'지하철 연계 · 배차·대기 미반영':selectedRouteVariant==='balanced'?'종합 최적(잠정) · PRI 미반영':(routeResult?.source==='seoul-pedestrian-graph'");
+replace(main,"    document.getElementById('route-map-source').textContent=transitPreview?(transitPreview.kind==='bus'?'버스 '+transitPreview.route+' · 운행시간·요금 미확인':transitPreview.kind==='rail'?'지하철 연계 · 배차·대기 미반영':'환승 '+transitPreview.changes+'회 · 운행시간·요금 미확인'):(routeResult?.source==='seoul-pedestrian-graph'","    document.getElementById('route-map-source').textContent=transitPreview?(transitPreview.kind==='bus'?'버스 '+transitPreview.route+' · 운행시간·요금 미확인':transitPreview.kind==='rail'?'지하철 연계 · 배차·대기 미반영':'환승 '+transitPreview.changes+'회 · 운행시간·요금 미확인'):selectedRouteVariant==='balanced'?'종합 최적(잠정) · PRI 미반영':(routeResult?.source==='seoul-pedestrian-graph'");
 replace('src/v815-map-product.js','  return {setWaypoints,renderStored};','  return {setWaypoints,renderStored,renderTransit};');
-replace(main,"  }\n});\n\n\n// ═════════════════════════════════════════════════════════════\n// v14 실시간 도보 안내","  }\n});\nwindow.addEventListener('dj-next:open-transit',()=>{if(!routeStart||!routeEnd||navMode)return;navigate('route');routeProductTools?.renderTransit();document.getElementById('dj815-rail-planner')?.scrollIntoView({block:'nearest'});});\n\n// ═════════════════════════════════════════════════════════════\n// v14 실시간 도보 안내");
+// Canonical V3 owns transit search, result selection and preview; no legacy open-transit injection.
 replace('index.html','<button type="button" data-route-variant="gentle" aria-pressed="false">경사 회피 우선</button>','<button type="button" data-route-variant="gentle" aria-pressed="false">경사 회피 우선</button>\n              <button type="button" data-route-variant="balanced" aria-pressed="false" disabled>종합 최적 (잠정)</button>');
 // Keep walking comparisons available when displaying a verified rail connection.
 // The public app owns rail cancellation, preview state, and marker cleanup.
-replace(main,'    invalidateRoute();\n    const walk=','    clearTransitPreview();showRouteLine(null);\n    const walk=');
-replace(main,"    navigate('map');fitWalkingRoute(coords);syncRoutePresentation();","    window.dispatchEvent(new CustomEvent('dj-next:route-selected',{detail:'transit'}));\n    navigate('map');fitWalkingRoute(coords);syncRoutePresentation();");
+// Keep canonical invalidateRoute() ownership for all transit modes.
+// Canonical transit preview owns fitWalkingRoute and details; do not rewrite navigation.
 replace('index.html','<button type="button" data-route-variant="balanced" aria-pressed="false" disabled>종합 최적 (잠정)</button>','<button type="button" data-route-variant="balanced" aria-pressed="false" disabled>종합 최적 (잠정)</button>\n              <button type="button" id="djNext-transit-option" disabled>대중교통 경로</button>');
 
 replace('src/v831-swipe-feature-toolbar.js','for(const child of [...row.children])if(child!==scroller&&child!==more)scroller.appendChild(child);','for(const child of [...row.children])if(child!==scroller&&child!==more&&child.id!==\'djNext-rail\')scroller.appendChild(child);');
