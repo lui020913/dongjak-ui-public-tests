@@ -1944,7 +1944,7 @@ function setCommunityNoticeView(open){
  const wasOpen=!panel.hidden;
  if(open&&communityDetail){communityDetail=null;communityReplyTo=null;document.getElementById('participation-panel').dataset.communityDetail='false';}
  panel.hidden=!open;toggle.setAttribute('aria-pressed',String(open));
- for(const id of ['community-list','participate-register'])document.getElementById(id).hidden=open;
+ document.getElementById('community-list').hidden=open;
  if(open){
   document.getElementById('community-list').replaceChildren();
   document.querySelector('#participation-panel>.dj836-sheet-body')?.scrollTo({top:0,behavior:'instant'});
@@ -2127,10 +2127,7 @@ for(const button of document.querySelectorAll('[data-close-page]')){
 }
 document.getElementById('news-close-to-map')?.addEventListener('click',()=>closePrimaryPageToMap(document.getElementById('news-panel')));
 // 경로 상세 결과는 아래 도보 길찾기 핸들러에서 연결합니다.
-document.getElementById('participate-register').addEventListener('click', () => {
-  navigate('map');
-  setAddMode(true);
-});
+
 
 function makeRecord(title, subtitle, callback) {
   const btn = document.createElement('button');
