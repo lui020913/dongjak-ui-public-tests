@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.203",
+  "application_version": "9.2.204",
   "public_work_branch": "main",
-  "purpose": "Verified PR #566 (merged 754aa1b): smooth mobile map rendering while retaining economy mode; earlier major/public/safety facilities; stable facility sheet and shared saved-group UI; community outgoing transition guard; bus interval outline removal, exact historical arrival paging and compact full-time display; retain official route geometry. Full source CI, phone aggregate, picker/facility and real route navigation checks passed. Protected Preview and Production QA required; live bus data availability remains to be verified. Road geometry review remains isolated.",
-  "attempt": 438,
+  "purpose": "Verified PR #569 (f39b7f8): remove automatic favorites folder row while retaining saved-place group management; restore icon-only save/share at all widths; suppress public POI circle backing and duplicate native symbols, preserve canonical park names, extend categorical pictograms; remove viewport-center clipping from stop labels and harmonize label zoom; preserve official rail geometry, improve line edges and capable-device DPR floor while keeping legacy economy. Source CI and picker/facility regression passed, mobile timeout passed on retry. Protected Preview, mobile QA and Production required. Road review remains isolated; real device visual confirmation still required.",
+  "attempt": 439,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
