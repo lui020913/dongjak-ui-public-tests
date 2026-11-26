@@ -4,10 +4,12 @@ on:
     paths:
       - 'scripts/research/road-surface-preview.html'
       - 'scripts/research/dongjak_road_surface_preview.py'
+      - 'scripts/research/package_final_road_overlays.py'
       - '.github/workflows/road-surface-isolated-preview.yml'
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,8 +20,42 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install shapely==2.1.2 pyproj==3.7.2 mapbox-vector-tile==2.2.0
-      - name: Generate actual geometry comparison
-        run: python scripts/research/dongjak_road_surface_preview.py road-preview-dist
+      - name: Download exact completed corridor and overlay review
+        uses: actions/download-artifact@v4
+        with:
+          name: dongjak-final-corridor-and-overlay-review
+          path: reviewed
+          run-id: 45763031345
+          github-token: ${{ github.token }}
+      - name: Download exact completed visual comparison
+        uses: actions/download-artifact@v4
+        with:
+          name: dongjak-final-isolated-visual-preview
+          path: road-preview-dist
+          run-id: 45763031345
+          github-token: ${{ github.token }}
+      - name: Validate provenance and package reviewed overlay comparisons
+        run: |
+          set -euo pipefail
+          python scripts/research/package_final_road_overlays.py reviewed/final-review reviewed/final-alignment road-preview-dist
+          cp scripts/research/road-surface-preview.html road-preview-dist/index.html
+          python - <<'PY'
+          import json,os,pathlib,re
+          p=pathlib.Path('road-preview-dist')
+          m=json.loads((p/'manifest.json').read_text())
+          assert m['preview'] and m['building_count']>0
+          assert json.loads((p/'corridor-summary.json').read_text())['candidate_links']==7845
+          m['review_source_commit']=m['source_commit']
+          m['review_run_id']=45763031345
+          m['source_commit']=os.environ['GITHUB_SHA']
+          (p/'manifest.json').write_text(json.dumps(m,ensure_ascii=False))
+          assert all(f.stat().st_size<25*1024*1024 for f in p.rglob('*') if f.is_file())
+          inline=re.findall(r'<script>([\s\S]*?)</script>',(p/'index.html').read_text())
+          assert len(inline)==1
+          pathlib.Path('/tmp/road-preview-check.js').write_text(inline[0])
+          PY
+          node --check /tmp/road-preview-check.js
+          jq -e 'length==9' road-preview-dist/overlay-manifest.json >/dev/null
       - uses: actions/upload-artifact@v4
         with:
           name: road-surface-visual-preview
