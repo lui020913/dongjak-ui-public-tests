@@ -15,7 +15,7 @@ export function officialFeatures(places,boundary){
    const lon=Number(place.lng),lat=Number(place.lat);
    if(!Number.isFinite(lon)||!Number.isFinite(lat)||!boundary||!insideBoundary([lon,lat],boundary))continue;
    const name=String(place.name||'').trim();if(!name||isFormerPoliceFacility(name)||isUnverifiedPoliceFacility(name))continue;
-   const key=`${name.replace(/\s+/g,'').toLowerCase()}|${lon.toFixed(4)}|${lat.toFixed(4)}`;
+   const key=`${name.replace(/\s+/g,'').toLowerCase()}|${place.category||''}|${lon.toFixed(4)}|${lat.toFixed(4)}`;
    if(seen.has(key)||accepted.some(p=>sameFacility(p,place)))continue;seen.add(key);accepted.push(place);
    features.push({type:'Feature',id:features.length+1,geometry:{type:'Point',coordinates:[lon,lat]},properties:{
      name,registeredName:place.registeredName||'',category:String(place.category||'시설'),kind:String(place.category||''),...facilityPresentation(place.category),
@@ -207,7 +207,7 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
      const partial=official.failed.length||official.truncated.length||osmFailed;
      const next=officialFeatures(merged,getBoundary());
      cache=next;searchableGeneralPlaces=merged.filter(p=>insideBoundary([Number(p.lng),Number(p.lat)],getBoundary()));restore();
-     app?.dispatchEvent(new CustomEvent('dongjak:official-facilities-ready'));lastBox=bbox;latest=Date.now();
+     app?.dispatchEvent(new CustomEvent('dongjak:official-facilities-ready',{detail:next.features.map(f=>({...f.properties,lng:f.geometry.coordinates[0],lat:f.geometry.coordinates[1]}))}));lastBox=bbox;latest=Date.now();
      status(`${source} ${next.features.length.toLocaleString()}곳 · ${partial?'일부 자료 조회 제한 · ':''}표시 정보는 현장 확인 필요`);
    }catch(error){
      status(cache.features.length?`기존 일반시설 ${cache.features.length}곳 표시 중 · 최신 조회 실패`:'일반시설 조회 실패 · 다시 시도해 주세요');
