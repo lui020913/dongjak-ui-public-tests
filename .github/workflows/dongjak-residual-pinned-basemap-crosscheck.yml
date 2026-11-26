@@ -1,0 +1,45 @@
+name: Dongjak residual pinned basemap cross-check
+on:
+  push:
+    branches: [audit/remaining-native-road-correspondence-20261126]
+    paths:
+      - 'scripts/research/dongjak_residual_pinned_basemap_crosscheck.py'
+      - '.github/workflows/dongjak-residual-pinned-basemap-crosscheck.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2 mapbox-vector-tile==2.2.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-residual-source-evidence
+          path: residual
+          run-id: 45786890876
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-green-building-audit
+          path: green
+          run-id: 45745321396
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-reaudited-road-display-assets
+          path: assets
+          run-id: 45786891095
+          github-token: ${{ github.token }}
+      - run: python scripts/research/dongjak_residual_pinned_basemap_crosscheck.py residual green assets output
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-residual-pinned-basemap-crosscheck
+          path: output/
+          retention-days: 14
+          if-no-files-found: error
