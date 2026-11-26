@@ -30,3 +30,8 @@
 .canvas[data-transit-results=true] .header .mode{display:none}
 @media(max-height:680px){.transit-results{max-height:46dvh;padding:9px 11px;gap:6px}.tr-head button{width:36px;height:36px}.tr-card{padding:8px 10px}.tr-filter button{min-height:36px}}
 @media(prefers-reduced-motion:reduce){.transit-mode-toggle button,.tr-filter button,.tr-card{transition:none}}
+
+.tr-filter button{white-space:nowrap;font-size:clamp(10px,3.1vw,12px);padding-inline:3px}
+.tr-filter button[data-filter=mixed]{flex:1.45}
+.tr-multi-track span{min-width:0;flex:0 1 auto;padding-inline:5px;white-space:nowrap}
+.tr-multi-track span[data-vehicle=true]{flex:1;border:1px solid var(--route-color);background:color-mix(in srgb,var(--route-color) 16%,var(--tr-paper));color:var(--tr-ink)}
