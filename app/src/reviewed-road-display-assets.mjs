@@ -3,6 +3,8 @@
  * Every request fails open to original source geometry.
  */
 const ROOT='/data/road-display-review/';
+const RECOVERY_ROOT='/data/road-display-repair/';
+export const RECOVERED_SURFACE_TILE=Object.freeze({file:'recovered-surfaces.geojson',sha256:'d9ba3f598003ed3e9f5a3898386d4dc9e0af973248d2158e741f20d6d886ba84',bytes:30374,count:8,bbox:Object.freeze([126.90880361157356,37.489993781236095,126.9814867004426,37.51397303535885])});
 const PATHS=new Set(['/data/protection-zone/sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson','/data/sangdo1-analysis-view/bocha-mixed-roads.geojson','/data/road-speed/sangdo1_speed_links.geojson','/data/sangdo1-analysis-view/slope.geojson','/data/safety/slope/dongjak_walk_links_slope_visual.geojson','/data/safety/walk/dongjak_walk_links.geojson']);
 const GRAPH='3f80b417f5b6fe27b0fb7f31c107c0b19f967daf86836cd024d68ea38787607a';
 const hex=async bytes=>Array.from(new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
@@ -30,11 +32,19 @@ export function createRoadDisplayAssets({fetcher=globalThis.fetch,enabled=false}
    })().catch(()=>null).then(result=>{if(!result)manifestPromise=null;return result;});
    return manifestPromise;
  }
- async function checked(meta,limit=8*1024*1024){
+ async function readChecked(meta,limit,root){
    if(!file(meta?.file)||!sha(meta?.sha256)||!Number.isInteger(meta.bytes)||meta.bytes<1||meta.bytes>limit)throw Error('invalid asset metadata');
-   const r=await fetcher(ROOT+meta.file,{cache:'force-cache'});if(!r.ok)throw Error('review asset HTTP '+r.status);
+   const r=await fetcher(root+meta.file,{cache:'force-cache'});if(!r.ok)throw Error('review asset HTTP '+r.status);
    const bytes=await r.arrayBuffer();if(bytes.byteLength!==meta.bytes||await hex(bytes)!==meta.sha256)throw Error('asset integrity mismatch');
    return parse(bytes);
+ }
+ const checked=(meta,limit=8*1024*1024)=>readChecked(meta,limit,ROOT);
+ // A separately pinned additive repair; it never expands the eligible native IDs.
+ async function recovered(){
+   if(!enabled||!globalThis.crypto?.subtle)return null;
+   const d=await readChecked(RECOVERED_SURFACE_TILE,64*1024,RECOVERY_ROOT);
+   if(d.type!=='FeatureCollection'||d.features?.length!==RECOVERED_SURFACE_TILE.count||d.features.some(f=>f.properties?.kind!=='baseline'||!['Polygon','MultiPolygon'].includes(f.geometry?.type)))throw Error('recovered road geometry mismatch');
+   return d;
  }
  async function displayResponse(path,response){
    if(!enabled||!PATHS.has(path)||!globalThis.crypto?.subtle)return response.json();
@@ -48,7 +58,7 @@ export function createRoadDisplayAssets({fetcher=globalThis.fetch,enabled=false}
      return applyReviewedGeometry(original,patch);
    }catch(e){console.warn('[road display] original geometry retained',path,e.message);return original}
  }
- return {manifest,checked,displayResponse};
+ return {manifest,checked,recovered,displayResponse};
 }
 // Opt-in isolated app QA only. No hidden route geometry changes in Production.
 const previewEnabled=typeof window!=='undefined'&&new URLSearchParams(window.location.search).get('roadReview')==='1';
