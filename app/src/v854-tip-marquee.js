@@ -24,7 +24,7 @@ export function installTipMarquee(doc=document,win=window){
     if(available<=0){stop();lastKey='';return;}
     const range=doc.createRange();range.selectNodeContents(copy);
     const textWidth=Math.max(copy.scrollWidth,copy.getBoundingClientRect().width,range.getBoundingClientRect().width);
-    const overflow=Math.max(0,copy.scrollWidth-available,Math.ceil(textWidth-available+1));
+    const overflow=Math.max(0,copy.scrollWidth-available,Math.ceil(textWidth-available));
     const moving=overflow>0&&!reduced.matches&&!app.classList.contains('dj-reduced-animation');
     const key=[copy.textContent,available,overflow,moving].join('|');
     if(key===lastKey)return;
@@ -61,11 +61,13 @@ export function installTipMarquee(doc=document,win=window){
     schedule();
   }
   const rootObserver=new win.MutationObserver(()=>{attach();schedule();});
-  rootObserver.observe(app,{childList:true,subtree:true,attributes:true,attributeFilter:['data-tab','data-search-open','data-dj-pri-visible','class']});
+  rootObserver.observe(app,{childList:true,subtree:true});
+  const stateObserver=new win.MutationObserver(schedule);
+  stateObserver.observe(app,{attributes:true,attributeFilter:['data-tab','data-search-open','data-dj-pri-visible','class']});
   media.addEventListener?.('change',schedule);reduced.addEventListener?.('change',schedule);
   doc.addEventListener('visibilitychange',schedule);win.addEventListener('resize',schedule,{passive:true});
   doc.fonts?.ready?.then(schedule);attach();
-  return ()=>{disposed=true;media.removeEventListener?.('change',schedule);reduced.removeEventListener?.('change',schedule);doc.removeEventListener('visibilitychange',schedule);win.removeEventListener('resize',schedule);rootObserver.disconnect();observer?.disconnect();resize?.disconnect();if(raf)win.cancelAnimationFrame(raf);stop();const node=tip();node?.classList.remove('dj854-tip-marquee');node?.style.removeProperty('--dj854-tip-overflow');node?.style.removeProperty('--dj-tip-close-reserve');if(node)delete node.dataset.djTipReadUntil;};
+  return ()=>{disposed=true;media.removeEventListener?.('change',schedule);reduced.removeEventListener?.('change',schedule);doc.removeEventListener('visibilitychange',schedule);win.removeEventListener('resize',schedule);rootObserver.disconnect();stateObserver.disconnect();observer?.disconnect();resize?.disconnect();if(raf)win.cancelAnimationFrame(raf);stop();const node=tip();node?.classList.remove('dj854-tip-marquee');node?.style.removeProperty('--dj854-tip-overflow');node?.style.removeProperty('--dj-tip-close-reserve');if(node)delete node.dataset.djTipReadUntil;};
 }
 if(typeof document!=='undefined'&&typeof window!=='undefined'){
   const start=()=>installTipMarquee(document,window);
