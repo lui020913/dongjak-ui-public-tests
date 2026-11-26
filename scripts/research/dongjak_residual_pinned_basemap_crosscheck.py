@@ -83,7 +83,7 @@ def main(residual,green,assets,out):
             i=int(i);a=g.intersection(osmb[i]).area
             if a>.01:bh.append({**bm[i],'gis_coverage':round(a/g.area,4),'native_coverage':round(a/osmb[i].area,4)})
         bh.sort(key=lambda x:-x['gis_coverage'])
-        matched=any(x['gis_coverage']>=.7 and x['osm_coverage']>=.5 for x in bh)
+        matched=any(x['gis_coverage']>=.7 and x['native_coverage']>=.5 for x in bh)
         rh=[]
         for i in rt.query(g.buffer(.1),predicate='intersects'):
             i=int(i);length=g.intersection(osmr[i]).length
