@@ -15,7 +15,10 @@ test('transit is a separate mode and reuses existing route UI and motion',()=>{
 });
 test('PRI and transit arrival are scoped to verified walking legs and matching route id',()=>{
  const main=read('main.js'),detail=read('transit-route-detail.js');
- assert.ok(main.includes('evaluateCompositePriRouteCandidates({standard:first,gentle:last}'));
+ assert.ok(main.includes('evaluateCompositePriRouteCandidates(candidates'));
+ assert.ok(main.includes('chooseTransitWalk(candidates,assessment'));
+ assert.ok(main.includes('selectTransitWalk(result,preferPri)'));
+ assert.ok(read('transit-route-comparison.js').includes('tr-pri-preference'));
  assert.ok(detail.includes('value.coverage<.65'));
  assert.ok(detail.includes('String(data.arsId)===String(detail.arsId)'));
  assert.ok(detail.includes('String(x.routeId)===String(detail.routeId)'));
