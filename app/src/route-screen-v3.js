@@ -45,6 +45,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
           <svg viewBox="0 0 24 24"><path d="M8 3v17m0 0-4-4m4 4 4-4M16 21V4m0 0-4 4m4-4 4 4"/></svg>
         </button>
       </div>
+      <button type="button" class="pri-trigger" data-v3="pri">PRI 평가 항목 · 6/6</button>
       <section class="recent" id="v3-recent" hidden><div class="recent-head"><strong>최근 검색 장소</strong><button type="button" data-v3="clear-recent">기록 삭제</button></div><div class="recent-list"></div></section>
     </section>
     <div class="tools" aria-label="지도 조작">
@@ -282,6 +283,8 @@ export function mountRouteScreenV3(doc=document, win=window) {
   for(const key of ['back']){
     listen(q('[data-v3="'+key+'"]'),'click',()=>old.querySelector('[data-close-page="route"]')?.click());
   }
+  listen(q('[data-v3="pri"]'),'click',()=>win.dispatchEvent(new CustomEvent('dongjak:open-route-pri')));
+  listen(win,'dongjak:route-pri-factors',event=>{q('[data-v3="pri"]').textContent='PRI 평가 항목 · '+event.detail.count+'/6';});
   listen(q('[data-v3="start"]'),'click',()=>openSearch('start'));
   listen(q('[data-v3="end"]'),'click',()=>openSearch('end'));
   listen(q('[data-v3="waypoint"]'),'click',addWaypointRow);
