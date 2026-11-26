@@ -12,7 +12,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  .tr-track{display:flex;height:7px;gap:3px;border-radius:8px;overflow:hidden;margin:9px 0}.tr-track i{flex:1;background:#d2dcdb}.tr-track i:nth-child(2){flex:3;background:var(--tr-color,#147257)}
  .tr-card button{border:0;border-radius:18px;background:#e7f0ec;color:#147257;font-weight:740;padding:7px 12px;font-size:12px;width:100%}.tr-note{font-size:11px;color:#62786f;line-height:1.45;margin:6px 0}
  .canvas[data-transit-mode=transit] .pri-trigger,.canvas[data-transit-mode=transit] .waypoint-add-row{display:none!important}
- .canvas[data-transit-results=true] .action,.canvas[data-transit-results=true] .tools{visibility:hidden;pointer-events:none}
+ .canvas[data-transit-results=true] .action,.canvas[data-transit-results=true] .tools,.canvas[data-transit-results=true] .route-panel{visibility:hidden;pointer-events:none}
  `;shadow.append(style);
  const panel=doc.createElement('section');panel.className='transit-results';panel.hidden=true;panel.setAttribute('aria-label','대중교통 경로 비교');
  panel.innerHTML='<div class="tr-head"><h2>대중교통 경로</h2><button type="button" aria-label="경로 결과 닫기">×</button></div><div class="tr-filter" role="group" aria-label="교통수단 필터"></div><p class="tr-note" role="status" aria-live="polite"></p><div class="tr-list"></div>';
@@ -61,10 +61,10 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  async function search(){
   close();const ps=points();panel.hidden=false;view.dataset.transitResults='true';filter='all';
   if(ps.length!==2){status.textContent='대중교통은 경유지 없는 출발지와 도착지 두 곳을 지원합니다.';return;}
-  pointKey=key(ps);const seq=generation;controller=new AbortController();
-  const timer=win.setTimeout(()=>controller?.abort(),30000);
+  pointKey=key(ps);const seq=generation;const requestController=new AbortController();controller=requestController;
+  const timer=win.setTimeout(()=>requestController.abort(),30000);
   status.textContent='공식 정류장·노선 정보를 조회하는 중입니다.';
-  try{const result=await findTransitOptions(ps[0],ps[1],{signal:controller.signal,apiBase:String(import.meta.env?.VITE_TRANSPORT_API_BASE||'/api/transport').replace(/\/$/,'')});if(seq!==generation||disposed)return;options=result;render();}
+  try{const result=await findTransitOptions(ps[0],ps[1],{signal:requestController.signal,apiBase:String(import.meta.env?.VITE_TRANSPORT_API_BASE||'/api/transport').replace(/\/$/,'')});if(seq!==generation||disposed)return;options=result;render();}
   catch(e){if(seq===generation&&!disposed)status.textContent='교통정보를 불러오지 못했습니다. 다시 시도해 주세요.';}
   finally{win.clearTimeout(timer);}
  }
