@@ -32,7 +32,9 @@ const targetNames=['밤골.상도역롯데캐슬파크엘','흑석자이.유앤�
 const sites=targetNames.map(name=>{const stop=district.find(s=>s.name===name);assert.ok(stop,name);return stop;});
 const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1,serviceWorkers:'block'});
 const page=await ctx.newPage();const errors=[];
-page.on('pageerror',e=>errors.push(String(e)));
+page.on('pageerror',e=>{const detail=e.stack||String(e);errors.push(detail);console.log('POI_CLICK_PAGE_ERROR',detail);});
+await page.addInitScript(()=>{const original=Node.prototype.insertBefore;Node.prototype.insertBefore=function(node,reference){try{return original.call(this,node,reference);}catch(error){console.error('POI_INSERT_BEFORE_DIAGNOSTIC',JSON.stringify({parent:this.id||this.className||this.nodeName,node:node?.id||node?.className||node?.nodeName,reference:reference?.id||reference?.className||reference?.nodeName,actualParent:reference?.parentNode?.id||reference?.parentNode?.className||reference?.parentNode?.nodeName,stack:new Error().stack}));throw error;}};});
+page.on('console',m=>{if(m.text().startsWith('POI_INSERT_BEFORE_DIAGNOSTIC'))console.log(m.text());});
 try{
    await page.goto(url+'/',{waitUntil:'domcontentloaded'});
    const menu=page.locator('#dj-install-menu');await menu.waitFor({state:'attached',timeout:30000});
@@ -73,6 +75,7 @@ try{
    await page.locator('#transport-close').click();await page.locator('#transport-sheet').waitFor({state:'hidden',timeout:15000});
  }
  assert.deepEqual((await registryState()).ids,expected);
+ console.log('POI_CLICK_ASSERTIONS_PASSED',JSON.stringify({officialStops:expected.length,results:results.map(r=>({arsId:r.arsId,title:r.title}))}));
  assert.deepEqual(errors,[]);
  console.log('DISTRICT_POI_ACTUAL_CLICK_OK',JSON.stringify({officialStops:expected.length,referenceStops:referenceExpected.length,results}));
 }finally{writeFileSync(out+'/results.json',JSON.stringify({results,errors},null,2));await ctx.close();await browser.close();server.close();}
