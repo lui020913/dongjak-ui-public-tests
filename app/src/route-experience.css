@@ -328,7 +328,7 @@
       display:flex!important;position:fixed!important;left:12px!important;right:12px!important;
       bottom:calc(env(safe-area-inset-bottom,0px) + 4px)!important;
       top:auto!important;width:calc(100% - 24px)!important;max-width:none!important;
-      max-height:min(54dvh,430px)!important;overflow:hidden!important;overscroll-behavior:contain!important;
+      max-height:min(44dvh,342px)!important;overflow:hidden!important;overscroll-behavior:contain!important;
       margin:0!important;padding:14px 15px!important;border-radius:23px!important;
       transform:none!important;translate:none!important;z-index:6600!important;
       background:var(--walk-paper)!important;
@@ -685,6 +685,7 @@
   #app #dj-route-choice-scroll::-webkit-scrollbar{display:none}
   #app #dj-route-choice-scroll .dj-route-choice-rows{max-height:none;overflow:visible;flex-shrink:0}
   #app #dj-route-choice-scroll > *{flex-shrink:0}
+  html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"][data-dj-transit-preview] #route-map-card:not([hidden]){max-height:min(54dvh,430px)!important}
   /* The earlier important sticky-footer rule must not expose the pedestrian
    * action beneath a transit itinerary. Only its own footer is interactive. */
   html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"][data-dj-transit-preview] #route-map-card :is(.route-map-card-actions,#dj-route-choice-list,.dj-walk-native-summary){display:none!important}
