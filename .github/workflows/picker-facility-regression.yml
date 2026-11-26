@@ -1,0 +1,21 @@
+name: Picker and facility route regression
+on:
+  pull_request:
+    paths:
+      - 'app/src/pilot-layer-selection.css'
+      - 'app/src/place-details.js'
+      - 'app/src/main.js'
+      - 'app/tests/picker-layer-facility-route-20261126.test.mjs'
+      - '.github/workflows/picker-facility-regression.yml'
+permissions:
+  contents: read
+jobs:
+  focused-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check app/src/main.js && node --check app/src/place-details.js
+      - run: node --test app/tests/picker-layer-facility-route-20261126.test.mjs app/tests/active-layer-dock-20261126.test.mjs app/tests/v864-facility-detail-redesign.test.mjs

@@ -11,3 +11,10 @@
 #djNext-layer-panel .djNext-layer-row[data-unavailable='true']{opacity:.58;filter:grayscale(1)}
 #djNext-layer-panel .djNext-layer-row[data-unavailable='true'] button:disabled,.pilot-unavailable-layer:disabled{cursor:not-allowed}
 .pilot-unavailable-layer:disabled{opacity:.58;filter:grayscale(1)}
+
+/* All map-layer dismiss chips are idle-map chrome, never picker/modal chrome.
+ * Keep layer state intact; CSS restores the dock when the owning window closes. */
+#app#app:is(.route-picking,.route-preview,.route-guiding,[data-community-picking="true"]) #djNext-active-layers,
+#app#app:has(#route-pick-hint:not([hidden]),#community-map-hint:not([hidden]),#route-transit-confirm:not([hidden]),#detail-sheet:not([hidden]),#entry-sheet:not([hidden]),#overview-sheet:not([hidden]),#admin-dong-picker:not([hidden]),#map-gesture-guide:not([hidden]),#pza-road-sheet:not([hidden]),#djNext-layer-panel:not([hidden]),#transport-sheet:not([hidden]),#dj-bus-route-detail:not([hidden]),#route-place-search:not([hidden]),#dj-route-v3:not([hidden]),.dj-place-detail-popup,dialog[open],[role="dialog"][aria-modal="true"]:not([hidden])) #djNext-active-layers{
+ display:none!important;visibility:hidden!important;pointer-events:none!important;
+}
