@@ -4,6 +4,9 @@ Uses pinned review artifacts, never overwrites authoritative app/public data.
 import hashlib,json,pathlib,sys,math
 from collections import Counter
 from shapely.geometry import shape
+from shapely.validation import explain_validity
+from shapely import make_valid
+from dongjak_road_building_audit import metric,feature,polygonal
 def read(p):return json.loads(p.read_text())
 def digest(raw):return hashlib.sha256(raw).hexdigest()
 def save(path,obj):
@@ -24,9 +27,16 @@ def main(hybrid,review,alignment,native,out):
     # original vertices/properties and publish actual bounds, including any
     # feature extending beyond its bucket, so viewport lookup cannot lose it.
     step=.005
-    groups={};bounds={}
+    groups={};bounds={};quarantined=[];valid_rows=[]
     for i,f in enumerate(data):
-        g=shape(f['geometry']);assert not g.is_empty and g.is_valid
+        g=shape(f['geometry'])
+        # The earlier audit checked projected geometry; decimal serialization
+        # can create self-touching rings in WGS84. Do not silently repair or
+        # drop a polygon that might be needed for native-road replacement.
+        if g.is_empty or not g.is_valid:
+            quarantined.append({'row':i,'kind':f.get('properties',{}).get('kind'),'edge_index':f.get('properties',{}).get('edge_index'),'reason':explain_validity(g),'feature':f})
+            continue
+        valid_rows.append(i)
         p=g.representative_point()
         key=(math.floor(p.x/step),math.floor(p.y/step))
         groups.setdefault(key,[]).append((i,f));bounds[i]=g.bounds
@@ -50,7 +60,12 @@ def main(hybrid,review,alignment,native,out):
                 flush(key,part,batch);batch=[];size=42;part+=1
             batch.append((i,f));size+=nbytes
         if batch:flush(key,part,batch)
-    assert [recovered[i] for i in range(len(data))]==data
+    assert [recovered[i] for i in valid_rows]==[data[i] for i in valid_rows]
+    assert len(recovered)+len(quarantined)==len(data)
+    quarantine_meta=save(out/'quarantined-surfaces.json',quarantined)
+    # Keep the original source intact; the package is deliberately disabled
+    # until coverage is re-audited against these exact renderable surfaces.
+    print('SURFACE_SERIALIZATION_DIAGNOSTICS',json.dumps({'count':len(quarantined),'kinds':dict(Counter(x['kind'] for x in quarantined)),'sample':[{k:v for k,v in x.items() if k!='feature'} for x in quarantined[:10]]}))
     # Only the display geometry of ordinary source-backed line layers is
     # eligible for static substitution; original properties and original order
     # are already checked by the reviewed alignment. Width and night require
@@ -70,7 +85,7 @@ def main(hybrid,review,alignment,native,out):
         meta=save(out/f'overlay-{k}-geometry.json',{'original_sha256':digest(raw),'original_count':len(old),'changes':changed})
         overlays.append({**meta,'id':k,'original_path':'/'+rel,'original_count':len(old),'changed_count':len(changed)})
     native_meta=save(out/'native-id-eligibility.json',n)
-    manifest={'schema':1,'operational_enabled':False,'graph_sha256':r['graph_sha256'],'surface_count':len(data),'counts':h['counts'],'tiles':tiles,'overlays':overlays,'native':native_meta,'remaining':419,'minzoom':16,'deferred_adapters':['width','night','pri-lighting'],'limitations':['Display geometry only. Never replace graph or PRI values.','Native source version and app browser QA required before activation.']}
+    manifest={'schema':1,'operational_enabled':False,'graph_sha256':r['graph_sha256'],'surface_count':len(recovered),'source_surface_count':len(data),'quarantine':{**quarantine_meta,'count':len(quarantined)},'counts':h['counts'],'tiles':tiles,'overlays':overlays,'native':native_meta,'remaining':419,'minzoom':16,'deferred_adapters':['width','night','pri-lighting'],'limitations':['Display geometry only. Never replace graph or PRI values.','Native source version and app browser QA required before activation.']}
     save(out/'manifest.json',manifest)
-    print('OPERATIONAL_DISPLAY_ASSETS_RESULT',json.dumps({'surface_count':len(data),'tiles':len(tiles),'max_tile_bytes':max(t['bytes'] for t in tiles),'total_tile_bytes':sum(t['bytes'] for t in tiles),'overlays':{o['id']:o['changed_count'] for o in overlays},'native_ids':259,'operational_enabled':False}))
+    print('OPERATIONAL_DISPLAY_ASSETS_RESULT',json.dumps({'surface_count':len(recovered),'source_surface_count':len(data),'quarantined':len(quarantined),'tiles':len(tiles),'max_tile_bytes':max(t['bytes'] for t in tiles),'total_tile_bytes':sum(t['bytes'] for t in tiles),'overlays':{o['id']:o['changed_count'] for o in overlays},'native_ids':259,'operational_enabled':False}))
 if __name__=='__main__':main(*map(pathlib.Path,sys.argv[1:6]))
