@@ -21,7 +21,7 @@ export function busSegment(coordinates,stops){
   for(const stop of stops){
     let best=-1,min=Infinity;
     for(let i=previous+1;i<coordinates.length;i++){
-      const p=coordinates[i];if(!Array.isArray(p)||!p.every(Number.isFinite))continue;
+      const p=coordinates[i];if(!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite))continue;
       const d=meters(stop,{lng:p[0],lat:p[1]});
       if(d<min){min=d;best=i;}
       if(d<12)break;
@@ -46,13 +46,13 @@ export async function findTransitOptions(from,to,{fetcher=globalThis.fetch,signa
       const arrivals=await Promise.allSettled(starts.map(s=>get(apiBase+'/bus?'+new URLSearchParams({arsId:s.arsId}))));
       if(arrivals.some(x=>x.status==='rejected'))busStatus='partial';
       for(const res of arrivals)if(res.status==='fulfilled')for(const item of res.value.items||[]){
-        if(/^\d{5,15}$/.test(item.routeId||''))candidates.set(item.routeId,item.route);
+        if(/^\d{5,15}$/.test(item.routeId||''))candidates.set(item.routeId,{name:item.route,routeType:item.routeType});
       }
       const routeEntries=[...candidates].slice(0,12);
       if(candidates.size>routeEntries.length)busStatus='partial';
       for(let i=0;i<routeEntries.length;i+=3){
         if(signal?.aborted)throw new Error('취소');
-        const batch=await Promise.allSettled(routeEntries.slice(i,i+3).map(async ([id,name])=>{
+        const batch=await Promise.allSettled(routeEntries.slice(i,i+3).map(async ([id,{name,routeType}])=>{
           const data=await get(apiBase+'/bus/route-path?'+new URLSearchParams({routeId:id}));
           if(String(data.routeId)!==id||!Array.isArray(data.stops)||data.stops.length<2)throw new Error('노선 미확인');
           const pairs=directBusPairs(data.stops,startIds,endIds)
@@ -60,10 +60,11 @@ export async function findTransitOptions(from,to,{fetcher=globalThis.fetch,signa
             .sort((a,b)=>a.walkM-b.walkM||a.stopCount-b.stopCount);
           for(const p of pairs){
             const coords=busSegment(data.coordinates,p.stops);
-            if(coords?.length>=2)return {...p,kind:'bus',routeId:id,route:name,coords};
+            if(coords?.length>=2)return {...p,kind:'bus',routeId:id,route:name,routeType,coords};
           }
           return null;
         }));
+        if(signal?.aborted)throw new Error('취소');
         if(batch.some(x=>x.status==='rejected'))busStatus='partial';
         bus.push(...batch.flatMap(x=>x.status==='fulfilled'&&x.value?[x.value]:[]));
       }
