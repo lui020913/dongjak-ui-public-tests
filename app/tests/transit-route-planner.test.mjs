@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {directBusPairs,busSegment,findTransitOptions} from '../src/transit-route-planner.mjs';
+import {directBusPairs,busSegment,findTransitOptions,transferCandidates} from '../src/transit-route-planner.mjs';
 const a={seq:1,arsId:'20001',lng:126.95,lat:37.50},b={seq:2,arsId:'20002',lng:126.951,lat:37.50},c={seq:3,arsId:'20003',lng:126.952,lat:37.50};
 test('direct bus follows official stop order and rejects reverse travel',()=>{
  assert.equal(directBusPairs([c,a,b],new Set([a.arsId]),new Set([c.arsId]))[0].stopCount,2);
@@ -32,4 +32,30 @@ test('official candidate retains vehicle type and no fabricated transit duration
 });
 test('malformed coordinate points never become a verified segment',()=>{
  assert.equal(busSegment([[a.lng,a.lat,0],[b.lng,b.lat,0],[c.lng,c.lat,0]],[a,b,c]),null);
+});
+
+test('one bus transfer uses two ordered verified vehicle legs and nearby transfer stops',()=>{
+ const stop=(seq,arsId,lng,lat=37.50)=>({seq,arsId,lng,lat,name:arsId});
+ const x=stop(1,'20001',126.950),y=stop(2,'20002',126.953),z=stop(1,'20003',126.9532),w=stop(2,'20004',126.956);
+ const record=(id,stops)=>({id,name:id,routeType:'7',stops,coordinates:stops.map(s=>[s.lng,s.lat])});
+ const records=[record('100000001',[x,y]),record('100000002',[z,w])];
+ const result=transferCandidates(records,x,w,new Set([x.arsId]),new Set([w.arsId]));
+ assert.equal(result.busTransfer.length,1);
+ assert.deepEqual(result.busTransfer[0].legs.map(l=>l.routeId),['100000001','100000002']);
+ assert.equal(result.busTransfer[0].changes,1);
+ assert.equal(result.busTransfer[0].minutes,undefined);
+ assert.equal(transferCandidates(records,x,w,new Set([x.arsId]),new Set([w.arsId]),{maxTransferM:1}).busTransfer.length,0);
+ assert.equal(transferCandidates(records,w,x,new Set([w.arsId]),new Set([x.arsId])).busTransfer.length,0);
+});
+test('bus to rail candidate uses known station order and does not fabricate total duration',()=>{
+ const x={seq:1,arsId:'20001',lng:126.961,lat:37.501,name:'출발 정류장'};
+ const y={seq:2,arsId:'20002',lng:126.963708,lat:37.50877,name:'흑석역 정류장'};
+ const to={lng:126.941005,lat:37.513534};
+ const records=[{id:'100000001',name:'버스',routeType:'7',stops:[x,y],coordinates:[[x.lng,x.lat],[y.lng,y.lat]]}];
+ const result=transferCandidates(records,x,to,new Set([x.arsId]),new Set());
+ const plan=result.mixed.find(p=>p.legs[0].kind==='bus');
+ assert.ok(plan);
+ assert.equal(plan.legs[1].kind,'rail');
+ assert.equal(plan.legs[1].stops[0],'흑석');
+ assert.equal(plan.minutes,undefined);
 });
