@@ -2914,8 +2914,8 @@ function clearTransitPreview(){
   window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:null}));
   // Remove preview-owned layers before their sources; ordinary transport layers stay intact.
   for(const id of ['dj815-transit-walk','dj815-transit-rail','dj-transit-rail-verified','dj-transit-rail-schematic','dj815-transit-bus','dj-transit-multi-walk','dj-transit-multi-bus','dj-transit-multi-rail','dj-transit-multi-stops']){
-    if(!map.getSource(id))continue;
-    try{for(const suffix of ['-line','-focus-casing','-circle'])if(map.getLayer(id+suffix))map.removeLayer(id+suffix);
+    try{if(!map.getSource(id))continue;
+      for(const suffix of ['-line','-focus-casing','-circle'])if(map.getLayer(id+suffix))map.removeLayer(id+suffix);
       if(!map.getStyle().layers.some(layer=>layer.source===id))map.removeSource(id);
       else map.getSource(id)?.setData({type:'FeatureCollection',features:[]});
     }catch(error){console.debug('[대중교통 경로 정리]',error?.message);}
@@ -3765,7 +3765,7 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
     if(!stillCurrent())throw new Error('이동 중 경로 조건이 변경됐습니다. 다시 시도하세요.');
     const last=await fetchTransitPedestrianPair(plan.destination,to,signal);
     if(!stillCurrent())throw new Error('이동 중 경로 조건이 변경됐습니다. 다시 시도하세요.');
-    const [startWalk,endWalk]=await Promise.all([selectTransitWalk(first,preferPri),selectTransitWalk(last,preferPri)]);
+    const [startWalk,endWalk]=await Promise.all([selectTransitWalk(first,preferPri,signal),selectTransitWalk(last,preferPri,signal)]);
     if(!stillCurrent())throw new Error('경로 조건이 변경됐습니다.');
     if(!startWalk||!endWalk)throw new Error('역과 출발·도착 장소를 연결할 실제 보행경로가 없습니다.');
     const railSegments=transitRailSegments(plan.stops,plan.lines,VERIFIED_STATIONS,await getTransitRailPaths());
@@ -3852,11 +3852,11 @@ async function fetchTransitPedestrianPair(from,to,signal){
  const standard=await fetchPedestrianRoute(from,to,'standard',signal,{transitExterior:true});
  return {standard:{...standard,transitExterior:!routeWithinDistrict(standard.coords,boundaryGeometry,isDongjak)},gentle:null};
 }
-async function selectTransitWalk(pair,preferPri){
+async function selectTransitWalk(pair,preferPri,signal){
  const valid=r=>transitCoordinatesInScope(r.coords);
  const candidates={standard:pair.standard&&valid(pair.standard)?pair.standard:null,gentle:pair.gentle&&valid(pair.gentle)?pair.gentle:null};
  let assessment=null;
- if(!Object.values(candidates).some(r=>r?.transitExterior))try{assessment=await evaluateCompositePriRouteCandidates(candidates,{factors:priPreferences.getSelected(),timeoutMs:4500});}catch{}
+ if(!Object.values(candidates).some(r=>r?.transitExterior))try{assessment=await evaluateCompositePriRouteCandidates(candidates,{factors:priPreferences.getSelected(),timeoutMs:4500,signal});}catch(error){if(signal?.aborted)throw error;}
  return chooseTransitWalk(candidates,assessment,{preferPri,valid});
 }
 // Assess the two actual walking legs independently, never the vehicle path.
@@ -3885,7 +3885,7 @@ async function previewMultiTransit(plan,signal,preferPri=true){
    const sameStop=a.arsId&&a.arsId===b.arsId&&a.lng===b.lng&&a.lat===b.lat;
    if(sameStop||(a.lng===b.lng&&a.lat===b.lat)){walks.push({coords:[],seconds:0,kilometers:0});continue;}
    const result=await fetchTransitPedestrianPair(a,b,signal);
-   const selected=await selectTransitWalk(result,preferPri);
+   const selected=await selectTransitWalk(result,preferPri,signal);
    if(!current())throw new Error('경로 조건이 변경됐습니다.');
    if(!selected||!transitCoordinatesInScope(selected.coords))throw new Error('실제 환승 보행 연결을 확인하지 못했습니다.');
    walks.push(selected);
@@ -3968,7 +3968,7 @@ window.addEventListener('dongjak:transit-candidate-review',event=>{
    const cacheKey=[a.lng,a.lat,b.lng,b.lat,Boolean(preferPri)].join(',');
    let pending=walkCache?.get(cacheKey);
    if(!pending){
-    pending=(async()=>{const pair=await fetchTransitPedestrianPair(a,b,signal);if(!current())throw new Error('경로 조건이 변경됐습니다.');return selectTransitWalk(pair,preferPri);})();
+    pending=(async()=>{const pair=await fetchTransitPedestrianPair(a,b,signal);if(!current())throw new Error('경로 조건이 변경됐습니다.');return selectTransitWalk(pair,preferPri,signal);})();
     walkCache?.set(cacheKey,pending);
    }
    const walk=await pending;
@@ -3993,7 +3993,7 @@ window.addEventListener('dongjak:transit-route-preview',event=>{
     if(!current())throw new Error('경로 조건이 변경됐습니다.');
     const last=await fetchTransitPedestrianPair(plan.destination,to,signal);
     if(!current())throw new Error('경로 조건이 변경됐습니다.');
-    const [a,b]=await Promise.all([selectTransitWalk(first,preferPri),selectTransitWalk(last,preferPri)]);
+    const [a,b]=await Promise.all([selectTransitWalk(first,preferPri,signal),selectTransitWalk(last,preferPri,signal)]);
     if(!current())throw new Error('경로 조건이 변경됐습니다.');
     if(!a||!b||!map.isStyleLoaded?.())throw new Error('실제 보행 연결 경로 또는 지도를 확인하지 못했습니다.');
     invalidateRoute();
