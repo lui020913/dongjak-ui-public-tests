@@ -1963,6 +1963,31 @@ let communityPickedLocation = null;
 let communityDraftPhoto = null;
 let communityLocationMarker = null;
 let communityLocationCard = null;
+let communityFeedDismissObserver=null;
+function lockCommunityFeedForMap(){
+  const panel=document.getElementById('participation-panel');
+  if(!panel)return;
+  app.dataset.communityFeedLocked='true';
+  const enforce=()=>{
+    if(app.dataset.communityFeedLocked!=='true')return;
+    if(!panel.hidden)panel.hidden=true;
+    if(!panel.inert)panel.inert=true;
+    for(const key of ['djTabOutgoing','djPrimaryTransition'])if(panel.dataset[key]!==undefined)delete panel.dataset[key];
+    if(panel.style.getPropertyValue('display')!=='none'||panel.style.getPropertyPriority('display')!=='important')panel.style.setProperty('display','none','important');
+    if(panel.style.getPropertyValue('visibility')!=='hidden'||panel.style.getPropertyPriority('visibility')!=='important')panel.style.setProperty('visibility','hidden','important');
+  };
+  communityFeedDismissObserver?.disconnect();
+  enforce();
+  communityFeedDismissObserver=new MutationObserver(enforce);
+  communityFeedDismissObserver.observe(panel,{attributes:true,attributeFilter:['hidden','style','inert','data-dj-tab-outgoing','data-dj-primary-transition']});
+}
+function unlockCommunityFeedForEntry(){
+  if(app.dataset.communityFeedLocked!=='true')return;
+  communityFeedDismissObserver?.disconnect();communityFeedDismissObserver=null;
+  delete app.dataset.communityFeedLocked;
+  const panel=document.getElementById('participation-panel');
+  if(panel){panel.inert=false;panel.style.removeProperty('display');panel.style.removeProperty('visibility');}
+}
 function closeCommunityLocation(){
   communityLocationMarker?.remove();communityLocationMarker=null;
   communityLocationCard?.remove();communityLocationCard=null;
@@ -1996,6 +2021,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   // the editor's visible state when a parent close animation is interrupted.
   // Selecting or cancelling a map location is the explicit draft-resume path.
   const previousTab=app.dataset.tab;
+  if(tab==='participate')unlockCommunityFeedForEntry();
   // Leaving the map by another tab abandons the picker, not the draft.
   // A later map tap must never resume an unrelated community editor.
   if(tab!=='map'&&communityPickMode)clearCommunityLocationPick();
@@ -2520,6 +2546,7 @@ function showCommunityLocation(post) {
   const panel=document.getElementById('participation-panel');
   // Only the explicit report-location action bypasses the normal tab dissolve.
   if(panel){window.DongjakWindowMotion?.cancel(panel);delete panel.dataset.djTabOutgoing;delete panel.dataset.djPrimaryTransition;panel.hidden=true;for(const key of ['display','visibility','opacity','pointer-events','animation','transition','will-change','z-index'])panel.style.removeProperty(key);}
+  lockCommunityFeedForMap();
   navigate('map',{suppressOverview:true});
   app.dataset.communityLocationViewing='true';
   communityLocationMarker=new maplibregl.Marker({color:'#b262ad',scale:0.95}).setLngLat([lng,lat]).addTo(map);
