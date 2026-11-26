@@ -19,7 +19,7 @@ OFFSETS=[0,-.5,.5,-1,1,-1.5,1.5,-2,2,-2.5,2.5,-3,3]
 def write(out,name,features):
     (out/(name+".geojson")).write_text(json.dumps(fc(features),ensure_ascii=False,separators=(",",":")))
 
-def reconstruct(line, obstacles, known):
+def reconstruct(line, obstacles, known, endpoints=None):
     # No link movement beyond the local source corridor. Preserve both endpoints.
     if line.length<.1:return None,"short_link"
     allowed=line.buffer(SHIFT+.01)
@@ -32,7 +32,8 @@ def reconstruct(line, obstacles, known):
         middle=g.interpolate(.5,normalized=True) if g.geom_type=="LineString" else g
         hint=middle.distance(known.boundary) if not known.is_empty and known.covers(middle) else 1.5
         return min(MAX_RADIUS,max(MIN_RADIUS,hint),clearance(g)-MARGIN)
-    a,b=Point(line.coords[0]),Point(line.coords[-1])
+    a,b=endpoints if endpoints is not None else (Point(line.coords[0]),Point(line.coords[-1]))
+    if a.distance(Point(line.coords[0]))>SHIFT+.001 or b.distance(Point(line.coords[-1]))>SHIFT+.001:return None,"endpoint_shift_exceeds_limit"
     if min(clearance(a),clearance(b))<MIN_RADIUS+MARGIN:return None,"endpoint_obstructed"
     n=max(1,math.ceil(line.length/STEP))
     # Preserve every original vertex as a sample, so bends are not short-cut.
@@ -40,7 +41,8 @@ def reconstruct(line, obstacles, known):
     if len(ds)>1500:return None,"oversize_link"
     def options(i,d):
         p=line.interpolate(d)
-        if i==0 or i==len(ds)-1:return [(p,0.0)]
+        if i==0:return [(a,0.0)]
+        if i==len(ds)-1:return [(b,0.0)]
         q=line.interpolate(max(0,d-.4));r=line.interpolate(min(line.length,d+.4))
         dx,dy=r.x-q.x,r.y-q.y;norm=math.hypot(dx,dy)
         if norm<1e-8:return [(p,0.0)]
@@ -77,7 +79,7 @@ def reconstruct(line, obstacles, known):
     if not center.is_simple:return None,"self_intersecting"
     if center.hausdorff_distance(line)>SHIFT+.01:return None,"excess_shift"
     if center.length>line.length*1.3+1:return None,"excess_detour"
-    if not center.coords[0]==line.coords[0] or not center.coords[-1]==line.coords[-1]:raise ValueError("Changed endpoint")
+    if center.coords[0]!=a.coords[0] or center.coords[-1]!=b.coords[0]:raise ValueError("Changed endpoint")
     pieces=[LineString([points[i],points[i+1]]).buffer(w,quad_segs=6) for i,w in enumerate(widths)]
     surface=polygonal(unary_union(pieces))
     if surface.geom_type!="Polygon" or not surface.covers(center):return None,"disconnected_surface"
