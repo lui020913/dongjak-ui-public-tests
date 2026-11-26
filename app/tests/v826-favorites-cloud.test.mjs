@@ -102,7 +102,7 @@ test('v826: transport detail, personal list, online account and release history 
   assert.ok(JSON.parse(source('src/app-release-log.json')).releases.some(entry=>entry.version==='8.1.0')); 
   assert.match(source('src/app-release-log.json'),/\"sourceVersion\": \"v8\.26\.0\"/);
   assert.match(source('index.html'),/v824-favorites\.css/);
-  assert.match(source('src/place-details.js'),/getPlaceFolders\(\)/);
+  assert.match(source('src/v815-map-product.js'),/setSavedPlaceFolder\(place,select\.value\)/);
 });
 
 test('v826: session identity change clears the previous account before loading the next',()=>{

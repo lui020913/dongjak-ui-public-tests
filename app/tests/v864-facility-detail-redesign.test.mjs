@@ -9,7 +9,7 @@ test('v8.6.4 facility details use centered title and a separate mobile action ro
   assert.match(source,/dj-place-header-title/);
   assert.match(source,/dj-place-header-actions/);
   assert.match(source,/dj-place-info-card/);
-  assert.match(source,/dj-place-favorites-section/);
+  assert.doesNotMatch(source,/dj-place-favorites-section/);
   assert.match(source,/dj-place-ai-section/);
   assert.match(source,/\['start','출발'\],\['end','도착'\]/);
   assert.match(source,/headerActions\.append\(routeActions\)/);

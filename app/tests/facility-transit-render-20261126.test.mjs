@@ -4,7 +4,7 @@ import {facilityPresentation} from '../src/v912-poi-presentation.js';
 import {fetchArrivalHistory} from '../server/bus-arrival-history.mjs';
 const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
 test('normal phones smooth edges, legacy economy remains one pixel per CSS px',()=>{
- assert.equal(normalMapPixelRatio({phone:true,ua:'iPhone OS 18_2',deviceRatio:3}),2.5);
+ assert.equal(normalMapPixelRatio({phone:true,ua:'iPhone OS 18_2',deviceRatio:3}),3);
  assert.equal(phoneProfile({phone:true,ua:'Android 10; SM-N960N'}),'economy');
  assert.match(read('main.js'),/antialias: djInitialBudget!=='economy'/);
  assert.match(read('bus-route-overlay.js'),/tolerance:0,buffer:128,maxzoom:19/);
@@ -12,16 +12,17 @@ test('normal phones smooth edges, legacy economy remains one pixel per CSS px',(
 test('major and public facilities are available earlier without promoting all commercial icons',()=>{
  assert.equal(facilityPresentation('우체국').group,'public');
  assert.match(read('featured-place-labels.js'),/minzoom:13\.5/);
- assert.match(read('civic-facility-layer.js'),/minzoom:safety\?13\.8:type==='school'\|\|type==='civic'\?14\.2:16/);
+ assert.match(read('civic-facility-layer.js'),/minzoom:safety\?13\.8:\['school','civic','park','welfare'\]\.includes\(type\)\?14\.2:16/);
  assert.match(read('seoul-official-facilities.js'),/map\.getZoom\?\.\(\)<14/);
 });
-test('facility scroll owns body; cards do not shrink; common save group lives below content',()=>{
+test('facility scroll owns body; cards do not shrink; saving creates no second group surface',()=>{
  const js=read('place-details.js'),css=read('mobile-first-layout.css'),transport=read('transport-map.js');
- assert.match(js,/root\.append\(folderSection\)/);assert.match(js,/header\.append\(closeButton\)/);
+ assert.doesNotMatch(js,/root\.append\(folderSection\)/);assert.match(js,/header\.append\(closeButton\)/);
  assert.match(css,/\.dj-place-body > \*\{flex:0 0 auto!important/);
  assert.match(css,/\.dj834-reviews\{background:/);
- assert.match(js,/folderSelect\.classList\.add\('dj-shared-favorite-select'\)/);
- assert.match(transport,/transportFolder\.classList\.add\('dj-shared-favorite-select'\)/);
+ assert.doesNotMatch(js,/folderSelect|dj-place-action-label/);
+ assert.doesNotMatch(transport,/transportFolder/);
+ assert.match(read('v815-map-product.js'),/setSavedPlaceFolder\(place,select\.value\)/);
  assert.ok(js.indexOf('aiSection.append(text(\'small\'')<js.indexOf('installPlaceReviews(body,p)'));
 });
 test('outgoing community view cannot redraw or clear its detail before normal dissolve',()=>{

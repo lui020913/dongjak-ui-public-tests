@@ -8,7 +8,7 @@ import {isMetroDailyQuota,metroQuotaRetryMs} from './features/liveTransit/quota-
 import {coalesceViewportWork} from './adaptive-phone-map-budget.mjs';
 import {createInFlightRequests} from './arrival-request-coordinator.js';
 import {createTransportWindowLifecycle} from './transport-window-lifecycle.js';
-import {toggleSavedPlace,setSavedPlaceFolder,savedPlaces,getPlaceFolders,placeKey,recordRecentPlace,placeShareUrl,shareMapUrl} from './v815-place-store.js';
+import {toggleSavedPlace,savedPlaces,placeKey,recordRecentPlace,placeShareUrl,shareMapUrl} from './v815-place-store.js';
 import {koreanNameOnly, koreanOSMName} from './korean-labels.js';
 import {formatMetroArrivalCard} from './metro-arrival-display.js';
 import {metroTerminalLabel} from './metro-status-view.js';
@@ -1178,10 +1178,10 @@ export function installBasemapBusStopFallback(map,districtGeometry=null){
       layout:{'icon-image':'dj-bus-blue-marker',
         'icon-size':['interpolate',['linear'],['zoom'],16.4,0.262,18.2,0.331,20,0.393],
         'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-padding':1,
-        'text-field':['step',['zoom'],'',18.4,['coalesce',['get','name:nonlatin'],['get','name:ko'],['get','name_ko'],['get','name'],'']],
-        'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':['interpolate',['linear'],['zoom'],18.4,10.2,20,12.1],
+        'text-field':['step',['zoom'],'',17.75,['coalesce',['get','name:nonlatin'],['get','name:ko'],['get','name_ko'],['get','name'],'']],
+        'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':['interpolate',['linear'],['zoom'],17.75,10.2,20,12.1],
         'text-anchor':'top','text-offset':[0,1.4],'text-max-width':13,
-        'text-allow-overlap':false,'text-ignore-placement':false,'text-optional':true,
+        'text-allow-overlap':true,'text-ignore-placement':true,'text-optional':true,
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport',
         'icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport'},
       paint:{'icon-opacity':1,'text-color':busStopLabelPalette(typeof document!=='undefined'?document.documentElement?.dataset?.theme:'light').text,
@@ -1212,14 +1212,11 @@ function circlePolygonAround(lng,lat,radiusMeters,points=20){
 }
 function syncNearbyBusStopNameFilters(map){
   if(!map?.getCenter||!map?.setFilter)return;
-  const zoom=Number(map.getZoom?.()||0);
-  const center=map.getCenter();
-  const radius=zoom>=19.2?180:zoom>=18.4?250:zoom>=17.75?320:0;
-  const nearby=radius&&Number.isFinite(center?.lng)&&Number.isFinite(center?.lat)
-    ? ['within',circlePolygonAround(center.lng,center.lat,radius)] : null;
+  // Label eligibility must not depend on distance from the screen center.
+  // The source is already district-scoped; no radial clipping at high zoom.
   for(const [layerId,base] of Object.entries(BUS_NAME_FILTERS)){
     if(!map.getLayer?.(layerId))continue;
-    const next=nearby?['all',base,nearby]:base;
+    const next=base;
     try{if(JSON.stringify(map.getFilter?.(layerId))!==JSON.stringify(next))map.setFilter(layerId,next);}catch(error){console.debug('[버스정류장명] 근접 필터 조정 실패',layerId,error?.message);}
   }
 }
@@ -1257,7 +1254,7 @@ function labelVisibility(map){
         'text-size':['interpolate',['linear'],['zoom'],17.75,10.0,19,11.5],
         'text-offset':[0,1.4],'text-max-width':18,'text-optional':true,
         'text-anchor':'top',
-        'text-allow-overlap':false,'text-ignore-placement':false,'text-padding':2},
+        'text-allow-overlap':false,'text-ignore-placement':false,'text-padding':1,'text-variable-anchor':['top','bottom','left','right']},
       paint:{'text-color':'#18508e','text-halo-color':'#fff','text-halo-width':1.05}},
     // Once a user zooms in to street level, prioritize actual bus-stop names over
     // background label collisions. Only supplied OSM/Seoul names can appear.
@@ -1267,7 +1264,7 @@ function labelVisibility(map){
       layout:{'text-field':['get','label'],'text-font':['Noto Sans Regular','Open Sans Regular'],
         'text-size':['interpolate',['linear'],['zoom'],18.4,10.7,20,12.2],
         'text-offset':[0,1.4],'text-anchor':'top','text-max-width':14,
-        'text-allow-overlap':false,'text-ignore-placement':false,'text-optional':true,
+        'text-allow-overlap':true,'text-ignore-placement':true,'text-optional':true,
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},
       paint:{'text-color':'#18508e','text-halo-color':'rgba(255,255,255,0.97)','text-halo-width':1.05}}
   ];
@@ -1303,8 +1300,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const actionsRow=panel?.querySelector?.('.transport-selection-actions');
   const transportBookmark=actionsRow?document.createElement('button'):null;
   const transportShare=actionsRow?document.createElement('button'):null;
-  const transportFolder=actionsRow?document.createElement('select'):null;
-  if(transportBookmark&&transportShare&&transportFolder){
+  if(transportBookmark&&transportShare){
     transportBookmark.type='button';transportBookmark.id='transport-save-place';
     transportBookmark.textContent='☆ 즐겨찾기';transportBookmark.setAttribute('aria-label','교통 장소 즐겨찾기');
     transportShare.type='button';transportShare.id='transport-share-place';
@@ -1317,13 +1313,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       const url=placeShareUrl(place);
       if(url)void shareMapUrl(url,`${selected.name||'대중교통 시설'} · 동작지도`);
     });
-    transportFolder.id='transport-save-folder';
-    transportFolder.classList.add('dj-shared-favorite-select');
-    transportFolder.disabled=true;
-    transportFolder.setAttribute('aria-label','교통 장소 저장 그룹');
     const favoritesRow=document.createElement('div');
     favoritesRow.className='dj824-transport-favorites';
-    favoritesRow.append(transportBookmark,transportShare,transportFolder);
+    favoritesRow.append(transportBookmark,transportShare);
     actionsRow.after(favoritesRow);
   }
   const sourceStatus=document.getElementById('transport-source-status');
@@ -1538,7 +1530,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     selectedLine:raw.selectedLine||'',lines:raw.lines||[]
   }:null;
   function updateTransportFavorite(){
-    if(!selected||!transportBookmark||!transportFolder)return;
+    if(!selected||!transportBookmark)return;
     const record=favoritePlace(selected);
     const id=placeKey(record);
     const saved=id?savedPlaces().find(p=>placeKey(p)===id):null;
@@ -1547,22 +1539,11 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     transportBookmark.setAttribute('aria-pressed',String(Boolean(saved)));
     transportBookmark.setAttribute('aria-label',saved?'즐겨찾기 해제':'즐겨찾기 추가');
     if(!transportBookmark.querySelector('svg'))transportBookmark.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>';
-    transportFolder.replaceChildren();
-    for(const folder of getPlaceFolders()){
-      const option=document.createElement('option');option.value=folder;option.textContent=folder;
-      transportFolder.append(option);
-    }
-    transportFolder.value=saved?.folder||'즐겨찾기';
-    transportFolder.disabled=!saved;
   }
   transportBookmark?.addEventListener('click',()=>{
     if(!selected)return;
     const result=toggleSavedPlace(favoritePlace(selected));
     if(result.ok)updateTransportFavorite();
-  });
-  transportFolder?.addEventListener('change',()=>{
-    if(!selected)return;
-    setSavedPlaceFolder(favoritePlace(selected),transportFolder.value);
   });
   if(typeof window!=='undefined')window.addEventListener('dongjak:saved-places-change',updateTransportFavorite);
   if(typeof window!=='undefined')window.addEventListener('dongjak:open-saved-transport',event=>{
@@ -1624,7 +1605,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const localRailGeometry=fixedRailCollection(boundaryGeometry);
   let renderedRailPaths=indexRenderedMetroRail(localRailGeometry);
   let lastMetroMarkerItems=[];
-  map.addSource('transport-schematic-connections',{type:'geojson',data:localRailGeometry});
+  map.addSource('transport-schematic-connections',{type:'geojson',data:localRailGeometry,tolerance:0,buffer:128,maxzoom:19});
   setDisplayedRailPaths(map,renderedRailPaths);
   // 실제 노선 공간정보(행안부 2026) 우선: 도로·하천의 실제 굴곡과 교차점을 보존합니다.
   // 공식 API에 없는 신림선 또는 조회 실패한 호선은 오프라인 안내용 선형을 유지합니다.
@@ -1647,7 +1628,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       console.info('[지하철 노선] 공공 GIS 조회 실패, 기존 안내선형 유지:',error?.message||error);
     });
   }
-  map.addSource('transport-actual-connections',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+  map.addSource('transport-actual-connections',{type:'geojson',data:{type:'FeatureCollection',features:[]},tolerance:0,buffer:128,maxzoom:19});
   const firstLabel=map.getStyle().layers.find(l=>l.type==='symbol')?.id;
   // 전체 동작구를 볼 때는 역보다 노선이 우선 보이도록 선형을 더 진하게 표시합니다.
   // 실제 철도/터널 선형과 혼동되지 않도록 역 기반 개략 노선임을 명시합니다.
@@ -1657,13 +1638,13 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     minzoom:METRO_MARKER_MIN_ZOOM,maxzoom:20,layout:{'line-cap':'round','line-join':'round'},
     paint:{'line-color':'#ffffff','line-width':['interpolate',['linear'],['zoom'],10.2,4.4,13,6.2,17,5.2],
       'line-opacity':['*',['get','opacity'],0.68],
-      'line-blur':['interpolate',['linear'],['get','opacity'],0.0,1.1,0.18,0.7,0.45,0.32,1.0,0.12]}});
+      'line-blur':['interpolate',['linear'],['get','opacity'],0.0,1.1,0.18,0.7,0.45,0.42,1.0,0.35]}});
   map.addLayer({id:'transport-schematic-subway',type:'line',source:'transport-schematic-connections',
     minzoom:METRO_MARKER_MIN_ZOOM,maxzoom:20,layout:{'line-cap':'round','line-join':'round'},
     paint:{'line-color':['get','color'],
       'line-width':['interpolate',['linear'],['zoom'],10.2,2.9,13,4.3,17,3.8],
       'line-opacity':['get','opacity'],
-      'line-blur':['interpolate',['linear'],['get','opacity'],0.0,0.95,0.18,0.62,0.45,0.28,1.0,0.08]}});
+      'line-blur':['interpolate',['linear'],['get','opacity'],0.0,0.95,0.18,0.62,0.45,0.38,1.0,0.30]}});
   // OSM 실제 노선 relation의 선형이 존재하면 저배율에서 더 선명하게 겹쳐 표시합니다.
   // 오프라인·조회 실패 시 위 개략 노선이 남습니다.
   map.addLayer({id:'transport-real-rail-overview-casing',type:'line',source:'transport-actual-connections',

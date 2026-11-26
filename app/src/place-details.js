@@ -9,7 +9,7 @@ import {installPlaceReviews} from './v834-place-reviews.js';
 import {verifiedPlaceRecord} from './verified-place-directory.js';
 import {facilityRoadAddress} from './map-search-refinement.js';
 import {createSelectedLocationPin} from './selected-location-pin.js';
-import {toggleSavedPlace,isPlaceSaved,recordRecentPlace,placeShareUrl,shareMapUrl,setSavedPlaceFolder,getPlaceFolders,savedPlaces,placeKey} from './v815-place-store.js';
+import {toggleSavedPlace,isPlaceSaved,recordRecentPlace,placeShareUrl,shareMapUrl} from './v815-place-store.js';
 import {enableAnchoredPopupDragging} from './draggable-floats.js';
 /** Fact-first detail popup. Brief AI explanations are generated server-side only;
  * no invented contact/address and no telephone dialing action. */
@@ -200,29 +200,17 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
   }
   headerActions.append(routeActions);
 
-  // Browser-local saves; desktop reveals folder selection only after saving.
+  // Save directly without opening a second surface; groups are managed in Saved Places.
   const personalActions=document.createElement('div');personalActions.className='dj815-place-actions';
-  const folderSection=document.createElement('section');folderSection.className='dj-place-favorites-section dj-shared-favorite-row';
-  const folderHeading=text('strong','즐겨찾기 그룹','dj-place-section-heading');
-  const folderWrap=document.createElement('label');folderWrap.className='dj815-place-folder';
-  folderWrap.append(text('span','즐겨찾기 그룹','dj-place-folder-label'));
-  const folderSelect=document.createElement('select');folderSelect.classList.add('dj-shared-favorite-select');folderSelect.setAttribute('aria-label','즐겨찾기 그룹');
-  for(const name of getPlaceFolders()){const option=document.createElement('option');option.value=name;option.textContent=name;folderSelect.append(option);}
-  folderSelect.value=savedPlaces().find(item=>placeKey(item)===placeKey(p))?.folder||'즐겨찾기';
-  folderWrap.append(folderSelect);folderWrap.hidden=!isPlaceSaved(p);
-  folderHeading.classList.add('dj-place-redundant-folder-heading');folderHeading.hidden=true;
-  folderSection.append(folderHeading,folderWrap);folderSection.hidden=folderWrap.hidden;root.append(folderSection);
 
   const saveButton=document.createElement('button');saveButton.type='button';saveButton.className='dj854-place-favorite';
   saveButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>';
   const syncFavorite=({saved=isPlaceSaved(p),error=false}={})=>{
     saveButton.setAttribute('aria-pressed',String(Boolean(saved)));
-    folderWrap.hidden=!saved;folderSection.hidden=!saved;
     const label=error?'저장 공간을 확인해 주세요.':saved?'즐겨찾기 해제':'즐겨찾기 추가';
     saveButton.setAttribute('aria-label',label);saveButton.title=label;
     saveButton.dataset.error=error?'true':'false';
   };
-  saveButton.append(text('span','저장','dj-place-action-label'));
   syncFavorite();
   saveButton.addEventListener('click',()=>{
     const result=toggleSavedPlace(p);
@@ -232,7 +220,6 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
   const shareButton=document.createElement('button');shareButton.type='button';shareButton.className='dj856-place-share';
   shareButton.setAttribute('aria-label','장소 공유');shareButton.title='장소 공유';
   shareButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4m-6.6 7.4 6.6 4.4"/></svg>';
-  shareButton.append(text('span','공유','dj-place-action-label'));
   shareButton.addEventListener('click',()=>{void shareMapUrl(placeShareUrl(p),`${p.name} · 동작지도`);});
   personalActions.append(saveButton,shareButton);
   if(!layerContent)headerActions.append(personalActions);
@@ -258,10 +245,6 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
   header.append(closeButton);
   // Dispose the tap fallback with the native MapLibre popup lifecycle.
 
-  folderSelect.addEventListener('change',()=>{
-    if(!isPlaceSaved(p))return;
-    setSavedPlaceFolder(p,folderSelect.value);
-  });
   if(!layerContent)recordRecentPlace(p);
   
   const aiSection=document.createElement('section');aiSection.className='dj-place-ai-section';if(!layerContent)body.append(aiSection);
