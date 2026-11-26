@@ -146,11 +146,15 @@
         @media (max-width:699px) {
           #dj840-map-tip > .dj840-tip-copy-viewport {
             margin-inline-end: var(--dj-tip-close-reserve, 0px) !important;
+            display:flex !important; flex:1 1 0% !important; min-width:0 !important; max-width:none !important;
+            padding:0 !important; justify-content:flex-start !important; transform:none !important; animation:none !important;
             overflow: hidden !important;
           }
           #dj840-map-tip > .dj840-tip-copy-viewport > .dj840-tip-copy {
-            flex-shrink: 0 !important;
-            width: max-content !important;
+            display:block !important; flex:0 0 auto !important; flex-shrink: 0 !important;
+            width: max-content !important; max-width:none !important; min-width:0 !important;
+            margin:0 !important; padding:0 !important; overflow:visible !important; text-align:left !important;
+            animation:none !important; transition:opacity 170ms ease !important;
             white-space: nowrap !important;
             text-overflow: clip !important;
           }
@@ -162,6 +166,19 @@
               overflow-wrap:anywhere !important; animation:none !important;
             }
           }
+        }
+
+        @media(max-width:699px) {
+          #app[data-tab="map"][data-dj-search-crossfade] #djNext-toolbar,
+          #app[data-tab="map"][data-dj-search-crossfade] #dj-v794-toolbar:not([data-dj-next-ready="1"]),
+          #app[data-tab="map"][data-dj-search-crossfade] #dj-search-entry-actions {
+            display:flex !important; visibility:visible !important; animation:none !important;
+            transition:none !important; pointer-events:none !important;
+          }
+          #app[data-tab="map"][data-dj-search-crossfade] :is(#djNext-toolbar,#dj-v794-toolbar:not([data-dj-next-ready="1"]),#dj-search-entry-actions) :is(button,#djNext-scroll) {
+            visibility:visible !important; pointer-events:none !important;
+          }
+          #app[data-tab="map"][data-dj-search-crossfade] #dj-v794-toolbar[data-dj-next-ready="1"] {display:none !important;visibility:hidden !important;}
         }
         #dj-user-tip-close {
           appearance: none !important;
