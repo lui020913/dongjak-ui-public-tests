@@ -125,6 +125,10 @@ test('real transit detail buttons navigate to the visible route editor, includin
    await expect(app).toHaveAttribute('data-dj-transit-exterior','false');
    await expect(route.locator('[data-v3="calculate"]')).toBeDisabled();
    expect(await register('end',outside)).toBe(false);
+   const denied=page.locator('#dj832-dongjak-boundary');
+   await expect(denied).toBeVisible();
+   await denied.locator('.dj832-boundary-confirm').click();
+   await expect(denied).toBeHidden();
 
   }
   await route.locator('[data-v3="back"]').click();

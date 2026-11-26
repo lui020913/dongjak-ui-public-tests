@@ -3747,6 +3747,7 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
     routeWaypoints=next.map(p=>({...p,label:p.name}));invalidateRoute();
   },
   onTransitPreview:previewRailTransit=async (plan,signal,preferPri=true)=>{
+    assertTransitScope();
     if(!routeStart||!routeEnd)throw new Error('출발지와 목적지가 필요합니다.');
     if(routeWaypoints.length)throw new Error('경유지 없는 두 지점만 지원합니다.');
     if(navMode)throw new Error('GPS 안내 중에는 다른 이동안을 표시할 수 없습니다.');

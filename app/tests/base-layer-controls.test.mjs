@@ -39,7 +39,7 @@ test('접근성 버튼과 별개인 기본 지도 옵션, 확대 3D 자동 표�
   assert.match(html,/data-base-layer="boundary"/);
   assert.match(html,/id="toggle-station-accessibility"/);
   assert.match(main,/function visibleBuilding2D\(\)\{[\s\S]*?return mapReady && Boolean\(boundaryGeometry\)/);
-  assert.match(main,/return baseBuildingsVisible && !movementIsSlow && mapReady/);
+  assert.match(main,/return app\.dataset\.djTransitExterior!=='true' && baseBuildingsVisible && !movementIsSlow && mapReady/);
   assert.match(main,/baseLayerControls\?\.apply/);
   assert.match(css,/#app\[data-base-metro="off"\] \.metro-station-marker/);
 });
