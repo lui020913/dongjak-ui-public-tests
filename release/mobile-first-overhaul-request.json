@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.200",
+  "application_version": "9.2.201",
   "public_work_branch": "main",
-  "purpose": "Verified PR #560 on top of released bus layout #557: measure rendered TIP sentence and move all glyphs fully left and back with reading time and fixed TIP badge/X; two-way crossfade between upper map feature toolbar and search action chips; preserve reduced motion, pointer isolation, bus layout and PRI controls. Full source, phone regression and Chromium/WebKit geometry tests passed. Protected mobile Preview, QA and Production. Road research remains isolated.",
-  "attempt": 434,
+  "purpose": "Verified PR #562: subtle top function button elevation, no compound rail or toolbar shadows, theme-specific low-elevation shadows; preserve TIP motion, toolbar crossfade and bus layout. Full source and phone regressions and Chromium/WebKit tests passed. Protected mobile Preview, QA and Production. Road review isolated.",
+  "attempt": 435,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
