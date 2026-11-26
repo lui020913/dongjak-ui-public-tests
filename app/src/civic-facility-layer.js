@@ -1,4 +1,4 @@
-import {normalizeFacilityCategory,facilityOsmCategory,verifiedFacilityLabelExpression,formerPoliceNameVariants,isFormerPoliceFacility,isUnverifiedPoliceFacility,repurposedPoliceNameVariants} from './facility-display-names.js';
+import {normalizeFacilityCategory,facilityOsmCategory,sameFacility,verifiedFacilityLabelExpression,formerPoliceNameVariants,isFormerPoliceFacility,isUnverifiedPoliceFacility,repurposedPoliceNameVariants} from './facility-display-names.js';
 import {openPlaceDetails} from './place-details.js';
 import {installSeoulOfficialFacilities} from './seoul-official-facilities.js';
 import {registerFacilityIcons,iconName,DEFAULT_POI_GROUPS} from './v912-poi-presentation.js';
@@ -123,6 +123,32 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
       map.on('mouseleave',layerId,()=>{map.getCanvas().style.cursor='';});
     }catch(error){console.warn('[시설 POI 레이어]',type,error?.message||error);}
   }
+  // Match actual rendered official identities against currently loaded vector POIs.
+  // Do not hide unrelated nearby facilities or use an untyped distance-only mask.
+  let officialRows=[],lastDedupSignature='';
+  const reconcileOfficialDuplicates=()=>{
+    if(map.isMoving?.())return;
+    let features=[];try{features=map.querySourceFeatures(source,{sourceLayer:'poi'})||[];}catch{return;}
+    const matches=new Set();
+    for(const f of features){
+      if(f.id==null||f.geometry?.type!=='Point')continue;
+      const [lng,lat]=f.geometry.coordinates;
+      const name=escapeName(f);if(!name)continue;
+      const category=facilityOsmCategory(f.properties||{});
+      if(officialRows.some(p=>sameFacility(p,{name,category,lng,lat})))matches.add(f.id);
+    }
+    const ids=[...matches].sort((a,b)=>String(a).localeCompare(String(b)));
+    const signature=JSON.stringify(ids);
+    if(signature===lastDedupSignature)return;
+    lastDedupSignature=signature;
+    for(const type of types){
+      const id='dj-civic-poi-'+type;if(!map.getLayer(id))continue;
+      const base=civicFilter(type,boundaryGeometry);
+      map.setFilter(id,ids.length?['all',base,['!',['in',['id'],['literal',ids]]]]:base);
+    }
+  };
+  app?.addEventListener('dongjak:official-facilities-ready',e=>{officialRows=Array.isArray(e.detail)?e.detail:[];reconcileOfficialDuplicates();});
+  map.on('idle',reconcileOfficialDuplicates);
   const recolor=()=>{
     const dark=app?.dataset?.theme==='dark';
     for(const type of types){
