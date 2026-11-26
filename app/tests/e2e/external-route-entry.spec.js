@@ -34,7 +34,7 @@ test('real transit detail buttons navigate to the visible route editor, includin
   await expect(route).toBeVisible();
   await expect(page.locator('.dj-route-endpoint-marker,.dj-route-candidate-marker')).toHaveCount(0);
   if(which==='start'){
-   const trigger=route.locator('[data-v3="pri"]'),dialog=page.locator('#dj-route-pri-dialog');
+   const trigger=route.locator('[data-v3="pri"]'),dialog=page.locator('#dj-route-pri-preferences-dialog');
    await trigger.click();
    await expect(dialog).toBeVisible();
    await expect(dialog.locator('input:checked')).toHaveCount(6);
