@@ -20,7 +20,9 @@ export function installTipMarquee(doc=document,win=window){
     const oldReserve=parseFloat(node.style.getPropertyValue('--dj-tip-close-reserve'))||0;
     const reserve=x&&x.width&&x.height&&x.bottom>lane.top&&x.top<lane.bottom?Math.max(0,Math.ceil(lane.right+oldReserve-x.left+8)):0;
     if(reserve!==oldReserve)node.style.setProperty('--dj-tip-close-reserve',reserve+'px');
-    const available=viewport.clientWidth;
+    const style=win.getComputedStyle(viewport);
+    const padding=(parseFloat(style.paddingLeft)||0)+(parseFloat(style.paddingRight)||0);
+    const available=Math.max(0,viewport.clientWidth-padding);
     if(available<=0){stop();lastKey='';return;}
     const range=doc.createRange();range.selectNodeContents(copy);
     const textWidth=Math.max(copy.scrollWidth,copy.getBoundingClientRect().width,range.getBoundingClientRect().width);
@@ -30,7 +32,8 @@ export function installTipMarquee(doc=document,win=window){
     if(key===lastKey)return;
     lastKey=key;stop();tracked=copy;
     node.classList.toggle('dj854-tip-marquee',moving);
-    node.style.setProperty('--dj854-tip-overflow',`${-overflow}px`);
+    const offset=`${-overflow}px`;
+    if(node.style.getPropertyValue('--dj854-tip-overflow')!==offset)node.style.setProperty('--dj854-tip-overflow',offset);
     const travelSeconds=Math.max(1.8,overflow/24);
     const durationSeconds=travelSeconds*2+2;
     node.dataset.djTipReadUntil=String(Date.now()+Math.max(10000,moving?(durationSeconds+2)*1000:10000));
