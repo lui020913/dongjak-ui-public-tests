@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """District-wide building/greenery audit. Reports only; never edits map assets."""
 import json
+import time
+from urllib.error import HTTPError, URLError
 from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -27,10 +29,31 @@ def polygon_parts(g):
 def vegetation(boundary):
     # OSM is a comparison source, not cadastral or proof of demolition.
     # Request the entire district plus margin, including relation member geometry.
-    query='[out:json][timeout:90];(nwr["natural"~"^(wood|scrub)$"](37.47,126.89,37.53,127.00);nwr["landuse"~"^(forest|grass|meadow)$"](37.47,126.89,37.53,127.00);nwr["leisure"~"^(park|garden)$"](37.47,126.89,37.53,127.00););out geom;'
-    request=Request("https://overpass-api.de/api/interpreter",data=urlencode({"data":query}).encode(),headers={"User-Agent":"DongjakSafetyMap-GreenBuildingResearch/1.0","Accept":"application/json"})
-    with urlopen(request,timeout=115) as r: payload=json.load(r)
-    if payload.get("remark"): raise RuntimeError(payload["remark"])
+    # Smaller requests reduce upstream gateway timeout risk. A partial
+    # response must not be mistaken for a district-wide audit.
+    elements={}
+    metadata=[]
+    for south,north in ((37.47,37.50),(37.50,37.53)):
+        for west,east in ((126.89,126.945),(126.945,127.00)):
+            bbox=f"{south},{west},{north},{east}"
+            query=f'[out:json][timeout:45];(wr["natural"~"^(wood|scrub)$"]({bbox});wr["landuse"~"^(forest|grass|meadow)$"]({bbox});wr["leisure"~"^(park|garden)$"]({bbox}););out geom;'
+            for attempt in range(3):
+                try:
+                    request=Request("https://overpass-api.de/api/interpreter",data=urlencode({"data":query}).encode(),headers={"User-Agent":"DongjakSafetyMap-GreenBuildingResearch/1.0","Accept":"application/json"})
+                    with urlopen(request,timeout=65) as r: chunk=json.load(r)
+                    if chunk.get("remark") or not isinstance(chunk.get("elements"),list):
+                        raise RuntimeError(chunk.get("remark","Malformed Overpass response"))
+                    break
+                except (HTTPError,URLError,TimeoutError,RuntimeError) as error:
+                    if isinstance(error,HTTPError) and error.code not in (429,500,502,503,504): raise
+                    if attempt==2: raise RuntimeError(f"Greenery source unavailable for {bbox}; no full-district result") from error
+                    print(f"Temporary source error for {bbox}: {error}; retry",flush=True)
+                    time.sleep(15*(attempt+1))
+            for el in chunk["elements"]: elements[(el["type"],el["id"])]=el
+            metadata.append({"bbox":bbox,"osm3s":chunk.get("osm3s",{})})
+            print(f"Completed greenery tile {bbox}: {len(chunk['elements'])} elements",flush=True)
+            time.sleep(3)
+    payload={"elements":list(elements.values()),"osm3s":{"tiles":metadata}}
     write(OUT/"osm-response.json",payload)
     forest=[];green=[]
     for el in payload.get("elements",[]):
