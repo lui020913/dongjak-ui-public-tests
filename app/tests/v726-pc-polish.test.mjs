@@ -32,7 +32,9 @@ test('route selection suppresses facility details and uses named candidate for H
  assert.match(details,/dongjak:route-map-place/);
  assert.ok(details.indexOf("classList.contains('route-picking')")<details.indexOf('map.easeTo'));
  assert.match(main,/addEventListener\('dongjak:route-map-place'/);
- assert.match(main,/showTransitRouteConfirmation\(\{kind:'point',source:'facility'/);
+ assert.match(main,/selectNamedRouteMapPlace\(\{\.\.\.place,kind:'point',source:'facility'/);
+ assert.match(main,/routeMapPickArbiter\.named\(\(\)=>showTransitRouteConfirmation/);
+ assert.match(main,/routeMapPickArbiter\.defer\(\(\)=>/);
 });
 
 test('route HUD and road-width legend are positioned as shared sheets above the five-tab dock',()=>{
