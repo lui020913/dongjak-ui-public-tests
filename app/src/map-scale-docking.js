@@ -293,7 +293,7 @@ export function installScaleDocking({map,app,overview}={}){
         '#bottom-nav','#overview-sheet:not([hidden])',
         '.page-panel:not([hidden])','#transport-sheet:not([hidden])',
         '.detail-sheet:not([hidden])','.entry-sheet:not([hidden])',
-        '#night-visibility-float:not([hidden])'
+        '#night-visibility-float:not([hidden])','#dj-community-location-card'
       ];
       let boundaryTop=mapRect.bottom-18;
       for(const selector of overlaySelectors){
@@ -316,9 +316,9 @@ export function installScaleDocking({map,app,overview}={}){
       const minimumTop=Math.max(70,(header?.bottom??mapRect.top+60)-mapRect.top+12);
       const dockNight=app.dataset.sangdoNight==='on' && aboveTools>=minimumTop;
       const railBelow=railBottom===null?null:railBottom-mapRect.top+10;
-      const fitsBelowRail=railBelow!==null && railBelow+scaleHeight < boundaryTop-mapRect.top-12;
+      const fitsBelowRail=app.dataset.communityLocationViewing!=='true'&&railBelow!==null && railBelow+scaleHeight < boundaryTop-mapRect.top-12;
       const tip=app.querySelector('#dj840-map-tip');
-      const pair=tip&&!tip.hidden&&tip.classList.contains('is-visible')&&
+      const pair=app.dataset.communityLocationViewing!=='true'&&tip&&!tip.hidden&&tip.classList.contains('is-visible')&&
         navRect&&navRect.width>120&&app.dataset.tab==='map'&&!dockNight&&app.dataset.djUserTipDismissed!=='true';
       const scaleX=mobileScaleLeft({
         mapLeft:mapRect.left,mapWidth:mapRect.width,
@@ -428,7 +428,7 @@ export function installScaleDocking({map,app,overview}={}){
     if(!mo)return;
     // The TIP is not a scale blocker, but its visibility/class change must
     // schedule a fresh synchronized HUD row when the startup tour closes.
-    for(const selector of [...MOBILE_SCALE_BLOCKERS,tipSelector]){
+    for(const selector of [...MOBILE_SCALE_BLOCKERS,tipSelector,'#dj-community-location-card']){
       for(const node of app.ownerDocument.querySelectorAll(selector)){
         if(observedNodes.has(node))continue;
         observedNodes.add(node);
