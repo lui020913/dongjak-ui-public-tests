@@ -1,16 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {createBuildingCoverage} from '../src/building-coverage.js';
+import {createBuildingCoverage,buildingModeVisibility} from '../src/building-coverage.js';
 import {createBusRouteOverlay,BUS_ROUTE_STOP_ICONS,BASE_BUS_STOP_LAYERS} from '../src/bus-route-overlay.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-test('native 2D is never hidden without rendered extrusion coverage',()=>{
- const handlers={},writes=[],shape={type:'Polygon',coordinates:[[[126.95,37.5],[126.9501,37.5],[126.9501,37.5001],[126.95,37.5001],[126.95,37.5]]]};
- let rendered=[];const native={id:1,source:'base',sourceLayer:'building',geometry:shape};
- const map={on:(n,fn)=>handlers[n]=fn,getZoom:()=>18,getLayer:()=>true,getLayoutProperty:()=> 'visible',queryRenderedFeatures:({layers})=>layers[0]==='base-building'?[native]:rendered,setFeatureState:(...a)=>writes.push(['set',...a]),removeFeatureState:(...a)=>writes.push(['remove',...a])};
- const c=createBuildingCoverage(map,['base-building']);c.setSheet(1);handlers.idle();assert.equal(writes.length,0);
- c.setExtruding(true);handlers.idle();assert.equal(writes.length,0);rendered=[{geometry:shape}];handlers.idle();assert.equal(writes[0][0],'set');
- c.setExtruding(false);assert.equal(writes[1][0],'remove');
+test('2D and 3D building modes are mutually exclusive and reversible',()=>{
+ const handlers={},states=new Map([['building','visible'],['optional-building','none']]);
+ const map={on:(n,fn)=>handlers[n]=fn,getLayer:id=>states.has(id),getLayoutProperty:id=>states.get(id),setLayoutProperty:(id,k,v)=>states.set(id,v)};
+ const c=createBuildingCoverage(map,['building','optional-building']);
+ assert.deepEqual(buildingModeVisibility(false),{plan:'visible',extrusion:'none'});
+ assert.deepEqual(buildingModeVisibility(true),{plan:'none',extrusion:'visible'});
+ c.setExtruding(true);assert.equal(states.get('building'),'none');
+ c.setExtruding(false);assert.equal(states.get('building'),'visible');assert.equal(states.get('optional-building'),'none');
+ const main=read('src/main.js');
+ assert.match(main,/const fillVisible=visibleBuilding2D\(\) && !show/);
+ assert.match(main,/const desired=modeVisibility.extrusion/);
 });
 test('selected route icons use official point coordinates and competing markers are restored on clear',async()=>{
  const layers=new Map(BASE_BUS_STOP_LAYERS.map(id=>[id,{id,layout:{visibility:'visible'}}])),sources=new Map();let data;

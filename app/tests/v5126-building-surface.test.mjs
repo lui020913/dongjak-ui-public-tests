@@ -17,7 +17,7 @@ test('수직 2D: 라이트 면 유지, 다크 건물은 반투명하게 표시�
 test('기울인 3D: 2D 건물 면은 계속 흐려지고 3D 레이어는 별도 유지',()=>{
   assert.ok(buildingFootprintPaint('dark',55)['fill-opacity']<0.15);
   const main=source('src/main.js');
-  assert.match(main,/buildingFootprintFilter\(show\)/);
+  assert.match(main,/buildingModeVisibility\(show\)/);
   assert.match(main,/'fill-extrusion-height'/);
   assert.match(main,/loadBuildingTileFeatures\(sheet\)/);
 });

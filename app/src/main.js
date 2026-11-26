@@ -67,7 +67,7 @@ import {installRoadWidthLayer} from './road-width-layer.js';
 import {installAdminDongLayer} from './admin-dong-layer.js';
 import {installBaseLayerControls} from './base-layer-controls.js';
 import {loadBuildingTileFeatures} from './building-assets.js';
-import {createBuildingCoverage,buildingFootprintFilter} from './building-coverage.js';
+import {createBuildingCoverage,buildingModeVisibility} from './building-coverage.js';
 import {nearestBuildingSheets} from './building-prewarm.js';
 import {installSafetyLayers,installBridgeDeck} from './safety-layers.js';
 import {installMapOrientationControls,installNeighborDistrictLabels,installDecorativeParkTrees} from './map-polish.js';
@@ -737,7 +737,7 @@ function visibleBuilding2D(){
   return mapReady && Boolean(boundaryGeometry);
 }
 function visibleBuilding3D(){
-  return baseBuildingsVisible && !movementIsSlow && mapReady && Boolean(boundaryGeometry) && map.getPitch() >= PITCH_BUILDING_START;
+  return baseBuildingsVisible && !movementIsSlow && mapReady && Boolean(boundaryGeometry) && map.getPitch() >= PITCH_BUILDING_START && map.getZoom()>=BUILDING_ZOOM_MIN && loadedBuildingTiles.size>0;
 }
 function syncTiltWithBuildings() {
   if (!mapReady) return;
@@ -752,7 +752,8 @@ function syncTiltWithBuildings() {
   const {opacity,color}=appearance;
   // At most one footprint-paint update per ~2 degrees instead of a full
   // setPaintProperty on every mousemove/pitch event for *every* GIS tile.
-  const fillVisible=visibleBuilding2D();
+  const modeVisibility=buildingModeVisibility(show);
+  const fillVisible=visibleBuilding2D() && !show;
   const paintKey=`${theme}/${fillVisible}/${show}/${movementIsSlow}`;
   const updateFootprint=paintKey!==lastFootprintPaintKey;
   const footprint=updateFootprint?{...buildingFootprintPaint(theme,0),
@@ -761,8 +762,7 @@ function syncTiltWithBuildings() {
   lastFootprintPaintKey=paintKey;
   for(const info of loadedBuildingTiles.values()){
     if(info.footprintFillId && map.getLayer(info.footprintFillId)){
-      const desired=fillVisible?'visible':'none';
-      if(info.footprint3DMode!==show){map.setFilter(info.footprintFillId,buildingFootprintFilter(show));info.footprint3DMode=show;}
+      const desired=fillVisible?modeVisibility.plan:'none';
       if(map.getLayoutProperty(info.footprintFillId,'visibility')!==desired)
         map.setLayoutProperty(info.footprintFillId,'visibility',desired);
       if(updateFootprint && footprint){
@@ -776,7 +776,7 @@ function syncTiltWithBuildings() {
         map.getLayoutProperty(info.footprintLineId,'visibility')!=='none')
       map.setLayoutProperty(info.footprintLineId,'visibility','none');
     if(!map.getLayer(info.layerId))continue;
-    const desired=show?'visible':'none';
+    const desired=modeVisibility.extrusion;
     if(map.getLayoutProperty(info.layerId,'visibility')!==desired)
       map.setLayoutProperty(info.layerId,'visibility',desired);
     if(show && (Math.abs(opacity-(info.lastOpacity??-1))>0.045 || info.lastColor!==color)){
@@ -887,7 +887,7 @@ async function loadOneBuildingSheet(sheet){
     const outlineStyle=buildingFootprintOutlinePaint(visualTheme.currentTheme(),map.getPitch());
     const firstSymbol=map.getStyle().layers.find(l=>l.type==='symbol')?.id;
     map.addLayer({id:footprintFillId,type:'fill',source:sourceId,minzoom:BUILDING_ZOOM_MIN,
-      filter:buildingFootprintFilter(visibleBuilding3D()),layout:{visibility:visibleBuilding2D()?'visible':'none'},paint:footprintStyle},firstSymbol);
+      layout:{visibility:visibleBuilding2D()&&!visibleBuilding3D()?'visible':'none'},paint:footprintStyle},firstSymbol);
     map.addLayer({id:footprintLineId,type:'line',source:sourceId,minzoom:BUILDING_ZOOM_MIN,
       layout:{visibility:'none'},paint:outlineStyle},firstSymbol);
     map.addLayer({id:layerId,type:'fill-extrusion',source:sourceId,
@@ -1726,6 +1726,7 @@ map.on('load',()=>{
   installForestShade({map,app});
   const nativeBuildingLayers=installBaseBuildingPalette({map,app});
   buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers);
+  buildingCoverage.setExtruding(visibleBuilding3D());
   status('지도 준비 완료 · 동작구 경계 불러오는 중');
   // 공개 Terrarium DEM: API 키 없이 지형을 표시합니다. 지형 데이터의 상세도는 지역별로 다릅니다.
   try {

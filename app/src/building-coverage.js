@@ -38,30 +38,23 @@ export function createCoverageIndex(features){
   });
  }};
 }
-// Native footprints remain a fail-safe in 2D. In 3D, only hide a
-// native polygon after matching a currently rendered GIS extrusion.
+// A single mode owns building rendering. Restore the original 2D layer
+// visibility when the actual GIS extrusion mode ends.
+export function buildingModeVisibility(extruding){
+ return extruding?{plan:'none',extrusion:'visible'}:{plan:'visible',extrusion:'none'};
+}
 export function createBuildingCoverage(map,layers){
- const sheets=new Set(),hidden=new Map();let dirty=true,extruding=false;
- const invalidate=()=>{for(const target of hidden.values())try{map.removeFeatureState(target,'djGisCovered');}catch{}hidden.clear();dirty=true;};
+ let extruding=false;
+ const original=new Map();
  const sync=()=>{
-  if(!dirty||!extruding||map.isMoving?.()||(map.getZoom?.()??0)<15)return;
-  const ids=layers.filter(id=>map.getLayer(id));
-  const gis=[...sheets].map(id=>'dongjak-buildings-3d-'+id).filter(id=>map.getLayer(id)&&map.getLayoutProperty?.(id,'visibility')!=='none');
-  if(!ids.length||!gis.length)return;
-  let features,rendered;
-  try{rendered=map.queryRenderedFeatures({layers:gis});features=map.queryRenderedFeatures({layers:ids});}catch{return;}
-  if(!rendered.length)return;
-  const index=createCoverageIndex(rendered),seen=new Map();
-  for(const f of features){
-   if(f.id==null||!f.source||!f.sourceLayer)continue;
-   const key=JSON.stringify([f.source,f.sourceLayer,f.id]),target={source:f.source,sourceLayer:f.sourceLayer,id:f.id};
-   const match=index.matches(f.geometry),prior=seen.get(key);seen.set(key,{target,match:match&&(prior?.match??true)});
+  for(const id of layers){
+   if(!map.getLayer(id))continue;
+   const current=map.getLayoutProperty?.(id,'visibility')||'visible';
+   if(!original.has(id))original.set(id,current);
+   const desired=extruding?'none':original.get(id);
+   if(current!==desired)map.setLayoutProperty(id,'visibility',desired);
   }
-  for(const [key,{target,match}] of seen){
-   try{if(match&&!hidden.has(key)){map.setFeatureState(target,{djGisCovered:true});hidden.set(key,target);}else if(!match&&hidden.has(key)){map.removeFeatureState(target,'djGisCovered');hidden.delete(key);}}catch{}
-  }
-  dirty=false;
  };
- map.on('idle',sync);map.on('movestart',invalidate);map.on('moveend',()=>{dirty=true;});map.on('style.load',invalidate);
- return {setExtruding(value){if(extruding!==Boolean(value)){extruding=Boolean(value);invalidate();}},setSheet(id){sheets.add(id);dirty=true;},removeSheet(id){sheets.delete(id);invalidate();}};
+ map.on('style.load',()=>{original.clear();sync();});
+ return {setExtruding(value){extruding=Boolean(value);sync();},setSheet(){sync();},removeSheet(){sync();}};
 }

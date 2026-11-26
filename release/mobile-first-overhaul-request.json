@@ -2,7 +2,7 @@
   "source": "public-app",
   "application_version": "9.2.189",
   "public_work_branch": "main",
-  "purpose": "Preserve native 2D buildings and retry incomplete GIS sheets; suppress native footprint only for actually rendered 3D extrusion; use official route stop coordinates for selected route marker and labels, restore baseline stops after route clear; hide active release dock during PRI and other sheets. Protected preview and production.",
+  "purpose": "Use mutually exclusive 2D/3D building display, restore 2D when extrusion ends or is unavailable, retry incomplete GIS sheets; align selected bus route stop icons and hide release dock during panels. Protected Preview and Production.",
   "attempt": 421,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
