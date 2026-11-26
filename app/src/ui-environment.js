@@ -118,6 +118,10 @@ export function nativePavedAreaFill(layer={}){
  return layer.type==='fill'&&source==='transportation'&&!/rail|metro|subway|tram|water|river|lake|pier|ferry|bridge|tunnel|contour/.test(id);
 }
 export const LIGHT_PAVED_AREA_COLOR='#e5e8e1';
+// The highway-area layer mixes pedestrian plazas with bridges and vehicle roads.
+export function nativePavedAreaPaint(fallback='#ffffff'){
+ return ['case',['all',['==',['get','class'],'path'],['in',['get','subclass'],['literal',['pedestrian','footway','path']]]],LIGHT_PAVED_AREA_COLOR,fallback];
+}
 // v17.11: white roads need a slightly darker surrounding land surface.
 // Apply only to the base-map style; building, route and safety overlays retain their own colors.
 export function lightMapLandRole(layer = {}) {
@@ -229,7 +233,7 @@ export function initTheme({map,app}){
       }
       if(themeState.value==='light'){
         if(entry.type==='background')set('background-color',entry.landRole==='ground'?'#e2e4dc':entry.background);
-        if(entry.type==='fill')set('fill-color',entry.pavedArea?LIGHT_PAVED_AREA_COLOR:entry.roadRole ? (entry.roadRole==='edge'?'#d0d8d3':'#ffffff') : entry.landRole==='vegetation'?'#a5ca92':entry.landRole==='ground'?'#e1e4dc':entry.fill);
+        if(entry.type==='fill')set('fill-color',entry.pavedArea?nativePavedAreaPaint(entry.roadRole?(entry.roadRole==='edge'?'#d0d8d3':'#ffffff'):entry.fill):entry.roadRole ? (entry.roadRole==='edge'?'#d0d8d3':'#ffffff') : entry.landRole==='vegetation'?'#a5ca92':entry.landRole==='ground'?'#e1e4dc':entry.fill);
         if(entry.type==='line')set('line-color',entry.roadRole ? (entry.roadRole==='edge'?'#cbd4d0':'#ffffff') : entry.line);
         if(entry.type==='symbol') {set('text-color',entry.text);set('text-halo-color',entry.halo);set('text-halo-width',entry.haloWidth);}
       }else{
