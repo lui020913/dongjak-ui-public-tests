@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.208",
+  "application_version": "9.2.209",
   "public_work_branch": "main",
-  "purpose": "Verified PR #574 (c330f02): restore eight formerly quarantined baseline road surfaces including Sangdo Elementary and Nodeul, with zero measured GIS building intersection and no expansion beyond audited geometry. Separate SHA-256-pinned additive asset; keep all original 12045 reviewed surface data and 258 native road eligibility guards unchanged. Full source CI and actual app mobile QA at three sites passed. Preserve v9.2.207 building deduplication, original routing, PRI, buildings and analysis data. Protected Preview, phone QA and Production required.",
-  "attempt": 443,
+  "purpose": "Verified PR #575 (7464433): fix primary tab cross-dissolve by stable panel identity and logical destination ownership; all 36 independent phone shards and aggregate source CI passed. Include v9.2.208's eight recovered road surfaces (PR #574), v9.2.207 building deduplication and all preceding features; preserve original road/routing/PRI data. Full protected Preview, phone QA and Production required. Supersedes failed v9.2.208 release; no relaxed gates.",
+  "attempt": 444,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
