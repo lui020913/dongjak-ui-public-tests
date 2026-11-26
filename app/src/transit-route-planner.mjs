@@ -57,7 +57,7 @@ export function transferCandidates(records,from,to,startIds,endIds,{limit=3,maxT
   }
  }
  const rank=(a,b)=>a.score-b.score;
- const busCandidates=[],mixedCandidates=[];
+ const busCandidates=[],mixedCandidates=[],multiCandidates=[];
  const retain=(arr,candidate)=>{if(arr.length>=40&&candidate.score>=arr.at(-1).score)return;arr.push(candidate);arr.sort(rank);if(arr.length>40)arr.pop();};
  const nearestRail=p=>stations.filter(s=>meters(p,s)<=1400).sort((a,b)=>meters(p,a)-meters(p,b)).slice(0,4);
  const nearFrom=nearestRail(from),nearTo=nearestRail(to);
@@ -89,20 +89,42 @@ export function transferCandidates(records,from,to,startIds,endIds,{limit=3,maxT
    }
   }
  }
+ // Keep only a small number of nearby rail connections for two transfers.
+ const enter=[],exit=[];
+ for(const a of starts)for(let j=a.i+1;j<Math.min(a.rec.stops.length,a.i+35);j++){
+  for(const station of stations){
+   const distance=meters(a.rec.stops[j],station);if(distance>maxTransferM)continue;
+   retain(enter,{a,j,station,score:meters(from,a.rec.stops[a.i])+distance+45*(j-a.i)});
+  }
+ }
+ for(const b of ends)for(let k=Math.max(0,b.i-35);k<b.i;k++){
+  for(const station of stations){
+   const distance=meters(b.rec.stops[k],station);if(distance>maxTransferM)continue;
+   retain(exit,{b,k,station,score:meters(to,b.rec.stops[b.i])+distance+45*(b.i-k)});
+  }
+ }
+ const railCache=new Map();
+ for(const a of enter)for(const b of exit){
+  if(a.a.rec.id===b.b.rec.id||a.station.name===b.station.name)continue;
+  const key=a.station.name+'|'+b.station.name;
+  if(!railCache.has(key))railCache.set(key,railLeg(a.station,b.station));
+  const rail=railCache.get(key);if(!rail)continue;
+  retain(multiCandidates,{score:a.score+b.score+45*(rail.stops.length-1)+250,a,b,rail});
+ }
  const collect=(raw,kind,make)=>{
   const out=[],seen=new Set();
   for(const p of raw){
    const legs=make(p);if(legs.some(x=>!x))continue;
    const key=legs.map(x=>x.kind==='bus'?x.routeId:[...new Set(x.lines)].join('/')).join('|');
    if(seen.has(key))continue;seen.add(key);
-   out.push({kind,legs,origin:legs[0].origin,destination:legs.at(-1).destination,changes:1});
+   out.push({kind,legs,origin:legs[0].origin,destination:legs.at(-1).destination,changes:legs.length-1});
    if(out.length>=limit)break;
   }
   return out;
  };
  return {
   busTransfer:collect(busCandidates,'transfer',p=>[busLeg(p.a.rec,p.a.i,p.j),busLeg(p.b.rec,p.k,p.b.i)]),
-  mixed:collect(mixedCandidates,'mixed',p=>p.railFirst?[p.rail,busLeg(p.b.rec,p.k,p.b.i)]:[busLeg(p.a.rec,p.a.i,p.j),p.rail])
+  mixed:[...collect(mixedCandidates,'mixed',p=>p.railFirst?[p.rail,busLeg(p.b.rec,p.k,p.b.i)]:[busLeg(p.a.rec,p.a.i,p.j),p.rail]),...collect(multiCandidates,'mixed',p=>[busLeg(p.a.a.rec,p.a.a.i,p.a.j),p.rail,busLeg(p.b.b.rec,p.b.k,p.b.b.i)])]
  };
 }
 
