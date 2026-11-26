@@ -5,10 +5,10 @@ import {scopedCompositeFeatures} from '../src/pri-scope-data.mjs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('candidate display is visible and distinguishable without changing unknown risk',()=>{
  const src=read('src/pri-map.js'),css=read('src/pri-map.css');
- assert.match(src,/CANDIDATE_COLOR='#829691',CANDIDATE_OPACITY=\.88/);
- assert.match(src,/sharedCandidate:!f.properties.evaluated&&ids.has/);
+ assert.match(src,/CANDIDATE_COLOR='#c98945',CANDIDATE_OPACITY=\.96/);
+ assert.match(src,/sharedRoadDisplay\(source,ids,sharedRoadReference\)/);
  assert.match(src,/'line-color':CANDIDATE_COLOR,'line-opacity':CANDIDATE_OPACITY/);
- assert.match(css,/dj-pri-key-candidate::before\{border-top:3px dashed #829691/);
+ assert.match(css,/dj-pri-key-candidate::before\{border-top:3px dashed #c98945/);
  const candidates=JSON.parse(read('public/data/pri/sangdo1_shared_road_candidates_20261125.json'));
  const scope=JSON.parse(read('public/data/protection-zone/sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson'));
  const ids=new Set(candidates.scores.map(s=>s.id)),draw=scopedCompositeFeatures(scope,new Map());
