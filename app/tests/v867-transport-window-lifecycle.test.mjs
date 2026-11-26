@@ -43,6 +43,8 @@ test('교통정보 닫기 로직은 합성 버튼 클릭을 재전송하지 않�
   const transport=await readFile(new URL('../src/transport-map.js',import.meta.url),'utf8');
   assert.doesNotMatch(source,/dispatchLocalClick\(element\('transport-close'\)/);
   assert.match(source,/node\.dispatchEvent\(new EventCtor\('dongjak:transport-dismiss'\)\)/);
-  assert.match(transport,/closeButton\.addEventListener\('click',[\s\S]*?close\(true\)/);
+  assert.match(transport,/bindReliablePopupClose\(closeButton,[\s\S]*?close\(true\)/);
+  assert.match(transport,/if\(seq===closingSequence\)close\(true\)/);
+  assert.match(transport,/closeInput\.reset\(\)/);
   assert.match(transport,/windowState\.beginOpen\(openKey,\{origin,refresh,mapEvent\}\)/);
 });

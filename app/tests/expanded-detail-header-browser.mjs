@@ -11,14 +11,14 @@ try{
   await page.addStyleTag({content:css});
   await page.addScriptTag({type:'module',content:helper+'\nwindow.bindClose=bindReliablePopupClose;'});
   await page.waitForFunction(()=>window.bindClose);
-  await page.evaluate(()=>{const f=document.querySelector('#facility'),t=document.querySelector('#transport-sheet');window.closed=0;window.bindClose(f.querySelector('button'),()=>{window.closed++;f.remove();});window.closeTransit=window.bindClose(t.querySelector('button'),()=>{window.closed++;t.hidden=true;t.classList.remove('dj871-sheet-expanded');});});
+  await page.evaluate(()=>{const f=document.querySelector('#facility'),t=document.querySelector('#transport-sheet');window.__detailCloseCount=0;window.bindClose(f.querySelector('button'),()=>{window.__detailCloseCount++;f.remove();});window.closeTransit=window.bindClose(t.querySelector('button'),()=>{window.__detailCloseCount++;t.hidden=true;t.classList.remove('dj871-sheet-expanded');});});
   for(const selector of ['.dj-place-header-close','#transport-close']){
    if(selector.startsWith('#'))await page.evaluate(()=>{const t=document.querySelector('#transport-sheet');t.hidden=false;t.classList.add('dj871-sheet-expanded');});
    const button=page.locator(selector);
    const hit=await button.evaluate(b=>{const r=b.getBoundingClientRect(),p=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return {hit:b.contains(p),w:r.width,h:r.height};});
    assert.ok(hit.hit&&hit.w>=44&&hit.h>=44,JSON.stringify({width,selector,hit}));
    await button.tap();
-   await page.waitForFunction(n=>window.closed===n,selector.startsWith('#')?2:1);
+   await page.waitForFunction(n=>window.__detailCloseCount===n,selector.startsWith('#')?2:1);
   }
   assert.equal(await page.locator('.topbar').evaluate(n=>getComputedStyle(n).visibility),'visible');
   console.log('EXPANDED_HEADER_BROWSER_PASS',width);
