@@ -2012,6 +2012,10 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   if (tab !== 'map') {
     if (!detail.hidden) showOverview();
   }
+  // Programmatic route entry is an explicit user choice, not a delayed
+  // automatic sheet reopen. Authorize it after the preceding close operations
+  // so the shared ghost-open guard cannot discard the newly opened route tab.
+  if(tab==='route')window.DongjakWindowLifecycle?.requestOpen('route-panel');
   app.dataset.tab = tab;
   // In HOME mode route-panel synchronization must not reopen safety overview.
   if(tab==='map'&&suppressOverview)app.dataset.djSafetyHomeOnly='1';

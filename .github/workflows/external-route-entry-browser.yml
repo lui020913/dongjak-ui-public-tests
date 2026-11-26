@@ -1,0 +1,41 @@
+name: Real route endpoint navigation
+on:
+  pull_request:
+    paths:
+      - 'app/src/main.js'
+      - 'app/src/v806-unified-ui.js'
+      - 'app/tests/e2e/external-route-entry.spec.js'
+      - '.github/workflows/external-route-entry-browser.yml'
+permissions:
+  contents: read
+jobs:
+  route-entry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: |
+          cat > playwright.external-route.config.mjs <<'EOF'
+          export default {
+            testDir:'./tests/e2e', testMatch:'external-route-entry.spec.js',
+            timeout:180000, workers:1,
+            use:{baseURL:'http://127.0.0.1:4194',browserName:'chromium',headless:true,viewport:{width:390,height:844},hasTouch:true,isMobile:true,launchOptions:{args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}},
+            webServer:{command:'npm run preview -- --host 127.0.0.1',url:'http://127.0.0.1:4194',timeout:30000}
+          };
+          EOF
+          npx playwright test --config playwright.external-route.config.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: route-entry-test-results
+          path: app/test-results/
+          if-no-files-found: ignore

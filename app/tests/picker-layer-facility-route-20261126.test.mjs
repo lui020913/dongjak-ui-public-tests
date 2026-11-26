@@ -19,3 +19,11 @@ test('facility endpoint selection delegates validation and dismissal to route ow
  assert.ok(fn.indexOf("if(typeof dismiss==='function')dismiss()")<fn.indexOf("navigate('route')"));
  assert.ok(fn.indexOf("navigate('route')")<fn.indexOf('dongjak:route-endpoint-registered'));
 });
+
+test('route entry is authorized by shared lifecycle after transport dismissal',()=>{
+ const m=read('main.js'),ui=read('v806-unified-ui.js');
+ const nav=m.slice(m.indexOf('function navigate(tab,'),m.indexOf('// Capture mobile HOME'));
+ assert.ok(nav.indexOf('closeTransportPanel(false)')<nav.indexOf("requestOpen('route-panel')"));
+ assert.ok(nav.indexOf("requestOpen('route-panel')")<nav.indexOf('app.dataset.tab = tab'));
+ assert.ok(ui.includes("['route-panel','dj854-weather-sheet'"));
+});
