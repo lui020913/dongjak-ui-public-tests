@@ -42,3 +42,8 @@ test('pending, unavailable and unobserved walking evidence stay distinct',()=>{
  assert.equal(formatTransitReview(null,true),'도보 연결 확인 불가');
  assert.match(formatTransitReview({walkM:366,walkMinutes:5,coverage:0,comparable:false},true),/안전 미평가/);
 });
+
+test('compact card review hides redundant zero coverage but never invents a safety score',()=>{
+ assert.equal(formatTransitReview({walkM:1190,walkMinutes:15,coverage:0,comparable:false},true),'도보 1.19km · 안전 미평가');
+ assert.match(formatTransitReview({walkM:200,walkMinutes:3,coverage:.8,comparable:true,risk:32},true),/PRI 32.0점 \(관측 80%\)/);
+});

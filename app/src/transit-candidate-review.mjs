@@ -41,7 +41,8 @@ export async function reviewAllTransitCandidates(plans,{signal,concurrency=2,rev
  await Promise.all(Array.from({length:Math.min(plans.length,Math.max(1,Math.min(2,concurrency)))},worker));
 }
 export function formatTransitReview(result,done=false){
- if(!done)return '도보 거리·시간 및 PRI 조회 중';
+ if(!done)return '도보 조회 중';
  if(!result)return '도보 연결 확인 불가';
- return '도보 '+result.walkM+'m · 약 '+result.walkMinutes+'분 · '+(result.comparable?'관측 PRI '+result.risk.toFixed(1)+'점':'안전 미평가 또는 PRI 자료 부족')+' · 관측 '+Math.round(result.coverage*100)+'%';
+ const distance=result.walkM>=1000?(result.walkM/1000).toFixed(2).replace(/0$/,'').replace(/\.$/,'')+'km':result.walkM+'m';
+ return '도보 '+distance+' · '+(result.comparable?'PRI '+result.risk.toFixed(1)+'점 (관측 '+Math.round(result.coverage*100)+'%)':'안전 미평가');
 }
