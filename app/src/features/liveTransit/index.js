@@ -2,6 +2,7 @@ import {isMetroDailyQuota,isMixedMetroQuota,metroQuotaRetryMs,METRO_QUOTA_NOTICE
 /** MapLibre real-time vehicle overlay. Isolated GeoJSON sources and layers; no GPS permission. */
 import {payloadToCollection,LINE_COLORS} from './normalize.js';
 import {loadTrainAtlas} from './train-atlas.js';
+import {NEUTRAL_BUS_IMAGE,ensureNeutralBusImage} from '../../live-bus-art.js';
 import {selectedBusVehicleRoute} from '../../bus-route-overlay.js';
 import {haversineMeters,getDisplayedRailPaths} from './geometry.js';
 import {TRAIN_ICON_SIZE_STOPS,trainLaneOffset,trainLaneOffsetExpression} from './train-lanes.js';
@@ -158,9 +159,12 @@ export function attachLiveTransitOverlay(map,opts={}){
         paint:{'icon-opacity':['interpolate',['linear'],['zoom'],11,.75,13.2,.9,15.5,1,18,1,22,1]}
       },LIVE_METRO_LAYER);
     }
-    if(!map.getLayer(LIVE_BUS_LAYER))map.addLayer({id:LIVE_BUS_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:minimumZoom,
-      filter:['==',['get','mode'],'bus'],paint:{...common,'circle-color':'#0785ef',
-        'circle-radius':['interpolate',['linear'],['zoom'],13.2,5.7,15.5,7.7,18,9.8]}});
+    const busArt=ensureNeutralBusImage(map);
+    if(busArt&&map.getLayer(LIVE_BUS_LAYER)?.type==='circle')map.removeLayer(LIVE_BUS_LAYER);
+    if(!map.getLayer(LIVE_BUS_LAYER))map.addLayer(busArt?{id:LIVE_BUS_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:minimumZoom,
+      filter:['==',['get','mode'],'bus'],layout:{'icon-image':NEUTRAL_BUS_IMAGE,'icon-size':['interpolate',['linear'],['zoom'],11,.8,16,1.15,19,1.4],
+        'icon-anchor':'center','icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport','icon-allow-overlap':true,'icon-ignore-placement':true}}:
+      {id:LIVE_BUS_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:minimumZoom,filter:['==',['get','mode'],'bus'],paint:{...common,'circle-color':'#2672bc','circle-radius':6}});
     reportArtwork(atlasApplied?'atlas':trainImages?'fallback':'circle');
     map.getSource(LIVE_SOURCE)?.setData?.(display);
   }
