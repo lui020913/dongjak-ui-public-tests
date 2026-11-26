@@ -1,4 +1,5 @@
 import {busRouteColor} from './bus-route-overlay.js';
+import {subwayLineColor} from './transport-map.js';
 import {revealSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 import './transit-route-detail.css';
 const labels={walk:'도보',bus:'버스',rail:'지하철'};
@@ -36,7 +37,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   if(!detail){arrivalRequest?.abort();arrivalRequest=null;current=null;step=null;root.hidden=true;root.replaceChildren();cancelSurfaceMotion(root);return;}
   if(same(current,detail)){current=detail;updatePri();return;}
   arrivalRequest?.abort();arrivalRequest=null;current=detail;step=null;root.replaceChildren();root.hidden=false;
-  const kind=detail.kind,color=kind==='bus'?busRouteColor(detail.routeType):'#b69b4d';root.style.setProperty('--tr-line-color',color);
+  const kind=detail.kind,color=kind==='bus'?busRouteColor(detail.routeType):subwayLineColor(railLabel(detail.lines[0]));root.style.setProperty('--tr-line-color',color);
   const name=kind==='bus'?detail.route:[...new Set(detail.lines)].map(railLabel).join(' · ');
   const header=el('div','dj-tr-heading');
   const title=el('strong','',name+' · '+labels[kind]);
@@ -83,7 +84,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   const next=button('다음 단계','',()=>{step=step>=3?null:step+1;updateStep();});next.dataset.stepNext='';
   controls.append(prev,next);guide.append(progress,controls,el('small','','자동 GPS·하차 알림이 아닌 수동 이동 순서입니다.'));
   footer.append(start,guide);
-  root.append(header,track,timeline,note,footer);updatePri();revealSurface(root);
+  root.append(header,track,timeline,note,footer);updatePri();
  }
  const listener=e=>render(e.detail);win.addEventListener('dongjak:transit-detail',listener);
  return ()=>{win.removeEventListener('dongjak:transit-detail',listener);arrivalRequest?.abort();cancelSurfaceMotion(root);root.remove();};
