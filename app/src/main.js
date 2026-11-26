@@ -860,6 +860,7 @@ export function shouldRender3DBuilding(geometry){
 // v17.12: 기존 국가기본도와 GIS건물 보완 GeoJSON을 모두 로딩합니다.
 
 async function loadOneBuildingSheet(sheet){
+  if(app.dataset.djTransitExterior==='true')return;
   const existing=loadedBuildingTiles.get(sheet.sheet);
   if(existing?.complete||buildingLoading.has(sheet.sheet)||(buildingRetryAfter.get(sheet.sheet)||0)>Date.now())return;
   buildingLoading.add(sheet.sheet);
@@ -926,7 +927,7 @@ function scheduleInitialBuildingWarmup(){
   if(initialBuildingWarmupScheduled||!boundaryGeometry||!mapReady||djRenderBudget.isEconomy())return;
   initialBuildingWarmupScheduled=true;
   const run=async()=>{
-    if(!boundaryGeometry)return;
+    if(!boundaryGeometry||app.dataset.djTransitExterior==='true')return;
     try{
       const manifest=await ensureBuildingManifest();
       const center=map.getCenter();
@@ -2922,6 +2923,7 @@ var transitHomeCamera;
 var transitRouteContext=[];
 var transitContextSignature='';
 var transitContextLayers;
+var transitContextDirty=false;
 function syncTransitContextBounds(active){
  const bounds=active?transitContextBounds(bufferedDistrictBounds(boundaryGeometry,0),[routeStart,routeEnd],transitRouteContext):bufferedDistrictBounds(boundaryGeometry);
  const signature=JSON.stringify(bounds);
@@ -2947,9 +2949,9 @@ function syncTransitExterior(force=false){
  if(active){
   clearTimeout(buildingLoadTimer);
   if(terrainEnabled){map.setTerrain(null);terrainEnabled=false;}
-  transitContextLayers.enforce();
+  transitContextLayers.enforce();transitContextDirty=false;
  }else{
-  transitContextLayers.restore();
+  transitContextDirty=false;transitContextLayers.restore();
   baseLayerControls?.apply();
   syncTiltWithBuildings();
  }
@@ -2961,8 +2963,9 @@ function syncTransitExterior(force=false){
   transitHomeCamera=null;
  }
 }
-// Late-added layers must obey the same budget without rebuilding styles during motion.
-map.on('idle',()=>{if(app.dataset.djTransitExterior==='true'&&!map.isMoving?.())transitContextLayers?.enforce();});
+// Recheck only after actual style changes, not every idle/zoom cycle.
+map.on('styledata',()=>{if(app.dataset.djTransitExterior==='true')transitContextDirty=true;});
+map.on('idle',()=>{if(app.dataset.djTransitExterior==='true'&&transitContextDirty&&!map.isMoving?.()){transitContextLayers?.enforce();transitContextDirty=false;}});
 function clearTransitPreview(){
   transitRouteContext=[];
   const wasPreview=Boolean(transitPreview);

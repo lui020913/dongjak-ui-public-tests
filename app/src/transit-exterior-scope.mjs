@@ -31,17 +31,18 @@ export function transitContextBounds(districtBounds,endpoints=[],routeCoords=[])
  const points=[...ends,...path];
  if(ends.length<2)points.push(...districtBounds.filter(valid));
  if(!points.length)return TRANSIT_SEARCH_BOUNDS;
- const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]);
- const x=Math.min(...xs),X=Math.max(...xs),y=Math.min(...ys),Y=Math.max(...ys);
- // A limited context margin, with enough breathing room for portrait route fit.
- const latPad=Math.max(.0135,(Y-y)*.25,(X-x)*.3);
- const lngPad=Math.max(.017,(X-x)*.25,(Y-y)*.3);
+ let x=Infinity,X=-Infinity,y=Infinity,Y=-Infinity;
+ for(const [lng,lat] of points){x=Math.min(x,lng);X=Math.max(X,lng);y=Math.min(y,lat);Y=Math.max(Y,lat);}
+ // Keep roughly 750 m of local context before endpoints are known. Once a
+ // trip is selected, add proportional clearance only for the actual trip fit.
+ const latPad=ends.length<2&&!path.length ? .00675:Math.max(.00675,(Y-y)*.25,(X-x)*.3);
+ const lngPad=ends.length<2&&!path.length ? .0085:Math.max(.0085,(X-x)*.25,(Y-y)*.3);
  return [[Math.max(TRANSIT_SEARCH_BOUNDS[0][0],x-lngPad),Math.max(TRANSIT_SEARCH_BOUNDS[0][1],y-latPad)],
  [Math.min(TRANSIT_SEARCH_BOUNDS[1][0],X+lngPad),Math.min(TRANSIT_SEARCH_BOUNDS[1][1],Y+latPad)]];
 }
 export function transitContextLayer(layer){
  const id=String(layer.id||''),source=String(layer.source||''),kind=String(layer['source-layer']||'');
- if(layer.type==='background'||layer.type==='raster')return true;
+ if(layer.type==='background'||layer.type==='raster'&&id==='osm-emergency-base')return true;
  if(/^(?:dj815-transit-|dj-transit-(?:rail-|multi-))/.test(id))return true;
  if(/^(?:district-exterior-fade|district-border(?:-halo)?)$/.test(id))return true;
  if(/(?:^|[-_])gps(?:[-_]|$)/i.test(id))return true;

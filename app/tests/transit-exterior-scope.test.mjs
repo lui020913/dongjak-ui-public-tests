@@ -54,3 +54,12 @@ test('transit context retains ordinary roads and selected route, suspends other 
  context.restore();
  assert.equal(visibility.get('building'),'visible');assert.equal(visibility.get('facility'),'none');
 });
+
+test('initial camera keeps about 750 metres of context and ignores unrelated raster overlays',()=>{
+ const district=[[126.91,37.47],[126.99,37.53]];
+ const bounds=transitContextBounds(district);
+ assert.ok(district[0][0]-bounds[0][0]<.009);
+ assert.ok(district[1][1]-bounds[1][1]<.007);
+ assert.equal(transitContextLayer({id:'unrelated-raster',type:'raster'}),false);
+ assert.equal(transitContextLayer({id:'osm-emergency-base',type:'raster'}),true);
+});
