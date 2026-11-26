@@ -37,16 +37,16 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  };
  const choose=e=>{mode=e.currentTarget.dataset.transitMode;close();syncMode();};
  const modeButtons=[...shadow.querySelectorAll('[data-transit-mode]')];modeButtons.forEach(b=>{b.innerHTML=icon(b.dataset.transitMode==='walk'?'walk':'bus')+(b.dataset.transitMode==='walk'?'도보':'대중교통');b.addEventListener('click',choose);});
- panel.querySelector('.tr-head button').addEventListener('click',()=>{close({animate:true});q('[data-v3="calculate"]')?.focus({preventScroll:true});});
+ panel.querySelector('.tr-head button').addEventListener('click',()=>{close({animate:true});});
  for(const [id,label] of [['all','전체'],['bus','버스'],['rail','지하철']]){
   const b=doc.createElement('button');b.type='button';b.dataset.filter=id;b.innerHTML=(id==='all'?'':icon(id))+label;b.addEventListener('click',()=>{if(busy)return;filter=id;render(true);});filters.append(b);
  }
  function note(text,retry=false){status.textContent=text;list.replaceChildren();if(retry){const b=doc.createElement('button');b.type='button';b.className='tr-retry';b.textContent='다시 조회';b.addEventListener('click',search);list.append(b);}}
  function show(ps){cancelSurfaceMotion(panel);panel.style.removeProperty('pointer-events');endpoints.textContent=ps.map(nameOf).join(' → ');panel.hidden=false;view.dataset.transitResults='true';revealSurface(panel);}
  function render(animate=false){
+  if(!options)return;
   list.replaceChildren();
   for(const b of filters.children){b.setAttribute('aria-pressed',String(b.dataset.filter===filter));const count=b.dataset.filter==='all'?options.bus.length+options.rail.length:options[b.dataset.filter].length;const label=b.dataset.filter==='all'?'전체':b.dataset.filter==='bus'?'버스':'지하철';b.innerHTML=(b.dataset.filter==='all'?'':icon(b.dataset.filter))+label+' '+count;}
-  if(!options)return;
   const plans=[...(filter!=='rail'?options.bus:[]),...(filter!=='bus'?options.rail:[])];
   status.textContent=(options.busStatus==='complete'?'조회 범위 내 이동안입니다.':'일부 버스 정보 조회 불가. ')+' 시간·요금은 확인된 정보만 표시합니다.';
   if(!plans.length){const p=doc.createElement('p');p.className='tr-note';p.textContent='조회 범위에서 확인된 이동안이 없습니다.';list.append(p);}
@@ -72,7 +72,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  }
  async function search(){
   close();const ps=points();show(ps);filter='all';
-  if(ps.length!==2){note('대중교통은 경유지 없는 출발지와 도착지 두 곳을 지원합니다. 경유지를 삭제한 후 다시 조회하세요.');return;}
+  if(ps.length!==2){for(const b of filters.children)b.disabled=true;note('대중교통은 경유지 없는 출발지와 도착지 두 곳을 지원합니다. 경유지를 삭제한 후 다시 조회하세요.');return;}
   pointKey=key(ps);const seq=generation;const requestController=new AbortController();controller=requestController;
   const timer=win.setTimeout(()=>requestController.abort(),35000);
   for(const b of filters.children){b.disabled=true;b.setAttribute('aria-pressed',String(b.dataset.filter==='all'));}
