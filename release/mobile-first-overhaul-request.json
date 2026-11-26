@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.201",
+  "application_version": "9.2.202",
   "public_work_branch": "main",
-  "purpose": "Verified PR #562: subtle top function button elevation, no compound rail or toolbar shadows, theme-specific low-elevation shadows; preserve TIP motion, toolbar crossfade and bus layout. Full source and phone regressions and Chromium/WebKit tests passed. Protected mobile Preview, QA and Production. Road review isolated.",
-  "attempt": 435,
+  "purpose": "Verified PR #563 on top of released #562: adaptive map clarity with normal 2x and high-capability up to 3x DPR, preserve economy mode; compact content-sized facility sheet with equal pill actions; direct community report location return with marker, guarded camera and matching muted-green picker capsule; 2px reduced nav gap, TIP and scale coordination. Source tests 2245 passed, all CI and actual mobile browser checks passed. Protected Preview, Phone QA and Production; road review remains isolated.",
+  "attempt": 436,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
