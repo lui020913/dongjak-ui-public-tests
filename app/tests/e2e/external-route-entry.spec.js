@@ -32,7 +32,36 @@ test('real transit detail buttons navigate to the visible route editor, includin
   await expect(sheet).toBeHidden();
   await page.waitForTimeout(800);
   await expect(route).toBeVisible();
+  await expect(page.locator('.dj-route-endpoint-marker,.dj-route-candidate-marker')).toHaveCount(0);
+  if(which==='start'){
+   const trigger=route.locator('[data-v3="pri"]'),dialog=page.locator('#dj-route-pri-dialog');
+   await trigger.click();
+   await expect(dialog).toBeVisible();
+   await expect(dialog.locator('input:checked')).toHaveCount(6);
+   await dialog.locator('input').first().uncheck();
+   await dialog.locator('[data-pri-cancel]').click();
+   await trigger.click();
+   await expect(dialog.locator('input:checked')).toHaveCount(6);
+   for(const input of await dialog.locator('input').all())await input.uncheck();
+   await expect(dialog.locator('[data-pri-apply]')).toBeDisabled();
+   await dialog.locator('input[value="lighting"]').check();
+   await dialog.locator('[data-pri-apply]').click();
+   await expect(trigger).toContainText('1/6');
+   await trigger.click();
+   await dialog.locator('[data-pri-all]').click();
+   await dialog.locator('[data-pri-apply]').click();
+   await expect(trigger).toContainText('6/6');
+   await expect(dialog).toHaveCount(1);
+   await route.locator('[data-v3="end"]').click();
+   await route.locator('[data-v3="search-map"]').click();
+   await expect(app).toHaveAttribute('data-tab','map');
+   await expect(page.locator('.dj-route-endpoint-marker')).toHaveCount(1);
+   await page.locator('#route-pick-cancel').click();
+   await expect(app).toHaveAttribute('data-tab','route');
+   await expect(page.locator('.dj-route-endpoint-marker,.dj-route-candidate-marker')).toHaveCount(0);
+  }
   await route.locator('[data-v3="back"]').click();
   await expect(app).toHaveAttribute('data-tab','map');
+  await expect(page.locator('.dj-route-endpoint-marker,.dj-route-candidate-marker')).toHaveCount(0);
  }
 });
