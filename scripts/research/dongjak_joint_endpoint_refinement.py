@@ -2,7 +2,13 @@
 Every incident graph edge must be eligible and repaired atomically.
 No production assets, routing, or PRI are modified.
 """
-import json, math, pathlib, sys, shutil, hashlib
+import json, math, pathlib, sys, shutil, hashlib, os
+import dongjak_corridor_gap_recovery as gap
+DEEP=os.environ.get('DJ_DEEP_CORRIDOR_SEARCH')=='1'
+STEP=.20 if DEEP else .25
+DIVERSITY=.32 if DEEP else .45
+CHOICE_LIMIT=20 if DEEP else 10
+COMBO_LIMIT=320 if DEEP else 96
 from dongjak_corridor_gap_recovery import solve
 from sangdo1_corridor_refinement import refine_surface
 from collections import Counter, defaultdict
@@ -84,10 +90,10 @@ def main(base,out):
             reasons["other_failure"]+=1;continue
         obs=unary_union([ctx(i)[0] for i,_ in refs])
         opts=[]
-        for ix in range(-12,13):
-            for iy in range(-12,13):
-                p=Point(anchor.x+ix*.25,anchor.y+iy*.25)
-                if math.hypot(ix,iy)*.25>SHIFT or (not obs.is_empty and p.distance(obs)<MIN_RADIUS+MARGIN):continue
+        for ix in range(-math.ceil(SHIFT/STEP),math.ceil(SHIFT/STEP)+1):
+            for iy in range(-math.ceil(SHIFT/STEP),math.ceil(SHIFT/STEP)+1):
+                p=Point(anchor.x+ix*STEP,anchor.y+iy*STEP)
+                if math.hypot(ix,iy)*STEP>SHIFT or (not obs.is_empty and p.distance(obs)<MIN_RADIUS+MARGIN):continue
                 if any(p.distance(point(i,end))>SHIFT for i,end in refs):continue
                 opts.append(p)
         opts.sort(key=lambda p:(p.distance(anchor),-p.distance(obs) if not obs.is_empty else 0))
@@ -96,8 +102,8 @@ def main(base,out):
         # Keep near and diverse clearance alternatives, not only clustered nearest positions.
         choices=[]
         for p in opts:
-            if all(p.distance(q)>=.45 for q in choices):choices.append(p)
-            if len(choices)>=10:break
+            if all(p.distance(q)>=DIVERSITY for q in choices):choices.append(p)
+            if len(choices)>=CHOICE_LIMIT:break
         movable[node]=choices
     # Shared endpoints form small atomic groups. Larger groups remain for review.
     groups=[];remaining=set(movable)
@@ -120,7 +126,7 @@ def main(base,out):
         choices.sort(key=lambda ps:sum(p.distance(anchors[n]) for n,p in zip(group,ps)))
         accepted=None
         cache={}
-        for ps in choices[:96]:
+        for ps in choices[:COMBO_LIMIT]:
             changes=dict(zip(group,ps));trial=[]
             for i in affected:
                 line=lines[i];obs,known=ctx(i);u,v=edges[i][1:3]
@@ -129,6 +135,12 @@ def main(base,out):
                 if key not in cache:
                     result,reason=reconstruct(line,obs,known,(a,b))
                     if result is None:result,reason=solve(line,obs,known,(a,b))
+                    if DEEP and result is None and reason in ('no_free_path','path_guard','surface_guard','clearance_guard'):
+                        old_cell=gap.CELL
+                        try:
+                            gap.CELL=.22
+                            result,reason=solve(line,obs,known,(a,b))
+                        finally:gap.CELL=old_cell
                     cache[key]=(result,reason)
                 result,reason=cache[key]
                 if result is None:break
@@ -160,7 +172,7 @@ def main(base,out):
     for name in ("original-links","buildings","official-roads","boundary"):
         shutil.copyfile(base/(name+".geojson"),out/(name+".geojson"))
     final=success|recovered
-    report={**summary,"baseline_success":len(success),"joint_recovered":len(recovered),"candidate_links":len(final),"unresolved_links":len(remaining_fail),"original_links":len(baseline),"moved_nodes":len(moved_nodes),"blocked_nodes":len(blocked),"eligible_nodes":len(movable),"reasons":dict(reasons),"recovered_length_m":round(sum(lines[i].length for i in recovered),2),"baseline_component_sizes":components(edges,success),"updated_component_sizes":components(edges,final),"original_component_sizes":components(edges,baseline),"baseline_unchanged":True,"graph_sha256":summary["graph_sha256"],"limitations":["Graph component counts reflect source node IDs, not proof of actual road connectivity","All incident links checked before moving a node","No measured positions; display-only candidate; no production edits","At most three blocked nodes jointly explored, 96 position combinations per group; preserve prior moved nodes"]}
+    report={**summary,"baseline_success":len(success),"joint_recovered":len(recovered),"candidate_links":len(final),"unresolved_links":len(remaining_fail),"original_links":len(baseline),"moved_nodes":len(moved_nodes),"blocked_nodes":len(blocked),"eligible_nodes":len(movable),"reasons":dict(reasons),"recovered_length_m":round(sum(lines[i].length for i in recovered),2),"baseline_component_sizes":components(edges,success),"updated_component_sizes":components(edges,final),"original_component_sizes":components(edges,baseline),"baseline_unchanged":True,"graph_sha256":summary["graph_sha256"],"limitations":["Graph component counts reflect source node IDs, not proof of actual road connectivity","All incident links checked before moving a node","No measured positions; display-only candidate; no production edits",f"At most three blocked nodes jointly explored, {COMBO_LIMIT} position combinations per group; preserve prior moved nodes"]}
     (out/"summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2))
     print("JOINT_REFINEMENT_RESULT",json.dumps(report,ensure_ascii=False))
 if __name__=="__main__":main(pathlib.Path(sys.argv[1]),pathlib.Path(sys.argv[2]))
