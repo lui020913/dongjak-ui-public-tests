@@ -1,4 +1,5 @@
 import {installCommunityActivity} from './community-activity.js';
+import {splitCommunityReportBody} from './community-report-presentation.js';
 import {installImportantPlaceClick} from './important-place-click.js';
 import {installParkInfoClick} from './park-info-click.js';
 import {installFeaturedPlaceLabels} from './featured-place-labels.js';
@@ -95,6 +96,8 @@ import {slimMapTextHalos} from './map-label-halo.js';
 import {installSupabaseSafetyAi} from './v880-supabase-safety-ai.js';
 import './bocha-road-layer.css';
 import './pilot-layer-selection.css';
+import {installMapHudCollisionGuard} from './map-hud-collision-guard.js';
+import {createRouteMapPickArbiter} from './route-map-pick-arbiter.js';
 import './night-visibility.css';
 import './safety-workspace.css';
 import './night-visibility-panel.css';
@@ -272,6 +275,7 @@ let addMode = false;
 let activeFilter = '전체';
 // 도보 경로 기능. 지도에 지점 찍기와 조사 지점 등록은 서로 다른 모드입니다.
 let routePickMode = null; // 'start' | 'end' | null
+const routeMapPickArbiter=createRouteMapPickArbiter();
 let routeStart = null;
 let routeEnd = null;
 let routeResult = null;
@@ -1880,7 +1884,7 @@ map.on('load',()=>{
     // immediately surface the overview sheet underneath the user's X action.
     overview.hidden=true;
   }, canPickRoute:()=>Boolean(routePickMode),
-  onRoutePick:(place)=>{if(routePickMode)showTransitRouteConfirmation(place);},
+  onRoutePick:(place)=>selectNamedRouteMapPlace(place),
   onRouteSelect:(which,place)=>selectExternalRouteLocation(which,place), canOpen:()=>!navMode&&app.dataset.tab==='map' && !addMode && !routePickMode && !communityPickMode})).then(()=>{
     baseLayerControls?.apply();
     accessibilityLayer.bringToFront();
@@ -2526,6 +2530,21 @@ function showCommunityReport(postId,commentId,anchor){
   form.addEventListener('submit',async e=>{e.preventDefault();send.disabled=true;try{await reportSharedCommunity(postId,commentId,selected);form.remove();toast('신고가 접수되었습니다.');}catch(err){toast(err.message);send.disabled=false;}});
   anchor.append(form);
 }
+function communityReportContent(post,detail){
+  const {type,priority,body}=splitCommunityReportBody(post.body,post.category);
+  const content=document.createDocumentFragment();
+  if(detail&&type&&priority){
+    const facts=makeCEl('dl','community-report-facts');
+    for(const [label,value] of [['보행불편 유형',type],['현장 확인',priority]]){
+      const row=makeCEl('div','community-report-fact');
+      row.append(makeCEl('dt','community-report-label',label),makeCEl('dd','community-report-value',value));
+      facts.append(row);
+    }
+    content.append(facts);
+  }
+  content.append(makeCEl('p','community-post-body',body));
+  return content;
+}
 function renderCommunity() {
   const root=document.getElementById('community-list');if(!root)return;root.replaceChildren();
   // Refreshes may arrive during the notification view; never mount feed cards there.
@@ -2538,7 +2557,14 @@ function renderCommunity() {
   }
   const all=[...sharedCommunityPosts,...communityPosts];
   if(communityDetail&&!all.some(p=>p.id===communityDetail))communityDetail=null;
-  const detail=Boolean(communityDetail);const panel=document.getElementById('participation-panel');if(panel)panel.dataset.communityDetail=String(detail);if(detail)root.append(communityButton('‹ 목록으로','community-back',()=>{communityDetail=null;communityReplyTo=null;renderCommunity();if(panel)panel.querySelector('.dj836-sheet-body').scrollTop=communityListScroll;}));
+  const detail=Boolean(communityDetail);const panel=document.getElementById('participation-panel');if(panel)panel.dataset.communityDetail=String(detail);if(detail){
+    const back=communityButton('목록으로','community-back',()=>{communityDetail=null;communityReplyTo=null;renderCommunity();const scroll=panel?.querySelector('.dj836-sheet-body');if(scroll)scroll.scrollTop=communityListScroll;});
+    const arrow=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    arrow.setAttribute('viewBox','0 0 24 24');arrow.setAttribute('aria-hidden','true');arrow.classList.add('community-back-arrow');
+    const stroke=document.createElementNS('http://www.w3.org/2000/svg','path');
+    stroke.setAttribute('d','M15 5l-7 7 7 7');stroke.setAttribute('fill','none');stroke.setAttribute('stroke','currentColor');stroke.setAttribute('stroke-width','2.4');stroke.setAttribute('stroke-linecap','round');stroke.setAttribute('stroke-linejoin','round');
+    arrow.append(stroke);back.prepend(arrow);root.append(back);
+  }
   const query=communitySearch.trim().toLowerCase();
   const dongFilter=document.getElementById('community-dong-filter')?.value||'';
   let shown=all.filter(p=>detail?p.id===communityDetail:(communitySavedOnly?Boolean(p.bookmarked):!p.bookmarkOnly)&&(communityFilter==='전체'||p.category===communityFilter)&&(!dongFilter||p.dong===dongFilter)&&(!query||(p.title+' '+p.body).toLowerCase().includes(query)));
@@ -2580,7 +2606,7 @@ function renderCommunity() {
     const cat=makeCEl('span','community-post-category',post.category);
     const meta=makeCEl('span','community-post-meta',`${post.nickname} · ${formatCommunityDate(post.created)}${post.shared?' · 공개':' · 내 기기'}`);
     const tags=makeCEl('div','community-post-tags');tags.append(cat);if(post.dong)tags.append(makeCEl('span','community-post-dong',post.dong));header.append(tags,meta);
-    card.append(header);if(!detail){const open=communityButton(post.title,'community-post-title community-open-detail',()=>{const sc=document.querySelector('#participation-panel>.dj836-sheet-body');communityListScroll=sc?.scrollTop||0;communityDetail=post.id;communityReplyTo=null;renderCommunity();if(sc)sc.scrollTop=0;});card.append(open,makeCEl('p','community-post-body',post.body));if(post.photo){const img=document.createElement('img');img.className='community-feed-thumb';img.src=post.photo;img.alt='첨부 사진';img.loading='lazy';card.append(img);}const mini=makeCEl('p','community-summary-count',`공감 ${post.likes||0} · 댓글 ${post.comments?.length||0}${post.photo?' · 사진':''}${post.location?' · 위치':''}`);card.append(mini);root.append(card);continue;}card.append(makeCEl('h4','community-post-title',post.title),makeCEl('p','community-post-body',post.body));
+    card.append(header);if(!detail){const open=communityButton(post.title,'community-post-title community-open-detail',()=>{const sc=document.querySelector('#participation-panel>.dj836-sheet-body');communityListScroll=sc?.scrollTop||0;communityDetail=post.id;communityReplyTo=null;renderCommunity();if(sc)sc.scrollTop=0;});card.append(open,communityReportContent(post,false));if(post.photo){const img=document.createElement('img');img.className='community-feed-thumb';img.src=post.photo;img.alt='첨부 사진';img.loading='lazy';card.append(img);}const mini=makeCEl('p','community-summary-count',`공감 ${post.likes||0} · 댓글 ${post.comments?.length||0}${post.photo?' · 사진':''}${post.location?' · 위치':''}`);card.append(mini);root.append(card);continue;}card.append(makeCEl('h4','community-post-title',post.title),communityReportContent(post,true));
     if(post.photo){
       const img=document.createElement('img');img.className='community-post-image';
       img.src=post.photo;img.loading='lazy';img.alt='게시글 첨부 사진';card.append(img);
@@ -2903,20 +2929,25 @@ window.addEventListener('dongjak:route-swap',()=>{
   updateRouteLabels();
   toast('출발지와 목적지를 바꿨습니다.');
 });
-function selectExternalRouteLocation(which,place){
+function selectExternalRouteLocation(which,place,{dismiss}={}){
   if(navMode||!['start','end'].includes(which)||place?.lng==null||place?.lat==null||!Number.isFinite(Number(place.lng))||!Number.isFinite(Number(place.lat)))return false;
-  const label=String(place.name||'선택한 시설');
-  if(!setRouteLocation(which,{name:label,label,lng:Number(place.lng),lat:Number(place.lat),kind:place.kind||'place'}))return false;
+  const name=String(place.name||'선택한 장소');
+  const label=['bus','subway'].includes(place.kind)?describeTransitPlace(place):name;
+  if(!setRouteLocation(which,{name,label,lng:Number(place.lng),lat:Number(place.lat),kind:place.kind||'place',arsId:place.arsId||'',direction:place.direction||'',lines:place.lines||[],address:place.address||''}))return false;
   routePickMode=null;
   closeTransitRouteConfirmation();closeRouteSearch();
   quickSearch.close();quickSearch.clearMapResults?.();closeTransportPanel(false);
+  // Remove the originating sheet before the route UI is committed, rather than
+  // allowing its close handler to run over the newly presented route screen.
+  if(typeof dismiss==='function')dismiss();
   navigate('route');
   window.dispatchEvent(new CustomEvent('dongjak:route-endpoint-registered',{detail:{which}}));
   toast(which==='start'?`${label}을(를) 출발지로 지정했습니다.`:`${label}을(를) 목적지로 지정했습니다.`);
   return true;
 }
 window.addEventListener('dongjak:route-select',event=>{
-  const {which,place}=event.detail||{};selectExternalRouteLocation(which,place);
+  const request=event.detail;if(!request)return;
+  request.accepted=selectExternalRouteLocation(request.which,request.place,{dismiss:request.dismiss});
 });
 function describeTransitPlace(place) {
   const name=String(place?.name||'교통시설').trim();
@@ -2930,7 +2961,7 @@ function transitAtMapClick(point,lngLat) {
   // 클릭 지점과 가장 가까운 좌표의 마커를 우선합니다.
   const available = [
     'transport-subway-names','transport-subway-station','transport-subway-station-shadow',
-    'transport-bus-stop','transport-bus-names','poi_transit'
+    'transport-bus-stop','transport-bus-names','transport-bus-names-close','dj-transport-bus-pictogram','poi_transit','dj-basemap-bus-pictogram'
   ].filter(id=>map.getLayer(id));
   if(!available.length || !point)return null;
   const features=map.queryRenderedFeatures(
@@ -2940,15 +2971,15 @@ function transitAtMapClick(point,lngLat) {
   for(const feature of features){
     const props=feature.properties||{};
     let place=null;
-    if(String(feature.layer?.id||'').startsWith('transport-')){
+    if(String(feature.layer?.id||'').startsWith('transport-')||feature.layer?.id==='dj-transport-bus-pictogram'){
       const coordinates=feature.geometry?.coordinates;
       const lng=Number(coordinates?.[0]),lat=Number(coordinates?.[1]);
       const kind=props.kind;
       if((kind==='bus'||kind==='subway') && Number.isFinite(lng)&&Number.isFinite(lat)){
-        place={name:String(props.name||'정류장'),lng,lat,kind,arsId:String(props.arsId||''),
+        place={name:String(props.name||'정류장'),lng,lat,kind,arsId:String(props.arsId||''),direction:String(props.direction||''),
           lines:String(props.lines||'').split(',').map(x=>x.trim()).filter(Boolean)};
       }
-    } else if(feature.layer?.id==='poi_transit') place=baseMapTransitPlace(feature,lngLat);
+    } else if(['poi_transit','dj-basemap-bus-pictogram'].includes(feature.layer?.id)) place=baseMapTransitPlace(feature,lngLat);
     if(!place)continue;
     const xy=map.project([place.lng,place.lat]);
     const distance=Math.hypot(xy.x-point.x,xy.y-point.y);
@@ -2957,8 +2988,13 @@ function transitAtMapClick(point,lngLat) {
   matches.sort((a,b)=>a.distance-b.distance);
   return matches[0]?.place||null;
 }
+function selectNamedRouteMapPlace(place){
+  if(!routePickMode||app.dataset.tab!=='map'||!document.getElementById('route-transit-confirm')?.hidden)return false;
+  if(!place?.name||place.lng==null||place.lat==null||!Number.isFinite(Number(place.lng))||!Number.isFinite(Number(place.lat)))return false;
+  return routeMapPickArbiter.named(()=>showTransitRouteConfirmation({...place,lng:Number(place.lng),lat:Number(place.lat)}));
+}
 function showTransitRouteConfirmation(place) {
-  if(!requireDongjakRouteLocation(place))return;
+  if(!requireDongjakRouteLocation(place))return false;
   immersiveChrome.restore();
   closeTransitRouteConfirmation();
   routeTransitCandidate=place;
@@ -2967,9 +3003,9 @@ function showTransitRouteConfirmation(place) {
   const panel=document.getElementById('route-transit-confirm');
   document.getElementById('route-transit-confirm-name').textContent=place.name;
   document.getElementById('route-transit-confirm-desc').textContent=place.kind==='bus'
-    ? (place.arsId?`버스정류장 · ARS ${place.arsId}. 정류장명과 번호를 확인해 주세요.`:'버스정류장 · 지도의 표시 위치가 맞는지 확인해 주세요.')
-    : place.kind==='subway'?'지하철역 · 역명과 호선을 확인해 주세요.'
-    : `${place.address||'지도에서 선택한 위치'} · 이곳이 맞습니까?`;
+    ? ['버스정류장',place.arsId?`ARS ${place.arsId}`:'',place.direction||''].filter(Boolean).join(' · ')
+    : place.kind==='subway'?'지하철역'
+    : [place.source==='facility'?(place.category||'시설'):'지도에서 선택한 위치',place.address||''].filter(Boolean).join(' · ');
   const tags=document.getElementById('route-transit-confirm-lines');
   tags.replaceChildren();
   for(const line of place.lines||[]){
@@ -2987,19 +3023,19 @@ function showTransitRouteConfirmation(place) {
       else{name.textContent='도로명 주소 미확인';desc.textContent='주소를 불러오지 못했습니다. 선택한 지도 좌표로 경로를 계산합니다.';}
     });
   }
+  return true;
 }
 // Some HTML-based facility pins stop the map click from reaching the route
 // picker. In route selection mode they should open the ordinary route candidate
 // confirmation instead of their facility details popup.
 window.addEventListener('dongjak:route-map-place',event=>{
-  if(!routePickMode||!document.getElementById('route-transit-confirm')?.hidden)return;
-  const name=String(event.detail?.name||'선택한 장소');
-  const lng=Number(event.detail?.lng),lat=Number(event.detail?.lat);
-  if(!Number.isFinite(lng)||!Number.isFinite(lat))return;
-  showTransitRouteConfirmation({kind:'point',source:'facility',name,lng,lat,lines:[]});
+  const place=event.detail;
+  if(!place)return;
+  selectNamedRouteMapPlace({...place,kind:'point',source:'facility',lines:[]});
 });
 
 function closeTransitRouteConfirmation() {
+  routeMapPickArbiter.cancel();
   document.getElementById('route-transit-confirm').hidden=true;
   routeCandidateMarker?.remove();routeCandidateMarker=null;
   routeTransitCandidate=null;
@@ -3152,8 +3188,9 @@ document.getElementById('route-transit-accept').addEventListener('click',()=>{
     routeProductTools?.setWaypoints(routeWaypoints);
     navigate('route');toast('경유지를 추가했습니다.');return;
   }
-  if(!setRouteLocation(which,{lng:place.lng,lat:place.lat,label,resolveAddress:place.kind==='point'&&!['search','facility'].includes(place.source)&&!place.address}))return;
+  if(!setRouteLocation(which,{name:place.name,lng:place.lng,lat:place.lat,label,kind:place.kind,arsId:place.arsId||'',direction:place.direction||'',lines:place.lines||[],address:place.address||'',resolveAddress:place.kind==='point'&&!['search','facility'].includes(place.source)&&!place.address}))return;
   navigate('route');
+  window.dispatchEvent(new CustomEvent('dongjak:route-endpoint-registered',{detail:{which}}));
   toast(which==='start'?'선택한 위치를 출발지로 확정했습니다.':'선택한 위치를 목적지로 확정했습니다.');
 });
 
@@ -3170,11 +3207,15 @@ function beginRoutePick(which) {
 function pickRouteLocation(lngLat,point) {
   if (!routePickMode)return;
   if(!document.getElementById('route-transit-confirm').hidden)return;
-  const transit=transitAtMapClick(point,lngLat);
-  if(transit){showTransitRouteConfirmation(transit);return;}
-  // 일반 지도 위치도 마커를 먼저 표시하고, 사용자가 확인한 뒤에만 저장합니다.
-  showTransitRouteConfirmation({kind:'point',name:'지도에서 선택한 위치',
-    lng:lngLat.lng,lat:lngLat.lat,lines:[]});
+  // MapLibre fires the generic listener before some delegated POI listeners.
+  // Defer the coordinate fallback until all synchronous named-place handlers finish.
+  const which=routePickMode;
+  routeMapPickArbiter.defer(()=>{
+    if(routePickMode!==which||app.dataset.tab!=='map'||!document.getElementById('route-transit-confirm').hidden)return;
+    const transit=transitAtMapClick(point,lngLat);
+    if(transit){showTransitRouteConfirmation(transit);return;}
+    showTransitRouteConfirmation({kind:'point',name:'지도에서 선택한 위치',lng:lngLat.lng,lat:lngLat.lat,lines:[]});
+  });
 }
 function resetRoute() {
   routePriVisuals=null;
@@ -3885,7 +3926,7 @@ document.addEventListener('visibilitychange',()=>{
     document.getElementById('nav-warning').textContent='화면을 끄거나 다른 앱으로 전환하면 위치 추적이 중단될 수 있습니다.';
 });
 
-;(() => {const boot=()=>{installMobileSurfaceCoordinator(document,window);installRequestCompletion(document,window);};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();})();
+;(() => {const boot=()=>{installMobileSurfaceCoordinator(document,window);installRequestCompletion(document,window);installMapHudCollisionGuard(document,window);};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();})();
 
 // Animate only genuine hidden-to-visible transitions of phone map header controls.
 ;(()=>{const boot=()=>{const app=document.getElementById('app');if(!app)return;const phone=matchMedia('(max-width:699px)'),reduced=matchMedia('(prefers-reduced-motion: reduce)');const seen=new WeakMap(),motions=new WeakMap();let frame=0;const scan=()=>{frame=0;const nodes=[...app.querySelectorAll('.topbar,#map-quick-search,#djNext-toolbar,#dj-v794-toolbar,#dj831-scrollport')];for(const node of nodes){const style=getComputedStyle(node),visible=app.dataset.tab==='map'&&node.getClientRects().length>0&&style.visibility==='visible'&&style.display!=='none'&&Number(style.opacity)>0;const prior=seen.get(node);seen.set(node,visible);if(!visible){motions.get(node)?.cancel();motions.delete(node);continue;}if(prior!==false||!phone.matches||reduced.matches||!node.animate)continue;if(nodes.some(parent=>parent!==node&&parent.contains(node)&&motions.has(parent)))continue;if(node.getAnimations?.().some(a=>a.playState==='running'))continue;const motion=node.animate([{opacity:0},{opacity:Number(style.opacity)}],{duration:350,easing:'cubic-bezier(.25,.20,.40,1)'});motions.set(node,motion);motion.onfinish=()=>{if(motions.get(node)===motion)motions.delete(node);};}};const schedule=()=>{if(!frame)frame=requestAnimationFrame(scan);};scan();new MutationObserver(schedule).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class','style','data-tab','aria-hidden','data-closing']});document.addEventListener('animationend',schedule,true);document.addEventListener('transitionend',schedule,true);phone.addEventListener?.('change',schedule);};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();})();

@@ -137,7 +137,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
     const lng=Number(place?.lng??lngLat?.lng),lat=Number(place?.lat??lngLat?.lat);
     if(Number.isFinite(lng)&&Number.isFinite(lat)){
       window.dispatchEvent(new CustomEvent('dongjak:route-map-place',{
-        detail:{name:String(normalizeFacilityName(place?.name,place?.type||place?.category)||'선택한 장소').slice(0,90),lng,lat}
+        detail:{name:String(normalizeFacilityName(place?.name,place?.type||place?.category)||'선택한 장소').slice(0,90),lng,lat,category:normalizeFacilityCategory(place?.type||place?.category||'시설',place?.name),address:placeData({...place,lng,lat}).address}
       }));
     }
     return null;
@@ -188,9 +188,13 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
     button.textContent=label;
     button.setAttribute('aria-label',which==='start'?'여기서 출발':'여기로 도착');
     button.title=which==='start'?'여기서 출발':'여기로 도착';
-    button.addEventListener('click',()=>{
-      window.dispatchEvent(new CustomEvent('dongjak:route-select',{detail:{which,place:{name:p.name,lng:p.lng,lat:p.lat}}}));
-      popup?.remove();
+    button.addEventListener('click',event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      // The route owner validates the endpoint and dismisses this specific
+      // facility BEFORE revealing its editor. Rejected endpoints keep the sheet.
+      const request={which,place:{name:p.name,lng:p.lng,lat:p.lat,kind:'facility',address:p.address},dismiss:()=>popup?.remove(),accepted:false};
+      window.dispatchEvent(new CustomEvent('dongjak:route-select',{detail:request}));
     });
     routeActions.append(button);
   }

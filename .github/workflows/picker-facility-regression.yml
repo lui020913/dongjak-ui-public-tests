@@ -1,0 +1,49 @@
+name: Picker and facility route regression
+on:
+  pull_request:
+    paths:
+      - 'app/src/pilot-layer-selection.css'
+      - 'app/src/map-hud-collision-guard.js'
+      - 'app/tests/map-hud-collision-guard.test.mjs'
+      - 'app/tests/map-hud-collision-browser.mjs'
+      - 'app/src/place-details.js'
+      - 'app/src/main.js'
+      - 'app/src/community-report-presentation.js'
+      - 'app/tests/community-report-presentation.test.mjs'
+      - 'app/src/mobile-first-layout.css'
+      - 'app/src/popup-close-input.js'
+      - 'app/tests/popup-close-input.test.mjs'
+      - 'app/tests/expanded-detail-header-browser.mjs'
+      - 'app/src/transport-map.js'
+      - 'app/src/route-map-pick-arbiter.js'
+      - 'app/tests/route-map-pick-transit-facility-20261126.test.mjs'
+      - 'app/tests/picker-layer-facility-route-20261126.test.mjs'
+      - '.github/workflows/picker-facility-regression.yml'
+permissions:
+  contents: read
+jobs:
+  focused-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check app/src/main.js && node --check app/src/place-details.js && node --check app/src/transport-map.js
+      - run: node --test app/tests/picker-layer-facility-route-20261126.test.mjs app/tests/active-layer-dock-20261126.test.mjs app/tests/v864-facility-detail-redesign.test.mjs app/tests/map-hud-collision-guard.test.mjs app/tests/route-map-pick-transit-facility-20261126.test.mjs app/tests/popup-close-input.test.mjs app/tests/transport-click.test.mjs app/tests/community-report-presentation.test.mjs app/tests/v867-transport-window-lifecycle.test.mjs
+
+  geometry-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/map-hud-collision-browser.mjs
+      - run: node tests/expanded-detail-header-browser.mjs
