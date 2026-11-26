@@ -18,7 +18,7 @@ function start(){
   };
   return worker;
 }
-export function evaluateCompositePriRouteCandidates(routes,{timeoutMs=20000}={}){
+export function evaluateCompositePriRouteCandidates(routes,{timeoutMs=20000,factors}={}){
   return new Promise((resolve,reject)=>{
     const id=++sequence;
     const timer=setTimeout(()=>{
@@ -26,7 +26,7 @@ export function evaluateCompositePriRouteCandidates(routes,{timeoutMs=20000}={})
       pending.delete(id);reject(new Error('PRI 자료 분석 시간 초과'));
     },timeoutMs);
     pending.set(id,{resolve,reject,timer});
-    try{start().postMessage({id,routes});}
+    try{start().postMessage({id,routes,factors});}
     catch(error){pending.delete(id);clearTimeout(timer);reject(error);}
   });
 }
