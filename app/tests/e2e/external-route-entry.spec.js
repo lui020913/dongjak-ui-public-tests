@@ -62,6 +62,17 @@ test('real transit detail buttons navigate to the visible route editor, includin
    await expect(page.locator('.dj-route-endpoint-marker,.dj-route-candidate-marker')).toHaveCount(0);
   }
   if(which==='end'){
+   // Closing the route editor after the first entry intentionally resets
+   // the endpoints. Register the start again through the real app handler.
+   const accepted=await page.evaluate(()=>{
+    const detail={which:'start',place:{kind:'subway',name:'상도',lng:126.94795,lat:37.50283,lines:['7호선']}};
+    window.dispatchEvent(new CustomEvent('dongjak:route-select',{detail}));
+    return detail.accepted;
+   });
+   expect(accepted).toBe(true);
+   await expect(route.locator('#v3-start')).toContainText('상도');
+   await expect(route.locator('#v3-end')).toContainText('상도역');
+   await expect(route.locator('[data-v3="calculate"]')).toBeEnabled({timeout:10000});
    // Deterministic transit service fixture: real app endpoint state and real
    // comparison module, without depending on Seoul API availability in CI.
    const stops=[
