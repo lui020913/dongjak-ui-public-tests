@@ -867,7 +867,7 @@ async function loadOneBuildingSheet(sheet){
     for(const problem of errors) console.warn(`[동작하는 안전지도] ${sheet.sheet}번 ${problem.label} 로딩 실패:`,problem.error);
     // Defer geometry filtering and indexing until the phone camera is settled.
     while(djPhone&&map.isMoving?.())await new Promise(resolve=>map.once('moveend',resolve));
-    if(!boundaryGeometry)return;
+    if(!boundaryGeometry||app.dataset.djTransitPreview)return;
     // Tile-native buildings are incomplete in parts of Sangdo 1-dong. The
     // supplied base+supplement GIS footprints must also be available overhead.
     const districtBuildings=features.filter(f=>Number.isFinite(f.properties?.x)&&Number.isFinite(f.properties?.y)&&
@@ -939,7 +939,7 @@ function scheduleInitialBuildingWarmup(){
           if(typeof requestIdleCallback==='function')requestIdleCallback(resolve,{timeout:2200});
           else setTimeout(resolve,350);
         });
-        if(!map.getStyle?.()?.layers?.length)return;
+        if(!map.getStyle?.()?.layers?.length||app.dataset.djTransitPreview)return;
         await loadOneBuildingSheet(sheet);
       }
     }catch(error){console.info('[3D 건물 사전 준비] 요청 시 재시도 가능:',error?.message);}
@@ -948,9 +948,9 @@ function scheduleInitialBuildingWarmup(){
   else setTimeout(()=>void run(),900);
 }
 function djTrimOffscreenBuildings(sheets){
-  if(!djRenderBudget.isEconomy()||app.dataset.sangdoNight==='on'||map.isMoving?.())return;
+  if(!djPhone||app.dataset.sangdoNight==='on'||map.isMoving?.())return;
   const visible=sheets.map(s=>s.sheet);
-  for(const id of offscreenEvictionIds([...loadedBuildingTiles.keys()],visible,2)){
+  for(const id of offscreenEvictionIds([...loadedBuildingTiles.keys()],visible,djRenderBudget.isEconomy()?2:6)){
     const info=loadedBuildingTiles.get(id),sourceId='dongjak-buildings-data-'+id;
     if(!info||buildingLoading.has(id))continue;
     const owned=[info.footprintFillId,info.footprintLineId,info.layerId];
@@ -968,7 +968,7 @@ async function loadVisibleBuildingSheets(){
   let interrupted=false;
   try{
     const manifest=await ensureBuildingManifest();
-    if(!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN)return;
+    if(app.dataset.djTransitPreview||!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN)return;
     const bbox=getVisibleBBox();
     const nearby=manifest.sheets.filter(s=>intersects(s.bbox,bbox));
     const center=map.getCenter();const sheets=nearestBuildingSheets({sheets:nearby},[center.lng,center.lat],nearby.length);
@@ -2912,9 +2912,13 @@ function clearTransitPreview(){
   syncTransitExterior();
   if(wasPreview)scheduleBuildingLoad();
   window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:null}));
-  const empty={type:'FeatureCollection',features:[]};
+  // Remove preview-owned layers before their sources; ordinary transport layers stay intact.
   for(const id of ['dj815-transit-walk','dj815-transit-rail','dj-transit-rail-verified','dj-transit-rail-schematic','dj815-transit-bus','dj-transit-multi-walk','dj-transit-multi-bus','dj-transit-multi-rail','dj-transit-multi-stops']){
-    try{map.getSource(id)?.setData(empty);}catch{}
+    if(!map.getSource(id))continue;
+    try{for(const suffix of ['-line','-focus-casing','-circle'])if(map.getLayer(id+suffix))map.removeLayer(id+suffix);
+      if(!map.getStyle().layers.some(layer=>layer.source===id))map.removeSource(id);
+      else map.getSource(id)?.setData({type:'FeatureCollection',features:[]});
+    }catch(error){console.debug('[대중교통 경로 정리]',error?.message);}
   }
 }
 function syncPriRouteLine(){
