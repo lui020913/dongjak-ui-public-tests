@@ -2905,7 +2905,7 @@ function makeRouteMarker(position, color) {
   marker.getElement?.()?.classList.add('dj-route-endpoint-marker');
   return marker;
 }
-function drawRouteMarkers(visible=(app.dataset.tab==='map'||app.dataset.transitComparison==='true')&&!communityPickMode&&!addMode&&Boolean(routePickMode||((routeResult||transitPreview)&&app.dataset.djWalkArrived!=='1')||navMode)) {
+function drawRouteMarkers(visible=(app.dataset.tab==='map'||app.dataset.transitComparison==='true')&&!communityPickMode&&!addMode&&Boolean(app.dataset.transitComparison==='true'||routePickMode||((routeResult||transitPreview)&&app.dataset.djWalkArrived!=='1')||navMode)) {
   const update=(marker,point,key,color)=>{
     const next=visible&&point?`${point.lng},${point.lat}`:null;
     if(marker&&routeEndpointMarkerKeys[key]===next&&next)return marker;
@@ -3468,7 +3468,6 @@ window.addEventListener('dongjak:transit-comparison-focus',event=>{
  const {sheetTop,toolbarBottom}=event.detail||{};
  const padding=transitVisiblePadding(sheetTop,toolbarBottom);if(!padding)return;
  app.dataset.transitComparison='true';drawRouteMarkers(true);
- const rect=map.getContainer().getBoundingClientRect();
  map.easeTo({center:[routeEnd.lng,routeEnd.lat],offset:[0,(padding.top-padding.bottom)/2],padding:{top:0,bottom:0,left:0,right:0},pitch:0,duration:350});
 });
 window.addEventListener('dongjak:transit-comparison-dismiss',()=>{delete app.dataset.transitComparison;drawRouteMarkers();});
@@ -3893,7 +3892,7 @@ function setTransitPreviewStops(features){
  const id='dj-transit-multi-stops',data={type:'FeatureCollection',features};
  if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
  if(!map.getLayer(id+'-circle'))map.addLayer({id:id+'-circle',type:'circle',source:id,paint:{'circle-radius':['case',['==',['get','transfer'],true],7,6],'circle-color':'#fff','circle-stroke-color':['get','color'],'circle-stroke-width':2.5}});
- if(!map.getLayer(id+'-transfer-label'))map.addLayer({id:id+'-transfer-label',type:'symbol',source:id,filter:['==',['get','transfer'],true],layout:{'text-field':'환승','text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'],'text-size':11.7,'text-anchor':'bottom','text-offset':[0,-2.4],'text-allow-overlap':false,'text-ignore-placement':false,'text-padding':5,'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},paint:{'text-color':'#21483c','text-halo-color':'#fff','text-halo-width':1.1}});
+ if(!map.getLayer(id+'-transfer-label'))map.addLayer({id:id+'-transfer-label',type:'symbol',source:id,filter:['==',['get','transfer'],true],layout:{'text-field':'환승','text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'],'text-size':11.7,'text-variable-anchor':['bottom','top','left','right'],'text-radial-offset':2.4,'text-allow-overlap':false,'text-ignore-placement':false,'text-padding':5,'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},paint:{'text-color':'#21483c','text-halo-color':'#fff','text-halo-width':1.1}});
 }
 function transitRailData(segments){
  const color=line=>subwayLineColor(line==='신림'?'신림선':line+'호선');

@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.221",
+  "application_version": "9.2.222",
   "public_work_branch": "main",
-  "purpose": "Integrated transit design and map performance patch: filled route-color pill badges, route search/detail local fades, station-reference label font and zoom sizing, idle-only label style/reorder updates, idempotent native transit filter, shared displayed rail geometry for selected routes, route lines beneath station/POI symbols, transfer labels and teardown regression. Preserve v9.2.220 community dismissal and transit/POI improvements. Require protected source CI, mobile QA, Production and APK; physical device FPS not yet verified.",
-  "attempt": 456,
+  "purpose": "Remove transit fare/full-trip estimates; frame destination above comparison sheet and full route above detail sheet; preserve per-line metro station names and geographic icons with opposing anchors, collision-aware transfer labels; stabilize phone 2x renderer and postpone building loading during repeated gestures. Keep existing colors, verified paths and PRI. Require source CI, Preview, phone QA, Production and APK.",
+  "attempt": 457,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

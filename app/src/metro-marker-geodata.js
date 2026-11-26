@@ -2,7 +2,7 @@
  * MapLibre GeoJSON-based subway markers.
  * Far/overview zoom: transfer lines are shown as adjacent, separate colored circles.
  * Close zoom: each line marker is anchored to its own rendered rail geometry.
- * Overview and detail show one name per distinct station name; per-line icons remain.
+ * Overview shares one station name; detail preserves each line's name and places it away from its neighbor.
  */
 const asCollection=features=>({type:'FeatureCollection',features});
 const isCoordinate=x=>Array.isArray(x)&&x.length===2&&x.every(Number.isFinite);
@@ -60,27 +60,28 @@ export function metroMarkerGeojson(items,{
         stationKey:key,stationName:key,lines:lines.join(','),role:'summary',line,interchange:linePoints.length>1,
         badge:line==='신림선'?'신림':String(line).replace(/호선$/,''),
         color:colors[line],iconId:`dj-station-summary-${lineToken}`,
-        iconLines:[line],iconOffset,label:summaryLabel,labelOffset:[linePoints.length>1?0.56:0,-1.40],labelOn:index===0,
+        iconLines:[line],iconOffset,label:summaryLabel,labelOffset:[linePoints.length>1?0.56:0,-1.40],labelAnchor:'bottom',labelOn:index===0,
         openable
       }));
     });
 
     // Close zoom: each service gets its own marker on its own rail line.
-    // Different names (e.g. Isu/Chongsin) are preserved; identical station names appear once.
-    const seenLabels=new Set();
+    // Preserve per-line names even when identical, with opposite label anchors.
     linePoints.forEach((lp,index)=>{
       const line=normalizeLine(lp.line);
       const name=key==='이수'?(line==='4호선'?'총신대입구':'이수'):key;
       const baseLabel=name.endsWith('역')?name:`${name}역`;
       // The badge already identifies the line; never add a redundant route suffix.
-      const label=baseLabel;const labelOn=!seenLabels.has(label);seenLabels.add(label);
-      const side=linePoints.length>1?(index===0?-1:1):0;
+      const label=baseLabel;
+      const multi=linePoints.length>1;
+      const above=!multi||index%2===0;
+      const side=multi?(index-(linePoints.length-1)/2)*1.8:0;
       features.push(point([lp.lng,lp.lat],{
         stationKey:key,stationName:key==='이수'?'이수·총신대입구':key,
         lines:lines.join(','),role:'detail',line,
         badge:line==='신림선'?'신림':line.replace(/호선$/,''),color:colors[line],
         iconId:`dj-station-line-${line}`,iconLines:[line],iconOffset:[0,0],offset:[0,0],
-        label,labelOffset:[side*0.95,-1.45],labelAnchor:'bottom',labelOn,
+        label,labelOffset:[side,above?-1.65:1.65],labelAnchor:above?'bottom':'top',labelOn:true,
         openable:Boolean(isDistrict(lp.lng,lp.lat)||nearby(lp.lng,lp.lat))
       }));
     });

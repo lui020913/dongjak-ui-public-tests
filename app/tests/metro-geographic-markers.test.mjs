@@ -53,7 +53,9 @@ test('역을 지도 지리 좌표로 저장하며 팬/줌에 따른 픽셀 위�
   assert.equal(new Set(summary.map(f=>f.properties.iconOffset.join(','))).size,2);
   assert.deepEqual(summary.map(f=>f.properties.iconOffset[0]).sort((a,b)=>a-b),[-34,34]);
   assert.equal(summary.filter(f=>f.properties.labelOn).length,1,'원거리에서는 역명을 한 번만 표시한다');
-  assert.equal(detail.filter(f=>f.properties.labelOn).length,1,'가까이 확대해도 동일 역명은 한 번만 표시한다');
+  assert.equal(detail.filter(f=>f.properties.labelOn).length,2,'가까이 확대하면 호선별 독립 역명을 유지한다');
+  assert.deepEqual(detail.map(f=>f.properties.labelAnchor).sort(),['bottom','top']);
+  assert.ok(detail.some(f=>f.properties.labelOffset[1]<0)&&detail.some(f=>f.properties.labelOffset[1]>0));
   assert.deepEqual(detail.map(f=>f.properties.label).sort(),['노량진역','노량진역']);
   assert.deepEqual(detail.map(f=>f.properties.badge).sort(),['1','9'],'호선별 숫자만 표시한다');
 });
