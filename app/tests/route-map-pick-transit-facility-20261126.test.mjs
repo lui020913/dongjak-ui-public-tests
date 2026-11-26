@@ -30,3 +30,10 @@ test('all transport marker click owners support picking and route buttons do not
  assert.ok(m.includes("source:'facility',lines:[]"));
  assert.ok(p.includes('address:placeData({...place,lng,lat}).address'));
 });
+
+test('route location confirmation shows place metadata without redundant confirmation question',()=>{
+ const m=read('main.js');
+ const s=m.slice(m.indexOf('function showTransitRouteConfirmation(place)'),m.indexOf('// Some HTML-based facility pins'));
+ assert.doesNotMatch(s,/이곳이 맞습니까|역명과 호선을 확인해 주세요/);
+ assert.ok(s.includes('place.address'));
+});

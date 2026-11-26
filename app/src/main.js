@@ -2980,9 +2980,9 @@ function showTransitRouteConfirmation(place) {
   const panel=document.getElementById('route-transit-confirm');
   document.getElementById('route-transit-confirm-name').textContent=place.name;
   document.getElementById('route-transit-confirm-desc').textContent=place.kind==='bus'
-    ? ['버스정류장',place.arsId?`ARS ${place.arsId}`:'',place.direction||'','이곳이 맞습니까?'].filter(Boolean).join(' · ')
-    : place.kind==='subway'?'지하철역 · 역명과 호선을 확인해 주세요.'
-    : [place.source==='facility'?(place.category||'시설'):'지도에서 선택한 위치',place.address||'','이곳이 맞습니까?'].filter(Boolean).join(' · ');
+    ? ['버스정류장',place.arsId?`ARS ${place.arsId}`:'',place.direction||''].filter(Boolean).join(' · ')
+    : place.kind==='subway'?'지하철역'
+    : [place.source==='facility'?(place.category||'시설'):'지도에서 선택한 위치',place.address||''].filter(Boolean).join(' · ');
   const tags=document.getElementById('route-transit-confirm-lines');
   tags.replaceChildren();
   for(const line of place.lines||[]){
