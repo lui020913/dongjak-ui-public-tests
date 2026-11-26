@@ -43,6 +43,9 @@ try{
    await page.waitForFunction(()=>window.__qaMap?.getSource('dongjak-buildings-data-6'),{},{timeout:60000});
    await page.waitForFunction(()=>window.__qaMap.isSourceLoaded('dongjak-buildings-data-6'),{},{timeout:30000});
    const read=()=>page.evaluate(async()=>{const m=window.__qaMap,s=m.getSource('dongjak-buildings-data-6'),data=typeof s.getData==='function'?await s.getData():s._data;return {count:data?.features?.length,plan:m.getLayoutProperty('dongjak-buildings-footprint-6','visibility'),extrusion:m.getLayoutProperty('dongjak-buildings-3d-6','visibility'),rendered:m.queryRenderedFeatures({layers:['dongjak-buildings-footprint-6','dongjak-buildings-3d-6']}).length};});
+   // Source readiness does not guarantee that a rendered frame contains its features.
+   // Wait for the actual visible layer instead of accepting an empty canvas.
+   await page.waitForFunction(()=>{const m=window.__qaMap;return m.getLayoutProperty('dongjak-buildings-footprint-6','visibility')==='visible'&&m.queryRenderedFeatures({layers:['dongjak-buildings-footprint-6']}).length>0;},{},{timeout:30000});
    const two=await read();assert.ok(two.count>0);assert.equal(two.plan,'visible');assert.equal(two.extrusion,'none');assert.ok(two.rendered>0);
    await page.locator('#map canvas').first().screenshot({path:out+'/'+(enabled?'on':'off')+'-2d.png',timeout:15000});
    await page.evaluate(()=>window.__qaMap.jumpTo({pitch:45}));
