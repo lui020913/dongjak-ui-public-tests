@@ -2,14 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-test('v8.5.2 keeps the map TIP persistent and cross-fades its copy every 10 seconds',()=>{
+test('v8.5.2 keeps the map TIP persistent and cross-fades its copy after reading',()=>{
  const tip=read('src/v840-coordinated-ui.js');
  const scale=read('src/map-scale-docking.js');
  assert.match(tip,/const advanceTip=/);
  assert.match(tip,/dj852-tip-copy-fade/);
  assert.doesNotMatch(tip,/tipShownThisMapVisit|tipHideTimer|showBriefTip/);
  assert.match(tip,/tipMark\.textContent='TIP'/);
- assert.match(tip,/\},10000\)/);
+ assert.match(tip,/Date\.now\(\)<Number\(label\.dataset\.djTipReadUntil\)/);
  assert.match(scale,/shouldHideMobileScale/);
  assert.doesNotMatch(scale,/MOBILE_SCALE_BLOCKERS[\s\S]{0,160}#dj840-map-tip/);
  assert.match(read('index.html'),/v832-mobile-interaction\.js/);
