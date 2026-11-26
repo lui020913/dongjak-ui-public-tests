@@ -16,7 +16,9 @@
 *,*::before,*::after {box-sizing:border-box}
 button,input {font:inherit}
 button {cursor:pointer; -webkit-tap-highlight-color:transparent}
-button:focus-visible,input:focus-visible{outline:3px solid #62a99d;outline-offset:2px}
+button:focus,input:focus{outline:none;box-shadow:none}
+:is(button,input):focus-visible{outline:var(--dj-route-focus-outline,2px solid #596368);outline-offset:2px}
+input:focus{border-color:#596368}
 [hidden]{display:none!important}
 .canvas {position:absolute;inset:0;pointer-events:none}
 .canvas[data-search-open="true"]{background:var(--v3-page-bg)}

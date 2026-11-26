@@ -39,6 +39,20 @@
           : (displayTheme==='dark'?'#22282e':'#f3f7f5');
       })();
     </script>
+    <script id="dj-interaction-input">
+      (function () {
+        const root = document.documentElement;
+        const pointer = () => { root.dataset.djFocusInput = 'pointer'; };
+        const keyboard = (event) => {
+          if (['Tab','Enter',' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','Escape'].includes(event.key)) {
+            root.dataset.djFocusInput = 'keyboard';
+          }
+        };
+        document.addEventListener('pointerdown', pointer, {capture:true, passive:true});
+        document.addEventListener('touchstart', pointer, {capture:true, passive:true});
+        document.addEventListener('keydown', keyboard, {capture:true});
+      })();
+    </script>
     <script id="dj-production-style-recovery">
       // Independent of the application bundle: failed local styles must not
       // expose an unstyled, interactive map. Vite's hashed CSS is same-origin.
@@ -101,6 +115,65 @@
       })();
     </script>
     <style>
+      /* DJ_INTERACTION_FOCUS_START */
+      @layer dj-interaction-focus;
+      @layer dj-interaction-focus {
+        :root { --dj-neutral-focus: #596368; --dj-route-focus-outline: 2px solid var(--dj-neutral-focus); }
+        :root[data-dj-focus-input="pointer"] { --dj-route-focus-outline: none; }
+        :root:has(#app[data-theme="dark"]) { --dj-neutral-focus: #b9c2c6; }
+        :is(button,[role="button"],[role="tab"],[role="switch"],[role="option"],[role="checkbox"],[role="radio"],[tabindex],a[href],summary,input,textarea,select) {
+          -webkit-tap-highlight-color: transparent !important;
+        }
+        :is(button,[role="button"],[role="tab"],[role="switch"],[role="option"],[role="checkbox"],[role="radio"],[tabindex],a[href],summary,input,textarea,select):focus {
+          outline: none !important;
+          box-shadow: none !important;
+        }
+        html:not([data-dj-focus-input="pointer"]) :is(button,[role="button"],[role="tab"],[role="switch"],[role="option"],[role="checkbox"],[role="radio"],[tabindex],a[href],summary,input,textarea,select):focus-visible {
+          outline: 2px solid var(--dj-neutral-focus) !important;
+          outline-offset: 2px !important;
+        }
+        :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),textarea,select):focus {
+          border-color: var(--dj-neutral-focus) !important;
+        }
+        .metro-station-marker:is(:hover,:focus-visible) .metro-badges {
+          outline-color: var(--dj-neutral-focus) !important;
+        }
+        html[data-dj-focus-input="pointer"] .metro-station-marker:focus .metro-badges {
+          outline: none !important;
+        }
+        @media (max-width:699px) {
+          #dj840-map-tip > .dj840-tip-copy-viewport {
+            margin-inline-end: var(--dj-tip-close-reserve, 0px) !important;
+            overflow: hidden !important;
+          }
+          #dj840-map-tip > .dj840-tip-copy-viewport > .dj840-tip-copy {
+            flex-shrink: 0 !important;
+            width: max-content !important;
+            white-space: nowrap !important;
+            text-overflow: clip !important;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            #dj840-map-tip:not([hidden]) { height:auto !important; max-height:none !important; }
+            #dj840-map-tip > .dj840-tip-copy-viewport { height:auto !important; }
+            #dj840-map-tip > .dj840-tip-copy-viewport > .dj840-tip-copy {
+              width:100% !important; white-space:normal !important;
+              overflow-wrap:anywhere !important; animation:none !important;
+            }
+          }
+        }
+        #dj-user-tip-close {
+          appearance: none !important;
+          -webkit-appearance: none !important;
+          background: transparent !important;
+          border: 0 !important;
+          box-shadow: none !important;
+          filter: none !important;
+        }
+        #dj-user-tip-close::before, #dj-user-tip-close::after {
+          box-shadow: none !important;
+        }
+      }
+          /* DJ_INTERACTION_FOCUS_END */
       /* Critical first paint: no unstyled logo or white-theme flash. */
       html,body{margin:0;min-height:100%;}
       .map-startup-overlay{

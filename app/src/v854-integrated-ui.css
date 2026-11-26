@@ -256,7 +256,7 @@ html body #app#app #map-quick-search-dropdown .dj854-search-empty{
   html body #app#app #dj840-map-tip.dj854-tip-marquee span{
     animation:dj854-tip-marquee var(--dj854-tip-duration,9s) ease-in-out infinite alternate!important;
   }
-  @keyframes dj854-tip-marquee{from{transform:translateX(0)}to{transform:translateX(var(--dj854-tip-overflow,-42px))}}
+  @keyframes dj854-tip-marquee{0%,10%{transform:translateX(0)}90%,100%{transform:translateX(var(--dj854-tip-overflow,0px))}}
   html body #app#app[data-theme="dark"] #dj-mobile-utilities .dj854-more-head{
     background:var(--dj800-surface,#192e31)!important;border-bottom-color:var(--dj800-border,#49625d)!important;
   }
