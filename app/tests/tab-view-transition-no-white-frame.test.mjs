@@ -63,7 +63,7 @@ test('phone tab switches real DOM immediately and animates content, never white 
  const primary=read('src/primary-surface-transition.js');
  const toolbar=read('src/v845-mobile-motion.js');
  assert.match(read('src/bottom-tab-navigation.js'),/createPrimarySurfaceTransition\(\{doc,win,app,replay,reduced\}\)/);
- assert.match(primary,/app\.dataset\.tab!==destination\|\|\(incoming&&incoming\.hidden\)/);
+ assert.match(primary,/app\.dataset\.tab!==destination\|\|app\.inert/);
  assert.match(toolbar,/if\(primaryOwnsPaint\(\)\)/);
  const js=read('src/bottom-tab-navigation.js');
  const built=new URL('../src/mobile-next.css',import.meta.url);
@@ -119,7 +119,8 @@ test('community and news directly dissolve incoming content above an opaque outg
   assert.equal(incoming.values.get('opacity'),'0');assert.ok(Number(incoming.values.get('z-index'))>Number(previous.values.get('z-index')));
   raf(0);raf(32);const a=Number(incoming.values.get('opacity'));assert.ok(a>0&&a<1);
   // A late legacy style/hidden write cannot blank or cover the old page.
-  previous.hidden=true;previous.style.setProperty('opacity','0');incoming.style.setProperty('z-index','1');raf(64);
+  previous.hidden=true;incoming.hidden=true;previous.style.setProperty('opacity','0');incoming.style.setProperty('z-index','1');raf(64);
+  assert.equal(incoming.hidden,false,'a stale visibility write cannot hide the logically selected destination');
   assert.equal(previous.hidden,false);assert.equal(previous.values.get('opacity'),'1');assert.equal(incoming.values.get('z-index'),'7001');
   assert.ok(Number(incoming.values.get('opacity'))>a);
   for(let i=3;i<=11;i++)raf(i*32);
