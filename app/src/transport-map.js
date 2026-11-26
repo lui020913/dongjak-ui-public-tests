@@ -1708,7 +1708,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       ['!=',['get','class'],'bus'],['!=',['get','subclass'],'bus_stop'],['!=',['get','subclass'],'bus_station']]);
     if(suppressNativeRail || (map.getZoom?.()??16)<12.45 || document.getElementById('app')?.dataset?.baseMetro==='off')rules.push(['!=',['get','class'],'rail']);
     if(typeof map.setFilter!=='function')return;
-    try{map.setFilter('poi_transit',rules.length?['all',...rules]:null);}catch(e){console.warn('기본 교통 아이콘 축척 제한 실패',e);}
+    try{const next=rules.length?['all',...rules]:null;if(JSON.stringify(map.getFilter?.('poi_transit'))!==JSON.stringify(next))map.setFilter('poi_transit',next);}catch(e){console.warn('기본 교통 아이콘 축척 제한 실패',e);}
   }
   updateBaseTransitFilter();
   map.on('zoomend',updateBaseTransitFilter);

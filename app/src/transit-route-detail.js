@@ -1,7 +1,7 @@
 import {WALK_ICON_PATH} from './route-walk-icon.mjs';
 import {busRouteColor} from './bus-route-overlay.js';
 import {subwayLineColor} from './transport-map.js';
-import {revealSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
+import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 import './transit-route-detail.css';
 import {transitProximity} from './transit-guide-proximity.mjs';
 import {transitRailArrival} from './transit-rail-arrival.mjs';
@@ -144,11 +144,11 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   root.append(fixed,body,footer);
  }
  function render(detail){
-  if(!detail){restoreNativeActions();stopGps();arrivalRequest?.abort();arrivalRequest=null;current=null;step=null;root.hidden=true;root.replaceChildren();cancelSurfaceMotion(root);return;}
+  if(!detail){restoreNativeActions();stopGps();arrivalRequest?.abort();arrivalRequest=null;current=null;step=null;cancelSurfaceMotion(root);const finish=()=>{if(current)return;root.hidden=true;root.replaceChildren();root.style.removeProperty('pointer-events');};if(!root.hidden){root.style.setProperty('pointer-events','none');exitSurface(root,finish);}else finish();return;}
   if(same(current,detail)){current=detail;updatePri();return;}
-  hideNativeActions();
+  cancelSurfaceMotion(root);root.style.removeProperty('pointer-events');hideNativeActions();
   stopGps();reminder=false;arrivalRequest?.abort();arrivalRequest=null;current=detail;step=null;root.replaceChildren();root.hidden=false;
-  if(detail.legs){renderMulti(detail);return;}
+  if(detail.legs){renderMulti(detail);revealSurface(root);return;}
   const kind=detail.kind,color=kind==='bus'?busRouteColor(detail.routeType):subwayLineColor(railLabel(detail.lines[0]));root.style.setProperty('--tr-line-color',color);
   const name=kind==='bus'?detail.route:[...new Set(detail.lines)].map(railLabel).join(' · ');
   const header=el('div','dj-tr-heading');
@@ -156,7 +156,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   const metric=el('b','',Number.isFinite(detail.minutes)?'참고 약 '+Math.ceil(detail.minutes)+'분':'전체 시간 미확인');
   const sub=el('small','',kind==='rail'?railShapeNote(detail.railQuality)+' · 배차·대기·요금 미반영':'공식 버스 노선 · 운행시간·요금 미확인');
   header.append(title,metric,sub);
-  const track=el('div','dj-tr-order');track.setAttribute('aria-label','이동 순서, 시간 비율 아님');for(const name of ['도보',labels[kind],'도보'])track.append(el('span','',name));
+  const track=el('div','dj-tr-order');track.setAttribute('aria-label','이동 순서, 시간 비율 아님');track.append(el('span','','도보'),el('span','dj-tr-vehicle',name),el('span','','도보'));
   const timeline=el('div','dj-tr-timeline');
   function row(type,title,sub){
    const li=el('div','dj-tr-leg');const marker=el('span','dj-tr-marker');marker.innerHTML=icon(type);marker.dataset.kind=type;
@@ -199,7 +199,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   controls.append(prev,next);guide.append(progress,controls);
   const guideBody=el('div','dj-tr-guide-body');guideBody.hidden=true;guideBody.append(gpsControls(),el('small','','승하차 단계는 직접 전환합니다. 위치 확인과 하차 접근 진동은 화면이 켜진 동안의 참고 정보이며 지하에서는 오차가 클 수 있습니다.'));
   footer.append(start,guide);
-  layoutDetail(header,track,fareInfo(detail),timeline,note,footer,guideBody);updatePri();
+  layoutDetail(header,track,fareInfo(detail),timeline,note,footer,guideBody);updatePri();revealSurface(root);
  }
 
  function renderMulti(detail){
@@ -208,7 +208,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   const header=el('div','dj-tr-heading');header.append(el('strong','',detail.legs.map(label).join(' + ')),el('b','','환승 '+(detail.legs.length-1)+'회'),el('small','','전체 시간·요금 미확인'+(detail.railQuality?' · '+railShapeNote(detail.railQuality):'')));
   const track=el('div','dj-tr-order dj-tr-multi-order');track.setAttribute('aria-label','이동 순서, 시간 비율 아님');
   track.append(el('span','','도보'));
-  detail.legs.forEach((leg,i)=>{if(i)track.append(el('span','','환승'));const v=el('span','dj-tr-vehicle',labels[leg.kind]);v.style.setProperty('--vehicle-color',color(leg));track.append(v);});
+  detail.legs.forEach((leg,i)=>{if(i)track.append(el('span','','환승'));const v=el('span','dj-tr-vehicle',label(leg));v.style.setProperty('--vehicle-color',color(leg));track.append(v);});
   track.append(el('span','','도보'));
   const timeline=el('div','dj-tr-timeline');
   function row(type,title,sub,routeColor){
@@ -256,7 +256,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   const next=button('다음 단계','',()=>{step=step>=root.querySelectorAll('.dj-tr-leg').length-1?null:step+1;updateStep();});next.dataset.stepNext='';
   controls.append(prev,next);guide.append(progress,controls);
   const guideBody=el('div','dj-tr-guide-body');guideBody.hidden=true;guideBody.append(gpsControls(),el('small','','승하차 단계는 직접 전환합니다. 위치 확인과 하차 접근 진동은 화면이 켜진 동안의 참고 정보이며 지하에서는 오차가 클 수 있습니다.'));
-  footer.append(start,guide);layoutDetail(header,track,fareInfo(detail),timeline,note,footer,guideBody);updatePri();
+  footer.append(start,guide);layoutDetail(header,track,fareInfo(detail),timeline,note,footer,guideBody);updatePri();revealSurface(root);
  }
 
  const listener=e=>render(e.detail);win.addEventListener('dongjak:transit-detail',listener);

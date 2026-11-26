@@ -179,9 +179,16 @@ export function initTheme({map,app}){
   const mapLabelTextPaint=Object.freeze({color:'#f1f4f6',halo:'rgba(18,25,32,0.97)',width:LABEL_HALO_MAX_PX});
   const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:LABEL_HALO_MAX_PX});
   const semanticSymbolPattern=/(?:train[-_]?vehicle|route[-_]?badge|line[-_]?badge|dj-pri-(?:line|point))/i;
-  function syncMapLabelContrast(){
+  const stationFont=['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'];
+  const stationSize=['interpolate',['linear'],['zoom'],13.3,10,16,11.6,17.15,11.7,20,11.7];
+  let labelStyleSignature='';
+  function syncMapLabelContrast(force=false){
+    if(map.isMoving?.()){scheduleMapLabelContrast();return;}
     const layers=map.getStyle?.()?.layers;
     if(!Array.isArray(layers))return;
+    const signature=themeState.value+'|'+(app.dataset.djSettingsText||'normal')+'|'+layers.filter(l=>l.type==='symbol').map(l=>l.id).sort().join(',');
+    if(!force&&signature===labelStyleSignature)return;
+    labelStyleSignature=signature;
     for(const layer of layers){
       // No text-field means icon-only; preserve safety/transit pictograms.
       if(layer.type!=='symbol'||!layer.layout?.['text-field']||semanticSymbolPattern.test(layer.id))continue;
@@ -205,21 +212,22 @@ export function initTheme({map,app}){
           if(JSON.stringify(current)!==JSON.stringify(value))map.setPaintProperty(id,key,value);
         }
         if(typeof map.getLayoutProperty==='function'&&typeof map.setLayoutProperty==='function'&&original.size!=null){
-          const textSize=scaleMapLabelSize(original.size,app.dataset.djSettingsText||'normal');
+          const named=/(name|label|poi|place|district|admin|school|station|bus|civic|bridge|featured|park|neighbor|dong)/i.test(id)&&!/(exit|badge|vehicle|number|shield|arrow|pictogram)/i.test(id)&&(!layer.layout?.['symbol-placement']||layer.layout['symbol-placement']==='point');
+          if(named&&JSON.stringify(map.getLayoutProperty(id,'text-font'))!==JSON.stringify(stationFont))map.setLayoutProperty(id,'text-font',stationFont);
+          const textSize=scaleMapLabelSize(named?stationSize:original.size,app.dataset.djSettingsText||'normal');
           if(JSON.stringify(map.getLayoutProperty(id,'text-size'))!==JSON.stringify(textSize))map.setLayoutProperty(id,'text-size',textSize);
         }
       }catch{/* A style reload can temporarily remove an individual label layer. */}
     }
   }
-  let labelSyncScheduled=false;
+  let labelSyncTimer=null;
   function scheduleMapLabelContrast(){
-    if(labelSyncScheduled)return;
-    labelSyncScheduled=true;
-    const run=()=>{labelSyncScheduled=false;syncMapLabelContrast();};
-    if(typeof requestAnimationFrame==='function')requestAnimationFrame(run);
-    else Promise.resolve().then(run);
+    if(labelSyncTimer!==null||map.isMoving?.())return;
+    labelSyncTimer=setTimeout(()=>{labelSyncTimer=null;if(!map.isMoving?.())syncMapLabelContrast();},180);
   }
   map.on('styledata',scheduleMapLabelContrast);
+  map.on('moveend',scheduleMapLabelContrast);
+  map.on('style.load',()=>{labelStyleSignature='';scheduleMapLabelContrast();});
   window.addEventListener?.('dongjak:map-text-scale-change',scheduleMapLabelContrast);
   function applyTheme(){
     if(!map.isStyleLoaded()){map.once?.('idle',applyTheme);return;}
@@ -274,7 +282,7 @@ export function initTheme({map,app}){
     // Keep official and fallback bus-stop names readable even in initial night mode.
     applyBusStopLabelTheme(map,themeState.value);
     repaintVegetation(map,app); // Include forest shade installed after baseline capture.
-    syncMapLabelContrast(); // Base and late map labels share the same theme contrast.
+    syncMapLabelContrast(true); // Base and late map labels share the same theme contrast.
     // existing building polygons are handled separately when each tile is loaded.
     for(const layer of map.getStyle().layers){
       if(layer.id.startsWith('dongjak-buildings-3d-') && layer.type==='fill-extrusion'){
