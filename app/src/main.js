@@ -841,7 +841,7 @@ function getVisibleBBox(){
 function scheduleBuildingLoad(){
   if (app.dataset.djTransitPreview || !visibleBuilding2D() || map.getZoom()<BUILDING_ZOOM_MIN || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
   clearTimeout(buildingLoadTimer);
-  buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},230);
+  buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},djPhone?600:230);
 }
 async function ensureBuildingManifest(){
   if(buildingManifest)return buildingManifest;
@@ -988,6 +988,7 @@ async function loadVisibleBuildingSheets(){
     if(buildingRetryAfter.size&&visibleBuilding2D()&&map.getZoom()>=BUILDING_ZOOM_MIN){buildingRetryTimer=setTimeout(()=>scheduleBuildingLoad(),16000);}
   }
 }
+map.on('movestart',()=>{if(djPhone)clearTimeout(buildingLoadTimer);});
 map.on('moveend',scheduleBuildingLoad);
 map.on('zoomend',()=>{syncTiltWithBuildings();});
 // Preserve the loaded building representation during pan, rotation and pitch.
@@ -2868,13 +2869,13 @@ function syncRoutePresentation() {
     detail.hidden=true;
     editor.hidden=true;
     const metric=readRouteMetrics();
-    document.getElementById('route-map-metrics').textContent = transitPreview?(Number.isFinite(transitPreview.minutes)?'참고 약 '+Math.ceil(transitPreview.minutes)+'분 · 도보 '+Math.round(transitPreview.walkM)+'m':'도보 '+Math.round(transitPreview.walkM)+'m · 전체 시간 미확인'):`${metric.duration} · ${metric.distance}`;
+    document.getElementById('route-map-metrics').textContent = transitPreview?('도보 '+Math.round(transitPreview.walkM)+'m'):`${metric.duration} · ${metric.distance}`;
     const pri=routeResult?.priExposure;
     const priInfo=Number.isFinite(pri?.risk) && pri?.coverage>=0.65
       ? '보행 위험도(PRI) 부분평가 '+pri.risk.toFixed(1)+'점 · 구간 관측 '+Math.round(pri.coverage*100)+'%'
       : '보행 위험도 평가 자료 부족';
     document.getElementById('route-guide-start').disabled=Boolean(transitPreview);
-    document.getElementById('route-map-source').textContent=transitPreview?(transitPreview.kind==='bus'?'버스 '+transitPreview.route+' · 운행시간·요금 미확인':transitPreview.kind==='rail'?'지하철 연계 · 배차·대기 미반영':'환승 '+transitPreview.changes+'회 · 운행시간·요금 미확인'):(routeResult?.source==='seoul-pedestrian-graph'
+    document.getElementById('route-map-source').textContent=transitPreview?(transitPreview.kind==='bus'?'버스 '+transitPreview.route:transitPreview.kind==='rail'?'지하철 연계':'환승 '+transitPreview.changes+'회'):(routeResult?.source==='seoul-pedestrian-graph'
       ? '서울시 도보 네트워크' : '외부 보행경로 서버')+' · '+priInfo;
   } else if (onMap && !picking && detail.hidden && editor.hidden && app.dataset.djSafetyHomeOnly!=='1') {
     showOverviewOnlyWithContent();
@@ -2904,14 +2905,14 @@ function makeRouteMarker(position, color) {
   marker.getElement?.()?.classList.add('dj-route-endpoint-marker');
   return marker;
 }
-function drawRouteMarkers(visible=app.dataset.tab==='map'&&!communityPickMode&&!addMode&&Boolean(routePickMode||((routeResult||transitPreview)&&app.dataset.djWalkArrived!=='1')||navMode)) {
+function drawRouteMarkers(visible=(app.dataset.tab==='map'||app.dataset.transitComparison==='true')&&!communityPickMode&&!addMode&&Boolean(routePickMode||((routeResult||transitPreview)&&app.dataset.djWalkArrived!=='1')||navMode)) {
   const update=(marker,point,key,color)=>{
     const next=visible&&point?`${point.lng},${point.lat}`:null;
     if(marker&&routeEndpointMarkerKeys[key]===next&&next)return marker;
     marker?.remove();routeEndpointMarkerKeys[key]=next;
     return next?makeRouteMarker(point,color):null;
   };
-  routeStartMarker=update(routeStartMarker,routeStart,'start','#2563eb');
+  routeStartMarker=update(routeStartMarker,app.dataset.transitComparison==='true'?null:routeStart,'start','#2563eb');
   routeEndMarker=update(routeEndMarker,routeEnd,'end','#0ba876');
 }
 // Keep the existing map, style, symbols, buildings and caches. Transit only
@@ -3457,6 +3458,20 @@ function readRouteMetrics() {
   const kilometers=routeResult.kilometers;
   return {duration:`약 ${Math.max(1,Math.ceil(seconds/60))}분`,distance:kilometers<1?`${Math.round(kilometers*1000)}m`:`${kilometers.toFixed(2)}km`};
 }
+function transitVisiblePadding(sheetTop,toolbarBottom){
+ const rect=map.getContainer().getBoundingClientRect();
+ const top=Math.max(0,toolbarBottom-rect.top)+18,bottom=Math.max(0,rect.bottom-sheetTop)+18;
+ return top+bottom<rect.height-48?{top,bottom,left:28,right:28}:null;
+}
+window.addEventListener('dongjak:transit-comparison-focus',event=>{
+ if(app.dataset.tab!=='route'||!routeEnd)return;
+ const {sheetTop,toolbarBottom}=event.detail||{};
+ const padding=transitVisiblePadding(sheetTop,toolbarBottom);if(!padding)return;
+ app.dataset.transitComparison='true';drawRouteMarkers(true);
+ const rect=map.getContainer().getBoundingClientRect();
+ map.easeTo({center:[routeEnd.lng,routeEnd.lat],offset:[0,(padding.top-padding.bottom)/2],padding:{top:0,bottom:0,left:0,right:0},pitch:0,duration:350});
+});
+window.addEventListener('dongjak:transit-comparison-dismiss',()=>{delete app.dataset.transitComparison;drawRouteMarkers();});
 function fitWalkingRoute(coords) {
   if(!Array.isArray(coords)||coords.length<2)return;
   const bounds=coords.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(coords[0],coords[0]));
@@ -3864,13 +3879,21 @@ function focusTransitRoute(coords){
  if(map.getLayer(circle))map.moveLayer(circle,before);
  const transferLabel='dj-transit-multi-stops-transfer-label';if(map.getLayer(transferLabel))map.moveLayer(transferLabel);
  const selected=transitPreview;
- requestAnimationFrame(()=>{if(transitPreview===selected&&selected&&app.dataset.tab==='map')fitWalkingRoute(coords);});
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  if(transitPreview!==selected||!selected||app.dataset.tab!=='map')return;
+  const card=document.getElementById('route-map-card'),head=document.getElementById('dj-walk-map-head');
+  const padding=card&&head?transitVisiblePadding(card.getBoundingClientRect().top,head.getBoundingClientRect().bottom):null;
+  const all=[...coords,...[routeStart,routeEnd].filter(Boolean).map(p=>[p.lng,p.lat])];
+  if(!padding||all.length<2){fitWalkingRoute(all);return;}
+  const bounds=all.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(all[0],all[0]));
+  map.fitBounds(bounds,{padding,maxZoom:16,duration:480,pitch:0,bearing:0});
+ }));
 }
 function setTransitPreviewStops(features){
  const id='dj-transit-multi-stops',data={type:'FeatureCollection',features};
  if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
  if(!map.getLayer(id+'-circle'))map.addLayer({id:id+'-circle',type:'circle',source:id,paint:{'circle-radius':['case',['==',['get','transfer'],true],7,6],'circle-color':'#fff','circle-stroke-color':['get','color'],'circle-stroke-width':2.5}});
- if(!map.getLayer(id+'-transfer-label'))map.addLayer({id:id+'-transfer-label',type:'symbol',source:id,filter:['==',['get','transfer'],true],layout:{'text-field':'환승','text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'],'text-size':11.7,'text-anchor':'bottom','text-offset':[0,-1.25],'text-allow-overlap':true,'text-ignore-placement':true,'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},paint:{'text-color':'#21483c','text-halo-color':'#fff','text-halo-width':1.1}});
+ if(!map.getLayer(id+'-transfer-label'))map.addLayer({id:id+'-transfer-label',type:'symbol',source:id,filter:['==',['get','transfer'],true],layout:{'text-field':'환승','text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'],'text-size':11.7,'text-anchor':'bottom','text-offset':[0,-2.4],'text-allow-overlap':false,'text-ignore-placement':false,'text-padding':5,'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},paint:{'text-color':'#21483c','text-halo-color':'#fff','text-halo-width':1.1}});
 }
 function transitRailData(segments){
  const color=line=>subwayLineColor(line==='신림'?'신림선':line+'호선');

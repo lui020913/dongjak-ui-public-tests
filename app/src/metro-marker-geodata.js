@@ -2,7 +2,7 @@
  * MapLibre GeoJSON-based subway markers.
  * Far/overview zoom: transfer lines are shown as adjacent, separate colored circles.
  * Close zoom: each line marker is anchored to its own rendered rail geometry.
- * Overview uses one shared station label; detail shows a label for each line marker.
+ * Overview and detail show one name per distinct station name; per-line icons remain.
  */
 const asCollection=features=>({type:'FeatureCollection',features});
 const isCoordinate=x=>Array.isArray(x)&&x.length===2&&x.every(Number.isFinite);
@@ -66,20 +66,21 @@ export function metroMarkerGeojson(items,{
     });
 
     // Close zoom: each service gets its own marker on its own rail line.
-    // Each line marker receives its own station label so no transfer-line label disappears.
+    // Different names (e.g. Isu/Chongsin) are preserved; identical station names appear once.
+    const seenLabels=new Set();
     linePoints.forEach((lp,index)=>{
       const line=normalizeLine(lp.line);
       const name=key==='이수'?(line==='4호선'?'총신대입구':'이수'):key;
       const baseLabel=name.endsWith('역')?name:`${name}역`;
       // The badge already identifies the line; never add a redundant route suffix.
-      const label=baseLabel;
+      const label=baseLabel;const labelOn=!seenLabels.has(label);seenLabels.add(label);
       const side=linePoints.length>1?(index===0?-1:1):0;
       features.push(point([lp.lng,lp.lat],{
         stationKey:key,stationName:key==='이수'?'이수·총신대입구':key,
         lines:lines.join(','),role:'detail',line,
         badge:line==='신림선'?'신림':line.replace(/호선$/,''),color:colors[line],
         iconId:`dj-station-line-${line}`,iconLines:[line],iconOffset:[0,0],offset:[0,0],
-        label,labelOffset:[side*0.95,-1.45],labelAnchor:'bottom',labelOn:true,
+        label,labelOffset:[side*0.95,-1.45],labelAnchor:'bottom',labelOn,
         openable:Boolean(isDistrict(lp.lng,lp.lat)||nearby(lp.lng,lp.lat))
       }));
     });

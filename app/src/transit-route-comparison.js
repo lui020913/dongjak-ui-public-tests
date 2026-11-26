@@ -6,7 +6,6 @@ import css from './transit-route-comparison.css?inline';
 import {bindTransitSheetHeader} from './transit-sheet-gesture.js';
 import {reviewAllTransitCandidates,formatTransitReview} from './transit-candidate-review.mjs';
 import {WALK_ICON_PATH} from './route-walk-icon.mjs';
-import {transitFareText} from './transit-fare-reference.mjs';
 const icons={
  walk:WALK_ICON_PATH,
  bus:'<rect x="5" y="3" width="14" height="16" rx="3"/><path d="M5 12h14M8 19v2m8-2v2M8 15h1m6 0h1"/>',
@@ -15,7 +14,7 @@ const icons={
 };
 const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+icons[name]+'</svg>';
 const railLabel=line=>line==='신림'?'신림선':line+'호선';
-const routeMetric=(plan,result,done)=>plan.kind==='rail'&&Number.isFinite(plan.indicativeMinutes)?'열차 약 '+Math.ceil(plan.indicativeMinutes)+'분':result?'도보 '+result.walkMinutes+'분':done?'전체 시간 미확인':'도보 조회 중';
+const routeMetric=(plan,result,done)=>result?'도보 '+result.walkMinutes+'분':done?'도보 시간 미확인':'도보 조회 중';
 const legLabel=p=>p.kind==='bus'?p.route:[...new Set(p.lines)].map(railLabel).join(' · ');
 const nameOf=p=>p?.name||p?.label||'선택한 장소';
 export function mountTransitComparison({doc,win,shadow,host,view,app}){
@@ -42,7 +41,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   const seq=++generation;controller?.abort();controller=null;previewController?.abort();previewController=null;stopReview();setBusy(false);
   if(!keepCache){cached=null;resetReview();}
   gesture.reset();
-  const finish=()=>{if(seq!==generation)return;panel.hidden=true;delete view.dataset.transitResults;list.replaceChildren();options=null;reviewLabels.clear();};
+  const finish=()=>{if(seq!==generation)return;panel.hidden=true;delete view.dataset.transitResults;win.dispatchEvent(new CustomEvent('dongjak:transit-comparison-dismiss'));list.replaceChildren();options=null;reviewLabels.clear();};
   cancelSurfaceMotion(panel);
   if(animate&&!panel.hidden){panel.style.pointerEvents='none';exitSurface(panel,()=>{panel.style.removeProperty('pointer-events');finish();});}else{panel.style.removeProperty('pointer-events');finish();}
  };
@@ -61,7 +60,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   const b=doc.createElement('button');b.type='button';b.dataset.filter=id;b.innerHTML=(id==='all'||id==='mixed'?'':icon(id))+label;b.addEventListener('click',()=>{if(busy)return;filter=id;render(true);});filters.append(b);
  }
  function note(text,retry=false){status.hidden=false;status.textContent=text;list.replaceChildren();if(retry){const b=doc.createElement('button');b.type='button';b.className='tr-retry';b.textContent='다시 조회';b.addEventListener('click',search);list.append(b);}}
- function show(ps){gesture.reset();syncBounds();panel.querySelector('.tr-scroll').scrollTop=0;cancelSurfaceMotion(panel);panel.style.removeProperty('pointer-events');endpoints.textContent=ps.map(nameOf).join(' → ');panel.hidden=false;view.dataset.transitResults='true';revealSurface(panel);}
+ function show(ps){gesture.reset();syncBounds();panel.querySelector('.tr-scroll').scrollTop=0;cancelSurfaceMotion(panel);panel.style.removeProperty('pointer-events');endpoints.textContent=ps.map(nameOf).join(' → ');panel.hidden=false;view.dataset.transitResults='true';revealSurface(panel);win.requestAnimationFrame(()=>{if(panel.hidden||app.dataset.tab!=='route'||ps.length!==2)return;win.dispatchEvent(new CustomEvent('dongjak:transit-comparison-focus',{detail:{sheetTop:panel.getBoundingClientRect().top,toolbarBottom:q('.header').getBoundingClientRect().bottom}}));});}
  function render(animate=false){
   if(!options)return;
   list.replaceChildren();reviewLabels.clear();
@@ -72,18 +71,18 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   if(!plans.length){const p=doc.createElement('p');p.className='tr-note';p.textContent='조회 범위에서 확인된 이동안이 없습니다.';list.append(p);}
   for(const plan of plans){
    const card=doc.createElement('button');card.type='button';card.className='tr-card';const lead=plan.legs?.[0]||plan;card.style.setProperty('--route-color',lead.kind==='bus'?busRouteColor(lead.routeType):subwayLineColor(railLabel(lead.lines[0])));
-   const metrics=doc.createElement('div');metrics.className='tr-metrics';const metric=doc.createElement('strong');metric.textContent=routeMetric(plan,reviewed.get(plan),reviewed.has(plan));const fare=doc.createElement('span');fare.className='tr-fare-compact';fare.textContent=transitFareText(plan);metrics.append(metric,fare);
+   const metrics=doc.createElement('div');metrics.className='tr-metrics';const metric=doc.createElement('strong');metric.textContent=routeMetric(plan,reviewed.get(plan),reviewed.has(plan));metrics.append(metric);
    const head=doc.createElement('div');head.className='tr-row';
    const mark=doc.createElement('span');mark.className='tr-bus-icon';mark.innerHTML=icon(lead.kind);
    const title=doc.createElement('strong');title.textContent=plan.legs?plan.legs.map(legLabel).join(' + '):plan.kind==='bus'?plan.route+' · 직행버스':legLabel(plan);
    const chevron=doc.createElement('span');chevron.className='tr-chevron';chevron.innerHTML=icon('chevron');head.append(mark,title,chevron);head.classList.add('tr-route-accessible-heading');
    const detail=doc.createElement('span');detail.className='tr-route-names';detail.textContent=plan.origin.name+' 승차 → '+plan.destination.name+' 하차';
-   const meta=doc.createElement('small');meta.textContent=(plan.legs?'환승 '+(plan.legs.length-1)+'회':plan.kind==='bus'?'직행 · '+plan.stopCount+'개 정류장':'환승 '+plan.changes+'회')+' · '+(plan.kind==='rail'?'대기 제외 추정':'전체 시간 미확인');
+   const meta=doc.createElement('small');meta.textContent=(plan.legs?'환승 '+(plan.legs.length-1)+'회':plan.kind==='bus'?'직행 · '+plan.stopCount+'개 정류장':'환승 '+plan.changes+'회');
    const track=doc.createElement('div');track.className='tr-route-badges';track.setAttribute('aria-label','탑승 노선 순서');
    const legs=plan.legs||[plan];let count=0;
    for(const leg of legs){for(const line of leg.kind==='bus'?[leg.route]:[...new Set(leg.lines||[])]){if(count++){const arrow=doc.createElement('span');arrow.className='tr-badge-arrow';arrow.textContent='›';track.append(arrow);}const badge=doc.createElement('span');badge.className='tr-line-badge';badge.textContent=leg.kind==='bus'?line:railLabel(line);badge.style.setProperty('--line-color',leg.kind==='bus'?busRouteColor(leg.routeType):subwayLineColor(railLabel(line)));track.append(badge);}}
    card.append(metrics,head,track,detail,meta);
-   const summary=doc.createElement('small');summary.className='tr-review-result';summary.textContent=formatTransitReview(reviewed.get(plan),reviewed.has(plan));if(plan.kind==='rail'&&reviewed.get(plan))summary.textContent+=' · 도보 '+reviewed.get(plan).walkMinutes+'분';summary.hidden=!reviewed.has(plan)&&plan.kind!=='rail';card.append(summary);reviewLabels.set(plan,{summary,metric});
+   const summary=doc.createElement('small');summary.className='tr-review-result';summary.textContent=formatTransitReview(reviewed.get(plan),reviewed.has(plan));summary.hidden=!reviewed.has(plan);card.append(summary);reviewLabels.set(plan,{summary,metric});
    card.addEventListener('click',async()=>{
     if(busy)return;if(key(points())!==pointKey){close();return;}
     const seq=generation;const request=new AbortController();previewController=request;stopReview();setBusy(true);cached={key:pointKey,options,filter,reviewed,preferPri};
@@ -101,7 +100,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   try{
    await reviewAllTransitCandidates(plans,{signal:request.signal,concurrency:2,review:plan=>new Promise((resolve,reject)=>win.dispatchEvent(new CustomEvent('dongjak:transit-candidate-review',{detail:{plan,signal:request.signal,preferPri:policy,walkCache,resolve,reject}}))),onResult:(plan,summary)=>{
     if(seq!==generation||request.signal.aborted||reviewController!==request)return;
-    reviewed.set(plan,summary);const label=reviewLabels.get(plan);if(label){label.summary.textContent=formatTransitReview(summary,true);if(plan.kind==='rail'&&summary)label.summary.textContent+=' · 도보 '+summary.walkMinutes+'분';label.summary.hidden=false;label.metric.textContent=routeMetric(plan,summary,true);}
+    reviewed.set(plan,summary);const label=reviewLabels.get(plan);if(label){label.summary.textContent=formatTransitReview(summary,true);label.summary.hidden=false;label.metric.textContent=routeMetric(plan,summary,true);}
    }});
   }finally{if(reviewController===request)reviewController=null;}
  }

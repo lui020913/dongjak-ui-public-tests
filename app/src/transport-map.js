@@ -1809,15 +1809,14 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},
       paint:{'text-color':'#21483c','text-halo-color':'rgba(255,255,255,0.98)','text-halo-width':2.1}});
   }
-  // At platform-level zoom, all route-specific station names should remain
-  // visible. Earlier deduplication silently removed the second 9호선 label.
+  // Close zoom retains distinct station names without forcing collisions.
   map.addLayer({id:'dj-metro-detail-name-very-close',type:'symbol',source:stationSource,minzoom:17.15,
     filter:['all',markerFilter('detail'),['==',['get','labelOn'],true]],
     layout:{'text-field':['get','label'],
       'text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'],
       'text-size':11.7,'text-offset':['get','labelOffset'],
       'text-anchor':'bottom',
-      'text-allow-overlap':true,'text-ignore-placement':true,
+      'text-allow-overlap':false,'text-ignore-placement':false,'text-padding':4,
       'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},
     paint:{'text-color':'#21483c','text-halo-color':'rgba(255,255,255,0.99)','text-halo-width':2.3}});
   // Hide metro lines and badges at the actual widest camera zoom on *both* PC and mobile.
