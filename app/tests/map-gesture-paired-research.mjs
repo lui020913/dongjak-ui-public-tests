@@ -1,7 +1,6 @@
 import {chromium} from '@playwright/test';
 import {writeFileSync,mkdirSync} from 'node:fs';
 import assert from 'node:assert/strict';
-import {dismissOnboarding} from './e2e/helpers.js';
 const urls=[process.env.BASELINE_URL,process.env.CANDIDATE_URL];
 assert.ok(urls.every(Boolean));
 const browser=await chromium.launch({args:['--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader']});
@@ -9,6 +8,8 @@ const report={baseline:process.env.BASELINE_SHA,candidate:process.env.CANDIDATE_
 const sites=[{name:'Sangdo',center:[126.94791,37.502834]},{name:'Noryangjin',center:[126.941005,37.513534]}];
 async function sample(url,variant,round){
  const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:3,serviceWorkers:'block',reducedMotion:'no-preference',userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Mobile/15E148 Safari/604.1'});
+ // Benchmark only camera behavior, with identical returning-user setup on both revisions.
+ await ctx.addInitScript(()=>{localStorage.setItem('dongjak_onboarding_seen_v860','1');sessionStorage.setItem('dj-map-guide-initial-shown-v7121','1');});
  const page=await ctx.newPage();
  try{
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
@@ -17,7 +18,8 @@ async function sample(url,variant,round){
   const startup=page.locator('#map-startup-overlay'),next=page.locator('#map-startup-continue');
   await page.waitForFunction(()=>{const o=document.querySelector('#map-startup-overlay'),n=document.querySelector('#map-startup-continue');return !o||!o.getClientRects().length||n?.getClientRects().length>0;},{},{timeout:90000});
   if(await startup.isVisible()&&await next.isVisible())await next.click();
-  await startup.waitFor({state:'hidden',timeout:45000});await dismissOnboarding(page);
+  await startup.waitFor({state:'hidden',timeout:45000});
+  await page.locator('#dj860-onboarding').waitFor({state:'hidden',timeout:45000});
   await page.waitForFunction(()=>window.__qaMap?.getStyle()?.sources?.openmaptiles,{},{timeout:90000});
   for(const site of sites){
    await page.evaluate(({center})=>{const m=window.__qaMap;m.jumpTo({center,zoom:17.8,pitch:0,bearing:0});},site);

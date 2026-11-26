@@ -56,18 +56,21 @@ test('왼쪽 메뉴 또는 지도 경계에서 부분 노출되는 대학·공�
   assert.match(read('src/landmark-layer.js'),/isMarkerOccluded/);
 });
 
-test('버스정류장 아이콘은 20배율에서도 28px를 넘지 않고 역명은 노선 위쪽에 고정',()=>{
+test('버스정류장 아이콘은 20배율에서도 28px를 넘지 않고 역명은 호선별 상하 분리',()=>{
   const transport=read('src/transport-map.js');
   assert.match(transport,/16\.4,0\.262,18\.2,0\.331,20,0\.393/);
   // 64px source pictogram * 0.393 at zoom 20 = 25.15px, below the 28px cap.
   assert.ok(64*0.393<=28);
-  assert.match(transport,/'text-anchor':'bottom'/);
+  assert.match(transport,/'text-anchor':\['get','labelAnchor'\]/);
   assert.doesNotMatch(transport,/'text-variable-anchor':\['top','bottom','left','right'\],\s*'text-radial-offset':0\.6/);
   const metro=metroMarkerGeojson([{kind:'subway',name:'노량진',lng:126.943,lat:37.513,lines:['1호선','9호선']}],{
     normalizeName:x=>x,normalizeLine:x=>x,
     placements:()=>[{line:'1호선',lng:126.943,lat:37.513},{line:'9호선',lng:126.9435,lat:37.513}],
     colors:{'1호선':'#0052a4','9호선':'#b89b2f'},radiusPredicate:()=>true
   });
-  assert.ok(metro.features.every(f=>f.properties.labelOffset[1]<0));
-  assert.ok(metro.features.filter(f=>f.properties.role==='detail').every(f=>f.properties.labelAnchor==='bottom'));
+  assert.ok(metro.features.filter(f=>f.properties.role==='summary').every(f=>f.properties.labelOffset[1]<0));
+  const detail=metro.features.filter(f=>f.properties.role==='detail');
+  assert.equal(detail.length,2);assert.ok(detail.every(f=>f.properties.labelOn));
+  assert.deepEqual(detail.map(f=>f.properties.labelAnchor).sort(),['bottom','top']);
+  assert.ok(detail.some(f=>f.properties.labelOffset[1]<0)&&detail.some(f=>f.properties.labelOffset[1]>0));
 });
