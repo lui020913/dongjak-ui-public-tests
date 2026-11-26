@@ -2010,11 +2010,6 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   if(previousTab!==tab)closePriPreferences();
   if((tab!=='map'||suppressOverview)&&transitPreview)clearTransitPreview();
   if(tab!=='map')closeCommunityLocation();
-  if(tab==='map'&&suppressOverview&&previousTab==='participate'){
-    cancelCommunityTabMotion();
-    const panel=document.getElementById('participation-panel');
-    if(panel){window.DongjakWindowMotion?.cancel(panel);delete panel.dataset.djTabOutgoing;delete panel.dataset.djPrimaryTransition;panel.hidden=true;for(const key of ['display','visibility','opacity','pointer-events','animation','transition','will-change','z-index'])panel.style.removeProperty(key);}
-  }
   const communityPanel=document.getElementById('participation-panel');
   const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
   if(!preserveCommunityComposer&&(reopeningCommunity||(previousTab!==tab&&(previousTab==='participate'||tab==='participate')))&&!communityPickMode&&!resumeCommunityDraft){
@@ -2508,10 +2503,11 @@ function showCommunityLocation(post) {
   quickSearch.close();quickSearch.clearMapResults?.();
   routePickMode=null;closeTransitRouteConfirmation();
   invalidateRoute(); // Preserve route editor endpoints, but dismiss the old preview.
+  const panel=document.getElementById('participation-panel');
+  // Only the explicit report-location action bypasses the normal tab dissolve.
+  if(panel){window.DongjakWindowMotion?.cancel(panel);delete panel.dataset.djTabOutgoing;delete panel.dataset.djPrimaryTransition;panel.hidden=true;for(const key of ['display','visibility','opacity','pointer-events','animation','transition','will-change','z-index'])panel.style.removeProperty(key);}
   navigate('map',{suppressOverview:true});
   app.dataset.communityLocationViewing='true';
-  const panel=document.getElementById('participation-panel');
-  if(panel){window.DongjakWindowMotion?.cancel(panel);delete panel.dataset.djTabOutgoing;delete panel.dataset.djPrimaryTransition;panel.hidden=true;}
   communityLocationMarker=new maplibregl.Marker({color:'#b262ad',scale:0.95}).setLngLat([lng,lat]).addTo(map);
   communityLocationMarker.getElement?.()?.classList.add('dj-community-location-marker');
   const card=makeCEl('section','dj-community-location-card');card.id='dj-community-location-card';card.setAttribute('aria-label','커뮤니티 제보 위치');
