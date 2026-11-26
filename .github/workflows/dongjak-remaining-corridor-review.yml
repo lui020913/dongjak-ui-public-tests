@@ -1,0 +1,62 @@
+name: Dongjak remaining fixed-endpoint corridor review
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/dongjak-remaining-corridor-review.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: dongjak-remaining-corridor-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  remaining:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'preview/road-surface-geometry-20261126'
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2 mapbox-vector-tile==2.2.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-final-corridor-and-overlay-review
+          path: reviewed
+          run-id: 45763031345
+          github-token: ${{ github.token }}
+      - name: Recheck only unresolved links without relocating endpoints
+        run: |
+          set -euo pipefail
+          python scripts/research/dongjak_corridor_gap_recovery.py --test
+          PYTHONPATH=scripts/research python - <<'PY'
+          import json,pathlib
+          import dongjak_corridor_gap_recovery as gap
+          base=pathlib.Path('reviewed/final-review')
+          out=pathlib.Path('fine-gap-review')
+          gap.CELL=.18
+          gap.main(base,out)
+          def read(p):return json.loads(p.read_text())
+          a,b=read(base/'summary.json'),read(out/'summary.json')
+          assert a['candidate_links']==7845 and a['unresolved_links']==426
+          assert a['original_links']==b['original_links']==8271
+          assert a['graph_sha256']==b['graph_sha256']
+          assert a['candidate_links']<=b['candidate_links']
+          for name in ('candidate-centers','candidate-surfaces','smoothed-surfaces'):
+              old=read(base/(name+'.geojson'))['features']
+              new=read(out/(name+'.geojson'))['features']
+              assert new[:len(old)]==old
+          assert read(base/'moved-nodes.geojson')==read(out/'moved-nodes.geojson')
+          print('FINE_GAP_REVIEW_RESULT',json.dumps({'before':a['candidate_links'],'after':b['candidate_links'],'recovered':b['candidate_links']-a['candidate_links'],'remaining':b['unresolved_links'],'protected_endpoints_unchanged':True,'existing_geometry_unchanged':True}))
+          PY
+      - run: python scripts/research/dongjak_road_polygon_alignment.py --test
+      - run: python scripts/research/dongjak_road_polygon_alignment.py fine-gap-review fine-gap-alignment
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-remaining-fixed-endpoint-review
+          path: |
+            fine-gap-review/
+            fine-gap-alignment/
+          retention-days: 14
+          if-no-files-found: error
