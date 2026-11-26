@@ -4,6 +4,7 @@ import {subwayLineColor} from './transport-map.js';
 import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 import css from './transit-route-comparison.css?inline';
 import {recommendReviewedTransit} from './transit-candidate-review.mjs';
+import {transitFareText} from './transit-fare-reference.mjs';
 const icons={
  walk:'<circle cx="13" cy="4" r="2"/><path d="m7 21 3-7 3 2 3 5M11 8l-2 5-4 2m6-7 4 4 4 1"/>',
  bus:'<rect x="5" y="3" width="14" height="16" rx="3"/><path d="M5 12h14M8 19v2m8-2v2M8 15h1m6 0h1"/>',
@@ -57,7 +58,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   reviewButton.disabled=busy||!(groups[filter]||groups.all).length;
   for(const b of filters.children){const id=b.dataset.filter;b.setAttribute('aria-pressed',String(id===filter));const label={all:'전체',bus:'버스',rail:'지하철',mixed:'버스+지하철'}[id];b.textContent=label+' '+groups[id].length;}
   const plans=groups[filter]||groups.all;
-  status.textContent=(options.busStatus==='complete'?'조회 범위 내 이동안입니다.':'일부 버스 정보 조회 불가. ')+' 시간·요금은 확인된 정보만 표시합니다.'+(reviewNote?' '+reviewNote:'');
+  status.textContent=(options.busStatus==='complete'?'조회 범위 내 이동안입니다.':'일부 버스 정보 조회 불가. ')+' 기본운임은 일반 성인 교통카드 기준이며 실제 요금과 다를 수 있습니다.'+(reviewNote?' '+reviewNote:'');
   if(!plans.length){const p=doc.createElement('p');p.className='tr-note';p.textContent='조회 범위에서 확인된 이동안이 없습니다.';list.append(p);}
   for(const plan of plans){
    const card=doc.createElement('button');card.type='button';card.className='tr-card';const lead=plan.legs?.[0]||plan;card.style.setProperty('--route-color',lead.kind==='bus'?busRouteColor(lead.routeType):subwayLineColor(railLabel(lead.lines[0])));
@@ -68,7 +69,8 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
    const detail=doc.createElement('span');detail.className='tr-route-names';detail.textContent=plan.origin.name+' 승차 → '+plan.destination.name+' 하차';
    const meta=doc.createElement('small');meta.textContent=plan.legs?'환승 '+(plan.legs.length-1)+'회 · 전체 시간 미확인':plan.kind==='bus'?plan.stopCount+'개 정류장 이동 · 소요시간 미확인':plan.railStops+'개 역 이동 · 환승 '+plan.changes+'회 · 참고 '+Math.ceil(plan.indicativeMinutes)+'분 (대기 제외, 추정)';
    const track=doc.createElement('div');track.className='tr-track';if(plan.legs){track.classList.add('tr-multi-track');track.innerHTML='<span>도보</span>'+plan.legs.map((leg,i)=>(i?'<span>환승</span>':'')+'<span data-vehicle="true">'+(leg.kind==='bus'?'버스':'지하철')+'</span>').join('')+'<span>도보</span>';}else track.innerHTML='<span>도보</span><span>'+(plan.kind==='bus'?'버스':'지하철')+'</span><span>도보</span>';track.setAttribute('aria-label','이동 순서, 시간 비율 아님');
-   card.append(head,detail,track,meta);
+   const fare=doc.createElement('small');fare.textContent=transitFareText(plan)+' · 일반 교통카드';
+   card.append(head,detail,track,meta,fare);
    if(reviewed.has(plan)){const result=reviewed.get(plan);const summary=doc.createElement('small');summary.className='tr-review-result';summary.textContent=result?'도보 '+result.walkM+'m · 약 '+result.walkMinutes+'분 · '+(result.comparable?'관측 PRI '+result.risk.toFixed(1)+'점':'PRI 비교 자료 부족')+' · 관측 '+Math.round(result.coverage*100)+'%':'도보 연결 확인 불가';card.append(summary);if(recommended===plan){const badge=doc.createElement('span');badge.className='tr-review-label';badge.textContent='비교한 후보 중 상대적 저위험';card.append(badge);}}
    card.addEventListener('click',async()=>{
     if(busy)return;if(key(points())!==pointKey){close();return;}

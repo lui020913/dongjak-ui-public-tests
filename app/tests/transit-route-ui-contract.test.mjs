@@ -22,5 +22,5 @@ test('PRI and transit arrival are scoped to verified walking legs and matching r
  assert.ok(detail.includes('value.coverage<.65'));
  assert.ok(detail.includes('String(data.arsId)===String(detail.arsId)'));
  assert.ok(detail.includes('String(x.routeId)===String(detail.routeId)'));
- assert.ok(detail.includes('자동 GPS·하차 알림이 아닌 수동 이동 순서'));
+ assert.ok(detail.includes('승하차 단계는 직접 전환합니다'));
 });

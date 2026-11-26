@@ -52,3 +52,9 @@
 #app .dj-tr-rail-rows{display:grid;gap:4px}
 #app .dj-tr-rail-row{display:grid;gap:3px;padding:7px 9px;border-radius:11px;background:var(--walk-soft,#eaf5ef);min-width:0}
 #app .dj-tr-rail-row strong{font-size:12px;font-weight:700;overflow-wrap:anywhere}
+
+#app .dj-tr-fare{display:grid;gap:4px;background:var(--walk-soft,#eaf5ef);padding:10px 12px;border-radius:14px}
+#app .dj-tr-fare strong{font-size:13px;font-weight:760}
+#app .dj-tr-fare small,#app .dj-tr-service-hours{font-size:11px;color:var(--walk-muted,#627970);overflow-wrap:anywhere}
+#app .dj-tr-fare-source{font-size:11px;color:var(--walk-primary,#137e65);text-decoration:underline;width:fit-content}
+#app .dj-tr-gps-status[data-near=true]{font-weight:750;color:var(--walk-primary,#137e65)}
