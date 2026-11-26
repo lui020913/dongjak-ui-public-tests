@@ -222,27 +222,29 @@ export function installPhonePermissions({app,doc=document,win=window}){
  for(const h of [10,20,34,46,26,38,18,30,12]){const bar=doc.createElement('i');bar.style.setProperty('--voice-bar',h+'px');wave.append(bar);}
  const feedback=doc.createElement('span');feedback.id='djNext-voice-status';feedback.hidden=true;feedback.setAttribute('role','status');
  voicePanel.append(wave,feedback);form.append(voicePanel);
- let active=null,timer=0;
+ let active=null,timer=0,watchdog=0,latest='';
  const clearMessage=()=>{win.clearTimeout(timer);feedback.hidden=true;voicePanel.setAttribute('aria-hidden','true');delete app.dataset.djVoiceFeedback;};
  const message=(t,sticky=false)=>{win.clearTimeout(timer);feedback.hidden=false;feedback.textContent=t;voicePanel.setAttribute('aria-hidden','false');app.dataset.djVoiceFeedback='true';if(!sticky)timer=win.setTimeout(clearMessage,5000);};
- const reset=()=>{active=null;delete app.dataset.djVoiceListening;mic.setAttribute('aria-pressed','false');mic.setAttribute('aria-label','음성 장소 검색');mic.innerHTML=phoneIcon('mic');};
+ const reset=()=>{win.clearTimeout(watchdog);watchdog=0;active=null;latest='';delete app.dataset.djVoiceListening;mic.setAttribute('aria-pressed','false');mic.setAttribute('aria-label','음성 장소 검색');mic.innerHTML=phoneIcon('mic');};
  const stop=()=>{if(!active)return;const r=active;reset();clearMessage();try{r.abort?.();}catch{}};
+ const commit=value=>{reset();clearMessage();input.value=value.slice(0,80);input.dispatchEvent(new win.Event('input',{bubbles:true}));if(form.requestSubmit)form.requestSubmit();else form.dispatchEvent(new win.Event('submit',{bubbles:true,cancelable:true}));};
+ const arm=(r,ms)=>{win.clearTimeout(watchdog);watchdog=win.setTimeout(()=>{if(active!==r)return;const value=latest;reset();try{r.abort?.();}catch{}if(value)commit(value);else message('음성 인식 응답이 없습니다. 다시 시도해 주세요.');},ms);};
  mic.addEventListener('click',()=>{
-  if(active){stop();return;}
+  if(active){const r=active;try{r.stop();if(active===r)arm(r,2000);}catch{stop();}return;}
   const API=win.SpeechRecognition||win.webkitSpeechRecognition;
   if(!API){message('음성 검색을 지원하지 않는 브라우저입니다.');return;}
   if(doc.activeElement===input)input.blur();
   $('map-quick-search-close')?.click();
-  const r=new API();active=r;r.lang='ko-KR';r.interimResults=true;r.continuous=false;
+  let r;try{r=new API();}catch{message('음성 검색을 시작할 수 없습니다.');return;}active=r;latest='';r.lang='ko-KR';r.interimResults=true;r.continuous=false;
   app.dataset.djVoiceListening='true';mic.setAttribute('aria-pressed','true');mic.setAttribute('aria-label','음성 인식 종료');mic.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>';message('음성 인식 준비 중…',true);
-  r.onstart=()=>{if(active===r)message('듣는 중… 말씀해 주세요.',true);};
-  r.onresult=e=>{if(active!==r)return;const result=e.results?.[e.resultIndex??0];const value=result?.[0]?.transcript?.trim();if(!value)return;if(!result.isFinal){message(value,true);return;}reset();clearMessage();input.value=value.slice(0,80);input.dispatchEvent(new Event('input',{bubbles:true}));form.requestSubmit?.();};
+  r.onstart=()=>{if(active===r){message('듣는 중… 말씀해 주세요.',true);arm(r,20000);}};
+  r.onresult=e=>{if(active!==r)return;const result=e.results?.[e.resultIndex??0];const value=result?.[0]?.transcript?.trim();if(!value)return;latest=value;if(!result.isFinal){message(value,true);arm(r,20000);return;}commit(value);};
   r.onerror=e=>{if(active!==r)return;reset();const messages={'not-allowed':'마이크 권한을 허용해 주세요.','service-not-allowed':'음성 검색을 이용할 수 없습니다.','no-speech':'음성이 감지되지 않았습니다.','audio-capture':'마이크를 사용할 수 없습니다.','network':'네트워크 연결을 확인해 주세요.','language-not-supported':'한국어 음성 검색을 지원하지 않습니다.'};if(e.error==='aborted')clearMessage();else message(messages[e.error]||'음성 검색을 다시 시도해 주세요.');};
-  r.onend=()=>{if(active===r){reset();clearMessage();}};
+  r.onend=()=>{if(active===r){const value=latest;if(value)commit(value);else{reset();message('인식된 음성이 없습니다. 다시 시도해 주세요.');}}};
   // SpeechRecognition.start owns its native microphone permission request.
   // The optional onboarding permission request stays available. Do not open a
   // second getUserMedia capture on each tap before starting recognition.
-  try{r.start()}catch{reset();message('음성 검색을 시작할 수 없습니다.');}
+  try{arm(r,10000);r.start()}catch{reset();message('음성 검색을 시작할 수 없습니다.');}
  });
  doc.addEventListener('visibilitychange',()=>{if(doc.hidden)stop();});
  input.addEventListener('focus',()=>{stop();clearMessage();});

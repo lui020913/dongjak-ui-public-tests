@@ -21,13 +21,17 @@ export const formerPoliceNameVariants=Object.freeze(formerPoliceNames);
 export const repurposedPoliceNameVariants=Object.freeze(verifiedNameAliases.filter(([alias,name])=>name==='동작청소년경찰학교').map(([alias])=>alias));
 export const isRepurposedPoliceFacility=name=>Boolean(verifiedPlaceRecord(name)?.repurposed);
 export function isFormerPoliceFacility(name){return formerPoliceNames.some(n=>fold(n)===fold(name));}
+export function isUnverifiedPoliceFacility(name){
+ const raw=String(name??'').trim();
+ return !isFormerPoliceFacility(raw)&&!verifiedPlaceRecord(raw)&&(/치안센터$/.test(raw.replace(/\s+/g,''))||/경찰 관련 시설 \(운영 미확인\)$/.test(raw));
+}
 export function facilityDisplayType(value,name=''){
  const category=normalizeFacilityCategory(value,name);
  const label=String(name??'').replace(/\s+/g,'');
  if(category==='경찰서'){
    if(/지구대$/.test(label))return '지구대';
    if(/파출소$/.test(label))return '파출소';
-   if(/치안센터$/.test(label))return '치안센터';
+
  }
  if(category==='소방서'){
    if(/119안전센터$/.test(label))return '119안전센터';
@@ -42,6 +46,7 @@ export function verifiedFacilityLabelExpression(raw){
 }
 export function normalizeFacilityCategory(value,name=''){
  if(isFormerPoliceFacility(name))return '운영 종료 시설';
+ if(isUnverifiedPoliceFacility(name))return '운영 미확인 시설';
  const verified=verifiedPlaceRecord(name);
  if(verified?.category)return verified.category;
  const raw=String(value??'').trim();
@@ -126,6 +131,7 @@ export function normalizeFacilityName(value,category=''){
  if(isFormerPoliceFacility(raw))return '상도5치안센터 (운영 종료)';
  const verified=verifiedDisplayName(raw);
  if(verified)return verified;
+ if(isUnverifiedPoliceFacility(raw))return raw.replace(/\s*치안센터$/,' 경찰 관련 시설 (운영 미확인)');
  category=normalizeFacilityCategory(category,raw);
  if(!raw||!COMMERCIAL.has(category))return raw;
  let name=stripLegal(trim(raw));
@@ -176,7 +182,7 @@ export function facilityNameMatches(place,query){
  const q=fold(query);if(!q)return false;
  const normalized=normalizeFacilityRecord(place);
  const categoryTerms=facilityCategorySearchTerms(query);
- if(categoryTerms.length&&(isFormerPoliceFacility(normalized.name)||(categoryTerms.includes('경찰서')&&isRepurposedPoliceFacility(normalized.name))))return false;
+ if(categoryTerms.length&&(isFormerPoliceFacility(normalized.name)||isUnverifiedPoliceFacility(normalized.name)||(categoryTerms.includes('경찰서')&&isRepurposedPoliceFacility(normalized.name))))return false;
  if(categoryTerms.length&&categoryTerms.includes(normalized.category))return true;
  const fields=[normalized.name,normalized.registeredName,normalized.category];
  if(fields.some(v=>fold(v).includes(q)))return true;

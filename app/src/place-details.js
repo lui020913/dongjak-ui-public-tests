@@ -1,4 +1,4 @@
-import {normalizeFacilityName,normalizeFacilityCategory,facilityDisplayType,isFormerPoliceFacility,isRepurposedPoliceFacility} from './facility-display-names.js';
+import {normalizeFacilityName,normalizeFacilityCategory,facilityDisplayType,isFormerPoliceFacility,isUnverifiedPoliceFacility,isRepurposedPoliceFacility} from './facility-display-names.js';
 import {usableMapSelectionOffset} from './transport-selection-marker.js';
 import {markAiSurfaceDismissal} from './ai-surface-dismiss-guard.js';
 import {setMobileSheetExpanded,dismissMobileSheet,interruptMobileSheetMotion,settleMobileSheetDrag,clearMobileSheetDrag} from './v889-mobile-sheet-motion.js';
@@ -26,7 +26,7 @@ export function placeData(raw={}){
   const name=tidy(normalizeFacilityName(raw.name,raw.type||raw.category),90)||'이름 미등록';
   const lon=Number(raw.lng), lat=Number(raw.lat);
   const trusted=verifiedPlaceRecord(name);
-  const former=isFormerPoliceFacility(raw.name);
+  const former=isFormerPoliceFacility(raw.name)||isUnverifiedPoliceFacility(raw.name);
   const incomingAddress=tidy(facilityRoadAddress(raw),220);
   // A generic label such as '동작구 대표 장소' is not a street address.
   // An OSM-sourced address may belong to another Seoul borough (e.g. 노들섬 in 용산구).
@@ -46,6 +46,7 @@ export function placeData(raw={}){
  * Explicitly avoids claiming named-site-specific opening hours or services.
  */
 export function facilityFallbackDescription(name,type){
+  if(isUnverifiedPoliceFacility(name))return '현재 운영 여부가 확인되지 않은 경찰 관련 시설입니다. 공식 지구대·파출소를 이용해 주세요. 긴급 신고는 112입니다.';
   if(isFormerPoliceFacility(name))return '이곳은 운영을 종료한 옛 치안센터입니다. 상도동 관할 경찰 업무는 동작경찰서의 상도지구대 등 현행 공식 관서를 확인하세요. 긴급 신고는 112입니다.';
   if(isRepurposedPoliceFacility(name))return '청소년 대상 범죄예방 교육과 경찰 체험을 위한 교육시설입니다. 현행 지구대·파출소가 아니며, 방문과 프로그램 예약은 경찰청 청소년경찰학교 공식 안내를 확인하세요.';
   const subject=String(name||'해당 시설').trim();
@@ -79,7 +80,7 @@ const aiMemo=new Map();
 function cacheKey(p){return `${p.name}|${p.lat?.toFixed(4)}|${p.lng?.toFixed(4)}`;}
 const EARTH_METERS=111000;
 export function matchingOsmContact(elements=[],p){
-  if(isFormerPoliceFacility(p?.name)||isRepurposedPoliceFacility(p?.name))return {};
+  if(isFormerPoliceFacility(p?.name)||isUnverifiedPoliceFacility(p?.name)||isRepurposedPoliceFacility(p?.name))return {};
   const candidates=[];
   for(const el of elements){
     const tag=el.tags||{};
@@ -102,7 +103,7 @@ export function matchingOsmContact(elements=[],p){
   return {phone,website,address};
 }
 async function enrich(p,signal){
-  if(p.lat==null||p.lng==null||isFormerPoliceFacility(p.name)||isRepurposedPoliceFacility(p.name))return {};
+  if(p.lat==null||p.lng==null||isFormerPoliceFacility(p.name)||isUnverifiedPoliceFacility(p.name)||isRepurposedPoliceFacility(p.name))return {};
   const id=cacheKey(p);
   if(mem.has(id))return mem.get(id);
   const safe=p.name.replace(/["\\]/g,'').slice(0,80);
@@ -377,7 +378,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
   }
   let pending=false;
   async function loadExplanation(){
-    if(controllerAI.signal.aborted||pending||isFormerPoliceFacility(p.name)||isRepurposedPoliceFacility(p.name))return;
+    if(controllerAI.signal.aborted||pending||isFormerPoliceFacility(p.name)||isUnverifiedPoliceFacility(p.name)||isRepurposedPoliceFacility(p.name))return;
     pending=true;retry.hidden=true;feedback.textContent=fallbackDescription+'\n\nAI 추가 안내를 확인하는 중입니다…';
     try{
       // Give fast, verified OSM enrichment a chance, but never delay the popup

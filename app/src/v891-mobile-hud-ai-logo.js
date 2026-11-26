@@ -78,7 +78,7 @@ export function installV891HeaderAndAi(doc=document,win=window){
     const inset=mobileKeyboardInset({innerHeight:layoutHeight,visualHeight:height,offsetTop:top});
     // Use one keyboard state for the composer safe-area. Do not treat an
     // ordinary scroll/zoom with the input unfocused as an open keyboard.
-    const keyboardOpen=Boolean(inset>120&&(query&&doc.activeElement===query||modal.dataset.djAiKeyboard==='true'));
+    const keyboardOpen=Boolean(layoutHeight-height>120&&editing);
     // Keep keyboard padding until the visible viewport expands, not merely
     // until focus leaves the field (iOS dismiss animation is asynchronous).
     if(modal.dataset.djAiKeyboard!==(keyboardOpen?'true':'false'))modal.dataset.djAiKeyboard=keyboardOpen?'true':'false';
@@ -86,7 +86,7 @@ export function installV891HeaderAndAi(doc=document,win=window){
     if(modal.style.getPropertyValue('--dj891-ai-visible-top')!==top+'px')modal.style.setProperty('--dj891-ai-visible-top',top+'px');
     if(modal.style.getPropertyValue('--dj891-ai-visible-height')!==height+'px')modal.style.setProperty('--dj891-ai-visible-height',height+'px');
     if(win.matchMedia('(max-width:699px)').matches){
-      setMapUnderAi(keyboardOpen);
+      setMapUnderAi(editing);
       for(const [key,value] of Object.entries({top:top+'px',right:'0px',bottom:'auto',left:'0px',height:height+'px','max-height':height+'px','min-height':'0px',margin:'0px',transform:'none',translate:'none'}))if(modal.style.getPropertyValue(key)!==value||modal.style.getPropertyPriority(key)!=='important')modal.style.setProperty(key,value,'important');
     }
   };

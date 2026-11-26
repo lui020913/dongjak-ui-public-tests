@@ -1,5 +1,5 @@
 import {facilitySearchGlyph} from './v912-poi-presentation.js';
-import {normalizeFacilityRecord,facilityNameMatches,facilityCategorySearchTerms,facilityOsmCategory,sameFacility,isFormerPoliceFacility,isRepurposedPoliceFacility} from './facility-display-names.js';
+import {normalizeFacilityRecord,facilityNameMatches,facilityCategorySearchTerms,facilityOsmCategory,sameFacility,isFormerPoliceFacility,isUnverifiedPoliceFacility,isRepurposedPoliceFacility} from './facility-display-names.js';
 /** Map-only search. Queries remote Photon only after explicit form submission. */
 import {searchPlaces,searchLocalPlaces} from './route-search.js';
 import {searchCachedTransportPlaces} from './transport-map.js';
@@ -28,6 +28,7 @@ export function mergeMapSearchResults(local=[],remote=[]){
   const found=[],seen=new Set();
   for(const rawItem of [...local,...remote]){
     const item=normalizeFacilityRecord(rawItem);
+    if(isUnverifiedPoliceFacility(item.name))continue;
     const lng=Number(item?.lng),lat=Number(item?.lat);
     if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
     const key=searchResultKey({...item,lng,lat});
@@ -90,7 +91,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
   const syncEntry=()=>{
     const visible=phoneSearch()&&app.dataset.tab==='map'&&(document.activeElement===query||app.dataset.searchOpen==='true');
     actions.hidden=!visible;
-    if(visible){const r=shell.getBoundingClientRect(),ai=document.getElementById('dj890-ai-orb');actions.style.top=Math.ceil(Math.max(r.bottom,ai?.getBoundingClientRect().bottom||0)+7)+'px';}
+    if(visible){const r=shell.getBoundingClientRect(),ai=document.getElementById('dj890-ai-orb');actions.style.top=Math.ceil((ai?.getBoundingClientRect().bottom||r.bottom)+7)+'px';}
     if(visible&&phoneSearch())app.dataset.djSearchEntry='1';else delete app.dataset.djSearchEntry;
   };
   const setTitle=value=>{title.textContent=value;};
@@ -138,7 +139,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
     const anchor=shell.getBoundingClientRect();
     const ai=document.getElementById('dj890-ai-orb');
     const aiBottom=phoneSearch()&&ai?ai.getBoundingClientRect().bottom:0;
-    const top=Math.ceil(Math.max(anchor.bottom,aiBottom)+7+(actions.hidden?0:actions.getBoundingClientRect().height+7));
+    const top=Math.ceil((aiBottom||anchor.bottom)+7+(actions.hidden?0:actions.getBoundingClientRect().height+7));
     const left=phoneSearch()?12:Math.max(10,Math.floor(anchor.left));
     const width=phoneSearch()?window.innerWidth-24:Math.max(140,Math.min(Math.floor(anchor.width),Math.floor(window.innerWidth-left-10)));
     dropdown.style.setProperty('--dj871-search-left',left+'px');
@@ -195,6 +196,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
   window.visualViewport?.addEventListener('resize',fitDropdown,{passive:true});
   window.visualViewport?.addEventListener('scroll',fitDropdown,{passive:true});
   window.addEventListener('resize',fitDropdown,{passive:true});
+  if(typeof ResizeObserver==='function'){const observer=new ResizeObserver(fitDropdown);observer.observe(shell);}
   const isTransitResult=isTransitMapSearchResult;
   const makeResultButton=place=>{
     const button=document.createElement('button');button.type='button';button.className='map-quick-search-result';
@@ -273,7 +275,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
       for(const f of features){
         const p=f.properties||{};const name=String(p['name:ko']||p.name||'').trim();
         const kind=facilityOsmCategory(p,String(p.subclass||p.class||'일반 시설').trim());
-        if(isFormerPoliceFacility(name)&&(nearby||facilityCategorySearchTerms(text).length))continue;
+        if(isUnverifiedPoliceFacility(name)||isFormerPoliceFacility(name)&&(nearby||facilityCategorySearchTerms(text).length))continue;
         if(!nearby&&isRepurposedPoliceFacility(name)&&facilityCategorySearchTerms(text).includes('경찰서'))continue;
         if(!name||(!nearby&&!facilityNameMatches({name,category:kind},text)&&Math.max(koreanSearchScore(text,name),koreanSearchScore(text,kind))<55))continue;
         if(f.geometry?.type!=='Point')continue;

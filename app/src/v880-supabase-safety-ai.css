@@ -376,7 +376,7 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
  html body #dj-ai-search-modal[open]{background:var(--ai-bg)!important;min-height:0!important;box-sizing:border-box!important;}
  body:has(#dj-ai-search-modal[open]) #app{pointer-events:none!important;}
  /* Retain the opaque keyboard sampling behavior only while the native keyboard is active. */
- body:has(#dj-ai-search-modal[open][data-dj-ai-keyboard="true"]) #app{visibility:hidden!important;}
+ 
  html body #dj-ai-search-modal[open] .dj-ai-search-body{flex:1 1 0!important;max-height:100%!important;overflow:hidden!important;justify-content:flex-start!important;}
  #dj-ai-search-modal .dj-ai-welcome{margin:0!important;text-align:left!important;}
 }
@@ -400,7 +400,8 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
   position:fixed!important;inset:0!important;width:100%!important;height:100%!important;
   margin:0!important;overflow:hidden!important;overscroll-behavior:none!important;
  }
- html body:has(#dj-ai-search-modal[open][data-dj-ai-keyboard="true"]) #app{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+ html body:has(#dj-ai-search-modal[open][data-dj-ai-keyboard="true"]) #app,html body:has(#dj-ai-search-modal[open] #dj-ai-query:focus) #app{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+  #dj-ai-search-modal[open][data-dj-ai-keyboard="true"]::backdrop,#dj-ai-search-modal[open]:has(#dj-ai-query:focus)::backdrop{background:var(--ai-bg,#eaf2ee)!important}
  html body #dj-ai-search-modal[open] .dj-ai-search-body{overflow:hidden!important;overscroll-behavior:none!important}
  html body #dj-ai-search-modal[open] .dj-ai-transcript{touch-action:pan-y!important;overscroll-behavior-y:none!important;min-height:0!important}
 }

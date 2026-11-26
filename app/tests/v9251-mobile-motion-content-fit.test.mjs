@@ -90,6 +90,6 @@ test('transport X uses a stationary fade with measured painted bounds until nati
   assert.match(js,/const fade=isGuide\|\|stationary\|\|lockTransit/);
   assert.match(js,/const width=rect\.width\+'px',height=rect\.height\+'px'/);
   assert.match(js,/'min-width':width,'max-width':width,height,'min-height':height,'max-height':height/);
-  assert.match(js,/if\(lockTransit\)target\.style\.setProperty\('clip-path','none','important'\)/);
+  assert.match(js,/if\(lockTransit\)target\.style\.setProperty\('clip-path',closingClip\|\|'none','important'\)/);
   assert.match(js,/try\{if\(complete&&!opening&&typeof afterClose==='function'\)afterClose\(\);\}\s*finally\{target\.removeAttribute\('data-dj810-animating'\);restore\(\);\}/);
 });

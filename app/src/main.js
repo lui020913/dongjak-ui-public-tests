@@ -2846,14 +2846,28 @@ function requireDongjakRouteLocation(position){
   }
   return true;
 }
+function renderedRoadName(position){
+  try{
+    const pt=map.project([position.lng??position.lon,position.lat]);
+    const features=map.queryRenderedFeatures([[pt.x-5,pt.y-5],[pt.x+5,pt.y+5]]);
+    for(const f of features){
+      if(!/transportation|road|street/i.test(f.sourceLayer||f.layer?.['source-layer']||f.layer?.id||''))continue;
+      const props=f.properties||{},name=String(props['name:ko']||props['name:nonlatin']||props.name||'').trim();
+      if(/[가-힣0-9](?:로|길)$/.test(name))return name;
+    }
+  }catch{}
+  return null;
+}
 async function fetchRouteRoadAddress(position){
+  const localRoad=renderedRoadName(position);
+  const fallback=road=>road?'도로명: '+road+' (건물번호 미확인)':null;
   try{
     const q=new URLSearchParams({lat:String(position.lat),lon:String(position.lng)});
     const response=await fetch('/api/reverse-address?'+q,{signal:AbortSignal.timeout(6500)});
-    if(!response.ok)return null;
+    if(!response.ok)return fallback(localRoad);
     const data=await response.json();
-    return typeof data.address==='string'&&data.address.trim()?data.address.trim():null;
-  }catch{return null;}
+    return typeof data.address==='string'&&data.address.trim()?data.address.trim():fallback(localRoad||data.roadName);
+  }catch{return fallback(localRoad);}
 }
 async function resolveRouteAddress(position){
   const address=await fetchRouteRoadAddress(position);
