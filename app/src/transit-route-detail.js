@@ -13,6 +13,7 @@ const paths={
 };
 const icon=kind=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+paths[kind]+'</svg>';
 const railLabel=x=>x==='신림'?'신림선':x+'호선';
+const railShapeNote=quality=>quality==='verified'?'공개 철도 선형':quality==='mixed'?'공개 철도 선형·일부 개략 구간':'역 순서 개략 경로';
 export function transitPriText(value){
  if(!value)return '평가 자료 부족';
  const coverage=Number.isFinite(value.coverage)?Math.round(value.coverage*100):null;
@@ -107,7 +108,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   const header=el('div','dj-tr-heading');
   const title=el('strong','',name+' · '+labels[kind]);
   const metric=el('b','',Number.isFinite(detail.minutes)?'참고 약 '+Math.ceil(detail.minutes)+'분':'전체 시간 미확인');
-  const sub=el('small','',kind==='rail'?'역 순서 개략 경로 · 배차·대기·요금 미반영':'공식 버스 노선 · 운행시간·요금 미확인');
+  const sub=el('small','',kind==='rail'?railShapeNote(detail.railQuality)+' · 배차·대기·요금 미반영':'공식 버스 노선 · 운행시간·요금 미확인');
   header.append(title,metric,sub);
   const track=el('div','dj-tr-order');track.setAttribute('aria-label','이동 순서, 시간 비율 아님');for(const name of ['도보',labels[kind],'도보'])track.append(el('span','',name));
   const timeline=el('div','dj-tr-timeline');
@@ -156,7 +157,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
  function renderMulti(detail){
   const label=leg=>leg.kind==='bus'?leg.route:[...new Set(leg.lines)].map(railLabel).join(' · ');
   const color=leg=>leg.kind==='bus'?busRouteColor(leg.routeType):subwayLineColor(railLabel(leg.lines[0]));
-  const header=el('div','dj-tr-heading');header.append(el('strong','',detail.legs.map(label).join(' + ')),el('b','','환승 '+(detail.legs.length-1)+'회'),el('small','','전체 시간·요금 미확인 · 지하철 선형은 역 순서 개략 경로'));
+  const header=el('div','dj-tr-heading');header.append(el('strong','',detail.legs.map(label).join(' + ')),el('b','','환승 '+(detail.legs.length-1)+'회'),el('small','','전체 시간·요금 미확인'+(detail.railQuality?' · '+railShapeNote(detail.railQuality):'')));
   const track=el('div','dj-tr-order dj-tr-multi-order');track.setAttribute('aria-label','이동 순서, 시간 비율 아님');
   track.append(el('span','','도보'));
   detail.legs.forEach((leg,i)=>{if(i)track.append(el('span','','환승'));const v=el('span','dj-tr-vehicle',labels[leg.kind]);v.style.setProperty('--vehicle-color',color(leg));track.append(v);});
