@@ -1,3 +1,4 @@
+import {createSearchToolbarCrossfade} from './map-toolbar-crossfade.js';
 import {facilitySearchGlyph} from './v912-poi-presentation.js';
 import {normalizeFacilityRecord,facilityNameMatches,facilityCategorySearchTerms,facilityOsmCategory,sameFacility,isFormerPoliceFacility,isUnverifiedPoliceFacility,isRepurposedPoliceFacility} from './facility-display-names.js';
 /** Map-only search. Queries remote Photon only after explicit form submission. */
@@ -88,9 +89,10 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
   const gpsButton=document.createElement('button');gpsButton.type='button';gpsButton.id='dj-search-gps-nearby';gpsButton.textContent='내 주변 검색';
   nearbyButton.id='dj-search-nearby';actions.append(nearbyButton,gpsButton,historyButton);app.append(actions);
   const phoneSearch=()=>window.matchMedia?.('(max-width:699px)')?.matches===true;
+  const crossfadeEntry=createSearchToolbarCrossfade(app,actions,window);
   const syncEntry=()=>{
     const visible=phoneSearch()&&app.dataset.tab==='map'&&(document.activeElement===query||app.dataset.searchOpen==='true');
-    actions.hidden=!visible;
+    crossfadeEntry(visible,phoneSearch()&&app.dataset.tab==='map');
     if(visible){const r=shell.getBoundingClientRect(),ai=document.getElementById('dj890-ai-orb');actions.style.top=Math.ceil((ai?.getBoundingClientRect().bottom||r.bottom)+7)+'px';}
     if(visible&&phoneSearch())app.dataset.djSearchEntry='1';else delete app.dataset.djSearchEntry;
   };
