@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.196",
+  "application_version": "9.2.197",
   "public_work_branch": "main",
-  "purpose": "Verified integrated PR #554 (includes all PR #553 changes): capsule text actions, compact nearby safety typography, horizontal metro arrival rows, remove duplicate advanced tools and community map-report entry, open map risk-report composer directly, fix facility/transit route endpoint navigation. Protected mobile Preview, QA and Production. Retry after aligning the release-only metro typography test with the verified 13px countdown and 42px horizontal row; retain all protected checks.",
-  "attempt": 429,
+  "purpose": "Verified PR #555: remove TIP close chrome and green interaction focus rings, retain neutral keyboard focus, preserve startup theme, and show the full TIP sentence before rotation. Full source CI, phone checks and Chromium/WebKit regression passed. Protected mobile Preview, QA and Production; road research PR #550 excluded.",
+  "attempt": 430,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
