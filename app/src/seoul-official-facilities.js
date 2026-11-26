@@ -80,8 +80,8 @@ export async function loadOsmGeneralFacilities(bbox,{signal,fetcher=fetch}={}){
  throw new Error('OSM 시설 자료 조회 실패');
 }
 
-export const appliedFacilityData=new WeakMap();
-function buildLayers(map,data,groups=DEFAULT_POI_GROUPS,dark=false){
+const appliedFacilityData=new WeakMap();
+export function buildLayers(map,data,groups=DEFAULT_POI_GROUPS,dark=false){
  if(!map.getStyle?.())return;
  registerFacilityIcons(map);
  let existing=map.getSource(SOURCE);
@@ -179,8 +179,10 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
  function flushPending(){
    clearTimeout(publishTimer);publishTimer=null;
    if(!active||map.isMoving?.()||!pendingPublish)return;
-   const result=pendingPublish;pendingPublish=null;cache=result.next;searchableGeneralPlaces=result.places;restore();
-   app?.dispatchEvent(new CustomEvent('dongjak:official-facilities-ready',{detail:cache.features.map(f=>({...f.properties,lng:f.geometry.coordinates[0],lat:f.geometry.coordinates[1]}))}));lastBox=result.bbox;latest=Date.now();status(result.message);
+   const result=pendingPublish;pendingPublish=null;const boundary=getBoundary();if(!boundary)return;
+   // GeoJSON normalization and boundary tests also wait until the gesture ends.
+   cache=officialFeatures(result.merged,boundary);searchableGeneralPlaces=result.merged.filter(p=>insideBoundary([Number(p.lng),Number(p.lat)],boundary));restore();
+   app?.dispatchEvent(new CustomEvent('dongjak:official-facilities-ready',{detail:cache.features.map(f=>({...f.properties,lng:f.geometry.coordinates[0],lat:f.geometry.coordinates[1]}))}));lastBox=result.bbox;latest=Date.now();status(`${result.source} ${cache.features.length.toLocaleString()}곳 · ${result.partial?'일부 자료 조회 제한 · ':''}표시 정보는 현장 확인 필요`);
  }
  function schedulePublish(){clearTimeout(publishTimer);if(!active||map.isMoving?.()||!pendingPublish)return;publishTimer=setTimeout(flushPending,350);}
  function targetBBox(){
@@ -222,8 +224,8 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
      }catch{osmFailed=true;}
      if(!merged.length&&osmFailed&&official.failed.length)throw new Error('facility sources unavailable');
      const partial=official.failed.length||official.truncated.length||osmFailed;
-     const next=officialFeatures(merged,getBoundary());
-     pendingPublish={next,places:merged.filter(p=>insideBoundary([Number(p.lng),Number(p.lat)],getBoundary())),bbox,message:`${source} ${next.features.length.toLocaleString()}곳 · ${partial?'일부 자료 조회 제한 · ':''}표시 정보는 현장 확인 필요`};
+     if(!active)return;
+     pendingPublish={merged,bbox,source,partial};
      schedulePublish();
    }catch(error){
      status(cache.features.length?`기존 일반시설 ${cache.features.length}곳 표시 중 · 최신 조회 실패`:'일반시설 조회 실패 · 다시 시도해 주세요');

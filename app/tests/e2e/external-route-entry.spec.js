@@ -109,6 +109,13 @@ test('real transit detail buttons navigate to the visible route editor, includin
    await results.locator('[data-filter="bus"]').click();
    await expect(results.locator('[data-filter="bus"]')).toHaveAttribute('aria-pressed','true');
    await expect(results.locator('.tr-card').first()).toContainText('기본운임 1,200원');
+   const card=results.locator('.tr-card').first();
+   await expect(card.locator('.tr-metrics')).toBeVisible();
+   await expect(card.locator('.tr-line-badge')).toHaveText('검증버스');
+   await expect(card.locator('.tr-fare-compact')).toHaveText('기본운임 1,200원');
+   await expect(card.locator('.tr-route-names')).toBeVisible();
+   await expect(card).not.toContainText('일반 교통카드 (참고 요금)');
+
    await results.locator('.tr-pri-preference').click();
    await expect(results.locator('.tr-pri-preference')).toHaveAttribute('aria-pressed','false');
    await route.locator('[data-v3="back"]').click();
