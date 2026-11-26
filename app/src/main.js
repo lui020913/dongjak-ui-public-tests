@@ -1985,6 +1985,32 @@ function saveCommunity(next) {
 // The first mobile frame is a map, not an automatically opened information sheet.
 // Explicit later navigation back to 안전지도 opens the full information panel.
 let firstMapEntryPending = true;
+// A report-location jump is a direct map handoff, not a tab dissolve.
+// Keep the dismissed community surface unpaintable even if a legacy layout
+// observer or delayed animation writes visibility after the synchronous jump.
+let communityReturnGuard=null;
+function releaseCommunityReturnGuard(){
+  if(!communityReturnGuard)return;
+  const {panel,observer}=communityReturnGuard;communityReturnGuard=null;observer.disconnect();
+  delete panel.dataset.djLocationReturnHidden;
+  panel.style.removeProperty('display');panel.style.removeProperty('visibility');panel.style.removeProperty('pointer-events');panel.inert=false;
+}
+function lockCommunityReturnSurface(panel){
+  if(!panel)return;
+  releaseCommunityReturnGuard();
+  const enforce=()=>{
+    if(!panel.hidden)panel.hidden=true;
+    if(!panel.inert)panel.inert=true;
+    if(panel.dataset.djTabOutgoing)delete panel.dataset.djTabOutgoing;
+    if(panel.dataset.djPrimaryTransition)delete panel.dataset.djPrimaryTransition;
+    for(const [key,value] of Object.entries({display:'none',visibility:'hidden','pointer-events':'none'})){
+      if(panel.style.getPropertyValue(key)!==value||panel.style.getPropertyPriority(key)!=='important')panel.style.setProperty(key,value,'important');
+    }
+  };
+  panel.dataset.djLocationReturnHidden='true';enforce();
+  const observer=new MutationObserver(enforce);observer.observe(panel,{attributes:true,attributeFilter:['hidden','inert','style','data-dj-tab-outgoing','data-dj-primary-transition']});
+  communityReturnGuard={panel,observer};
+}
 function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserveCommunityComposer=false}={}) {
   // All non-navigation destinations are unavailable until guidance ends.
   if(app.classList.contains('route-guiding')&&tab!=='map')return;
@@ -1996,6 +2022,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   // the editor's visible state when a parent close animation is interrupted.
   // Selecting or cancelling a map location is the explicit draft-resume path.
   const previousTab=app.dataset.tab;
+  if(tab==='participate')releaseCommunityReturnGuard();
   // Leaving the map by another tab abandons the picker, not the draft.
   // A later map tap must never resume an unrelated community editor.
   if(tab!=='map'&&communityPickMode)clearCommunityLocationPick();
@@ -2517,7 +2544,10 @@ function showCommunityLocation(post) {
   const panel=document.getElementById('participation-panel');
   // Only the explicit report-location action bypasses the normal tab dissolve.
   if(panel){window.DongjakWindowMotion?.cancel(panel);delete panel.dataset.djTabOutgoing;delete panel.dataset.djPrimaryTransition;panel.hidden=true;for(const key of ['display','visibility','opacity','pointer-events','animation','transition','will-change','z-index'])panel.style.removeProperty(key);}
+  // Lock before and after the native navigation's inline-style cleanup.
+  lockCommunityReturnSurface(panel);
   navigate('map',{suppressOverview:true});
+  lockCommunityReturnSurface(panel);
   app.dataset.communityLocationViewing='true';
   communityLocationMarker=new maplibregl.Marker({color:'#b262ad',scale:0.95}).setLngLat([lng,lat]).addTo(map);
   communityLocationMarker.getElement?.()?.classList.add('dj-community-location-marker');
