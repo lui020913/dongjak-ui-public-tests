@@ -69,6 +69,7 @@ import {computeMultiStopRoutes} from './v815-route-planner.js';
 import {VERIFIED_STATIONS} from './fixed-rail-data.js';
 import {fetchOfficialRailPaths} from './rail-official-shapes.js';
 import {transitRailSegments} from './transit-rail-geometry.mjs';
+import {getDisplayedRailPaths,getDisplayedRailQuality,pathBetweenDisplayedStations} from './features/liveTransit/geometry.js';
 import {installRoadWidthLayer} from './road-width-layer.js';
 import {installAdminDongLayer} from './admin-dong-layer.js';
 import {installBaseLayerControls} from './base-layer-controls.js';
@@ -2949,7 +2950,7 @@ function clearTransitPreview(){
   // Remove preview-owned layers before their sources; ordinary transport layers stay intact.
   for(const id of ['dj815-transit-walk','dj815-transit-rail','dj-transit-rail-verified','dj-transit-rail-schematic','dj815-transit-bus','dj-transit-multi-walk','dj-transit-multi-bus','dj-transit-multi-rail','dj-transit-multi-stops']){
     try{if(!map.getSource(id))continue;
-      for(const suffix of ['-line','-focus-casing','-circle'])if(map.getLayer(id+suffix))map.removeLayer(id+suffix);
+      for(const suffix of ['-line','-focus-casing','-circle','-transfer-label'])if(map.getLayer(id+suffix))map.removeLayer(id+suffix);
       if(!map.getStyle().layers.some(layer=>layer.source===id))map.removeSource(id);
       else map.getSource(id)?.setData({type:'FeatureCollection',features:[]});
     }catch(error){console.debug('[대중교통 경로 정리]',error?.message);}
@@ -3802,7 +3803,7 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
     const [startWalk,endWalk]=await Promise.all([selectTransitWalk(first,preferPri,signal),selectTransitWalk(last,preferPri,signal)]);
     if(!stillCurrent())throw new Error('경로 조건이 변경됐습니다.');
     if(!startWalk||!endWalk)throw new Error('역과 출발·도착 장소를 연결할 실제 보행경로가 없습니다.');
-    const railSegments=transitRailSegments(plan.stops,plan.lines,VERIFIED_STATIONS,await getTransitRailPaths());
+    const railSegments=await sharedTransitRailSegments(plan.stops,plan.lines);
     if(!stillCurrent())throw new Error('경로 조건이 변경됐습니다.');
     if(!railSegments.length||railSegments.some(s=>!transitCoordinatesInScope(s.coordinates)))throw new Error('지원 범위 내 철도 구간을 확인하지 못했습니다.');
     if(!map.isStyleLoaded?.())throw new Error('지도 스타일을 불러오는 중입니다.');
@@ -3815,7 +3816,7 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
         paint:{'line-color':color,'line-width':5,'line-opacity':.9,...(dash?{'line-dasharray':dash}:{})}});
     }
     const coords=[...startWalk.coords,...railSegments.flatMap(s=>s.coordinates),...endWalk.coords];
-    setTransitPreviewStops(plan.stops.flatMap((station,i)=>{const transfer=i>0&&i<plan.stops.length-1&&plan.lines[i-1]!==plan.lines[i];if(i!==0&&i!==plan.stops.length-1&&!transfer)return [];const line=plan.lines[Math.min(i,plan.lines.length-1)];return [{type:'Feature',properties:{color:subwayLineColor(line==='신림'?'신림선':line+'호선')},geometry:{type:'Point',coordinates:VERIFIED_STATIONS[station]}}];}));
+    setTransitPreviewStops(plan.stops.flatMap((station,i)=>{const transfer=i>0&&i<plan.stops.length-1&&plan.lines[i-1]!==plan.lines[i];if(i!==0&&i!==plan.stops.length-1&&!transfer)return [];const line=plan.lines[Math.min(i,plan.lines.length-1)];return [{type:'Feature',properties:{color:subwayLineColor(line==='신림'?'신림선':line+'호선'),transfer},geometry:{type:'Point',coordinates:VERIFIED_STATIONS[station]}}];}));
     app.dataset.djTransitPreview='rail';
     window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
     transitPreview={kind:'rail',minutes:plan.railHeuristicMinutes+(startWalk.seconds+endWalk.seconds)/60,walkM:(startWalk.kilometers+endWalk.kilometers)*1000};
@@ -3832,6 +3833,19 @@ async function getTransitRailPaths(){
  if(!transitRailPending)transitRailPending=fetchOfficialRailPaths(fetch,4000).then(paths=>{transitRailCache=paths;transitRailCacheAt=Date.now();return paths;}).catch(()=>[]).finally(()=>{transitRailPending=null;});
  return transitRailPending;
 }
+async function sharedTransitRailSegments(stops,lines){
+ const displayed=getDisplayedRailPaths(map),quality=getDisplayedRailQuality(map);
+ if(!Array.isArray(stops)||!Array.isArray(lines)||lines.length!==stops.length-1)return [];
+ const shared=lines.map((line,i)=>{
+  const name=line==='신림'?'신림선':line+'호선';
+  const coordinates=pathBetweenDisplayedStations(displayed?.get(name),VERIFIED_STATIONS[stops[i]],VERIFIED_STATIONS[stops[i+1]]);
+  return coordinates?{line,coordinates,source:quality?.get(name)?'displayed-verified-rail':'displayed-reference-rail',schematic:!quality?.get(name)}:null;
+ });
+ if(shared.every(Boolean))return shared;
+ const raw=await getTransitRailPaths();
+ const fallback=transitRailSegments(stops,lines,VERIFIED_STATIONS,raw);
+ return fallback.map((segment,i)=>shared[i]||segment);
+}
 // Selected transit preview is visually distinct from the underlying rail network.
 function focusTransitRoute(coords){
  for(const id of ['dj-transit-rail-verified','dj-transit-rail-schematic','dj815-transit-bus','dj-transit-multi-bus','dj815-transit-walk','dj-transit-multi-walk']){
@@ -3842,17 +3856,21 @@ function focusTransitRoute(coords){
   map.setPaintProperty(line,'line-width',walking?4:6);
   map.setPaintProperty(line,'line-opacity',1);
   if(walking)map.setPaintProperty(line,'line-dasharray',[1.5,1.5]);
-  map.moveLayer(casing);map.moveLayer(line);
+  const before=map.getStyle()?.layers?.find(l=>l.type==='symbol'&&l.id!=='dj-transit-multi-stops-transfer-label')?.id;
+  map.moveLayer(casing,before);map.moveLayer(line,before);
  }
  const circle='dj-transit-multi-stops-circle';
- if(map.getLayer(circle))map.moveLayer(circle);
+ const before=map.getStyle()?.layers?.find(l=>l.type==='symbol'&&l.id!=='dj-transit-multi-stops-transfer-label')?.id;
+ if(map.getLayer(circle))map.moveLayer(circle,before);
+ const transferLabel='dj-transit-multi-stops-transfer-label';if(map.getLayer(transferLabel))map.moveLayer(transferLabel);
  const selected=transitPreview;
  requestAnimationFrame(()=>{if(transitPreview===selected&&selected&&app.dataset.tab==='map')fitWalkingRoute(coords);});
 }
 function setTransitPreviewStops(features){
  const id='dj-transit-multi-stops',data={type:'FeatureCollection',features};
  if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
- if(!map.getLayer(id+'-circle'))map.addLayer({id:id+'-circle',type:'circle',source:id,paint:{'circle-radius':6,'circle-color':'#fff','circle-stroke-color':['get','color'],'circle-stroke-width':2.5}});
+ if(!map.getLayer(id+'-circle'))map.addLayer({id:id+'-circle',type:'circle',source:id,paint:{'circle-radius':['case',['==',['get','transfer'],true],7,6],'circle-color':'#fff','circle-stroke-color':['get','color'],'circle-stroke-width':2.5}});
+ if(!map.getLayer(id+'-transfer-label'))map.addLayer({id:id+'-transfer-label',type:'symbol',source:id,filter:['==',['get','transfer'],true],layout:{'text-field':'환승','text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'],'text-size':11.7,'text-anchor':'bottom','text-offset':[0,-1.25],'text-allow-overlap':true,'text-ignore-placement':true,'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},paint:{'text-color':'#21483c','text-halo-color':'#fff','text-halo-width':1.1}});
 }
 function transitRailData(segments){
  const color=line=>subwayLineColor(line==='신림'?'신림선':line+'호선');
@@ -3912,8 +3930,7 @@ async function previewMultiTransit(plan,signal,preferPri=true){
    if(!selected||!transitCoordinatesInScope(selected.coords))throw new Error('실제 환승 보행 연결을 확인하지 못했습니다.');
    walks.push(selected);
  }
- const paths=legs.some(l=>l.kind==='rail')?await getTransitRailPaths():[];
- const railSegments=legs.filter(l=>l.kind==='rail').flatMap(l=>transitRailSegments(l.stops,l.lines,VERIFIED_STATIONS,paths));
+ const railSegments=(await Promise.all(legs.filter(l=>l.kind==='rail').map(l=>sharedTransitRailSegments(l.stops,l.lines)))).flat();
  if(legs.some(l=>l.kind==='rail')&&!railSegments.length||railSegments.some(s=>!transitCoordinatesInScope(s.coordinates)))throw new Error('지원 범위 내 철도 구간을 확인하지 못했습니다.');
  if(!current()||!map.isStyleLoaded?.())throw new Error('지도 또는 경로 상태가 변경됐습니다.');
  invalidateRoute();
@@ -3929,10 +3946,8 @@ async function previewMultiTransit(plan,signal,preferPri=true){
   if(!map.getSource(id))map.addSource(id,{type:'geojson',data:collection});else map.getSource(id).setData(collection);
   if(!map.getLayer(id+'-line'))map.addLayer({id:id+'-line',type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':['get','color'],'line-width':5,'line-opacity':.9,...(dash?{'line-dasharray':[2,2]}:{})}});
  }
- const stopId='dj-transit-multi-stops';
- const stopData={type:'FeatureCollection',features:legs.flatMap(leg=>[leg.origin,leg.destination].map(p=>({type:'Feature',properties:{color:color(leg)},geometry:{type:'Point',coordinates:[p.lng,p.lat]}})))};
- if(!map.getSource(stopId))map.addSource(stopId,{type:'geojson',data:stopData});else map.getSource(stopId).setData(stopData);
- if(!map.getLayer(stopId+'-circle'))map.addLayer({id:stopId+'-circle',type:'circle',source:stopId,paint:{'circle-radius':5,'circle-color':'#fff','circle-stroke-color':['get','color'],'circle-stroke-width':2}});
+ const stopFeatures=legs.flatMap((leg,i)=>[leg.origin,leg.destination].map((p,j)=>({type:'Feature',properties:{color:color(leg),transfer:j===0&&i>0},geometry:{type:'Point',coordinates:[p.lng,p.lat]}})));
+ setTransitPreviewStops(stopFeatures);
  app.dataset.djTransitPreview=plan.kind;
  window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
  const preview=transitPreview={kind:plan.kind,changes:legs.length-1,minutes:null,walkM:walks.reduce((sum,w)=>sum+w.kilometers*1000,0)};
