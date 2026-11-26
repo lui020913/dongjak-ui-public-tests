@@ -1610,11 +1610,12 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   panel.addEventListener('dongjak:transport-dismiss',()=>close(true));
   document.getElementById('transport-refresh').addEventListener('click',()=>selected&&open(selected,true));
   for(const [buttonId,which] of [['transport-use-start','start'],['transport-use-end','end']]){
-    document.getElementById(buttonId).addEventListener('click',()=>{
+    document.getElementById(buttonId).addEventListener('click',event=>{
+      event.preventDefault();event.stopPropagation();
       if(!selected)return;
-      const place={...selected};
-      close(false);
-      onRouteSelect(which,place);
+      // The shared route owner validates first and then closes this sheet.
+      // Keep the original transit sheet visible if the endpoint is rejected.
+      onRouteSelect(which,{...selected});
     });
   }
   map.addSource('transport-bus',{type:'geojson',data:featureCollection([])});
@@ -3017,27 +3018,35 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   });
   for(const [layerId,kind] of [['transport-bus-stop','bus'],['dj-transport-bus-pictogram','bus'],['transport-subway-station-shadow','subway'],['transport-subway-station','subway'],['transport-subway-glyph','subway'],['transport-subway-names','subway'],['transport-bus-names','bus'],['transport-bus-names-close','bus']]){
     map.on('click',layerId,event=>{
-      if(!canOpen())return;
+      if(!canPickRoute()&&!canOpen())return;
       const id=event.features?.[0]?.properties?.osmId;
       const place=stops.get(id);
       if(place && !(place.kind==='subway' && isDongjak(place.lng,place.lat)!==true && !isNearBoundary(place.lng,place.lat))){
-        event.originalEvent?.stopPropagation();void open(place,false,'map',event);
+        event.originalEvent?.stopPropagation();
+        if(canPickRoute())onRoutePick(place);
+        else void open(place,false,'map',event);
       }
     });
-    map.on('mouseenter',layerId,()=>{if(canOpen())map.getCanvas().style.cursor='pointer';});
+    map.on('mouseenter',layerId,()=>{if(canPickRoute()||canOpen())map.getCanvas().style.cursor='pointer';});
     map.on('mouseleave',layerId,()=>{map.getCanvas().style.cursor='';});
   }
   for(const layerId of [BUS_ROUTE_STOPS,BUS_ROUTE_STOP_NAMES,BUS_ROUTE_STOP_ICONS])map.on('click',layerId,event=>{
-    if(!canOpen())return;
+    if(!canPickRoute()&&!canOpen())return;
     const props=event.features?.[0]?.properties,stop=busRouteOverlay.getRouteStops().find(s=>s.seq===Number(props?.seq));
     if(!stop)return;
     event.originalEvent?.stopPropagation();
-    void open({...stop,id:'route-stop:'+String(stop.arsId||stop.seq),kind:'bus',source:'seoul-official-bus-stop',lines:[]},false,'map',event);
+    const place={...stop,id:'route-stop:'+String(stop.arsId||stop.seq),kind:'bus',source:'seoul-official-bus-stop',lines:[]};
+    if(canPickRoute())onRoutePick(place);
+    else void open(place,false,'map',event);
   });
   // 배경 지도의 버스 아이콘과 기차 아이콘은 poi_transit 하나의 레이어에 들어갑니다.
   // 이 이벤트는 외부 위치 검색 서버 없이 작동합니다.
   function tryOpenBasemap(event){
-    if(!canOpen() || !panel.hidden)return false;
+    const picking=canPickRoute();
+    if((!picking&&!canOpen())||!panel.hidden)return false;
+    // During route picking, only delegated POI hits claim this click here;
+    // the generic coordinate fallback belongs to the main route picker.
+    if(picking&&!event.features?.length)return false;
     const point=event.point;
     const precise=['dj-metro-summary-icon','dj-metro-summary-name','dj-metro-detail-icon','dj-metro-detail-name'].filter(id=>map.getLayer(id));
     if(precise.length && map.queryRenderedFeatures(point,{layers:precise}).some(f=>precise.includes(f.layer?.id)))return false;
@@ -3058,7 +3067,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       return Math.hypot(ap.x-point.x,ap.y-point.y)-Math.hypot(bp.x-point.x,bp.y-point.y);
     });
     event.originalEvent?.stopPropagation();
-    void open(candidates[0],false,'map',event);
+    if(picking)onRoutePick(candidates[0]);
+    else void open(candidates[0],false,'map',event);
     return true;
   }
   for(const layerId of ['poi_transit','dj-basemap-bus-pictogram']){

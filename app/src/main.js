@@ -96,6 +96,7 @@ import {installSupabaseSafetyAi} from './v880-supabase-safety-ai.js';
 import './bocha-road-layer.css';
 import './pilot-layer-selection.css';
 import {installMapHudCollisionGuard} from './map-hud-collision-guard.js';
+import {createRouteMapPickArbiter} from './route-map-pick-arbiter.js';
 import './night-visibility.css';
 import './safety-workspace.css';
 import './night-visibility-panel.css';
@@ -273,6 +274,7 @@ let addMode = false;
 let activeFilter = '전체';
 // 도보 경로 기능. 지도에 지점 찍기와 조사 지점 등록은 서로 다른 모드입니다.
 let routePickMode = null; // 'start' | 'end' | null
+const routeMapPickArbiter=createRouteMapPickArbiter();
 let routeStart = null;
 let routeEnd = null;
 let routeResult = null;
@@ -1881,7 +1883,7 @@ map.on('load',()=>{
     // immediately surface the overview sheet underneath the user's X action.
     overview.hidden=true;
   }, canPickRoute:()=>Boolean(routePickMode),
-  onRoutePick:(place)=>{if(routePickMode)showTransitRouteConfirmation(place);},
+  onRoutePick:(place)=>selectNamedRouteMapPlace(place),
   onRouteSelect:(which,place)=>selectExternalRouteLocation(which,place), canOpen:()=>!navMode&&app.dataset.tab==='map' && !addMode && !routePickMode && !communityPickMode})).then(()=>{
     baseLayerControls?.apply();
     accessibilityLayer.bringToFront();
@@ -2906,8 +2908,9 @@ window.addEventListener('dongjak:route-swap',()=>{
 });
 function selectExternalRouteLocation(which,place,{dismiss}={}){
   if(navMode||!['start','end'].includes(which)||place?.lng==null||place?.lat==null||!Number.isFinite(Number(place.lng))||!Number.isFinite(Number(place.lat)))return false;
-  const label=String(place.name||'선택한 시설');
-  if(!setRouteLocation(which,{name:label,label,lng:Number(place.lng),lat:Number(place.lat),kind:place.kind||'place'}))return false;
+  const name=String(place.name||'선택한 장소');
+  const label=['bus','subway'].includes(place.kind)?describeTransitPlace(place):name;
+  if(!setRouteLocation(which,{name,label,lng:Number(place.lng),lat:Number(place.lat),kind:place.kind||'place',arsId:place.arsId||'',direction:place.direction||'',lines:place.lines||[],address:place.address||''}))return false;
   routePickMode=null;
   closeTransitRouteConfirmation();closeRouteSearch();
   quickSearch.close();quickSearch.clearMapResults?.();closeTransportPanel(false);
@@ -2935,7 +2938,7 @@ function transitAtMapClick(point,lngLat) {
   // 클릭 지점과 가장 가까운 좌표의 마커를 우선합니다.
   const available = [
     'transport-subway-names','transport-subway-station','transport-subway-station-shadow',
-    'transport-bus-stop','transport-bus-names','poi_transit'
+    'transport-bus-stop','transport-bus-names','transport-bus-names-close','dj-transport-bus-pictogram','poi_transit','dj-basemap-bus-pictogram'
   ].filter(id=>map.getLayer(id));
   if(!available.length || !point)return null;
   const features=map.queryRenderedFeatures(
@@ -2945,15 +2948,15 @@ function transitAtMapClick(point,lngLat) {
   for(const feature of features){
     const props=feature.properties||{};
     let place=null;
-    if(String(feature.layer?.id||'').startsWith('transport-')){
+    if(String(feature.layer?.id||'').startsWith('transport-')||feature.layer?.id==='dj-transport-bus-pictogram'){
       const coordinates=feature.geometry?.coordinates;
       const lng=Number(coordinates?.[0]),lat=Number(coordinates?.[1]);
       const kind=props.kind;
       if((kind==='bus'||kind==='subway') && Number.isFinite(lng)&&Number.isFinite(lat)){
-        place={name:String(props.name||'정류장'),lng,lat,kind,arsId:String(props.arsId||''),
+        place={name:String(props.name||'정류장'),lng,lat,kind,arsId:String(props.arsId||''),direction:String(props.direction||''),
           lines:String(props.lines||'').split(',').map(x=>x.trim()).filter(Boolean)};
       }
-    } else if(feature.layer?.id==='poi_transit') place=baseMapTransitPlace(feature,lngLat);
+    } else if(['poi_transit','dj-basemap-bus-pictogram'].includes(feature.layer?.id)) place=baseMapTransitPlace(feature,lngLat);
     if(!place)continue;
     const xy=map.project([place.lng,place.lat]);
     const distance=Math.hypot(xy.x-point.x,xy.y-point.y);
@@ -2962,8 +2965,13 @@ function transitAtMapClick(point,lngLat) {
   matches.sort((a,b)=>a.distance-b.distance);
   return matches[0]?.place||null;
 }
+function selectNamedRouteMapPlace(place){
+  if(!routePickMode||app.dataset.tab!=='map'||!document.getElementById('route-transit-confirm')?.hidden)return false;
+  if(!place?.name||place.lng==null||place.lat==null||!Number.isFinite(Number(place.lng))||!Number.isFinite(Number(place.lat)))return false;
+  return routeMapPickArbiter.named(()=>showTransitRouteConfirmation({...place,lng:Number(place.lng),lat:Number(place.lat)}));
+}
 function showTransitRouteConfirmation(place) {
-  if(!requireDongjakRouteLocation(place))return;
+  if(!requireDongjakRouteLocation(place))return false;
   immersiveChrome.restore();
   closeTransitRouteConfirmation();
   routeTransitCandidate=place;
@@ -2972,9 +2980,9 @@ function showTransitRouteConfirmation(place) {
   const panel=document.getElementById('route-transit-confirm');
   document.getElementById('route-transit-confirm-name').textContent=place.name;
   document.getElementById('route-transit-confirm-desc').textContent=place.kind==='bus'
-    ? (place.arsId?`버스정류장 · ARS ${place.arsId}. 정류장명과 번호를 확인해 주세요.`:'버스정류장 · 지도의 표시 위치가 맞는지 확인해 주세요.')
+    ? ['버스정류장',place.arsId?`ARS ${place.arsId}`:'',place.direction||'','이곳이 맞습니까?'].filter(Boolean).join(' · ')
     : place.kind==='subway'?'지하철역 · 역명과 호선을 확인해 주세요.'
-    : `${place.address||'지도에서 선택한 위치'} · 이곳이 맞습니까?`;
+    : [place.source==='facility'?(place.category||'시설'):'지도에서 선택한 위치',place.address||'','이곳이 맞습니까?'].filter(Boolean).join(' · ');
   const tags=document.getElementById('route-transit-confirm-lines');
   tags.replaceChildren();
   for(const line of place.lines||[]){
@@ -2992,19 +3000,19 @@ function showTransitRouteConfirmation(place) {
       else{name.textContent='도로명 주소 미확인';desc.textContent='주소를 불러오지 못했습니다. 선택한 지도 좌표로 경로를 계산합니다.';}
     });
   }
+  return true;
 }
 // Some HTML-based facility pins stop the map click from reaching the route
 // picker. In route selection mode they should open the ordinary route candidate
 // confirmation instead of their facility details popup.
 window.addEventListener('dongjak:route-map-place',event=>{
-  if(!routePickMode||!document.getElementById('route-transit-confirm')?.hidden)return;
-  const name=String(event.detail?.name||'선택한 장소');
-  const lng=Number(event.detail?.lng),lat=Number(event.detail?.lat);
-  if(!Number.isFinite(lng)||!Number.isFinite(lat))return;
-  showTransitRouteConfirmation({kind:'point',source:'facility',name,lng,lat,lines:[]});
+  const place=event.detail;
+  if(!place)return;
+  selectNamedRouteMapPlace({...place,kind:'point',source:'facility',lines:[]});
 });
 
 function closeTransitRouteConfirmation() {
+  routeMapPickArbiter.cancel();
   document.getElementById('route-transit-confirm').hidden=true;
   routeCandidateMarker?.remove();routeCandidateMarker=null;
   routeTransitCandidate=null;
@@ -3157,8 +3165,9 @@ document.getElementById('route-transit-accept').addEventListener('click',()=>{
     routeProductTools?.setWaypoints(routeWaypoints);
     navigate('route');toast('경유지를 추가했습니다.');return;
   }
-  if(!setRouteLocation(which,{lng:place.lng,lat:place.lat,label,resolveAddress:place.kind==='point'&&!['search','facility'].includes(place.source)&&!place.address}))return;
+  if(!setRouteLocation(which,{name:place.name,lng:place.lng,lat:place.lat,label,kind:place.kind,arsId:place.arsId||'',direction:place.direction||'',lines:place.lines||[],address:place.address||'',resolveAddress:place.kind==='point'&&!['search','facility'].includes(place.source)&&!place.address}))return;
   navigate('route');
+  window.dispatchEvent(new CustomEvent('dongjak:route-endpoint-registered',{detail:{which}}));
   toast(which==='start'?'선택한 위치를 출발지로 확정했습니다.':'선택한 위치를 목적지로 확정했습니다.');
 });
 
@@ -3175,11 +3184,15 @@ function beginRoutePick(which) {
 function pickRouteLocation(lngLat,point) {
   if (!routePickMode)return;
   if(!document.getElementById('route-transit-confirm').hidden)return;
-  const transit=transitAtMapClick(point,lngLat);
-  if(transit){showTransitRouteConfirmation(transit);return;}
-  // 일반 지도 위치도 마커를 먼저 표시하고, 사용자가 확인한 뒤에만 저장합니다.
-  showTransitRouteConfirmation({kind:'point',name:'지도에서 선택한 위치',
-    lng:lngLat.lng,lat:lngLat.lat,lines:[]});
+  // MapLibre fires the generic listener before some delegated POI listeners.
+  // Defer the coordinate fallback until all synchronous named-place handlers finish.
+  const which=routePickMode;
+  routeMapPickArbiter.defer(()=>{
+    if(routePickMode!==which||app.dataset.tab!=='map'||!document.getElementById('route-transit-confirm').hidden)return;
+    const transit=transitAtMapClick(point,lngLat);
+    if(transit){showTransitRouteConfirmation(transit);return;}
+    showTransitRouteConfirmation({kind:'point',name:'지도에서 선택한 위치',lng:lngLat.lng,lat:lngLat.lat,lines:[]});
+  });
 }
 function resetRoute() {
   routePriVisuals=null;

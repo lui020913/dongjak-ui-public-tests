@@ -8,6 +8,9 @@ on:
       - 'app/tests/map-hud-collision-browser.mjs'
       - 'app/src/place-details.js'
       - 'app/src/main.js'
+      - 'app/src/transport-map.js'
+      - 'app/src/route-map-pick-arbiter.js'
+      - 'app/tests/route-map-pick-transit-facility-20261126.test.mjs'
       - 'app/tests/picker-layer-facility-route-20261126.test.mjs'
       - '.github/workflows/picker-facility-regression.yml'
 permissions:
@@ -20,8 +23,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --check app/src/main.js && node --check app/src/place-details.js
-      - run: node --test app/tests/picker-layer-facility-route-20261126.test.mjs app/tests/active-layer-dock-20261126.test.mjs app/tests/v864-facility-detail-redesign.test.mjs app/tests/map-hud-collision-guard.test.mjs
+      - run: node --check app/src/main.js && node --check app/src/place-details.js && node --check app/src/transport-map.js
+      - run: node --test app/tests/picker-layer-facility-route-20261126.test.mjs app/tests/active-layer-dock-20261126.test.mjs app/tests/v864-facility-detail-redesign.test.mjs app/tests/map-hud-collision-guard.test.mjs app/tests/route-map-pick-transit-facility-20261126.test.mjs
 
   geometry-browser:
     runs-on: ubuntu-latest
