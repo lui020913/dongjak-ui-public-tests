@@ -59,3 +59,17 @@ test('bus to rail candidate uses known station order and does not fabricate tota
  assert.equal(plan.legs[1].stops[0],'흑석');
  assert.equal(plan.minutes,undefined);
 });
+
+test('bus–rail–bus candidate supports two ordered transfers without a synthetic ETA',()=>{
+ const a={seq:1,arsId:'20001',lng:126.961,lat:37.501,name:'출발'};
+ const b={seq:2,arsId:'20002',lng:126.963708,lat:37.50877,name:'흑석'};
+ const c={seq:1,arsId:'20003',lng:126.941005,lat:37.513534,name:'노량진'};
+ const d={seq:2,arsId:'20004',lng:126.937,lat:37.508,name:'도착'};
+ const record=(id,stops)=>({id,name:id,routeType:'7',stops,coordinates:stops.map(p=>[p.lng,p.lat])});
+ const result=transferCandidates([record('100000001',[a,b]),record('100000002',[c,d])],a,d,new Set([a.arsId]),new Set([d.arsId]));
+ const plan=result.mixed.find(p=>p.legs.length===3);
+ assert.ok(plan);
+ assert.deepEqual(plan.legs.map(l=>l.kind),['bus','rail','bus']);
+ assert.equal(plan.changes,2);
+ assert.equal(plan.minutes,undefined);
+});
