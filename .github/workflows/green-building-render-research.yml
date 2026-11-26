@@ -9,7 +9,7 @@ jobs:
   render:
     runs-on: ubuntu-24.04
     container:
-      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      image: mcr.microsoft.com/playwright:v1.65.1-noble
       options: --ipc=host
     timeout-minutes: 18
     steps:
