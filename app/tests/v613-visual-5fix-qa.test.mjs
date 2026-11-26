@@ -65,7 +65,7 @@ test('3D rendering avoids full per-frame style changes and adapts phone resoluti
   const js=read('src/main.js');
   assert.match(js,/djNormalPixelRatio=normalMapPixelRatio\(\{phone:djPhone,ua:navigator\.userAgent/);
   assert.match(js,/pixelRatio: djInitialBudget==='economy'\?1:djNormalPixelRatio/);
-  assert.match(read('src/adaptive-phone-map-budget.mjs'),/phone\?\(highEnd\?3:2\):1\.5/);
+  assert.match(read('src/adaptive-phone-map-budget.mjs'),/phone\?\(highEnd\?2\.5:2\):1\.5/);
   assert.match(js,/lastFootprintPaintKey/);
   assert.match(js,/updateFootprint && footprint/);
   assert.doesNotMatch(js,/movementIsSlow|slowSamples|interactiveMoving/);
