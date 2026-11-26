@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.204",
+  "application_version": "9.2.205",
   "public_work_branch": "main",
-  "purpose": "Verified PR #569 (f39b7f8): remove automatic favorites folder row while retaining saved-place group management; restore icon-only save/share at all widths; suppress public POI circle backing and duplicate native symbols, preserve canonical park names, extend categorical pictograms; remove viewport-center clipping from stop labels and harmonize label zoom; preserve official rail geometry, improve line edges and capable-device DPR floor while keeping legacy economy. Source CI and picker/facility regression passed, mobile timeout passed on retry. Protected Preview, mobile QA and Production required. Road review remains isolated; real device visual confirmation still required.",
-  "attempt": 439,
+  "purpose": "Verified PR #568 (5a286b2): activate reviewed base-road surfaces by default at zoom 16+, with 99 immutable assets, 12045 valid surface polygons, 258 eligible native road IDs, viewport-bounded loading, native tile SHA-256 and versioned source guards, and original-map fallback. Full source CI, actual app road QA, facility/picker regression and route navigation passed. Preserve v9.2.204 UI; no activation of analysis-layer geometry changes. Protected Preview, phone QA and Production required.",
+  "attempt": 440,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
