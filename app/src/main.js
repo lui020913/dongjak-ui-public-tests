@@ -2876,7 +2876,7 @@ function drawRouteMarkers(visible=app.dataset.tab==='map'&&!communityPickMode&&!
   routeEndMarker=update(routeEndMarker,routeEnd,'end','#0ba876');
 }
 function clearTransitPreview(){
-  transitPreview=null;transitGeneration++;
+  transitPreview=null;transitGeneration++;delete app.dataset.djTransitPreview;
   const empty={type:'FeatureCollection',features:[]};
   for(const id of ['dj815-transit-walk','dj815-transit-rail','dj815-transit-bus']){
     try{map.getSource(id)?.setData(empty);}catch{}
@@ -3716,6 +3716,8 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
         paint:{'line-color':color,'line-width':5,'line-opacity':.9,...(dash?{'line-dasharray':dash}:{})}});
     }
     const coords=[...startWalk.coords,...railCoords,...endWalk.coords];
+    app.dataset.djTransitPreview='rail';
+    window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
     transitPreview={minutes:plan.railHeuristicMinutes+(startWalk.seconds+endWalk.seconds)/60,walkM:(startWalk.kilometers+endWalk.kilometers)*1000};
     navigate('map');fitWalkingRoute(coords);syncRoutePresentation();
   }
@@ -3748,6 +3750,8 @@ window.addEventListener('dongjak:transit-route-preview',event=>{
       if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
       if(!map.getLayer(id+'-line'))map.addLayer({id:id+'-line',type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':color,'line-width':5,'line-opacity':.9}});
     }
+    app.dataset.djTransitPreview='bus';
+    window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
     transitPreview={kind:'bus',route:String(plan.route),minutes:null,walkM:(a.kilometers+b.kilometers)*1000};
     navigate('map');fitWalkingRoute([...a.coords,...plan.coords,...b.coords]);syncRoutePresentation();
   })().then(resolve,reject);
