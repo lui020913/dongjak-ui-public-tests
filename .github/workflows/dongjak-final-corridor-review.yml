@@ -1,0 +1,56 @@
+name: Dongjak final corridor and overlay review
+on:
+  pull_request:
+    paths:
+      - 'scripts/research/dongjak_joint_endpoint_refinement.py'
+      - 'scripts/research/road-surface-preview.html'
+      - '.github/workflows/dongjak-final-corridor-review.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  deep-refinement:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'preview/road-surface-geometry-20261126'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2 mapbox-vector-tile==2.2.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-joint-endpoint-refinement-review
+          path: baseline-review
+          run-id: 45762581599
+          github-token: ${{ github.token }}
+      - run: python scripts/research/dongjak_corridor_gap_recovery.py --test
+      - name: Deep search within unchanged geometric guards
+        env:
+          DJ_DEEP_CORRIDOR_SEARCH: '1'
+        run: python scripts/research/dongjak_joint_endpoint_refinement.py baseline-review final-review
+      - run: python scripts/research/dongjak_road_polygon_alignment.py --test
+      - run: python scripts/research/dongjak_road_polygon_alignment.py final-review final-alignment
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-final-corridor-and-overlay-review
+          path: |
+            final-review/
+            final-alignment/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Build isolated visual comparison with continuous road candidates
+        run: |
+          python scripts/research/dongjak_road_surface_preview.py road-preview-dist
+          cp final-review/candidate-surfaces.geojson road-preview-dist/corridor-surfaces.geojson
+          cp final-review/candidate-centers.geojson road-preview-dist/corridor-centers.geojson
+          cp final-review/unresolved-links.geojson road-preview-dist/corridor-unresolved.geojson
+          cp final-review/summary.json road-preview-dist/corridor-summary.json
+          cp final-alignment/summary.json road-preview-dist/alignment-summary.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-final-isolated-visual-preview
+          path: road-preview-dist/
+          if-no-files-found: error
+          retention-days: 14
