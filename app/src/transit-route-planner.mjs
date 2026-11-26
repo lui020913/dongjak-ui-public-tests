@@ -58,7 +58,7 @@ export function transferCandidates(records,from,to,startIds,endIds,{limit=3,maxT
  }
  const rank=(a,b)=>a.score-b.score;
  const busCandidates=[],mixedCandidates=[];
- const retain=(arr,candidate)=>{arr.push(candidate);arr.sort(rank);if(arr.length>40)arr.pop();};
+ const retain=(arr,candidate)=>{if(arr.length>=40&&candidate.score>=arr.at(-1).score)return;arr.push(candidate);arr.sort(rank);if(arr.length>40)arr.pop();};
  const nearestRail=p=>stations.filter(s=>meters(p,s)<=1400).sort((a,b)=>meters(p,a)-meters(p,b)).slice(0,4);
  const nearFrom=nearestRail(from),nearTo=nearestRail(to);
  for(const a of starts)for(let j=a.i+1;j<Math.min(a.rec.stops.length,a.i+35);j++){
@@ -118,12 +118,17 @@ export async function findTransitOptions(from,to,{fetcher=globalThis.fetch,signa
     const startIds=new Set(starts.map(x=>x.arsId)),endIds=new Set(ends.map(x=>x.arsId));
     if(starts.length||ends.length){
       const candidates=new Map();
-      const arrivals=await Promise.allSettled([...new Map([...starts,...ends.slice(0,4)].map(s=>[s.arsId,s])).values()].map(s=>get(apiBase+'/bus?'+new URLSearchParams({arsId:s.arsId}))));
+      const queryStops=[...new Map([...starts,...ends.slice(0,4)].map(s=>[s.arsId,s])).values()];
+      const arrivals=await Promise.allSettled(queryStops.map(s=>get(apiBase+'/bus?'+new URLSearchParams({arsId:s.arsId}))));
       if(arrivals.some(x=>x.status==='rejected'))busStatus='partial';
-      for(const res of arrivals)if(res.status==='fulfilled')for(const item of res.value.items||[]){
-        if(/^\d{5,15}$/.test(item.routeId||''))candidates.set(item.routeId,{name:item.route,routeType:item.routeType});
+      for(const [i,res] of arrivals.entries())if(res.status==='fulfilled')for(const item of res.value.items||[]){
+        if(!/^\d{5,15}$/.test(item.routeId||''))continue;
+        const prev=candidates.get(item.routeId)||{name:item.route,routeType:item.routeType,start:false,end:false};
+        prev.start ||= startIds.has(queryStops[i].arsId);prev.end ||= endIds.has(queryStops[i].arsId);candidates.set(item.routeId,prev);
       }
-      const routeEntries=[...candidates].slice(0,16),records=[];
+      const all=[...candidates],chosen=new Map([...all.filter(([,v])=>v.start&&v.end).slice(0,8),...all.filter(([,v])=>v.start&&!v.end).slice(0,4),...all.filter(([,v])=>v.end&&!v.start).slice(0,4)]);
+      for(const [id,entry] of all){if(chosen.size>=16)break;if(!chosen.has(id))chosen.set(id,entry);}
+      const routeEntries=[...chosen],records=[];
       if(candidates.size>routeEntries.length)busStatus='partial';
       for(let i=0;i<routeEntries.length;i+=3){
         if(signal?.aborted)throw new Error('취소');
