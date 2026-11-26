@@ -628,8 +628,8 @@ const map = new maplibregl.Map({
   maxPitch: 70,
   // Cap GPU raster size on high-DPI displays (2x DPR costs 4x pixels).
   pixelRatio: djInitialBudget==='economy'?1:djNormalPixelRatio,
-  // Mobile multisampling is a substantial and permanent GPU cost; retain it on desktop only.
-  canvasContextAttributes: { antialias: !djPhone && djInitialBudget!=='economy' }
+  // Multisampling smooths vector edges on normal devices; economy remains unmodified.
+  canvasContextAttributes: { antialias: djInitialBudget!=='economy' }
 });
 // The extra compact (i) control duplicated the attribution link in Map Options.
 // Keep source credits in '지도 옵션 > 지도 데이터 출처'; do not overlay the map.
@@ -2012,7 +2012,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   if(tab!=='map')closeCommunityLocation();
   const communityPanel=document.getElementById('participation-panel');
   const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
-  if(!preserveCommunityComposer&&(reopeningCommunity||(previousTab!==tab&&(previousTab==='participate'||tab==='participate')))&&!communityPickMode&&!resumeCommunityDraft){
+  if(!preserveCommunityComposer&&tab==='participate'&&(reopeningCommunity||previousTab!==tab)&&!communityPickMode&&!resumeCommunityDraft){
     communityDetail=null;
     const form=document.getElementById('community-form');
     if(form){communityComposerPortal?.close();form.hidden=true;}
@@ -2587,6 +2587,7 @@ function communityReportContent(post,detail){
   return content;
 }
 function renderCommunity() {
+  if(document.getElementById('participation-panel')?.dataset.djTabOutgoing==='true')return;
   const root=document.getElementById('community-list');if(!root)return;root.replaceChildren();
   // Refreshes may arrive during the notification view; never mount feed cards there.
   if(!document.getElementById('community-notifications').hidden)return;
