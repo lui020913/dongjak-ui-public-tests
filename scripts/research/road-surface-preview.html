@@ -1,6 +1,6 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>동작(動作)하는 안전지도 · 도로 프리뷰</title><link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css"><style>
-*{box-sizing:border-box}body{margin:0;background:#edf3ef;color:#203d36;font:15px system-ui,sans-serif}#map{position:absolute;inset:0}.top{position:absolute;top:env(safe-area-inset-top,0px);left:12px;right:12px;padding-top:12px;pointer-events:none}.panel{pointer-events:auto;background:rgba(255,255,255,.95);border:1px solid #d3e0da;border-radius:22px;box-shadow:0 4px 20px #1f463520;padding:12px}.brand{font-weight:800;letter-spacing:-.7px}.badge{font-size:11px;color:#59736a;margin-left:6px}.controls{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}button{font:inherit;font-size:13px;font-weight:650;color:#244b41;background:#edf3ef;border:1px solid #d1ded7;border-radius:18px;padding:9px 12px;cursor:pointer}button[aria-pressed=true]{background:#167f70;color:white;border-color:#167f70}.note{position:absolute;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0px));font-size:12px;line-height:1.5}.legend{display:flex;gap:12px;flex-wrap:wrap}.swatch{display:inline-block;width:12px;height:12px;border:1px solid #aaa;vertical-align:middle;margin-right:4px}.status{color:#59736a;margin-top:7px}.maplibregl-ctrl-bottom-right{bottom:105px}.maplibregl-ctrl-top-right{top:135px}button:focus-visible{outline:2px solid #596368}
-</style></head><body><div id="map"></div><div class="top"><div class="panel"><div class="brand">동작(動作)하는 안전지도 <span class="badge">도로 표현 실험 · 운영 미반영</span></div><div class="controls"><button id="old" aria-pressed="true">기존 지도</button><button id="raw" aria-pressed="false">실폭도로 원본</button><button id="new" aria-pressed="false">개선 시안</button><button id="corridor" aria-pressed="false" hidden>연속 도로 보정</button><button id="unresolved" aria-pressed="false" hidden>미해결 구간</button><button id="conflict" aria-pressed="false">중첩 보기</button><button id="pitch" aria-pressed="false">3D</button></div><div class="status" id="status" role="status">지도 데이터 불러오는 중…</div></div></div><div class="note panel"><div class="legend"><span><i class="swatch" style="background:#D2DCDB"></i>건물</span><span><i class="swatch" style="background:#fff"></i>도로</span><span><i class="swatch" style="background:#e57b58"></i>중첩·검토 대상</span></div><div>표시용 공간 보정안입니다. 도로가 끊기는 구간은 실측 확인이 필요하며 길찾기에는 적용하지 않습니다.</div></div><script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script><script>
+*{box-sizing:border-box}body{margin:0;background:#edf3ef;color:#203d36;font:15px system-ui,sans-serif}#map{position:absolute;inset:0}.top{position:absolute;top:env(safe-area-inset-top,0px);left:12px;right:12px;padding-top:12px;pointer-events:none}.panel{pointer-events:auto;background:rgba(255,255,255,.95);border:1px solid #d3e0da;border-radius:22px;box-shadow:0 4px 20px #1f463520;padding:12px}.brand{font-weight:800;letter-spacing:-.7px}.badge{font-size:11px;color:#59736a;margin-left:6px}.controls{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}button{font:inherit;font-size:13px;font-weight:650;color:#244b41;background:#edf3ef;border:1px solid #d1ded7;border-radius:18px;padding:9px 12px;cursor:pointer}button[aria-pressed=true]{background:#167f70;color:white;border-color:#167f70}.note{position:absolute;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0px));font-size:12px;line-height:1.5}.legend{display:flex;gap:12px;flex-wrap:wrap}.swatch{display:inline-block;width:12px;height:12px;border:1px solid #aaa;vertical-align:middle;margin-right:4px}.status{color:#59736a;margin-top:7px}.maplibregl-ctrl-bottom-right{bottom:105px}.maplibregl-ctrl-top-right{top:135px}button:focus-visible{outline:2px solid #596368}select{max-width:100%;font:inherit;font-size:12px;border:1px solid #d1ded7;border-radius:18px;background:#edf3ef;padding:8px;color:#244b41}
+</style></head><body><div id="map"></div><div class="top"><div class="panel"><div class="brand">동작(動作)하는 안전지도 <span class="badge">도로 표현 실험 · 운영 미반영</span></div><div class="controls"><button id="old" aria-pressed="true">기존 지도</button><button id="raw" aria-pressed="false">실폭도로 원본</button><button id="new" aria-pressed="false">개선 시안</button><button id="corridor" aria-pressed="false" hidden>연속 도로 보정</button><button id="unresolved" aria-pressed="false" hidden>미해결 구간</button><button id="conflict" aria-pressed="false">중첩 보기</button><button id="pitch" aria-pressed="false">3D</button></div><div class="controls" id="overlay-controls" hidden style="display:none"><select id="overlay-select" aria-label="도로 레이어"><option value="">도로 레이어 없음</option></select><button id="overlay-original" aria-pressed="false">원본 선형</button><button id="overlay-corrected" aria-pressed="true">보정 선형</button><span id="overlay-info" style="font-size:11px;align-self:center"></span></div><div class="status" id="status" role="status">지도 데이터 불러오는 중…</div></div></div><div class="note panel"><div class="legend"><span><i class="swatch" style="background:#D2DCDB"></i>건물</span><span><i class="swatch" style="background:#fff"></i>도로</span><span><i class="swatch" style="background:#e57b58"></i>중첩·검토 대상</span></div><div>표시용 공간 보정안입니다. 도로가 끊기는 구간은 실측 확인이 필요하며 길찾기에는 적용하지 않습니다.</div></div><script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script><script>
 (async()=>{const status=document.getElementById('status');try{
  const manifest=await fetch('./manifest.json').then(r=>{if(!r.ok)throw Error('manifest');return r.json()});
  const map=new maplibregl.Map({container:'map',style:'https://tiles.openfreemap.org/styles/bright',center:[126.949,37.502],zoom:16.2,maxZoom:19,pitch:0});
@@ -36,6 +36,32 @@
  for(const id of buttons)document.getElementById(id).onclick=()=>{mode=id;update()};document.getElementById('conflict').onclick=()=>{showConflict=!showConflict;update()};document.getElementById('pitch').onclick=()=>{is3d=!is3d;map.easeTo({pitch:is3d?45:0,duration:450});update()};map.on('moveend',loadBuildings);await loadBuildings();update();
  // Put conflict diagnostics above building fills only when explicitly selected.
  const orig=update;document.getElementById('conflict').onclick=()=>{showConflict=!showConflict;orig();if(showConflict)map.moveLayer('preview-conflict',symbol)};
- window.__roadPreview={map,manifest};
+ const overlays=await fetch('./overlay-manifest.json').then(r=>r.ok?r.json():[]).catch(()=>[]);
+ if(overlays.length){
+   const select=document.getElementById('overlay-select'),info=document.getElementById('overlay-info'),controls=document.getElementById('overlay-controls');
+   controls.hidden=false;controls.style.display='flex';
+   for(const o of overlays){const option=document.createElement('option');option.value=o.id;option.textContent=o.label;select.append(option)}
+   let side='corrected',token=0,activeId=null;
+   async function showOverlay(){
+     const t=++token,entry=overlays.find(o=>o.id===select.value);
+     if(activeId&&map.getLayer(activeId))map.removeLayer(activeId);
+     if(activeId&&map.getSource(activeId))map.removeSource(activeId);
+     activeId=null;
+     for(const k of ['original','corrected'])document.getElementById('overlay-'+k).setAttribute('aria-pressed',String(side===k));
+     if(!entry){info.textContent='';return}
+     info.textContent='불러오는 중…';
+     try{
+       const data=await fetch('./overlay-'+entry.id+'-'+side+'.geojson').then(r=>{if(!r.ok)throw Error('overlay');return r.json()});
+       if(t!==token)return;
+       activeId='preview-active-overlay';map.addSource(activeId,{type:'geojson',data,tolerance:0,maxzoom:19});
+       const colors=['case',['==',['get','review_status'],'aligned'],'#27898b',['==',['get','review_status'],'original'],'#647681','#df8a57'];
+       map.addLayer({id:activeId,source:activeId,type:entry.type,paint:entry.type==='fill'?{'fill-color':colors,'fill-opacity':.65}:{'line-color':colors,'line-width':3,'line-opacity':.85}},symbol);
+       info.textContent='정렬 '+entry.aligned.toLocaleString()+' · 표시 '+data.features.length.toLocaleString();
+     }catch(e){if(t===token)info.textContent='레이어 연결 실패: '+e.message}
+   }
+   select.addEventListener('change',showOverlay);
+   for(const k of ['original','corrected'])document.getElementById('overlay-'+k).onclick=()=>{side=k;showOverlay()};
+ }
+ window.__roadPreview={map,manifest,review,overlays};
  }catch(e){status.textContent='프리뷰 연결 실패: '+e.message}})();
 </script></body></html>
