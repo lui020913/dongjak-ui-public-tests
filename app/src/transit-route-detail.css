@@ -1,0 +1,39 @@
+
+#app #dj-transit-detail[hidden],#app #dj-transit-detail [hidden]{display:none!important}
+#app #dj-transit-detail{display:grid;gap:10px;min-width:0;color:var(--walk-text,#193d33);font-size:13px;line-height:1.4}
+#app[data-dj-transit-preview] #route-map-card .route-map-card-actions,#app[data-dj-transit-preview] #dj-route-choice-list{display:none!important}
+#app #dj-transit-detail svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#app .dj-tr-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 7px;align-items:center}
+#app .dj-tr-heading strong{font-size:16px;font-weight:800;overflow-wrap:anywhere}
+#app .dj-tr-heading b{font-size:15px;font-weight:800;letter-spacing:-.025em}
+#app .dj-tr-heading small{grid-column:1/-1;color:var(--walk-muted,#627970);font-size:11px}
+#app .dj-tr-order{display:flex;gap:3px;height:20px}
+#app .dj-tr-order span{display:grid;place-items:center;min-width:42px;border-radius:999px;background:var(--walk-soft,#eaf5ef);font-size:10px;font-weight:720;padding:0 8px}
+#app .dj-tr-order span:nth-child(2){flex:1;background:color-mix(in srgb,var(--tr-line-color) 15%,var(--walk-paper,#fff));border:1px solid var(--tr-line-color)}
+#app .dj-tr-timeline{display:grid;gap:0;min-width:0}
+#app .dj-tr-leg{display:grid;grid-template-columns:29px minmax(0,1fr);gap:9px;position:relative;padding:9px 7px;border-radius:13px;transition:background-color 180ms ease}
+#app .dj-tr-leg:not(:last-child)::after{content:'';position:absolute;left:20px;top:36px;bottom:-9px;width:2px;background:var(--walk-border,#dbe9e1)}
+#app .dj-tr-leg.is-current{background:var(--walk-soft,#eaf5ef)}
+#app .dj-tr-marker{width:27px;height:27px;display:grid;place-items:center;border-radius:50%;background:var(--walk-soft,#eaf5ef);color:var(--walk-primary,#137e65);z-index:1}
+#app .dj-tr-marker:is([data-kind=bus],[data-kind=rail]){color:var(--tr-line-color);border:1px solid currentColor;background:var(--walk-paper,#fff)}
+#app .dj-tr-leg-body{min-width:0;display:grid;gap:3px;padding-bottom:5px}
+#app .dj-tr-leg-body strong{font-size:14px;font-weight:780;overflow-wrap:anywhere}
+#app .dj-tr-leg-body small{font-size:12px;color:var(--walk-muted,#627970);overflow-wrap:anywhere}
+#app .dj-tr-pri{width:fit-content;max-width:100%;font-size:11px;padding:3px 8px;border-radius:999px;background:var(--walk-soft,#eaf5ef);color:var(--walk-muted,#627970)}
+#app .dj-tr-stops{font-size:12px;color:var(--walk-muted,#627970);margin:2px 0}
+#app .dj-tr-stops summary{min-height:36px;cursor:pointer;padding:8px 0}
+#app .dj-tr-stops ol{margin:0;padding:0 0 0 22px;max-height:140px;overflow:auto;overscroll-behavior:contain}
+#app .dj-tr-stops li{padding:4px 0}
+#app .dj-tr-arrival{display:flex;align-items:center;gap:5px;justify-content:space-between;border:1px solid var(--walk-border,#dbe9e1);border-radius:13px;padding:3px 6px 3px 9px}
+#app .dj-tr-arrival .dj-tr-refresh{width:40px;height:40px;min-width:40px;display:grid;place-items:center;border:0;border-radius:50%;color:var(--walk-primary,#137e65);background:var(--walk-soft,#eaf5ef)}
+#app .dj-tr-note{display:flex;gap:6px;align-items:flex-start;font-size:11px;color:var(--walk-muted,#627970);line-height:1.5;margin:0}
+#app .dj-tr-footer{display:grid;gap:5px;background:var(--walk-paper,#fff)}
+#app .dj-tr-start,#app .dj-tr-step-controls button{min-height:48px;white-space:normal;border:0;border-radius:999px;padding:8px 14px;color:#fff;background:var(--walk-primary,#137e65);font-size:14px;font-weight:780}
+#app .dj-tr-step-guide{display:grid;gap:6px}
+#app .dj-tr-step-guide small{font-size:11px;color:var(--walk-muted,#627970)}
+#app .dj-tr-step-controls{display:flex;gap:8px}
+#app .dj-tr-step-controls button{flex:1;min-width:0}
+#app .dj-tr-step-controls button:first-child{color:var(--walk-primary,#137e65);background:var(--walk-soft,#eaf5ef)}
+#app .dj-tr-step-controls button:disabled,#app .dj-tr-refresh:disabled{opacity:.5}
+#app #dj-transit-detail button:focus-visible{outline:2px solid #596368;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){#app .dj-tr-leg{transition:none}}
