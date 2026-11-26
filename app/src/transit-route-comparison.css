@@ -35,3 +35,8 @@
 .tr-filter button[data-filter=mixed]{flex:1.45}
 .tr-multi-track span{min-width:0;flex:0 1 auto;padding-inline:5px;white-space:nowrap}
 .tr-multi-track span[data-vehicle=true]{flex:1;border:1px solid var(--route-color);background:color-mix(in srgb,var(--route-color) 16%,var(--tr-paper));color:var(--tr-ink)}
+
+.tr-pri-preference{align-self:flex-start;min-height:36px;padding:5px 12px;border-radius:999px;border:1px solid var(--tr-border);background:var(--tr-paper);color:var(--tr-muted);font-size:12px;font-weight:700;transition:background-color 180ms ease,color 180ms ease}
+.tr-pri-preference[aria-pressed=true]{color:var(--tr-ink);background:var(--tr-soft);border-color:var(--tr-primary)}
+.tr-pri-preference:disabled{opacity:.65}
+@media(prefers-reduced-motion:reduce){.tr-pri-preference{transition:none}}
