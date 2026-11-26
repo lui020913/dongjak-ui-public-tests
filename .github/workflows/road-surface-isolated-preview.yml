@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'scripts/research/road-surface-preview.html'
+      - 'scripts/research/selective-road-filter.js'
+      - 'scripts/research/selective-road-filter.test.cjs'
       - 'scripts/research/dongjak_road_surface_preview.py'
       - 'scripts/research/package_final_road_overlays.py'
       - '.github/workflows/road-surface-isolated-preview.yml'
@@ -48,6 +50,14 @@ jobs:
           path: campus-review
           run-id: 45771337301
           github-token: ${{ github.token }}
+      - name: Download exact selective eligibility review
+        uses: actions/download-artifact@v4
+        with:
+          name: dongjak-native-id-eligibility
+          path: native-id-review
+          run-id: 45774343937
+          github-token: ${{ github.token }}
+      - run: node scripts/research/selective-road-filter.test.cjs
       - name: Validate provenance and package reviewed overlay comparisons
         run: |
           set -euo pipefail
@@ -60,10 +70,16 @@ jobs:
           cp hybrid-review/hybrid-road-surfaces.geojson hybrid-review/hybrid-summary.json campus-review/campus-summary.json road-preview-dist/
           jq -e '.counts.baseline_accepted==4202 and .counts.reviewed_accepted==7852 and .unresolved_source_count==419' road-preview-dist/hybrid-summary.json >/dev/null
           jq -e '.road_links==448 and .counts.accepted_clear==401 and .counts.unresolved==47' road-preview-dist/campus-summary.json >/dev/null
+          cp native-id-review/native-id-eligibility.json road-preview-dist/
+          jq -e '.eligible_id_count==259 and (.eligible_native_ids|length)==259 and .operational_enabled==false' road-preview-dist/native-id-eligibility.json >/dev/null
           cp scripts/research/road-surface-preview.html road-preview-dist/index.html
           python - <<'PY'
           import json,os,pathlib,re
           p=pathlib.Path('road-preview-dist')
+          html=(p/'index.html').read_text()
+          marker='/* SELECTIVE_ROAD_FILTER_INLINE */'
+          assert html.count(marker)==1
+          (p/'index.html').write_text(html.replace(marker,pathlib.Path('scripts/research/selective-road-filter.js').read_text()))
           m=json.loads((p/'manifest.json').read_text())
           assert m['preview'] and m['building_count']>0
           assert json.loads((p/'corridor-summary.json').read_text())['candidate_links']==7852
