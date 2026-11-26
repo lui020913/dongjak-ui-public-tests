@@ -18,3 +18,14 @@ test('unavailable edge stays explicitly schematic and transfer colors retain lin
  assert.equal(segments[0].schematic,false);assert.equal(segments[1].schematic,true);
  assert.deepEqual(segments.map(s=>s.line),['9','7']);
 });
+
+import {pathBetweenDisplayedStations,setDisplayedRailPaths,getDisplayedRailPaths,getDisplayedRailQuality} from '../src/features/liveTransit/geometry.js';
+test('selected itinerary follows the same curved map path in both directions',()=>{
+ const paths=[[a,b],[b,c]],map={};
+ setDisplayedRailPaths(map,new Map([['9호선',paths]]),new Map([['9호선',true]]));
+ assert.equal(getDisplayedRailPaths(map).get('9호선'),paths);assert.equal(getDisplayedRailQuality(map).get('9호선'),true);
+ const forward=pathBetweenDisplayedStations(paths,a,c),reverse=pathBetweenDisplayedStations(paths,c,a);
+ assert.deepEqual(forward[0],a);assert.deepEqual(forward.at(-1),c);assert.ok(forward.some(p=>p[0]===b[0]&&p[1]===b[1]));
+ assert.deepEqual(reverse[0],c);assert.deepEqual(reverse.at(-1),a);
+ assert.equal(pathBetweenDisplayedStations([[a,b],[[126.953,37.501],c]],a,c),null);
+});

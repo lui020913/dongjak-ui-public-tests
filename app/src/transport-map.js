@@ -628,6 +628,13 @@ export function indexRenderedMetroRail(collection){
   }
   return lines;
 }
+function renderedRailQuality(collection){
+ const quality=new Map();
+ for(const f of collection?.features||[]){const line=normalizeLineName(f.properties?.line||'');if(!line)continue;
+ const actual=f.properties?.schematic===false&&['MOIS_KR_Subway_2026','OpenStreetMap_ODbL'].includes(f.properties?.source);
+ const prior=quality.get(line);quality.set(line,prior===false?false:actual);}
+ return quality;
+}
 function nearestRenderedRail(point,paths){
   let best=null;
   for(const path of paths||[]){
@@ -1606,12 +1613,14 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   let renderedRailPaths=indexRenderedMetroRail(localRailGeometry);
   let lastMetroMarkerItems=[];
   map.addSource('transport-schematic-connections',{type:'geojson',data:localRailGeometry,tolerance:0,buffer:128,maxzoom:19});
-  setDisplayedRailPaths(map,renderedRailPaths);
+  setDisplayedRailPaths(map,renderedRailPaths,renderedRailQuality(localRailGeometry));
   // 실제 노선 공간정보(행안부 2026) 우선: 도로·하천의 실제 굴곡과 교차점을 보존합니다.
   // 공식 API에 없는 신림선 또는 조회 실패한 호선은 오프라인 안내용 선형을 유지합니다.
   // 외부 자료를 기다리느라 기존 지도를 중단하지 않습니다.
-  if(typeof window!=='undefined' && /^https?:$/.test(window.location?.protocol||'')){
-    void fetchOfficialRailPaths().then(paths=>{
+  let pendingOfficialRailPaths=null;
+  const officialRailPublish=coalesceViewportWork(()=>{
+      const paths=pendingOfficialRailPaths;pendingOfficialRailPaths=null;
+      if(!paths)return;
       const result=mergeOfficialRail(localRailGeometry,paths);
       if(!result.lines.length)return;
       const source=map.getSource('transport-schematic-connections');
@@ -1619,12 +1628,14 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       source.setData(result.collection);
       // Keep station badges anchored to the actual displayed official curves.
       renderedRailPaths=indexRenderedMetroRail(result.collection);
-      setDisplayedRailPaths(map,renderedRailPaths);
+      setDisplayedRailPaths(map,renderedRailPaths,renderedRailQuality(result.collection));
       if(lastMetroMarkerItems.length)renderMetroMarkers(lastMetroMarkerItems);
       const dataSources=[...new Set(result.collection.features.filter(f=>!f.properties?.schematic).map(f=>f.properties?.source).filter(Boolean))];
        console.info('[지하철 노선] 실제 지형 선형 적용:',result.lines.map(k=>k==='신림'?'신림선':`${k}호선`).join(', '),'출처:',dataSources.join(', '));
        window.dispatchEvent(new CustomEvent('dj:rail-geometry-loaded',{detail:{lines:result.lines,sources:dataSources}}));
-    }).catch(error=>{
+  },{delay:350,isMoving:()=>map.isMoving?.()===true});
+  if(typeof window!=='undefined' && /^https?:$/.test(window.location?.protocol||'')){
+    void fetchOfficialRailPaths().then(paths=>{pendingOfficialRailPaths=paths;officialRailPublish.request();}).catch(error=>{
       console.info('[지하철 노선] 공공 GIS 조회 실패, 기존 안내선형 유지:',error?.message||error);
     });
   }
@@ -1708,7 +1719,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       ['!=',['get','class'],'bus'],['!=',['get','subclass'],'bus_stop'],['!=',['get','subclass'],'bus_station']]);
     if(suppressNativeRail || (map.getZoom?.()??16)<12.45 || document.getElementById('app')?.dataset?.baseMetro==='off')rules.push(['!=',['get','class'],'rail']);
     if(typeof map.setFilter!=='function')return;
-    try{map.setFilter('poi_transit',rules.length?['all',...rules]:null);}catch(e){console.warn('기본 교통 아이콘 축척 제한 실패',e);}
+    try{const next=rules.length?['all',...rules]:null;if(JSON.stringify(map.getFilter?.('poi_transit'))!==JSON.stringify(next))map.setFilter('poi_transit',next);}catch(e){console.warn('기본 교통 아이콘 축척 제한 실패',e);}
   }
   updateBaseTransitFilter();
   map.on('zoomend',updateBaseTransitFilter);
@@ -1902,8 +1913,13 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     try{map.setFilter('dj-basemap-bus-pictogram',filter);lastTileFallbackFilter=signature;}
     catch(error){console.debug('[정류장 예비 레이어 중복 필터]',error?.message||error);}
   }
+  let lastStopDataSignature='';
   function showStops(items){
+    if(map.isMoving?.()){stopPublish.request();return;}
     const filtered=items.filter(x=>x.kind==='subway'?withinMetroRadius(x.lng,x.lat):isDongjak(x.lng,x.lat)===true);
+    const signature=JSON.stringify(filtered);
+    if(signature===lastStopDataSignature)return;
+    lastStopDataSignature=signature;
     stops=new Map(filtered.map(x=>[x.id,x]));
     cachedTransportPlaces=filtered;
     map.getSource('transport-bus').setData(featureCollection(filtered.filter(x=>x.kind==='bus')));
@@ -1914,7 +1930,13 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const busCount=currentVisibleBusStops.length;
     sourceStatus.textContent=`버스 ${busCount}곳${officialStaticStopCount ? ' (서울시 공식 정류소 정적자료)' : ' (OSM 보완자료)'} · 철도역 ${filtered.length-busCount}곳 · 지도에서 선택`;
   }
-  function refreshStops(){showStops(combineStations());}
+  const stopPublish=coalesceViewportWork(()=>showStops(combineStations()),{delay:350,isMoving:()=>map.isMoving?.()===true});
+  function refreshStops(){
+    // Initial local data remains immediate when stationary. All later asynchronous
+    // deliveries are batched and never rebuild icons or placement during gestures.
+    if(!lastStopDataSignature&&!map.isMoving?.())showStops(combineStations());
+    else stopPublish.request();
+  }
   // The authoritative polygon may be updated asynchronously by the admin layer.
   map.on?.('dongjak:boundary-updated',()=>{refreshStops();void preloadOfficialStaticBusStops();});
   // On each deployment official static data is loaded directly as a local asset.

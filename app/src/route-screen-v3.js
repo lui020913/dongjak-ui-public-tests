@@ -1,4 +1,5 @@
 import {WALK_ICON_PATH} from './route-walk-icon.mjs';
+import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 /**
  * Walking route entry V3: a completely new, isolated visual screen.
  * No inherited route-card, legacy sheet layout, footer CSS, or cloned UI.
@@ -106,14 +107,20 @@ export function mountRouteScreenV3(doc=document, win=window) {
     searchScreen.dataset.keyboard=searchLayoutHeight-top-height>100?'open':'closed';
   };
   const setSearchVisible=visible=>{
-    searchScreen.hidden=!visible;
+    const wasVisible=!searchScreen.hidden;
+    cancelSurfaceMotion(searchScreen);
     if(visible){
+      searchScreen.hidden=false;searchScreen.inert=false;searchScreen.style.removeProperty('pointer-events');
       view.dataset.searchOpen='true';
       searchLayoutWidth=win.innerWidth;
       searchLayoutHeight=Math.max(win.innerHeight||0,doc.documentElement.clientHeight||0);
       syncViewport();
+      if(!wasVisible)revealSurface(searchScreen,{win});
     }else{
       delete view.dataset.searchOpen;
+      searchScreen.inert=true;searchScreen.style.setProperty('pointer-events','none');
+      const hide=()=>{if(view.dataset.searchOpen!=='true'){searchScreen.hidden=true;searchScreen.style.removeProperty('pointer-events');}};
+      if(wasVisible&&!host.hidden)exitSurface(searchScreen,hide,{win});else hide();
       delete searchScreen.dataset.keyboard;
       host.style.removeProperty('--v3-search-top');
       host.style.removeProperty('--v3-search-height');

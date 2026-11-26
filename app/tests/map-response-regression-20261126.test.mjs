@@ -67,3 +67,11 @@ test('delayed POI response during a gesture performs zero source writes; settled
   buildLayers(map,source.data);assert.equal(writes,1);assert.equal(styleWrites,0);
  }finally{controller?.stop();for(const [k,d] of saved){if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}
 });
+
+test('safety and public overlay network completion is batched and cannot change symbols mid-gesture',()=>{
+ const s=src('safety-layers.js');
+ assert.match(s,/pendingSources.set\(ctl.source,data\);publish.request\(\)/);
+ assert.match(s,/if\(map.isMoving\?\.\(\)\)\{pendingVisibility.set\(id,desired\);publish.request\(\);continue;\}/);
+ assert.match(s,/delay:350,isMoving:\(\)=>map.isMoving\?\.\(\)===true/);
+ assert.match(s,/catch\(error\) \{\s*s.active=false;\s*button.setAttribute\('aria-pressed','false'\);\s*setControlVisibility\(ctl,false\)/);
+});

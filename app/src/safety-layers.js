@@ -1,6 +1,7 @@
 import {koreanOSMName} from './korean-labels.js';
 import {registerFacilityIcons,iconName} from './v912-poi-presentation.js';
 import {openPlaceDetails} from './place-details.js';
+import {coalesceViewportWork} from './adaptive-phone-map-budget.mjs';
 
 // v17.11: 안전시설 및 횡단보도는 OSM 기여 데이터로 조회합니다.
 // 확인되지 않은 시설을 임의로 생성하지 않습니다. 사용자가 레이어를 켰을 때만 요청합니다.
@@ -163,6 +164,20 @@ export function installSafetyLayers({map,maplibregl,isDongjak,canOpen=()=>true})
     paint:{'text-color':'#fff'}});
 
   function updateStatus(message){if(statusEl) statusEl.textContent = message;}
+  // Keep both async success and failure from invalidating symbol placement mid-pan.
+  const pendingSources=new Map(),pendingVisibility=new Map();
+  const publish=coalesceViewportWork(()=>{
+    for(const [id,data] of pendingSources){map.getSource(id)?.setData(data);pendingSources.delete(id);}
+    for(const [id,desired] of pendingVisibility){if(map.getLayer(id)&&(map.getLayoutProperty(id,'visibility')||'visible')!==desired)map.setLayoutProperty(id,'visibility',desired);pendingVisibility.delete(id);}
+  },{delay:350,isMoving:()=>map.isMoving?.()===true});
+  function setControlVisibility(ctl,visible){
+    const desired=visible?'visible':'none';
+    for(const id of ctl.layers){
+      if(map.isMoving?.()){pendingVisibility.set(id,desired);publish.request();continue;}
+      pendingVisibility.delete(id);
+      if(map.getLayer(id)&&(map.getLayoutProperty(id,'visibility')||'visible')!==desired)map.setLayoutProperty(id,'visibility',desired);
+    }
+  }
   for (const ctl of controls) {
     const s = state[ctl.mode];
     const button = ctl.button;
@@ -170,7 +185,7 @@ export function installSafetyLayers({map,maplibregl,isDongjak,canOpen=()=>true})
     button.addEventListener('click', async () => {
       s.active = !s.active;
       button.setAttribute('aria-pressed',String(s.active));
-      for(const id of ctl.layers) if(map.getLayer(id)) map.setLayoutProperty(id,'visibility',s.active?'visible':'none');
+      setControlVisibility(ctl,s.active);
       if(!s.active || s.loaded || s.busy) return;
       s.busy = true;
       button.disabled = true;
@@ -184,13 +199,13 @@ export function installSafetyLayers({map,maplibregl,isDongjak,canOpen=()=>true})
               ? `[out:json][timeout:25];(nwr["amenity"~"^(townhall|community_centre|social_facility|kindergarten|childcare|school|public_building)$"](${SAFETY_BBOX});nwr["office"="government"](${SAFETY_BBOX});nwr["building"="government"](${SAFETY_BBOX});nwr["leisure"="park"](${SAFETY_BBOX}););out center tags;`
               : `[out:json][timeout:25];node["highway"="crossing"](${SAFETY_BBOX});out tags;`;
         const data = safetyFeatures(await queryOverpass(query),isDongjak,ctl.mode);
-        map.getSource(ctl.source)?.setData(data);
+        pendingSources.set(ctl.source,data);publish.request();
         s.loaded=true;
         updateStatus(`${ctl.mode==='safety'?'안전시설':ctl.mode==='essentials'?'약국·편의점':ctl.mode==='public'?'공공·교육시설':'횡단보도'} ${data.features.length.toLocaleString()}곳 · OSM 등록 자료`);
       } catch(error) {
         s.active=false;
         button.setAttribute('aria-pressed','false');
-        for(const id of ctl.layers) if(map.getLayer(id)) map.setLayoutProperty(id,'visibility','none');
+        setControlVisibility(ctl,false);
         updateStatus('공개지도 자료 연결 실패 · 잠시 후 다시 선택');
       } finally { s.busy=false;button.disabled=false; }
     });

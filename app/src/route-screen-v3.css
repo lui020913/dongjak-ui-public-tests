@@ -21,8 +21,9 @@ button:focus,input:focus{outline:none;box-shadow:none}
 input:focus{border-color:#596368}
 [hidden]{display:none!important}
 .canvas {position:absolute;inset:0;pointer-events:none}
-.canvas[data-search-open="true"]{background:var(--v3-page-bg)}
-.canvas[data-search-open="true"] > :not(.search-screen){visibility:hidden;pointer-events:none}
+.canvas > :not(.search-screen){transition:opacity 180ms ease,visibility 0s linear 0s}
+.canvas[data-search-open="true"] > :not(.search-screen){opacity:0;visibility:hidden;pointer-events:none;transition:opacity 180ms ease,visibility 0s linear 180ms}
+@media(prefers-reduced-motion:reduce){.canvas > :not(.search-screen){transition:none}}
 .header {
   position:fixed;
   top:0;left:0;right:0;

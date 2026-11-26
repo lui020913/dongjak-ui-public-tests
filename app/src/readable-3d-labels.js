@@ -63,7 +63,7 @@ function lastLayersMatch(actual,desired){
  */
 const promotingMaps=new WeakSet();
 export function promoteReadable3DLabelLayers(map){
-  if(!map?.getStyle||!map?.moveLayer||nightOwnsLayerOrder(map)||promotingMaps.has(map))return false;
+  if(!map?.getStyle||!map?.moveLayer||map.isMoving?.()||nightOwnsLayerOrder(map)||promotingMaps.has(map))return false;
   promotingMaps.add(map);
   try {return applyReadableLayerOrder(map);}finally{promotingMaps.delete(map);}
 }
@@ -96,10 +96,12 @@ function applyReadableLayerOrder(map){
 
 export function installReadable3DLabels({map}={}){
   if(!map?.getStyle||!map?.setLayoutProperty)return ()=>{};
-  let removed=false,pending=false,updating=false;
+  let removed=false,pending=false,updating=false,lastOrder='';
   function update(){
     pending=false;
-    if(removed||updating||nightOwnsLayerOrder(map))return;
+    if(removed||updating||map.isMoving?.()||nightOwnsLayerOrder(map))return;
+    const order=(map.getStyle()?.layers||[]).map(l=>l.id).join('|');
+    if(order===lastOrder)return;
     updating=true;
     try{
       const height=labelHeightAtPitch(map.getPitch?.()??0);
@@ -114,10 +116,11 @@ export function installReadable3DLabels({map}={}){
         }catch{/* Some external styles reject this property. Other labels remain intact. */}
       }
       promoteReadable3DLabelLayers(map);
+      lastOrder=(map.getStyle()?.layers||[]).map(l=>l.id).join('|');
     }finally{updating=false;}
   }
   function schedule(){
-    if(pending||removed||updating)return;
+    if(pending||removed||updating||map.isMoving?.())return;
     pending=true;
     if(typeof requestAnimationFrame==='function')requestAnimationFrame(update);
     else update();
@@ -126,11 +129,16 @@ export function installReadable3DLabels({map}={}){
   map.on?.('pitchend',schedule);
   map.on?.('styledata',schedule);
   map.on?.('idle',schedule);
+  const resetOrder=()=>{lastOrder='';schedule();};
+  map.on?.('moveend',schedule);
+  map.on?.('style.load',resetOrder);
   schedule();
   return ()=>{
     removed=true;
     map.off?.('pitchend',schedule);
     map.off?.('styledata',schedule);
     map.off?.('idle',schedule);
+    map.off?.('moveend',schedule);
+    map.off?.('style.load',resetOrder);
   };
 }

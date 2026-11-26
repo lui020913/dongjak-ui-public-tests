@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.220",
+  "application_version": "9.2.221",
   "public_work_branch": "main",
-  "purpose": "Integrated protected release: preserve verified PR #592 compact transit results and deferred facility updates, v9.2.218 common map lifecycle and 2.5x cap, and PR #593 immediate report-location feed dismissal with stale animation/visibility guard, deliberate reentry and repeated browser regression. Require integrated source CI, protected Preview, full phone QA, Production and APK. No changes to safety evaluation or geometry.",
-  "attempt": 455,
+  "purpose": "Integrated transit design and map performance patch: filled route-color pill badges, route search/detail local fades, station-reference label font and zoom sizing, idle-only label style/reorder updates, idempotent native transit filter, shared displayed rail geometry for selected routes, route lines beneath station/POI symbols, transfer labels and teardown regression. Preserve v9.2.220 community dismissal and transit/POI improvements. Require protected source CI, mobile QA, Production and APK; physical device FPS not yet verified.",
+  "attempt": 456,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

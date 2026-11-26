@@ -90,7 +90,7 @@
 .tr-fare-compact{font-size:12px;color:var(--tr-ink);font-weight:650;white-space:nowrap}
 .tr-route-accessible-heading{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .tr-route-badges{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding-block:2px}
-.tr-line-badge{border:1px solid var(--line-color);background:color-mix(in srgb,var(--line-color) 12%,var(--tr-paper));color:var(--tr-ink);border-radius:6px;padding:3px 8px;font-size:12px;font-weight:750;line-height:1.25}
+.tr-line-badge{display:inline-flex;align-items:center;justify-content:center;border:0;background:var(--line-color);color:#fff;border-radius:999px;padding:4px 11px;min-height:24px;font-size:12px;font-weight:700;line-height:1.25;white-space:nowrap}
 .tr-badge-arrow{color:var(--tr-muted);font-size:16px}
 .tr-scroll .tr-route-names{font-size:12px;font-weight:600}
 .tr-scroll .tr-review-result{padding-top:4px;border-top:0}
