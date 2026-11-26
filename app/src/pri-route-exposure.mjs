@@ -4,7 +4,7 @@
  * invents links, silently scores unmapped streets as safe, or claims a
  * statistically representative network-wide safety ranking.
  */
-import {parseImport,currentSixFactorScore,currentSixFactorCoverage} from './pri-data.mjs';
+import {parseImport,observedFactorScore,CURRENT_SIX_FACTORS} from './pri-data.mjs';
 import {spatialMatchSpeedFactor} from './pri-speed-spatial-match.mjs';
 import {SPEED_RISK_SOURCE} from './pri-speed-risk.mjs';
 
@@ -37,12 +37,24 @@ export async function loadCompositePriForRoutes(fetchImpl=fetch){
   return bundle;
 }
 
-function buildObservedLines(bundle){
+export function normalizeRoutePriFactors(factors){
+  if(factors===undefined)return [...CURRENT_SIX_FACTORS];
+  if(!Array.isArray(factors))throw new TypeError('PRI 평가 지표를 배열로 지정해야 합니다.');
+  const selected=CURRENT_SIX_FACTORS.filter(id=>factors.includes(id));
+  if(!selected.length||factors.some(id=>!CURRENT_SIX_FACTORS.includes(id)))throw new RangeError('PRI 평가 지표를 1개 이상 선택해 주세요.');
+  return selected;
+}
+function buildObservedLines(bundle,factors){
+  const selected=normalizeRoutePriFactors(factors);
+  // Preserve the default six-factor research method. A custom subset requires
+  // all chosen indicators at each matched road, preventing unequal evidence.
+  const required=selected.length===CURRENT_SIX_FACTORS.length?2:selected.length;
   const lines=[],grid=new Map();
   for(const segment of bundle?.segments||[]){
-    const safety=currentSixFactorScore(segment);
-    const coverage=currentSixFactorCoverage(segment);
-    if(safety===null||coverage<2||segment.geometry?.type!=='LineString')continue;
+    const values=selected.map(id=>observedFactorScore(segment,id)).filter(value=>value!==null);
+    const coverage=values.length;
+    if(coverage<required||segment.geometry?.type!=='LineString')continue;
+    const safety=values.reduce((sum,value)=>sum+value,0)/coverage;
     const cs=segment.geometry.coordinates;
     if(!Array.isArray(cs)||cs.length<2)continue;
     const risk=100-safety;
@@ -109,11 +121,12 @@ export function estimateRoutePriExposure(route,observedLines){
     observedFactorsMean:covered>=20?Math.round(indicatorDistance/covered*10)/10:null
   };
 }
-export function compareCompositePriRoutes(routes,bundle){
-  const lines=buildObservedLines(bundle);
+export function compareCompositePriRoutes(routes,bundle,factors){
+  const selected=normalizeRoutePriFactors(factors);
+  const lines=buildObservedLines(bundle,selected);
   const standard=estimateRoutePriExposure(routes?.standard,lines);
   const gentle=estimateRoutePriExposure(routes?.gentle,lines);
-  const result={standard,gentle,recommendation:null,reason:'insufficient',researchOnly:true};
+  const result={standard,gentle,recommendation:null,reason:'insufficient',researchOnly:true,selectedFactors:selected};
   if(!standard||!gentle||standard.risk===null||gentle.risk===null)return result;
   // Coverage restrictions apply to the entire route, not only its mapped
   // subspan. Low coverage must not be misrepresented as "safer."
@@ -180,8 +193,8 @@ export function routePriColorGeometry(route,observedLines){
   }
   return {type:'FeatureCollection',features};
 }
-export function visualizeCompositePriRoutes(routes,bundle){
-  const lines=buildObservedLines(bundle);
+export function visualizeCompositePriRoutes(routes,bundle,factors){
+  const lines=buildObservedLines(bundle,factors);
   return {
     standard:routePriColorGeometry(routes?.standard,lines),
     gentle:routePriColorGeometry(routes?.gentle,lines)
