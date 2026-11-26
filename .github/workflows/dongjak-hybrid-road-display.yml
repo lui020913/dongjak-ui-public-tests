@@ -1,0 +1,42 @@
+name: Dongjak hybrid road display integration review
+on:
+  pull_request:
+    paths:
+      - 'scripts/research/dongjak_hybrid_road_display.py'
+      - '.github/workflows/dongjak-hybrid-road-display.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: dongjak-hybrid-road-display-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  review:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'preview/road-surface-geometry-20261126'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-exact-free-space-review
+          path: reviewed
+          run-id: 45768516164
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-final-isolated-visual-preview
+          path: original-display
+          run-id: 45763031345
+          github-token: ${{ github.token }}
+      - run: python scripts/research/dongjak_hybrid_road_display.py reviewed/exact-review original-display hybrid-review
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-hybrid-road-display-review
+          path: hybrid-review/
+          retention-days: 14
+          if-no-files-found: error
