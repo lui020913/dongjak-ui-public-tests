@@ -148,7 +148,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   if(same(current,detail)){current=detail;updatePri();return;}
   cancelSurfaceMotion(root);root.style.removeProperty('pointer-events');hideNativeActions();
   stopGps();reminder=false;arrivalRequest?.abort();arrivalRequest=null;current=detail;step=null;root.replaceChildren();root.hidden=false;
-  if(detail.legs){renderMulti(detail);revealSurface(root);return;}
+  if(detail.legs){renderMulti(detail);return;}
   const kind=detail.kind,color=kind==='bus'?busRouteColor(detail.routeType):subwayLineColor(railLabel(detail.lines[0]));root.style.setProperty('--tr-line-color',color);
   const name=kind==='bus'?detail.route:[...new Set(detail.lines)].map(railLabel).join(' · ');
   const header=el('div','dj-tr-heading');

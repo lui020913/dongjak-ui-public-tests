@@ -99,3 +99,14 @@ test('metro exits, facilities, close bus stops and bridge labels converge on one
   assert.doesNotMatch(code,/map\.moveLayer\(/);
  }
 });
+
+test('no label layout or layer moves during an active gesture, exactly one settled update',()=>{
+ const f=makeMap();let moving=true,writes=0;f.map.isMoving=()=>moving;
+ const set=f.map.setLayoutProperty;f.map.setLayoutProperty=(...args)=>{writes++;set(...args);};
+ const dispose=installReadable3DLabels({map:f.map});
+ for(let i=0;i<50;i++){f.events.get('styledata')();f.events.get('idle')();assert.equal(promoteReadable3DLabelLayers(f.map),false);}
+ assert.equal(writes,0);assert.equal(f.moves,0);
+ moving=false;f.events.get('moveend')();assert.ok(writes>0);const count=writes,moves=f.moves;
+ for(let i=0;i<50;i++){f.events.get('styledata')();f.events.get('idle')();}
+ assert.equal(writes,count);assert.equal(f.moves,moves);dispose();
+});

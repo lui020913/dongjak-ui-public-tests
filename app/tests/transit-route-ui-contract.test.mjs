@@ -47,3 +47,20 @@ test('transit cancellation reaches the PRI worker and does not cancel an unrelat
   c.abort();await assert.rejects(third,{name:'AbortError'});
  }finally{if(original===undefined)delete globalThis.Worker;else globalThis.Worker=original;}
 });
+
+test('transit badge uses actual map route palette as a filled pill and search/detail surfaces fade',()=>{
+ const css=read('transit-route-comparison.css'),js=read('transit-route-comparison.js'),detail=read('transit-route-detail.js'),entry=read('route-screen-v3.js');
+ const rule=css.match(/\.tr-line-badge\{[^}]+\}/)[0];
+ assert.match(rule,/background:var\(--line-color\)/);assert.match(rule,/color:#fff/);assert.match(rule,/border-radius:999px/);
+ assert.match(js,/badge.style.setProperty\('--line-color',leg.kind==='bus'\?busRouteColor\(leg.routeType\):subwayLineColor/);
+ assert.match(entry,/revealSurface\(searchScreen/);assert.match(entry,/exitSurface\(searchScreen/);
+ assert.match(detail,/revealSurface\(root\)/);assert.match(detail,/exitSurface\(root,finish\)/);
+});
+test('shared map names use station font and zoom curve without writing style during movement',()=>{
+ const code=read('ui-environment.js');
+ assert.match(code,/const stationFont=\['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'\]/);
+ assert.match(code,/named\?stationSize:original.size/);
+ assert.match(code,/if\(map.isMoving\?\.\(\)\)\{scheduleMapLabelContrast\(\);return;\}/);
+ assert.match(code,/signature===labelStyleSignature/);
+ assert.match(code,/map.on\('moveend',scheduleMapLabelContrast\)/);
+});

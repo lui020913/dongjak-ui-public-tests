@@ -129,7 +129,9 @@ export function installReadable3DLabels({map}={}){
   map.on?.('pitchend',schedule);
   map.on?.('styledata',schedule);
   map.on?.('idle',schedule);
+  const resetOrder=()=>{lastOrder='';schedule();};
   map.on?.('moveend',schedule);
+  map.on?.('style.load',resetOrder);
   schedule();
   return ()=>{
     removed=true;
@@ -137,5 +139,6 @@ export function installReadable3DLabels({map}={}){
     map.off?.('styledata',schedule);
     map.off?.('idle',schedule);
     map.off?.('moveend',schedule);
+    map.off?.('style.load',resetOrder);
   };
 }

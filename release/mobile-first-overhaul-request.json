@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.220",
+  "application_version": "9.2.221",
   "public_work_branch": "main",
-  "purpose": "Integrated protected release: preserve verified PR #592 compact transit results and deferred facility updates, v9.2.218 common map lifecycle and 2.5x cap, and PR #593 immediate report-location feed dismissal with stale animation/visibility guard, deliberate reentry and repeated browser regression. Require integrated source CI, protected Preview, full phone QA, Production and APK. No changes to safety evaluation or geometry.",
-  "attempt": 455,
+  "purpose": "Solid route-color pill badges in transit comparison and detail, local search/detail crossfades, consistent Sangdo-station-based point label typography and zoom scale, skip label style and promotion work during movement, dedupe unchanged transit filters, keep safety data, common map and community feed lock. Require source CI, Preview, phone QA, Production and APK; actual physical phone frame rate not yet measured.",
+  "attempt": 456,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
