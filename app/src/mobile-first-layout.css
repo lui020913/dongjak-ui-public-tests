@@ -2077,3 +2077,44 @@
   #app .page-panel[data-dj-primary-transition] > :is(.dj-sheet-chrome,.dj836-sheet-body){animation:none!important;transition:none!important;opacity:1!important;}
  }
 }
+
+/* Expanded facility/transit sheets own their visible header. MapLibre's
+ * popup remains in the map stacking context; hide only competing chrome,
+ * never the map ancestor, bottom nav, or a real modal dialog. */
+@layer mobile-first-shell {
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app#app#app#app:has(:is(#transport-sheet:not([hidden]),.dj-place-detail-popup).dj871-sheet-expanded)
+    :is(.topbar,#map-quick-search,#map-quick-search-dropdown,#djNext-toolbar,#dj-v794-toolbar,#dj831-scrollport,.map-actions,#djNext-active-layers,#dj840-map-tip,#dj-user-tip-close,.maplibregl-ctrl-top-right,.maplibregl-ctrl-top-left,.maplibregl-ctrl-bottom-left),
+  html body #app#app#app#app#app#app#app#app#app#app#app:has(:is(#transport-sheet:not([hidden]),.dj-place-detail-popup).dj871-sheet-expanded)
+    :is(.topbar,#map-quick-search,#map-quick-search-dropdown,#djNext-toolbar,#dj-v794-toolbar,#dj831-scrollport,.map-actions,#djNext-active-layers) *{
+   visibility:hidden!important;opacity:0!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app #transport-sheet.dj871-sheet-expanded:not([hidden]){
+   z-index:7000!important;pointer-events:auto!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app :is(#transport-sheet,.dj-place-detail-popup).dj871-sheet-expanded
+    :is(.transport-panel-head,.dj-place-header){
+   position:relative!important;z-index:80!important;flex-shrink:0!important;
+   overflow:visible!important;pointer-events:auto!important;touch-action:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app :is(#transport-sheet,.dj-place-detail-popup).dj871-sheet-expanded
+    :is(.transport-panel-head,.dj-place-header) button{
+   position:relative!important;z-index:82!important;pointer-events:auto!important;
+   touch-action:manipulation!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app :is(#transport-sheet,.dj-place-detail-popup).dj871-sheet-expanded
+    :is(#transport-close,.dj-place-header-close){
+   width:44px!important;min-width:44px!important;max-width:44px!important;
+   height:44px!important;min-height:44px!important;max-height:44px!important;
+   flex:0 0 44px!important;display:grid!important;place-items:center!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app :is(#transport-sheet,.dj-place-detail-popup).dj871-sheet-expanded
+    :is(#transport-close,.dj-place-header-close) svg{
+   pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app :is(#transport-sheet,.dj-place-detail-popup).dj871-sheet-expanded
+    :is(.dj856-transport-edge-drag,.dj-place-edge-drag){
+   pointer-events:none!important;
+  }
+ }
+}

@@ -34,6 +34,7 @@ import {saveTimetable,loadTimetable} from './transport-timetable-cache.js';
 import {verifiedKorailLine1Timetable} from './metro-korail-line1.js';
 import {createSelectedTransportPin,mobileTransportFocusOffset,usableMapSelectionOffset} from './transport-selection-marker.js';
 import {setMobileSheetExpanded} from './v889-mobile-sheet-motion.js';
+import {bindReliablePopupClose} from './popup-close-input.js';
 
 // v5.2 교통 지도: 고정 지하철 안내 선형 + 배경지도 POI 정류소/역 위치.
 // 서울시 실시간 정보는 별도 서버에 키를 보관하는 transport-proxy.mjs가 준비된 경우에만 표시.
@@ -1585,10 +1586,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   };
   closeActivePanel=close;
   const closeButton=document.getElementById('transport-close');
-  closeButton.addEventListener('click',event=>{
-    // The close action is fully processed before the browser can deliver
-    // an additional click to the map under the disappearing bottom sheet.
-    event?.stopPropagation?.();
+  const closeInput=bindReliablePopupClose(closeButton,()=>{
+    if(panel.hidden)return;
+    // The close action has one owner even when Safari loses the click.
     markAiSurfaceDismissal();
     document.dispatchEvent?.(new CustomEvent('dongjak:transport-dismiss-start'));
     // A newly selected station/stop may reopen before the old close fade
@@ -1600,11 +1600,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       });
     }else exitSurface(panel,()=>{if(seq===closingSequence)close(true);});
   });
-  // Stop the entire touch sequence at its real target, not just its
-  // synthesized click. Keep native button semantics and accessibility.
-  for(const eventType of ['pointerdown','pointerup','touchstart','touchend']){
-    closeButton.addEventListener(eventType,event=>event.stopPropagation(),{passive:true});
-  }
+  // Capture the start without replacing the shared tap fallback listeners.
+  // The header drag owner already excludes interactive controls.
   // All other callers (home, another sheet, a swipe gesture) use the same
   // method. The event never bubbles and never re-triggers a click handler.
   panel.addEventListener('dongjak:transport-dismiss',()=>close(true));
@@ -2803,6 +2800,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     // validated new selection through the shared window's recent-close guard.
     if(!sameStationLineChange)globalThis.DongjakWindowLifecycle?.requestOpen?.('transport-sheet');
     const thisSeq=++seq;
+    closeInput.reset();
     selected=place;
     if(!refresh)resetBusRoutePreview();
     updateTransportFavorite();

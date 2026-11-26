@@ -57,3 +57,23 @@ test('facility component retains the native cleanup and watchdog',()=>{
   assert.match(source,/closeWatchdog=window\.setTimeout\(finish,1000\)/);
   assert.match(source,/window\.DongjakWindowMotion\.close\(motion,finish\)/);
 });
+
+test('native touch tap fallback is single-shot and can reset for the next station',()=>{
+ const x=fixture();
+ const t={identifier:1,clientX:12,clientY:14};
+ x.button.fire('touchstart',{touches:[t],changedTouches:[t]});
+ x.button.fire('touchend',{changedTouches:[t]});
+ x.flush();assert.equal(x.count(),1);
+ x.button.fire('click');assert.equal(x.count(),1);
+ x.dispose.reset();x.button.fire('click');assert.equal(x.count(),2);
+ x.dispose();
+});
+test('touch drag or canceled tap does not close',()=>{
+ const x=fixture(),t={identifier:1,clientX:12,clientY:14},m={...t,clientY:45};
+ x.button.fire('touchstart',{touches:[t],changedTouches:[t]});
+ x.button.fire('touchmove',{touches:[m]});
+ x.button.fire('touchend',{changedTouches:[m]});
+ x.flush();assert.equal(x.count(),0);
+ x.button.fire('touchstart',{touches:[t],changedTouches:[t]});x.button.fire('touchcancel');
+ x.button.fire('touchend',{changedTouches:[t]});x.flush();assert.equal(x.count(),0);x.dispose();
+});
