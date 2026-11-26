@@ -174,6 +174,114 @@
         }
       }
           /* DJ_INTERACTION_FOCUS_END */
+      /* DJ_BUS_PILL_LAYOUT_START — mobile bus only; same in source and sealed release. */
+      @layer dj-bus-pill-layout {
+        @media(max-width:699px) {
+          #transport-sheet[data-kind="bus"] {
+            --dj-bus-inset: 10px;
+            box-sizing: border-box !important;
+            padding-inline: var(--dj-bus-inset) !important;
+          }
+          #transport-sheet[data-kind="bus"] > .handle {
+            width: calc(100% + 2 * var(--dj-bus-inset)) !important;
+            min-width: calc(100% + 2 * var(--dj-bus-inset)) !important;
+            margin-inline: calc(-1 * var(--dj-bus-inset)) !important;
+          }
+          #transport-sheet[data-kind="bus"] .transport-panel-head {
+            box-sizing: border-box !important;
+            width: 100% !important; max-width: 100% !important;
+            margin-inline: 0 !important; padding-inline: 0 !important;
+          }
+          #transport-sheet[data-kind="bus"] .transport-panel-head > div:first-child:not(.dj-news-transport-actions) {
+            padding-inline: 0 46px !important;
+            margin-inline: 0 !important; min-width: 0 !important;
+          }
+          #transport-sheet[data-kind="bus"] .transport-panel-head #transport-close { right: 0 !important; }
+          #transport-sheet[data-kind="bus"] .transport-panel-head .dj-news-transport-actions {
+            display: grid !important; grid-template-columns: repeat(4,minmax(0,1fr)) !important;
+            width: 100% !important; max-width: 100% !important; min-width: 0 !important;
+            gap: 6px !important; padding-inline: 0 !important; margin-inline: 0 !important;
+            grid-column: 1 / -1 !important; box-sizing: border-box !important;
+          }
+          #transport-sheet[data-kind="bus"] .dj-news-transport-actions > button {
+            box-sizing: border-box !important; width: 100% !important; max-width: none !important;
+            min-width: 0 !important; min-height: 40px !important; padding-inline: 4px !important;
+            border-radius: 999px !important;
+          }
+          #transport-sheet[data-kind="bus"] .dj875-transit-scroll {
+            box-sizing: border-box !important; width: 100% !important; max-width: 100% !important;
+            padding-inline: 0 !important; margin-inline: 0 !important; min-width: 0 !important;
+          }
+          #transport-sheet[data-kind="bus"] .transport-arrivals-title {
+            box-sizing: border-box !important; width: 100% !important; max-width: 100% !important;
+            padding-inline: 0 !important; margin-inline: 0 !important; gap: 6px !important; flex-wrap: wrap !important;
+          }
+          #transport-sheet[data-kind="bus"] .transport-arrivals-title #transport-mode-tabs {
+            margin-inline: 0 !important; min-width: 0 !important; max-width: 100% !important;
+          }
+          #transport-sheet[data-kind="bus"] .transport-updated-actions {
+            min-width: 0 !important; gap: 5px !important; margin-inline-start: auto !important;
+          }
+          #transport-sheet[data-kind="bus"] #transport-refresh { padding-inline: 9px !important; }
+          #transport-sheet[data-kind="bus"] :is(#transport-arrivals,#transport-lines,#transport-service-hours) {
+            box-sizing: border-box !important; width: 100% !important; max-width: 100% !important;
+            margin-inline: 0 !important; padding-inline: 0 !important; min-width: 0 !important;
+          }
+          #transport-sheet[data-kind="bus"] #transport-arrivals:has(>.transport-arrival-row) {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit,minmax(min(100%,156px),1fr)) !important;
+            gap: 6px !important; align-items: stretch !important;
+          }
+          #transport-sheet[data-kind="bus"] #transport-arrivals > .transport-arrival-row {
+            box-sizing: border-box !important; display: grid !important;
+            grid-template-columns: minmax(0,1.12fr) minmax(0,1fr) !important;
+            align-items: center !important; gap: 5px !important;
+            width: 100% !important; min-width: 0 !important; max-width: 100% !important;
+            height: auto !important; min-height: 66px !important; max-height: none !important;
+            padding: 10px 13px !important; margin: 0 !important;
+            border-radius: 999px !important; overflow: visible !important;
+            text-align: start !important;
+          }
+          #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-main {
+            box-sizing: border-box !important; min-width: 0 !important; width: 100% !important;
+            max-width: 100% !important; display: flex !important; flex-direction: column !important;
+            align-items: flex-start !important; justify-content: center !important; gap: 3px !important;
+            margin: 0 !important; padding: 0 !important;
+          }
+          #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-main > strong {
+            box-sizing: border-box !important; display: inline-flex !important; align-items: center !important;
+            justify-content: center !important; align-self: flex-start !important;
+            width: fit-content !important; max-width: 100% !important; min-width: 0 !important;
+            padding: 3px 6px !important; margin: 0 !important; border-radius: 9px !important;
+            font-size: calc(12px + var(--dj803-text-delta,0px)) !important;
+            line-height: 1.2 !important; white-space: normal !important; overflow-wrap: anywhere !important;
+            word-break: normal !important; text-align: center !important;
+          }
+          #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-main > small {
+            box-sizing: border-box !important; width: 100% !important; max-width: 100% !important;
+            min-width: 0 !important; margin: 0 !important; padding: 0 !important;
+            font-size: calc(11px + var(--dj803-text-delta,0px)) !important; line-height: 1.3 !important;
+            text-align: left !important; white-space: normal !important; overflow-wrap: anywhere !important; word-break: normal !important;
+          }
+          #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-time {
+            box-sizing: border-box !important; display: flex !important; flex-direction: column !important;
+            align-items: flex-end !important; justify-content: center !important; gap: 2px !important;
+            width: 100% !important; min-width: 0 !important; max-width: 100% !important;
+            margin: 0 !important; padding: 0 !important;
+            font-size: calc(12px + var(--dj803-text-delta,0px)) !important; line-height: 1.3 !important;
+            text-align: right !important; white-space: normal !important; overflow-wrap: anywhere !important; word-break: normal !important;
+          }
+          #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-time > * {
+            width: auto !important; max-width: 100% !important; min-width: 0 !important;
+            white-space: normal !important; overflow-wrap: anywhere !important; text-align: right !important;
+          }
+          #transport-sheet[data-kind="bus"] #transport-arrivals .dj875-stop-count {
+            font-size: calc(10px + var(--dj803-text-delta,0px)) !important; line-height: 1.25 !important;
+          }
+        }
+      }
+      /* DJ_BUS_PILL_LAYOUT_END */
+
       /* Critical first paint: no unstyled logo or white-theme flash. */
       html,body{margin:0;min-height:100%;}
       .map-startup-overlay{
