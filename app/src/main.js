@@ -2710,7 +2710,7 @@ priEditorNote.id='dj-pri-route-editor-advice';
 priEditorNote.className='dj-pri-route-advice';
 priEditorNote.hidden=true;
 document.getElementById('route-summary')?.append(priEditorNote);
-function closePriPreferences(){const dialog=document.getElementById('dj-route-pri-dialog');if(dialog?.open)dialog.close();}
+function closePriPreferences(){const dialog=document.getElementById('dj-route-pri-preferences-dialog');if(dialog?.open)dialog.close();}
 const priPreferences=installRoutePriPreferences({onApply:factors=>{
   syncPriPreferenceLabels();
   if(routeResult&&!navMode){priVariantChosenManually=false;void reviewPriCandidates(routeVariants,factors);}
