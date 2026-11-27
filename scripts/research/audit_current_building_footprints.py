@@ -289,6 +289,44 @@ for j,indices in site_by_current.items():
         edits[key]=edit
         decisions.append({'type':'Feature','geometry':f['geometry'],'properties':{k:v for k,v in edit.items() if k!='original'}})
         print('VERIFIED_DISPLAY_EDIT '+json.dumps(edit,ensure_ascii=False,separators=(',',':')),flush=True)
+# Completed-site display cleanup: use the exact official polygon or a
+# corroborated OSM site boundary, not a buffer around an apartment name.
+# A current building can be represented by multiple retained pieces; measure
+# actual coverage rather than demanding one geometrically identical polygon.
+# The newer GIS supplement is never suppressed by the absence of MOIS geometry.
+gap_decisions=collections.Counter()
+for i,(site_g,ref,confirmed) in site_boundaries.items():
+    site=sites[i]
+    if not confirmed or site['approved']<'2020-01-01':continue
+    if planned.intersects(site_g):continue
+    inside={int(j) for j in tree.query(site_g,predicate='intersects') if site_g.covers(cur[int(j)].representative_point())}
+    towers=[j for j in inside if int(props[j].get('gro_flo_co') or 0)>=5 and cur[j].area>=100]
+    expected=int(str(site['expected_dongs']).replace(',',''))
+    if len(towers)<max(1,expected*.7):continue
+    retained_towers=0
+    for j in towers:
+        parts=[legacy_geoms[int(n)] for n in legacy_tree.query(cur[j],predicate='intersects') if float(legacy_rows[int(n)][3]['properties'].get('h') or 0)>=12]
+        if parts and cur[j].intersection(unary_union(parts)).area/cur[j].area>=.65:retained_towers+=1
+    print('COMPLETED_SITE_RETAINED_TOWERS '+json.dumps({'site':site['name'],'expected':expected,'current':len(towers),'retained':retained_towers,'boundary':ref},ensure_ascii=False),flush=True)
+    if retained_towers<max(1,expected*.7):continue
+    interior=site_g.buffer(-3)
+    if interior.is_empty:continue
+    for n0 in legacy_tree.query(interior,predicate='intersects'):
+        n=int(n0);sheet,kind,row,f,g=legacy_rows[n]
+        if kind!='file' or not interior.covers(g) or not 20<=g.area<=300:continue
+        h=float(f['properties'].get('h') or 0)
+        if not 0<h<=9 or planned.intersects(g):continue
+        if any(g.distance(cur[int(j)])<2 for j in tree.query(g.buffer(2),predicate='intersects')):continue
+        # Preserve any building independently represented in October 2026 GIS.
+        if any(legacy_rows[int(k)][1]=='supplement' and legacy_geoms[int(k)].distance(g)<2 for k in legacy_tree.query(g.buffer(2),predicate='intersects')):continue
+        # Do not suppress named or otherwise independently identified assets.
+        if any(f['properties'].get(k) for k in ('name','name:ko','building_name','buildingName')):continue
+        key=(sheet,kind,row)
+        if key in edits:continue
+        edit={'sheet':sheet,'kind':'base','row':row,'original':f['geometry'],'original_height':h,'source_count':source_counts[(sheet,kind)],'source_sha256':source_hashes[(sheet,kind)],'site':site['name'],'approved':site['approved'],'reason':'completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified','boundary_reference':ref,'retained_towers':retained_towers,'expected_towers':expected}
+        edits[key]=edit;gap_decisions[site['name']]+=1
+        print('VERIFIED_DISPLAY_EDIT '+json.dumps(edit,ensure_ascii=False,separators=(',',':')),flush=True)
+print('COMPLETED_SITE_DISPLAY_CLEANUP '+json.dumps(dict(gap_decisions),ensure_ascii=False),flush=True)
 (OUT/'verified-apartment-display-edits.json').write_text(json.dumps({'schema':1,'edits':list(edits.values())},ensure_ascii=False,separators=(',',':')))
 (OUT/'apartment-site-gap-review.geojson').write_text(json.dumps({'type':'FeatureCollection','features':site_gap_rows},ensure_ascii=False,separators=(',',':')))
 counts['official_completed_boundary_matches']=official_matches;counts['verified_display_edits']=len(edits);counts['completed_site_gap_candidates']=len(site_gap_rows)
