@@ -1,3 +1,4 @@
+import {busDirectionLabel} from './bus-search-directions.mjs';
 import {samePhysicalBusStop} from './bus-stop-dedup.js';
 import {normalizeFacilityCategory,normalizeFacilityRecord,sameFacility,isUnavailableFacility} from './facility-display-names.js';
 const rawType=p=>[p?.kind,p?.type,p?.category].map(v=>String(v||'').trim().toLowerCase());
@@ -45,9 +46,7 @@ export function searchResultKey(p){
 export function searchResultSubtitle(p){
   const kind=kindOf(p);let parts;
   if(kind==='bus'){
-    const direction=String(p.direction||'').trim();
-    const known=direction&&!/^\d+$/.test(direction)&&!/^ARS\b/i.test(direction)&&!/^(?:미확인|방면 미확인|방면 정보 없음|정보 없음|unknown|undefined|null|-)$/i.test(direction);
-    parts=['버스정류장',known?(direction.endsWith('방면')?direction:direction+' 방면'):'방면 미확인'];
+    parts=['버스정류장',busDirectionLabel(p)];
   }else{
     const address=userAddress(p.address);
     const lines=Array.isArray(p.lines)?p.lines:[];
