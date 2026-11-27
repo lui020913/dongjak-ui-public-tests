@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.253",
+  "application_version": "9.2.254",
   "public_work_branch": "main",
-  "purpose": "District-wide duplicate building correction: authoritative full GIS sheet takes exclusive native geometry ownership via spatial filter, independent of ID, name, shape and apartment site. Until each full sheet loads, native fallback only; preserve road and symbol layers, no additional GIS acquisition. Keep previous redevelopment cleanup and walking/UI fixes. Immediate Production from exact build, independent Preview QA.",
-  "attempt": 495,
+  "purpose": "District-wide exclusive GIS building sheet ownership; gate both plan and extrusion layout visibility until full sheet readiness, including through theme recoloring. Preserve original zoom fade and add ownership regression. Keep site colors, redevelopment names, roads, transit and safety layers unchanged. Existing direct visual release path with exact successful build and independent Preview QA.",
+  "attempt": 496,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
