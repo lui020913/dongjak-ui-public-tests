@@ -1,6 +1,7 @@
 // v17.8 지도 시인성: 경계 밖 자치구 이름, 장식용 공원 수목, 축척·나침반.
 // 정확한 수목 위치/수량 데이터가 아닙니다. 공원 폴리곤 범위 안에서 장식용으로 배치합니다.
 import {queryOverpass, SAFETY_BBOX} from './safety-layers.js';
+import {NEIGHBOR_ADMIN_LABELS} from './neighbor-admin-label-data.mjs';
 const empty=()=>({type:'FeatureCollection',features:[]});
 
 function polygonRings(geometry){
@@ -72,11 +73,15 @@ export function makeNeighborDistrictLabels(features,dongjakBounds){
 }
 export function installNeighborDistrictLabels(map,features,dongjakBounds,isDongjak){
   const data=makeNeighborDistrictLabels(features,dongjakBounds);
+  // Startup caches only Dongjak's polygon. The compact, independently sourced
+  // label points keep adjacent names available even with no network.
+  const names=new Set(data.features.map(f=>f.properties.name));
+  for(const [name,lng,lat] of NEIGHBOR_ADMIN_LABELS)if(!names.has(name))data.features.push({type:'Feature',geometry:{type:'Point',coordinates:[lng,lat]},properties:{name}});
   // If the chosen interior point happens to be inside Dongjak due to imprecise source geometry, omit it.
   data.features=data.features.filter(f=>isDongjak(...f.geometry.coordinates)!==true);
   map.addSource('neighbor-district-names',{type:'geojson',data});
-  map.addLayer({id:'neighbor-district-names',type:'symbol',source:'neighbor-district-names',minzoom:10,maxzoom:20,
-    layout:{'text-field':['get','name'],'text-size':['interpolate',['linear'],['zoom'],10,10.5,13,15],
+  map.addLayer({id:'neighbor-district-names',type:'symbol',source:'neighbor-district-names',minzoom:8,maxzoom:20,
+    layout:{'text-field':['get','name'],'text-size':['interpolate',['linear'],['zoom'],8,10,10,11.5,13,15],
       'text-font':['Noto Sans Bold','Open Sans Semibold','Open Sans Regular'],
       'text-allow-overlap':false,'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport','text-max-width':8},
     paint:{'text-color':'#687b80','text-halo-color':'#f4f6f5','text-halo-width':2.6,'text-opacity':0.92}});

@@ -19,7 +19,7 @@ import {fixedRailCollection,fixedMetroStations} from './fixed-rail-lines.js';
 import {metroMarkerGeojson, METRO_MARKER_MIN_ZOOM, METRO_PLATFORM_SPLIT_ZOOM as METRO_PLATFORM_SPLIT_ZOOM_DATA} from './metro-marker-geodata.js';
 import {installResponsiveMetroVisibility} from './metro-overview-visibility.js';
 import {railGeojson,stationsGeojson} from './fixed-rail-data.js';
-import {fetchOfficialRailPaths,mergeOfficialRail} from './rail-official-shapes.js';
+import {fetchOfficialRailPaths,mergeOfficialRail,withMappedLine4} from './rail-official-shapes.js';
 import {setDisplayedRailPaths} from './features/liveTransit/geometry.js';
 import {isMedianBusStopName,medianStopBaseName,busStopDisplayName} from './median-bus-stops.js';
 import {busCoverageSamples} from './bus-coverage-grid.js';
@@ -1609,7 +1609,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   // OSM 실제 철도 선로/승강장 공간정보. 선로의 호선을 확인하지 못하면 임의로 색을 배정하지 않습니다.
   map.addSource('transport-rail-tracks',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
   map.addSource('transport-rail-platforms',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  const localRailGeometry=fixedRailCollection(boundaryGeometry);
+  const localRailGeometry=withMappedLine4(fixedRailCollection(boundaryGeometry));
   let renderedRailPaths=indexRenderedMetroRail(localRailGeometry);
   let lastMetroMarkerItems=[];
   map.addSource('transport-schematic-connections',{type:'geojson',data:localRailGeometry,tolerance:0,buffer:128,maxzoom:19});

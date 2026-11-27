@@ -71,3 +71,15 @@ test('incomplete official 4호선 river crossing cannot replace continuous refer
  assert.equal(result.lines.includes('4'),false);
  assert.deepEqual(result.collection.features.filter(f=>f.properties.line==='4호선'),input.features.filter(f=>f.properties.line==='4호선'));
 });
+
+
+test('real mapped line 4 follows Dongjak railway bridge and survives an incomplete upstream',async()=>{
+ const {withMappedLine4}=await import('../src/rail-official-shapes.js');
+ const {LINE4_MAPPED_TRACK}=await import('../src/line4-mapped-track.mjs');
+ const local=withMappedLine4(fixedRailCollection());const features=local.features.filter(f=>f.properties.line==='4호선');
+ assert.ok(features.length>0&&features.every(f=>f.properties.source==='OpenStreetMap_ODbL'&&!f.properties.schematic));
+ const points=features.flatMap(f=>f.geometry.coordinates);
+ for(const lat of [37.508,37.511,37.514,37.517])assert.ok(points.some(p=>Math.abs(p[1]-lat)<.0007&&p[0]>126.980&&p[0]<126.985),'bridge crossing at '+lat);
+ const parts=[{line:'4',coordinates:LINE4_MAPPED_TRACK.filter(p=>p[1]>.519)},{line:'4',coordinates:LINE4_MAPPED_TRACK.filter(p=>p[1]<.506)}];
+ const result=mergeOfficialRail(local,parts);assert.equal(result.lines.includes('4'),false);assert.deepEqual(result.collection.features.filter(f=>f.properties.line==='4호선'),features);
+});

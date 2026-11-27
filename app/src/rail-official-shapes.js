@@ -6,6 +6,7 @@
  */
 import {railGeojson, VERIFIED_STATIONS, FIXED_RAIL_STATION_ORDER} from './fixed-rail-data.js';
 import {FIXED_RAIL_COLORS, FIXED_RAIL_NAMES} from './fixed-rail-lines.js';
+import {LINE4_MAPPED_TRACK} from './line4-mapped-track.mjs';
 
 export const OFFICIAL_RAIL_SOURCE = 'https://portal.esrikr.com/arcgis/rest/services/Hosted/MOIS_KR_Subway/FeatureServer/2/query';
 const EXTENT=[126.855,37.438,127.055,37.562];
@@ -70,7 +71,9 @@ function project(p,a,b){
   return {distance:Math.hypot(ax+t*vx,ay+t*vy),t};
 }
 function makeReference(code){
-  const route=railGeojson.features.find(f=>f.properties.line===code)?.geometry.coordinates;
+  // The river crossing bends east along the actual bridge. A station-based
+  // chord is not an appropriate corridor reference for official track data.
+  const route=code==='4'?LINE4_MAPPED_TRACK:railGeojson.features.find(f=>f.properties.line===code)?.geometry.coordinates;
   if(!route?.length)return null;
   const lengths=[0];
   for(let i=1;i<route.length;i++)lengths.push(lengths.at(-1)+distance(route[i-1],route[i]));
@@ -224,6 +227,12 @@ export function mergeOfficialRail(schematicCollection,rawPaths){
   return {collection:fc([...kept,...[...replacements.values()].flat()]),lines:[...replacements.keys()]};
 }
 
+// Build the offline display from real mapped geometry for line 4. This keeps
+// the bridge alignment intact if the optional official service is incomplete.
+export function withMappedLine4(collection){
+ const result=mergeOfficialRail(collection,[{line:'4',coordinates:LINE4_MAPPED_TRACK,origin:'OpenStreetMap_ODbL'}]);
+ return result.collection;
+}
 export function makeOfficialRailQueryUrl(){
   const params=new URLSearchParams({
     where:'1=1',geometry:EXTENT.join(','),geometryType:'esriGeometryEnvelope',
