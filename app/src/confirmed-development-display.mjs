@@ -58,7 +58,7 @@ export function installConfirmedDevelopmentDisplay({map,app,plans}){
  // A single ground-plan polygon masks only the selected sites, below roads;
  // GIS building footprints/extrusions are excluded using the same polygons.
  const colors=()=>app.dataset.theme==='dark'?{fill:'#37453f',line:'#758a7e',text:'#dce6df',halo:'#273a32'}:{fill:'#e8e7e0',line:'#b2b9ae',text:'#52665b',halo:'#f7f8f4'};
- const visible=()=>app.dataset.tab==='map'&&!app.dataset.djTransitPreview&&app.dataset.transitComparison!=='true'&&app.dataset.djRouteActive!=='true'&&!app.dataset.djRouteActive&& !app.classList.contains('route-active');
+ const visible=()=>app.dataset.tab==='map'&&!app.dataset.djTransitPreview&&app.dataset.transitComparison!=='true'&&app.dataset.djRouteActive!=='true'&&!['route-picking','route-preview','route-guiding'].some(c=>app.classList.contains(c));
  const syncVisibility=()=>{const mode=visible()?'visible':'none';for(const id of [FILL,LINE,LABEL,OVERVIEW])if(map.getLayer(id)&&map.getLayoutProperty(id,'visibility')!==mode)map.setLayoutProperty(id,'visibility',mode);};
  const applyTheme=()=>{const c=colors();for(const [id,key,v] of [[FILL,'fill-color',c.fill],[LINE,'line-color',c.line],[LABEL,'text-color',c.text],[LABEL,'text-halo-color',c.halo],[OVERVIEW,'text-color',c.text],[OVERVIEW,'text-halo-color',c.halo]])if(map.getLayer(id))map.setPaintProperty(id,key,v);};
  const install=()=>{
