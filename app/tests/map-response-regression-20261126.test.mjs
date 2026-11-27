@@ -26,7 +26,7 @@ test('native transportation areas distinguish pedestrian surfaces while ordinary
  const color=nativePavedAreaPaint();
  assert.equal(color[0],'match');
  assert.ok(color[2].includes('path')&&color[2].includes('pedestrian'));
- assert.equal(color[3],'#e7e9e2');
+ assert.equal(color[3],'#f7f7f7');
  assert.equal(color[4],'#ffffff');
  assert.match(src('ui-environment.js'),/entry\.pavedArea\?nativePavedAreaPaint/);
 });
