@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/research/build_dongjak_osm_walk_graph.py'
+      - 'scripts/research/fetch_dongjak_osm_walk_source.py'
       - '.github/workflows/district-osm-pedestrian-graph.yml'
 permissions:
   contents: read
@@ -24,11 +25,15 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq osmium-tool
           python -m pip install osmium
-          curl --fail --location --retry 2 --max-time 360 --output korea.osm.pbf https://download.geofabrik.de/asia/south-korea-latest.osm.pbf
-          osmium extract --bbox 126.898199,37.470377,126.990385,37.522621 --strategy complete_ways korea.osm.pbf -o dongjak.osm.pbf
-          date="$(osmium fileinfo -e -g data.timestamp.last korea.osm.pbf | cut -c1-10)"
-          test -n "$date"
-          python scripts/research/build_dongjak_osm_walk_graph.py dongjak.osm.pbf district-osm-walk-graph.json --source-date "$date"
+          if curl --fail --location --retry 1 --connect-timeout 15 --max-time 300 --output korea.osm.pbf https://download.geofabrik.de/asia/south-korea-latest.osm.pbf; then
+            osmium extract --bbox 126.898199,37.470377,126.990385,37.522621 --strategy complete_ways korea.osm.pbf -o dongjak.osm.pbf
+            date="$(osmium fileinfo -e -g data.timestamp.last korea.osm.pbf | cut -c1-10)"
+            test -n "$date"
+            python scripts/research/build_dongjak_osm_walk_graph.py dongjak.osm.pbf district-osm-walk-graph.json --source-date "$date"
+          else
+            python scripts/research/fetch_dongjak_osm_walk_source.py
+            python scripts/research/build_dongjak_osm_walk_graph.py dongjak.osm district-osm-walk-graph.json --source-date "$(cat osm-source-date.txt)"
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: district-osm-walk-graph
