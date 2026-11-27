@@ -17,9 +17,9 @@ const icon=kind=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+paths[kind]+'</s
 const railLabel=x=>x==='신림'?'신림선':x+'호선';
 const railShapeNote=quality=>quality==='verified'?'공개 철도 선형':quality==='mixed'?'공개 철도 선형·일부 개략 구간':'역 순서 개략 경로';
 export function transitPriText(value){
- if(!value)return '평가 자료 부족';
+ if(!value)return '보행안전 데이터 미확보';
  const coverage=Number.isFinite(value.coverage)?Math.round(value.coverage*100):null;
- if(!Number.isFinite(value.risk)||value.coverage<.65||coverage===null)return '평가 자료 부족'+(coverage===null?'':' · 평가 '+coverage+'%');
+ if(!Number.isFinite(value.risk)||value.coverage<.65||coverage===null)return (coverage>0?'보행안전 데이터 부족':'보행안전 데이터 미확보')+(coverage===null||coverage===0?'':' · 확보 '+coverage+'%');
  return 'PRI '+value.risk.toFixed(1)+'점 · 평가 '+coverage+'%';
 }
 export function mountTransitDetail({doc,win,app,mapCard,actions}){
@@ -81,8 +81,8 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
  doc.addEventListener('visibilitychange',pauseGps);win.addEventListener('pagehide',pagehide);
 
  function updatePri(){
-  if(current.legs){for(const n of root.querySelectorAll('[data-pri-index]')){const i=Number(n.dataset.priIndex);n.textContent=current.walks[i].stationTransfer?'역내 환승 거리 미산정':current.walks[i].meters===0?'동일 위치 연결':current.walks[i].exterior?'동작구 외부 포함 · 보행안전 미평가':current.priLegs===null?'평가 자료 확인 중':transitPriText(current.priLegs?.[i])+(current.walks[i].priChoice==='observed-comparison'?' · 관측 저위험 후보 선택':'');}return;}
-  for(const key of ['first','last']){const n=root.querySelector('[data-pri-leg="'+key+'"]');if(n)n.textContent=current[key]?.exterior?'동작구 외부 포함 · 보행안전 미평가':current.pri===null?'평가 자료 확인 중':transitPriText(current.pri?.[key])+(current[key]?.priChoice==='observed-comparison'?' · 관측 저위험 후보 선택':'');}
+  if(current.legs){for(const n of root.querySelectorAll('[data-pri-index]')){const i=Number(n.dataset.priIndex);n.textContent=current.walks[i].stationTransfer?'역내 환승 거리 미산정':current.walks[i].meters===0?'동일 위치 연결':current.walks[i].exterior?'동작구 외부 포함 · 보행안전 데이터 미확보':current.priLegs===null?'평가 자료 확인 중':transitPriText(current.priLegs?.[i])+(current.walks[i].priChoice==='observed-comparison'?' · 관측 저위험 후보 선택':'');}return;}
+  for(const key of ['first','last']){const n=root.querySelector('[data-pri-leg="'+key+'"]');if(n)n.textContent=current[key]?.exterior?'동작구 외부 포함 · 보행안전 데이터 미확보':current.pri===null?'평가 자료 확인 중':transitPriText(current.pri?.[key])+(current[key]?.priChoice==='observed-comparison'?' · 관측 저위험 후보 선택':'');}
  }
  function updateStep(){
   const rows=[...root.querySelectorAll('.dj-tr-leg')];
