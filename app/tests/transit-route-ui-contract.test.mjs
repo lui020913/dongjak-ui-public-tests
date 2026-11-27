@@ -87,7 +87,8 @@ test('transit framing uses actual visible map area and complete endpoint bounds'
  assert.match(comparison,/sheetTop:panel.getBoundingClientRect\(\).top/);
  assert.match(main,/dongjak:transit-comparison-focus/);
  assert.match(main,/center:\[routeEnd.lng,routeEnd.lat\]/);
- assert.match(main,/transitVisiblePadding\(card.getBoundingClientRect\(\).top,head.getBoundingClientRect\(\).bottom\)/);
+ assert.match(main,/strictRoutePreviewPadding\(\{mapTop:rect.top,viewportHeight:rect.height,toolbarBottom:head.getBoundingClientRect\(\).bottom,sheetTop:card.getBoundingClientRect\(\).top\}\)/);
+ assert.match(main,/routePreviewFitObserver=new ResizeObserver\(scheduleVisibleRouteFit\)/);
  assert.match(main,/const all=\[\.\.\.coords,\.\.\.\[routeStart,routeEnd\]/);
  assert.match(main,/map.fitBounds\(bounds,\{padding,maxZoom:16,duration:480/);
 });

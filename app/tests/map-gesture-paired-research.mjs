@@ -41,8 +41,9 @@ async function sample(url,variant,round){
     const state=await page.evaluate(()=>{const m=window.__qaMap,app=document.getElementById('app');return {tab:app?.dataset?.tab,transit:app?.dataset?.djTransitExterior,center:m.getCenter(),zoom:m.getZoom(),style:m.isStyleLoaded(),tiles:m.areTilesLoaded?.(),layers:m.getStyle().layers.filter(l=>l.type==='symbol').map(l=>[l.id,m.getLayoutProperty(l.id,'visibility')||'visible'])};});
     console.log('MAP_GESTURE_READINESS_FAILURE',JSON.stringify({variant,round,site:site.name,...state}));throw error;
    }
-   const data=await page.evaluate(async({center,checkSharedScope})=>{
-    const m=window.__qaMap,frames=[],writes={},restores=[],sweeps=[];
+   const data=await page.evaluate(async({center,checkSharedScope,checkDistrictBuildings})=>{
+    const m=window.__qaMap,frames=[],writes={},restores=[],sweeps=[],settle=[],longTasks=[];
+    let observer;try{observer=new PerformanceObserver(list=>{for(const entry of list.getEntries())longTasks.push({start:entry.startTime,duration:entry.duration});});observer.observe({entryTypes:['longtask']});}catch{}
     // Lock the matched DPR and wait for labels and buildings in the same
     // browser task that begins measurement. A separate readiness RPC can
     // observe a previous tile frame before a pending GIS update clears it.
@@ -59,7 +60,7 @@ async function sample(url,variant,round){
     let state,stable=0;const deadline=performance.now()+90000;
     while(performance.now()<deadline){
      state=snapshot();
-     const ready=state.ready&&state.icons>0&&(!checkSharedScope||state.building.rendered>0&&!state.building.customDistance)&&Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001&&Math.abs(state.zoom-17.8)<.02;
+     const ready=state.ready&&state.icons>0&&(!checkSharedScope||state.building.rendered>0&&state.building.customDistance===checkDistrictBuildings)&&Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001&&Math.abs(state.zoom-17.8)<.02;
      stable=ready?stable+1:0;if(stable>=2)break;
      await new Promise(r=>setTimeout(r,300));
     }
@@ -91,14 +92,16 @@ async function sample(url,variant,round){
       const ended=performance.now(),after=m.getCenter();
       active=false;
       sweeps.push({elapsedMs:ended-started,frames:frames.length-count,from:[before.lng,before.lat],to:[after.lng,after.lat],target,zoom,beforeZoom,afterZoom:m.getZoom(),tailMs:ended-last});
-      await new Promise(r=>setTimeout(r,650));
+      const settleStart=performance.now(),settleFrames=[];let prev=settleStart;
+      await new Promise(resolve=>{const tick=now=>{settleFrames.push(now-prev);prev=now;if(now-settleStart>=1500)resolve();else requestAnimationFrame(tick);};requestAnimationFrame(tick);});
+      settle.push({frames:settleFrames,elapsed:performance.now()-settleStart});
      }
-    }finally{active=false;m.off('render',frame);for(const restore of restores.reverse())restore();}
-    return {frames,writes,sweeps,icons,building,visibleLayers:visibleIds.length,ratio:m.getPixelRatio?.()??null};
-   },{...site,checkSharedScope:variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'});
+    }finally{active=false;m.off('render',frame);observer?.disconnect();for(const restore of restores.reverse())restore();}
+    return {frames,writes,sweeps,settle,longTasks,icons,building,visibleLayers:visibleIds.length,ratio:m.getPixelRatio?.()??null};
+   },{...site,checkSharedScope:variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true',checkDistrictBuildings:variant==='candidate'&&process.env.CHECK_DISTRICT_BUILDINGS==='true'});
    if(variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'){
     console.log('DISTRICT_BUILDING_SCOPE',site.name,JSON.stringify(data.building));
-    assert.equal(data.building.customDistance,false,'original native building filters');
+    assert.equal(data.building.customDistance,process.env.CHECK_DISTRICT_BUILDINGS==='true','district building filter');
     assert.ok(data.building.rendered>0,'actual district buildings must remain rendered');
    }
    report.samples.push({variant,round,site:site.name,...data});
@@ -108,12 +111,21 @@ async function sample(url,variant,round){
    assert.ok(data.sweeps.every(x=>Math.hypot(x.to[0]-x.from[0],x.to[1]-x.from[1])>.0004&&Math.hypot(x.target[0]-x.to[0],x.target[1]-x.to[1])<.0001&&x.elapsedMs>=4000&&Math.abs(x.afterZoom-x.zoom)<.02),'matched camera sweep did not execute');
    assert.ok(data.frames.length>=10&&data.sweeps.every(x=>x.frames>=2),'insufficient map frames');
   }
+  if(variant==='candidate'&&process.env.CHECK_DISTRICT_BUILDINGS==='true'){
+   for(const pitch of [0,45]){
+    await page.evaluate(pitch=>window.__qaMap.jumpTo({center:[126.994,37.503],zoom:17.8,pitch,bearing:0}),pitch);
+    await page.waitForFunction(()=>{const m=window.__qaMap;return m.isStyleLoaded()&&!m.isMoving()&&m.areTilesLoaded();},{},{timeout:90000});
+    const outside=await page.evaluate(()=>{const m=window.__qaMap,ls=m.getStyle().layers.filter(l=>['fill','fill-extrusion','line'].includes(l.type)&&(l['source-layer']==='building'||l.id.startsWith('dongjak-buildings-')));const ids=ls.map(l=>l.id);return {raw:m.querySourceFeatures('openmaptiles',{sourceLayer:'building'}).length,rendered:ids.length?m.queryRenderedFeatures({layers:ids}).length:0,center:m.getCenter().toArray()};});
+    console.log('EXTERIOR_BUILDINGS',pitch,JSON.stringify(outside));assert.ok(outside.raw>0,'outside sample must contain real source buildings');assert.equal(outside.rendered,0,'outside building geometry must not render');
+   }
+  }
  }finally{await ctx.close();}
 }
 try{
  for(let i=0;i<3;i++)for(const n of (i%2?[1,0]:[0,1]))await sample(urls[n],n?'candidate':'baseline',i+1);
  const stats=rows=>{const a=rows.flatMap(x=>x.frames).sort((x,y)=>x-y);return {samples:a.length,p50:a[Math.floor((a.length-1)*.5)],p95:a[Math.floor((a.length-1)*.95)],slowPct:100*a.filter(x=>x>32).length/a.length,gestureWrites:rows.reduce((n,x)=>n+Object.values(x.writes).reduce((s,v)=>s+v,0),0)};};
  report.summary=Object.fromEntries(['baseline','candidate'].map(v=>[v,stats(report.samples.filter(x=>x.variant===v))]));
+ for(const variant of ['baseline','candidate']){const rows=report.samples.filter(x=>x.variant===variant);const post=rows.flatMap(x=>x.settle.flatMap(s=>s.frames)).sort((a,b)=>a-b);const tasks=rows.flatMap(x=>x.longTasks);report.summary[variant].postMoveP95=post[Math.floor((post.length-1)*.95)];report.summary[variant].longTaskCount=tasks.length;report.summary[variant].longTaskMax=tasks.reduce((m,x)=>Math.max(m,x.duration),0);}
  console.log('MAP_GESTURE_COMPARISON',JSON.stringify(report.summary));
  // Do not conceal a regression or claim a physical-device guarantee.
  assert.equal(report.summary.candidate.gestureWrites,0,'candidate must not mutate monitored POI or label sources/styles during camera motion');

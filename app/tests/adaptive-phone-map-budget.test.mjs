@@ -65,7 +65,7 @@ test('high-density phone rendering is capped at 2.5x without upscaling lower DPR
  assert.equal(normalMapPixelRatio({phone:true,deviceRatio:3}),2);
  assert.equal(normalMapPixelRatio({phone:false,deviceRatio:3}),1.5);
 });
-test('normal mobile cache retains visible tiles plus at most six offscreen tiles',()=>{
+test('optional eviction helper retains visible tiles plus a supplied offscreen allowance',()=>{
  const entries=Array.from({length:15},(_,i)=>String(i));
  const visible=['0','5','8'];
  const removed=offscreenEvictionIds(entries,visible,6);
@@ -79,7 +79,9 @@ test('transit teardown removes owned map layers before sources and defers tile w
  assert.match(clear,/syncTransitExterior\(\)/);
  assert.ok(clear.indexOf('map.removeLayer')<clear.indexOf('map.removeSource'));
  assert.match(clear,/-focus-casing/);
- assert.match(main,/offscreenEvictionIds\(\[\.\.\.loadedBuildingTiles.keys\(\)\],visible,djRenderBudget.isEconomy\(\)\?2:6\)/);
+ const trim=main.split('function djTrimOffscreenBuildings(sheets){')[1].split('async function loadVisibleBuildingSheets')[0];
+ assert.match(trim,/if\(!djRenderBudget.isEconomy\(\)\|\|/,'normal-quality phones must retain the original cache');
+ assert.match(trim,/offscreenEvictionIds\(\[\.\.\.loadedBuildingTiles.keys\(\)\],visible,2\)/,'economy profile retains its bounded cache');
 });
 
 test('transit mode changes only district display and camera extent, not shared basemap filters or buildings',async()=>{

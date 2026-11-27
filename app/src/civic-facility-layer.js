@@ -128,7 +128,7 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
   // Match actual rendered official identities against currently loaded vector POIs.
   // Do not hide unrelated nearby facilities or use an untyped distance-only mask.
   let officialByName=new Map(),lastDedupSignature='',dedupDirty=true,dedupTimer=0;
-  let lastViewportKey='';
+  let matchedIds=new Set();
   const markDirty=()=>{dedupDirty=true;};
   const scheduleReconcile=()=>{
     if(!dedupDirty||dedupTimer||map.isMoving?.())return;
@@ -140,7 +140,7 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
     dedupDirty=false;
     if(!officialByName.size&&!lastDedupSignature)return;
     let features=[];try{features=map.querySourceFeatures(source,{sourceLayer:'poi'})||[];}catch{return;}
-    const matches=new Set();
+    const matches=new Set(matchedIds);
     for(const f of features){
       if(f.id==null||f.geometry?.type!=='Point')continue;
       const [lng,lat]=f.geometry.coordinates;
@@ -149,6 +149,7 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
       const row={name,category,lng,lat};
       if((officialByName.get(identityName(row))||[]).some(p=>sameFacility(p,row)))matches.add(f.id);
     }
+    matchedIds=matches;
     const ids=[...matches].sort((a,b)=>String(a).localeCompare(String(b)));
     const signature=JSON.stringify(ids);
     if(signature===lastDedupSignature)return;
@@ -159,9 +160,9 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
       map.setFilter(id,ids.length?['all',base,['!',['in',['id'],['literal',ids]]]]:base);
     }
   };
-  app?.addEventListener('dongjak:official-facilities-ready',e=>{officialByName=new Map();for(const row of Array.isArray(e.detail)?e.detail:[]){const key=identityName(row);if(!officialByName.has(key))officialByName.set(key,[]);officialByName.get(key).push(row);}markDirty();scheduleReconcile();});
+  app?.addEventListener('dongjak:official-facilities-ready',e=>{officialByName=new Map();matchedIds=new Set();for(const row of Array.isArray(e.detail)?e.detail:[]){const key=identityName(row);if(!officialByName.has(key))officialByName.set(key,[]);officialByName.get(key).push(row);}markDirty();scheduleReconcile();});
   map.on('movestart',()=>{if(dedupTimer){clearTimeout(dedupTimer);dedupTimer=0;}});
-  map.on('moveend',()=>{const c=map.getCenter(),key=[c.lng.toFixed(5),c.lat.toFixed(5),map.getZoom().toFixed(2),map.getPitch().toFixed(1),map.getBearing().toFixed(1)].join('/');if(key!==lastViewportKey){lastViewportKey=key;markDirty();}scheduleReconcile();});
+  map.on('moveend',scheduleReconcile);
   map.on('sourcedata',e=>{if(e.sourceId===source&&e.sourceDataType==='content'&&e.tile){markDirty();scheduleReconcile();}});
   map.on('idle',scheduleReconcile);
   const recolor=()=>{
