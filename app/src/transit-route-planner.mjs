@@ -16,24 +16,30 @@ export function directBusPairs(stops,originIds,destinationIds){
 }
 const geometryMeters=coords=>coords.slice(1).reduce((sum,p,i)=>sum+meters({lng:coords[i][0],lat:coords[i][1]},{lng:p[0],lat:p[1]}),0);
 export function busSegment(coordinates,stops){
- if(!Array.isArray(coordinates)||!Array.isArray(stops)||stops.length<2||coordinates.some(p=>!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite)))return null;
- // Match the complete ordered stop sequence to the ordered route, not the
- // first nearby point of an opposite-direction segment or a loop.
+ if(!Array.isArray(coordinates)||coordinates.length<2||!Array.isArray(stops)||stops.length<2||coordinates.some(p=>!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite)))return null;
  const cumulative=[0];for(let i=1;i<coordinates.length;i++)cumulative.push(cumulative.at(-1)+meters({lng:coordinates[i-1][0],lat:coordinates[i-1][1]},{lng:coordinates[i][0],lat:coordinates[i][1]}));
+ // Project each ordered stop onto actual official line segments, not their
+ // sparsely sampled vertices. Never add a stop-to-stop chord.
  let states=[];
  for(const [j,stop] of stops.entries()){
   const candidates=[];
-  for(let i=0;i<coordinates.length;i++){
-   const p=coordinates[i],d=meters(stop,{lng:p[0],lat:p[1]});if(d>75)continue;
-   if(j===0){candidates.push({i,start:i,score:d});continue;}
+  for(let i=0;i<coordinates.length-1;i++){
+   const a=coordinates[i],b=coordinates[i+1],dx=(b[0]-a[0])*88000,dy=(b[1]-a[1])*111000,len2=dx*dx+dy*dy;
+   if(len2===0)continue;
+   const t=Math.max(0,Math.min(1,((stop.lng-a[0])*88000*dx+(stop.lat-a[1])*111000*dy)/len2));
+   const point=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],d=meters(stop,{lng:point[0],lat:point[1]});
+   if(d>75)continue;
+   const at=cumulative[i]+Math.sqrt(len2)*t,position={i,t,point,at};
+   if(j===0){candidates.push({...position,start:position,score:d});continue;}
    let best=null;
-   for(const prev of states){if(prev.i>=i)continue;const score=prev.score+d+.12*(cumulative[i]-cumulative[prev.i]);if(!best||score<best.score)best={i,start:prev.start,score};}
+   for(const prev of states){if(prev.at>=at-.01)continue;const score=prev.score+d+.12*(at-prev.at);if(!best||score<best.score)best={...position,start:prev.start,score};}
    if(best)candidates.push(best);
   }
   if(!candidates.length)return null;states=candidates;
  }
- const best=states.sort((a,b)=>a.score-b.score)[0];
- return coordinates.slice(best.start,best.i+1);
+ const best=states.sort((a,b)=>a.score-b.score)[0],first=best.start;
+ const result=[first.point,...coordinates.slice(first.i+1,best.i+1),best.point].filter((p,i,all)=>!i||p[0]!==all[i-1][0]||p[1]!==all[i-1][1]);
+ return result.length>=2?result:null;
 }
 // Cost is a screening heuristic: walking meters plus ridden distance
 // scaled by approximate relative speed, plus a per-stop dwell penalty.
