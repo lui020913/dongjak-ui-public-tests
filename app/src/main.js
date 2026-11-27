@@ -821,13 +821,13 @@ function syncTiltWithBuildings() {
   lastFootprintPaintKey=paintKey;
   for(const info of loadedBuildingTiles.values()){
     if(info.footprintFillId && map.getLayer(info.footprintFillId)){
-      const desired=fillVisible?modeVisibility.plan:'none';
+      const desired=info.owned&&fillVisible?modeVisibility.plan:'none';
       if(map.getLayoutProperty(info.footprintFillId,'visibility')!==desired)
         map.setLayoutProperty(info.footprintFillId,'visibility',desired);
       if(updateFootprint && footprint){
         for(const [key,value] of Object.entries(footprint)){
           if(map.getPaintProperty?.(info.footprintFillId,key)!==value)
-            map.setPaintProperty(info.footprintFillId,key,key==='fill-opacity'&&!info.owned?0:value);
+            map.setPaintProperty(info.footprintFillId,key,value);
         }
       }
     }
@@ -835,11 +835,11 @@ function syncTiltWithBuildings() {
         map.getLayoutProperty(info.footprintLineId,'visibility')!=='none')
       map.setLayoutProperty(info.footprintLineId,'visibility','none');
     if(!map.getLayer(info.layerId))continue;
-    const desired=modeVisibility.extrusion;
+    const desired=info.owned?modeVisibility.extrusion:'none';
     if(map.getLayoutProperty(info.layerId,'visibility')!==desired)
       map.setLayoutProperty(info.layerId,'visibility',desired);
     if(show && (Math.abs(opacity-(info.lastOpacity??-1))>0.045 || info.lastColor!==color)){
-      map.setPaintProperty(info.layerId,'fill-extrusion-opacity',info.owned?buildingZoomOpacityExpression(opacity):0);
+      map.setPaintProperty(info.layerId,'fill-extrusion-opacity',buildingZoomOpacityExpression(opacity));
       map.setPaintProperty(info.layerId,'fill-extrusion-color',color);
       info.lastOpacity=opacity;info.lastColor=color;
     }
@@ -927,17 +927,17 @@ async function loadOneBuildingSheet(sheet){
       buildingExtrusionAppearance(visualTheme.currentTheme(),map.getPitch()),
       app.dataset.sangdoNight==='on'&&visualTheme.currentTheme()==='dark');
     const footprintStyle=buildingFootprintPaint(visualTheme.currentTheme(),0);
-    footprintStyle['fill-opacity']=0; // native fallback until the complete sheet owns this area
+    footprintStyle['fill-opacity']=buildingZoomOpacityExpression(footprintStyle['fill-opacity']); // hidden until sheet owns this area
     const outlineStyle=buildingFootprintOutlinePaint(visualTheme.currentTheme(),map.getPitch());
     const firstSymbol=map.getStyle().layers.find(l=>l.type==='symbol')?.id;
     map.addLayer({id:footprintFillId,type:'fill',source:sourceId,minzoom:BUILDING_ZOOM_MIN,
-      layout:{visibility:visibleBuilding2D()&&!visibleBuilding3D()?'visible':'none'},paint:footprintStyle},firstSymbol);
+      layout:{visibility:'none'},paint:footprintStyle},firstSymbol);
     map.addLayer({id:footprintLineId,type:'line',source:sourceId,minzoom:BUILDING_ZOOM_MIN,
       layout:{visibility:'none'},paint:outlineStyle},firstSymbol);
     map.addLayer({id:layerId,type:'fill-extrusion',source:sourceId,
       filter:['==',['get','_render3d'],true],minzoom:BUILDING_ZOOM_MIN,
-      layout:{visibility:visibleBuilding3D()?'visible':'none'},
-      paint:{'fill-extrusion-color':buildingStyle.color,'fill-extrusion-opacity':0,
+      layout:{visibility:'none'},
+      paint:{'fill-extrusion-color':buildingStyle.color,'fill-extrusion-opacity':buildingZoomOpacityExpression(buildingStyle.opacity),
         'fill-extrusion-height':['interpolate',['linear'],['zoom'],BUILDING_ZOOM_FADE_START,0,BUILDING_ZOOM_FADE_END,['get','h']],
         'fill-extrusion-base':0}
     },firstSymbol);
