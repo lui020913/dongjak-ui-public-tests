@@ -784,7 +784,18 @@ function visibleBuilding2D(){
 function visibleBuilding3D(){
   // Camera movement and slow frames are never a visibility predicate.
   // The minzoom and paint expressions handle zoom without a layout flip.
-  return baseBuildingsVisible && mapReady && Boolean(boundaryGeometry) && buildingPitchActive && loadedBuildingTiles.size>0;
+  return baseBuildingsVisible && mapReady && Boolean(boundaryGeometry) && buildingPitchActive && loadedBuildingTiles.size>0 && [...loadedBuildingTiles.values()].some(info=>info.owned);
+}
+// Source ownership is committed only when a full GIS sheet has loaded.
+// Until then the native map is the sole visible owner. Never switch on pan frames.
+function syncBuildingSheetOwnership(){
+  if(!districtBuildingScope)return;
+  let changed=false;
+  for(const [id,info] of loadedBuildingTiles){
+    if(!info.owned&&info.complete&&info.count>0&&map.getSource('dongjak-buildings-data-'+id)&&map.isSourceLoaded('dongjak-buildings-data-'+id)){info.owned=true;changed=true;}
+  }
+  districtBuildingScope.setCoveredSheets([...loadedBuildingTiles.values()].filter(info=>info.owned).map(info=>info.bbox));
+  if(changed){lastFootprintPaintKey='';for(const info of loadedBuildingTiles.values())info.lastOpacity=-1;syncTiltWithBuildings();}
 }
 function syncTiltWithBuildings() {
   if (!mapReady) return;
@@ -792,7 +803,8 @@ function syncTiltWithBuildings() {
   is3D=pitch>=PITCH_BUILDING_START;
   buildingPitchActive=nextBuildingPitchMode(buildingPitchActive,pitch,PITCH_BUILDING_START,PITCH_BUILDING_EXIT);
   const show=visibleBuilding3D();
-  buildingCoverage?.setExtruding(show);
+  // Ownership is spatial, so native fallback remains outside the ready GIS sheets.
+  buildingCoverage?.setExtruding(false);
   const theme=visualTheme.currentTheme();
   const appearance=nightOcclusionBuildingPaint(
     buildingExtrusionAppearance(theme,pitch,PITCH_BUILDING_START,PITCH_BUILDING_FULL),
@@ -815,7 +827,7 @@ function syncTiltWithBuildings() {
       if(updateFootprint && footprint){
         for(const [key,value] of Object.entries(footprint)){
           if(map.getPaintProperty?.(info.footprintFillId,key)!==value)
-            map.setPaintProperty(info.footprintFillId,key,value);
+            map.setPaintProperty(info.footprintFillId,key,key==='fill-opacity'&&!info.owned?0:value);
         }
       }
     }
@@ -827,7 +839,7 @@ function syncTiltWithBuildings() {
     if(map.getLayoutProperty(info.layerId,'visibility')!==desired)
       map.setLayoutProperty(info.layerId,'visibility',desired);
     if(show && (Math.abs(opacity-(info.lastOpacity??-1))>0.045 || info.lastColor!==color)){
-      map.setPaintProperty(info.layerId,'fill-extrusion-opacity',buildingZoomOpacityExpression(opacity));
+      map.setPaintProperty(info.layerId,'fill-extrusion-opacity',info.owned?buildingZoomOpacityExpression(opacity):0);
       map.setPaintProperty(info.layerId,'fill-extrusion-color',color);
       info.lastOpacity=opacity;info.lastColor=color;
     }
@@ -906,7 +918,7 @@ async function loadOneBuildingSheet(sheet){
     const collection={type:'FeatureCollection',features:within};
     if(existing){
       if(successfulSources===totalSources&&map.getSource(sourceId)){
-        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,visible,apartmentExcluded);buildingRetryAfter.delete(sheet.sheet);
+        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,[],apartmentExcluded);buildingRetryAfter.delete(sheet.sheet);syncBuildingSheetOwnership();
       }else buildingRetryAfter.set(sheet.sheet,Date.now()+15000);
       return;
     }
@@ -915,7 +927,7 @@ async function loadOneBuildingSheet(sheet){
       buildingExtrusionAppearance(visualTheme.currentTheme(),map.getPitch()),
       app.dataset.sangdoNight==='on'&&visualTheme.currentTheme()==='dark');
     const footprintStyle=buildingFootprintPaint(visualTheme.currentTheme(),0);
-    footprintStyle['fill-opacity']=buildingZoomOpacityExpression(footprintStyle['fill-opacity']);
+    footprintStyle['fill-opacity']=0; // native fallback until the complete sheet owns this area
     const outlineStyle=buildingFootprintOutlinePaint(visualTheme.currentTheme(),map.getPitch());
     const firstSymbol=map.getStyle().layers.find(l=>l.type==='symbol')?.id;
     map.addLayer({id:footprintFillId,type:'fill',source:sourceId,minzoom:BUILDING_ZOOM_MIN,
@@ -925,12 +937,13 @@ async function loadOneBuildingSheet(sheet){
     map.addLayer({id:layerId,type:'fill-extrusion',source:sourceId,
       filter:['==',['get','_render3d'],true],minzoom:BUILDING_ZOOM_MIN,
       layout:{visibility:visibleBuilding3D()?'visible':'none'},
-      paint:{'fill-extrusion-color':buildingStyle.color,'fill-extrusion-opacity':buildingZoomOpacityExpression(buildingStyle.opacity),
+      paint:{'fill-extrusion-color':buildingStyle.color,'fill-extrusion-opacity':0,
         'fill-extrusion-height':['interpolate',['linear'],['zoom'],BUILDING_ZOOM_FADE_START,0,BUILDING_ZOOM_FADE_END,['get','h']],
         'fill-extrusion-base':0}
     },firstSymbol);
-    loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources,complete:successfulSources===totalSources,footprint3DMode:visibleBuilding3D()});
-    buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,successfulSources===totalSources?visible:[],apartmentExcluded);
+    loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources,complete:successfulSources===totalSources,owned:false,bbox:sheet.bbox,footprint3DMode:visibleBuilding3D()});
+    buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,[],apartmentExcluded);
+    syncBuildingSheetOwnership();
     if(successfulSources<totalSources)buildingRetryAfter.set(sheet.sheet,Date.now()+15000);else buildingRetryAfter.delete(sheet.sheet);
     lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
     building3DLastOpacity=-1;
@@ -982,7 +995,7 @@ function djTrimOffscreenBuildings(sheets){
     if(map.getStyle().layers.some(l=>l.source===sourceId&&!owned.includes(l.id)))continue;
     try{for(const layerId of owned)if(map.getLayer(layerId))map.removeLayer(layerId);
       if(map.getSource(sourceId))map.removeSource(sourceId);
-      loadedBuildingTiles.delete(id);buildingCoverage?.removeSheet(id);
+      loadedBuildingTiles.delete(id);buildingCoverage?.removeSheet(id);syncBuildingSheetOwnership();
     }catch(error){console.debug('[건물 캐시 정리]',error?.message);}
   }
   lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
@@ -1754,7 +1767,9 @@ map.on('load',()=>{
   districtBuildingScope=installDistrictBuildingScope(map);
   exteriorRoadScope=installExteriorRoadScope(map);
   buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers);
-  buildingCoverage.setExtruding(visibleBuilding3D());
+  buildingCoverage.setExtruding(false);
+  map.on('sourcedata',event=>{if(event.isSourceLoaded&&event.sourceId?.startsWith('dongjak-buildings-data-'))queueMicrotask(syncBuildingSheetOwnership);});
+  map.on('idle',syncBuildingSheetOwnership);
   status('지도 준비 완료 · 동작구 경계 불러오는 중');
   // 공개 Terrarium DEM: API 키 없이 지형을 표시합니다. 지형 데이터의 상세도는 지역별로 다릅니다.
   try {
@@ -1874,7 +1889,7 @@ map.on('load',()=>{
       boundaryGeometry=feature.geometry;
       districtBuildingScope?.update(boundaryGeometry);
       boundaryBounds=computeBounds(boundaryGeometry);
-      if(changed){for(const info of loadedBuildingTiles.values())info.complete=false;scheduleBuildingLoad();}
+      if(changed){for(const info of loadedBuildingTiles.values()){info.complete=false;info.owned=false;info.lastOpacity=-1;}lastFootprintPaintKey='';syncBuildingSheetOwnership();syncTiltWithBuildings();scheduleBuildingLoad();}
       if(gpsLastPosition)outsideDistrictAlert.check(...gpsLastPosition,boundaryGeometry,gpsLastAccuracy);
       syncTransitExterior(true);
       // Reclip bus tile fallback against the updated SGIS district polygon.

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {installDistrictBuildingScope,containsDistrictPoint,districtBuildingFilter} from '../src/district-building-scope.mjs';
+import {installDistrictBuildingScope,containsDistrictPoint,districtBuildingFilter,sheetBuildingMask} from '../src/district-building-scope.mjs';
 import {strictRoutePreviewPadding,routeProjectionCorrection} from '../src/route-map-focus.js';
 const boundary={type:'Polygon',coordinates:[[[0,0],[2,0],[2,2],[0,2],[0,0]]]};
 test('district scope applies only to building geometry and updates once per boundary',()=>{
@@ -51,3 +51,5 @@ test('native building scope keeps original rendering and repairs overwritten fil
  assert.deepEqual(rule[1],['<=',['distance',boundary],0]);assert.equal(rule[2][0],'>');assert.deepEqual(rule[2][1][1].coordinates[0][1],boundary.coordinates[0]);
  filters.set('building-top',null);events.styledata();assert.equal(writes.length,4);events.idle();assert.equal(writes.length,5);assert.deepEqual(filters.get('building-top'),rule);events.styledata();events.idle();assert.equal(writes.length,5);assert.equal(filters.has('dongjak-buildings-footprint-1'),false);
 });
+
+test('ready GIS sheets exclusively own all native building geometries without relying on feature IDs or apartment shapes',()=>{const layers=[{id:'building',type:'fill','source-layer':'building'},{id:'building-outline',type:'line','source-layer':'building'},{id:'building-3d',type:'fill-extrusion','source-layer':'building'},{id:'building-label',type:'symbol','source-layer':'building'},{id:'road',type:'line','source-layer':'transportation'},{id:'dongjak-buildings-footprint-2',type:'fill'}],filters=new Map(),writes=[];const map={getStyle:()=>({layers}),getFilter:id=>filters.get(id),setFilter:(id,v)=>{filters.set(id,v);writes.push(id)},on(){}};const owner=installDistrictBuildingScope(map);owner.update(boundary);const box=[0,0,1,1];owner.setCoveredSheets([box]);for(const id of ['building','building-outline','building-3d'])assert.deepEqual(filters.get(id),['all',districtBuildingFilter(boundary),sheetBuildingMask(box)]);for(const id of ['building-label','road','dongjak-buildings-footprint-2'])assert.equal(filters.has(id),false);const count=writes.length;owner.setCoveredSheets([box]);assert.equal(writes.length,count);owner.setCoveredSheets([]);assert.deepEqual(filters.get('building'),districtBuildingFilter(boundary));});

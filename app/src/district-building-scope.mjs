@@ -14,15 +14,21 @@ export function districtBuildingFilter(geometry){
  const exterior={type:'MultiPolygon',coordinates:[[outer,...parts.map(p=>p[0])],...parts.flatMap(p=>p.slice(1).map(h=>[h]))]};
  return ['all',['<=',['distance',geometry],0],['>',['distance',exterior],0]];
 }
+// Once an authoritative GIS sheet is ready, no native building geometry
+// may compete with it, including anonymous features and clipped tile fragments.
+export function sheetBuildingMask(bbox){
+ const [w,s,e,n]=bbox;return ['>',['distance',{type:'Polygon',coordinates:[[[w,s],[e,s],[e,n],[w,n],[w,s]]]}],0];
+}
 export function installDistrictBuildingScope(map){
- let rule=['==',1,0],key='',original=new Map(),dirty=false;
+ let rule=['==',1,0],key='',original=new Map(),dirty=false,covered=[],coverageKey='';
  const sync=()=>{
   for(const layer of map.getStyle()?.layers||[]){
    if(!isNativeBuildingGeometry(layer))continue;
    const id=layer.id;
    if(!original.has(id))original.set(id,map.getFilter(id)||null);
    const base=original.get(id);
-   const next=base?['all',base,rule]:rule;
+   const ownership=covered.length?['all',rule,...covered.map(sheetBuildingMask)]:rule;
+   const next=base?['all',base,ownership]:ownership;
    if(JSON.stringify(map.getFilter(id)||null)!==JSON.stringify(next))map.setFilter(id,next);
   }
  };
@@ -32,7 +38,7 @@ export function installDistrictBuildingScope(map){
  // style changes only, never on zoom/pitch/move frames.
  map.on('styledata',()=>{dirty=true;});
  map.on('idle',()=>{if(!dirty)return;dirty=false;sync();});
- return {update(geometry){if(!['Polygon','MultiPolygon'].includes(geometry?.type))return;
+ return {setCoveredSheets(sheets){const next=sheets.filter(b=>Array.isArray(b)&&b.length===4&&b.every(Number.isFinite)&&b[0]<b[2]&&b[1]<b[3]);const signature=JSON.stringify(next);if(signature===coverageKey)return;covered=next;coverageKey=signature;sync();},update(geometry){if(!['Polygon','MultiPolygon'].includes(geometry?.type))return;
   const next=JSON.stringify(geometry);if(next===key)return;
   key=next;rule=districtBuildingFilter(geometry);sync();
  }};
