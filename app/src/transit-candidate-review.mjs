@@ -25,7 +25,7 @@ export function recommendReviewedTransit(entries){
 export function transitReviewPairs(plan,from,to){
  const legs=plan.legs||[plan];
  if(!legs.length||legs.length>3||legs.some(l=>!l.origin||!l.destination))return [];
- return [[from,legs[0].origin],...legs.slice(1).map((l,i)=>[legs[i].destination,l.origin]),[legs.at(-1).destination,to]];
+ return [[from,transitAccessPoint(legs[0],true)],...legs.slice(1).map((l,i)=>[transitAccessPoint(legs[i],false),transitAccessPoint(l,true)]),[transitAccessPoint(legs.at(-1),false),to]];
 }
 
 /** Process every candidate progressively; keep at most two route evaluations in flight. */
@@ -46,3 +46,6 @@ export function formatTransitReview(result,done=false){
  const distance=result.walkM>=1000?(result.walkM/1000).toFixed(2).replace(/0$/,'').replace(/\.$/,'')+'km':result.walkM+'m';
  return '도보 '+distance+' · '+(result.comparable?'PRI '+result.risk.toFixed(1)+'점 (관측 '+Math.round(result.coverage*100)+'%)':'안전 미평가');
 }
+
+// Align walk request endpoints with the actual vehicle geometry, retaining stop identity.
+export function transitAccessPoint(leg,boarding){const p=boarding?leg.origin:leg.destination;const coord=leg.kind==='bus'?(boarding?leg.coords?.[0]:leg.coords?.at(-1)):null;return coord?.length===2&&coord.every(Number.isFinite)?{...p,lng:coord[0],lat:coord[1]}:p;}
