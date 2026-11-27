@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {estimateTransitTime} from '../src/transit-time-estimate.mjs';
+test('rail transfers include both boarding waits and station transfer estimate',()=>{const t=estimateTransitTime({kind:'rail',stops:['a','b','c'],lines:['7','신림']},180);assert.deepEqual(t,{totalMinutes:19,walkMinutes:3,rideMinutes:4,waitMinutes:8,transferMinutes:4,rideLegMinutes:[4],estimated:true});});
+test('bus time uses actual ordered geometry and does not fabricate missing distance',()=>{const p={kind:'bus',stops:['a','b'],coords:[[126.95,37.5],[126.96,37.5]]};const t=estimateTransitTime(p,120);assert.ok(t.totalMinutes>t.walkMinutes+t.waitMinutes);assert.equal(estimateTransitTime({...p,coords:[]},120),null);});

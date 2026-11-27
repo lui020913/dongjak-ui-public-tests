@@ -14,7 +14,7 @@ const icons={
 };
 const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+icons[name]+'</svg>';
 const railLabel=line=>line==='신림'?'신림선':line+'호선';
-const routeMetric=(plan,result,done)=>result?'도보 '+result.walkMinutes+'분':done?'도보 시간 미확인':'도보 조회 중';
+const routeMetric=(plan,result,done)=>result?(result.time?'약 '+result.time.totalMinutes+'분 · 도보 '+result.walkMinutes+'분':'전체 시간 미확인 · 도보 '+result.walkMinutes+'분'):done?'소요시간 미확인':'소요시간 계산 중';
 const legLabel=p=>p.kind==='bus'?p.route:[...new Set(p.lines)].map(railLabel).join(' · ');
 const nameOf=p=>p?.name||p?.label||'선택한 장소';
 export function mountTransitComparison({doc,win,shadow,host,view,app}){

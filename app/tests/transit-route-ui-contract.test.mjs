@@ -76,10 +76,12 @@ test('selected route casing and line remain beneath icons; transfer labels are e
  assert.match(main,/'-transfer-label'/);
 });
 
-test('transit comparison and detail omit fare and full-trip estimates; preserve walking data',()=>{
+test('transit comparison and detail omit fare and display explicitly estimated full-trip time with walking data',()=>{
  const list=read('transit-route-comparison.js'),detail=read('transit-route-detail.js');
- for(const code of [list,detail])assert.doesNotMatch(code,/transitFareText|TRANSIT_FARE_SOURCE|전체 시간 미확인|전체 시간·요금 미확인|운임 기준/);
- assert.match(list,/result\?'도보 '\+result.walkMinutes/);
+ for(const code of [list,detail])assert.doesNotMatch(code,/transitFareText|TRANSIT_FARE_SOURCE|전체 시간·요금 미확인|운임 기준/);
+ assert.match(list,/result.time.totalMinutes/);
+ assert.match(detail,/t.totalMinutes/);
+ assert.match(detail,/실시간 교통·배차 미반영 추정치/);
  assert.match(detail,/도보 '\+meters\+'m · 약 '\+minutes/);
 });
 test('transit framing uses actual visible map area and complete endpoint bounds',()=>{

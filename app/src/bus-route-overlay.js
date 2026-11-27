@@ -38,7 +38,7 @@ function vehicleArt(map){
  map.addImage(VEHICLE_IMAGE,g.getImageData(0,0,48,72),{pixelRatio:3});return true;
 }
 export function busRouteColor(type){
-  return ({'1':'#e5b928','2':'#4a9c39','3':'#3566c1','4':'#3d9b46','5':'#e5b928','6':'#c63d42','7':'#2b9d65','8':'#3566c1','9':'#3566c1'})[String(type)]||'#267f92';
+  return ({'1':'#52B5E5','2':'#4a9c39','3':'#3566c1','4':'#3d9b46','5':'#e5b928','6':'#c63d42','7':'#2b9d65','8':'#3566c1','9':'#3566c1'})[String(type)]||'#267f92';
 }
 export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,vehicleFetcher=null,onState=()=>{}}){
   let active=null,sequence=0,controller=null,geometry=empty(),vehicles=empty(),vehicleController=null,vehicleTimer=null;
