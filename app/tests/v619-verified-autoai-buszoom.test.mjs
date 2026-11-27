@@ -62,5 +62,5 @@ test('at max zoom native fallback pictogram stays visible and OSM viewport reple
   // The fixed district polygon is intentional; camera-centred radius clipping remains prohibited.
   assert.doesNotMatch(filters,/circlePolygonAround|radius|getCenter\s*\(/);
   assert.match(filters,/const next=district\?\['all',base,\['within',\{type:district.type,coordinates:district.coordinates\}\]\]:base;/);
-  assert.match(map,/syncNearbyBusStopNameFilters\(map,getDistrictGeometry\(\)\)/);
+  assert.match(map,/syncNearbyBusStopNameFilters\(map,cityScope\(\)\?getSeoulBoundary\(\):getDistrictGeometry\(\)\)/);
 });
