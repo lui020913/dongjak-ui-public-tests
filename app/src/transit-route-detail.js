@@ -57,11 +57,11 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
  function showPosition(position){
   if(!gps||step===null||arrived)return;
   const count=root.querySelectorAll('.dj-tr-leg').length;
-  const result=advanceTransitGps({position,targets:current?.targets,step,rows:count,count:nearCount,lastTimestamp:lastPosition});
+  const result=advanceTransitGps({position,targets:current?.targets,step,rows:count,count:nearCount,lastTimestamp:lastPosition,sameStopSteps:(current?.walks||[]).flatMap((w,i)=>w.sameStop?[i*2]:[])});
   if(result.ignored)return;
   lastPosition=result.timestamp;nearCount=result.count;
-  if(result.arrived){arrived=true;step=count-1;stopGps();updateStep();return;}
-  if(result.step!==step){step=result.step;updateStep();return;}
+  if(result.arrived){arrived=true;step=count-1;stopGps();win.dispatchEvent(new CustomEvent('dongjak:transit-guide-state',{detail:{active:false}}));updateStep();return;}
+  if(result.step!==step){step=result.step;updateStep();if(result.transfer==='same-stop')setGpsStatus('제자리 환승 · 다음 교통수단 안내');return;}
   setGpsStatus(result.state==='uncertain'?'GPS 신호 대기 중':'다음 지점까지 약 '+result.meters+'m');
  }
  function startGps(){
@@ -70,18 +70,18 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   setGpsStatus('GPS 연결 중');
   win.dispatchEvent(new CustomEvent('dongjak:transit-gps-start',{detail:{signal:controller.signal,onPosition:position=>{if(gps===controller)showPosition(position);},onError:()=>{if(gps===controller){stopGps();setGpsStatus('GPS 연결 실패',true);}}}}));
  }
- function beginGuide(){step=0;arrived=false;updateStep();startGps();}
- function endGuide(){stopGps();step=null;arrived=false;updateStep();}
+ function beginGuide(){step=0;arrived=false;win.dispatchEvent(new CustomEvent('dongjak:transit-guide-state',{detail:{active:true}}));updateStep();startGps();}
+ function endGuide(){stopGps();step=null;arrived=false;win.dispatchEvent(new CustomEvent('dongjak:transit-guide-state',{detail:{active:false}}));updateStep();}
  function gpsControls(){
   const box=el('div','dj-tr-gps');const status=el('small','dj-tr-gps-status','GPS 연결 중');status.setAttribute('role','status');
-  const retry=button('다시 연결','dj-tr-gps-retry',startGps);retry.hidden=true;box.append(status,retry);return box;
+  const retry=button('다시 연결','dj-tr-gps-retry',startGps);retry.hidden=true;const follow=button('내 위치 따라가기','dj-tr-gps-retry',()=>win.dispatchEvent(new CustomEvent('dongjak:transit-guide-follow')));const next=button('다음 단계','dj-tr-gps-retry',()=>{if(step===null||arrived)return;const rows=root.querySelectorAll('.dj-tr-leg').length;if(step>=rows-2){arrived=true;step=rows-1;stopGps();win.dispatchEvent(new CustomEvent('dongjak:transit-guide-state',{detail:{active:false}}));}else{step++;if(current?.walks?.[step/2]?.sameStop&&step%2===0)step++;nearCount=0;}updateStep();});next.setAttribute('aria-label','현재 단계 완료 확인 후 다음 단계');box.append(status,retry,follow,next);return box;
  }
  const pauseGps=()=>{if(doc.hidden){stopGps();if(step!==null&&!arrived)setGpsStatus('GPS 연결 대기 중');}else if(step!==null&&!arrived)startGps();};
  const pagehide=()=>stopGps();
  doc.addEventListener('visibilitychange',pauseGps);win.addEventListener('pagehide',pagehide);
 
  function updatePri(){
-  if(current.legs){for(const n of root.querySelectorAll('[data-pri-index]')){const i=Number(n.dataset.priIndex);n.textContent=current.walks[i].stationTransfer?'역내 환승 거리 미산정':current.walks[i].meters===0?'동일 위치 연결':current.walks[i].exterior?'동작구 외부 포함 · 데이터 확보 후 업데이트 예정':current.priLegs===null?'평가 자료 확인 중':transitPriText(current.priLegs?.[i])+(current.walks[i].priChoice==='observed-comparison'?' · 관측 저위험 후보 선택':'');}return;}
+  if(current.legs){for(const n of root.querySelectorAll('[data-pri-index]')){const i=Number(n.dataset.priIndex);n.textContent=current.walks[i].sameStop?'제자리 환승':current.walks[i].stationTransfer?'역내 환승 거리 미산정':current.walks[i].meters===0?'동일 위치 연결':current.walks[i].exterior?'동작구 외부 포함 · 데이터 확보 후 업데이트 예정':current.priLegs===null?'평가 자료 확인 중':transitPriText(current.priLegs?.[i])+(current.walks[i].priChoice==='observed-comparison'?' · 관측 저위험 후보 선택':'');}return;}
   for(const key of ['first','last']){const n=root.querySelector('[data-pri-leg="'+key+'"]');if(n)n.textContent=current[key]?.exterior?'동작구 외부 포함 · 데이터 확보 후 업데이트 예정':current.pri===null?'평가 자료 확인 중':transitPriText(current.pri?.[key])+(current[key]?.priChoice==='observed-comparison'?' · 관측 저위험 후보 선택':'');}
  }
  function updateStep(){
@@ -198,7 +198,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   const header=el('div','dj-tr-heading');header.append(el('strong','',detail.legs.map(label).join(' + ')),el('b','','환승 '+(detail.legs.length-1)+'회'),el('small','',detail.railQuality?railShapeNote(detail.railQuality):'공식 버스 노선'));
   const track=el('div','dj-tr-order dj-tr-multi-order');track.setAttribute('aria-label','이동 순서, 시간 비율 아님');
   track.append(el('span','','도보'));
-  detail.legs.forEach((leg,i)=>{if(i)track.append(el('span','','환승'));const v=el('span','dj-tr-vehicle',label(leg));v.style.setProperty('--vehicle-color',color(leg));track.append(v);});
+  detail.legs.forEach((leg,i)=>{if(i)track.append(el('span','',detail.walks[i]?.sameStop?'제자리 환승':'환승'));const v=el('span','dj-tr-vehicle',label(leg));v.style.setProperty('--vehicle-color',color(leg));track.append(v);});
   track.append(el('span','','도보'));
   const timeline=el('div','dj-tr-timeline');
   function row(type,title,sub,routeColor){
@@ -206,7 +206,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
    const body=el('div','dj-tr-leg-body');body.append(el('strong','',title),el('small','',sub));li.append(marker,body);timeline.append(li);return body;
   }
   const walkRow=(i,title)=>{
-   const w=detail.walks[i];const body=row('walk',title,w.stationTransfer?'다음 노선으로 환승':w.meters===0?'동일 위치에서 연결':'도보 '+w.meters+'m · 약 '+w.minutes+'분');
+   const w=detail.walks[i];const body=row('walk',title,w.sameStop?'제자리 환승 · 다음 버스 탑승':w.stationTransfer?'다음 노선으로 환승':w.meters===0?'동일 위치에서 연결':'도보 '+w.meters+'m · 약 '+w.minutes+'분');
    const pri=el('span','dj-tr-pri');pri.dataset.priIndex=String(i);body.append(pri);
   };
   walkRow(0,detail.from);
@@ -234,7 +234,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
     });refresh.innerHTML=icon('refresh');refresh.setAttribute('aria-label',label(leg)+' 도착정보 새로고침');arrival.append(message,refresh);board.append(arrival);
    }
    if(leg.kind==='rail')appendRailArrival(board,leg.stops?.[0],leg.lines?.[0]);
-   walkRow(i+1,leg.destination+' 하차'+(i<detail.legs.length-1?' · 환승':''));
+   walkRow(i+1,leg.destination+' 하차'+(i<detail.legs.length-1?(detail.walks[i+1]?.sameStop?' · 제자리 환승':' · 환승'):''));
   }
   row('end',detail.to,'목적지');
   const footer=el('div','dj-tr-footer');
