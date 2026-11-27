@@ -81,3 +81,8 @@
 #app .dj-tr-end,#app .dj-tr-gps-retry{border:0;border-radius:999px;min-height:40px;padding:6px 16px;background:var(--walk-soft,#eaf5ef);color:var(--walk-primary,#137e65);font-weight:750}
 #app .dj-tr-gps{border:0;padding:0;display:flex;align-items:center;justify-content:space-between}
 #app #dj-transit-detail .dj-tr-guide-body[hidden],#app .dj-tr-step-guide[hidden],#app .dj-tr-gps-retry[hidden]{display:none!important}
+
+/* Keep the live guidance controls inside narrow phone detail sheets. */
+#app #dj-transit-detail .dj-tr-gps{flex-wrap:wrap;gap:6px}
+#app #dj-transit-detail .dj-tr-gps-status{flex:1 0 100%;min-width:0;overflow-wrap:anywhere}
+#app #dj-transit-detail .dj-tr-gps-retry:not([hidden]){flex:1 1 auto;min-width:0;padding-inline:9px;white-space:normal}
