@@ -286,6 +286,7 @@ export function installMyInfo(doc=document){
    if(view==='type')syncTypography();if(view==='language')syncChoices();if(view==='map')syncMapChoices();
    detail.hidden=false;
    syncSubpageHeader();
+   syncSubpageHeader();
    body.scrollTop=0;
    const panelScroller=panel.querySelector(':scope > .dj836-sheet-body');
    if(panelScroller)panelScroller.scrollTop=0;
