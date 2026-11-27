@@ -1377,7 +1377,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const streamApp=document.getElementById('app');
   const cityScope=()=>streamApp?.dataset.djTransitExterior==='true'&&Boolean(getSeoulBoundary());
   const scopeContains=(lng,lat)=>cityScope()?inSeoul(lng,lat):isDongjak(lng,lat)===true;
-  let streamedRows=[],activeStreamKeys=new Set(),streamPending=0,streamReady=false,routeStopCoordinates=[];
+  let streamedRows=[],activeStreamKeys=new Set(),streamPending=0,streamFailed=0,streamReady=false,routeStopCoordinates=[];
   const overlapsRouteStop=(lng,lat,kind)=>routeStopCoordinates.some(([x,y])=>meterDistance([lng,lat],[x,y])<=(kind==='bus'?22:40));
   const inActiveCell=p=>activeStreamKeys.has((p.kind==='bus'?'bus':'rail')+'_'+cellKey(p.lng,p.lat));
   let stops=new Map();
@@ -1889,7 +1889,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const official=streamedRows.filter(eligible);
     const officialBus=official.filter(p=>p.kind==='bus');
     const officialIds=new Set(officialBus.map(p=>String(p.arsId)));
-    const fallbackBus=streamPending?osmTransport.filter(p=>p.kind==='bus'&&eligible(p)&&!officialIds.has(String(p.arsId))):[];
+    const fallbackBus=streamFailed?osmTransport.filter(p=>p.kind==='bus'&&eligible(p)&&!officialIds.has(String(p.arsId))):[];
     const buses=deduplicateBusStops([...officialBus,...fallbackBus]);
     const stations=new Map();
     for(const p of [...osmTransport.filter(p=>p.kind==='subway'),...official.filter(p=>p.kind==='subway'),...officialMetro]){
@@ -1907,7 +1907,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(!map.getLayer?.('dj-basemap-bus-pictogram')||!map.setFilter)return;
     const center=map.getCenter?.();
     const filter=busFilterInsideDistrict(
-      streamReady&&streamPending===0?['==',1,0]:busTileFallbackFilter(currentVisibleBusStops,center),getDistrictGeometry());
+      streamReady&&streamFailed===0?['==',1,0]:busTileFallbackFilter(currentVisibleBusStops,center),getDistrictGeometry());
     const signature=JSON.stringify(filter);
     if(lastTileFallbackFilter===signature)return;
     try{map.setFilter('dj-basemap-bus-pictogram',filter);lastTileFallbackFilter=signature;}
@@ -1949,8 +1949,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       if(!response.ok)throw Error('transit cell '+response.status);
       return response.json();
     },
-    onChange:(rows,{pending})=>{
-      streamReady=true;streamedRows=rows;streamPending=pending;officialStaticStopCount=rows.filter(p=>p.kind==='bus').length;
+    onChange:(rows,{pending,failed})=>{
+      streamReady=true;streamedRows=rows;streamPending=pending;streamFailed=failed;officialStaticStopCount=rows.filter(p=>p.kind==='bus').length;
       refreshStops();
     }
   });
@@ -1959,7 +1959,10 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const center=map.getCenter?.();
     if(center&&previousStreamCenter){const dx=center.lng-previousStreamCenter.lng,dy=center.lat-previousStreamCenter.lat;if(Math.hypot(dx,dy)>.0001)streamDirection={x:Math.sign(dx),y:Math.sign(dy)};}
     if(center)previousStreamCenter={lng:center.lng,lat:center.lat};
-    const keys=viewportKeys({west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()},map.getZoom(),{bus:streamApp?.dataset.baseBus!=='off',rail:streamApp?.dataset.baseMetro!=='off'},streamDirection);
+    const bounds={west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()};
+    const geometry=cityScope()?getSeoulBoundary():getDistrictGeometry();
+    if(geometry){const polygons=geometry.type==='Polygon'?[geometry.coordinates]:geometry.coordinates;let w=Infinity,e=-Infinity,s=Infinity,n=-Infinity;for(const polygon of polygons)for(const [x,y] of polygon[0]){w=Math.min(w,x);e=Math.max(e,x);s=Math.min(s,y);n=Math.max(n,y);}bounds.west=Math.max(bounds.west,w);bounds.east=Math.min(bounds.east,e);bounds.south=Math.max(bounds.south,s);bounds.north=Math.min(bounds.north,n);}
+    const keys=bounds.west<=bounds.east&&bounds.south<=bounds.north?viewportKeys(bounds,map.getZoom(),{bus:streamApp?.dataset.baseBus!=='off',rail:streamApp?.dataset.baseMetro!=='off'},streamDirection):[];
     activeStreamKeys=new Set(keys);cellStream.update(keys);refreshStops();
   }
   const streamViewportWork=coalesceViewportWork(refreshTransitViewport,{delay:110,isMoving:()=>map.isMoving?.()===true});
@@ -1986,7 +1989,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       const place=baseMapTransitPlace({...f,layer:{id:'poi_transit','source-layer':'poi'}});
       if(!place || (place.kind!=='bus' && place.name.startsWith('이름 미등록')))continue;
       if(place.kind==='subway' && !withinMetroRadius(place.lng,place.lat))continue;
-      if(place.kind==='bus' && (streamPending===0||isDongjak(place.lng,place.lat)!==true))continue;
+      if(place.kind==='bus' && (streamFailed===0||isDongjak(place.lng,place.lat)!==true))continue;
       const key=`${place.kind}/${normalizeStationQueryName(place.name)}/${place.lng.toFixed(3)}/${place.lat.toFixed(3)}`;
       if(known.has(key))continue;
       // 기본 역사 중 같은 역은 공식 좌표가 기준이며 중복 마커를 만들지 않습니다.
@@ -2012,7 +2015,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   let osmBusViewportBusy=false;
   async function fillHighZoomOSMBusStops(){
     const zoom=Number(map.getZoom?.()||0);
-    if(streamPending===0||zoom<16.8||osmBusViewportBusy||typeof map.getBounds!=='function')return;
+    if(streamFailed===0||zoom<16.8||osmBusViewportBusy||typeof map.getBounds!=='function')return;
     const center=map.getCenter?.();
     if(!center||!Number.isFinite(center.lng)||!Number.isFinite(center.lat))return;
     if(isDongjak(center.lng,center.lat)!==true)return;
@@ -2072,7 +2075,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   let officialBusAuthDisabled=false;
   let officialBusAuthWarned=false;
   function enrichNearbyBusStops(){
-    if(streamPending===0 || officialBusAuthDisabled || (map.getZoom?.()??0)<15 || busStopLookupInFlight>=2 || busStopLookups.size>=60)return;
+    if(streamFailed===0 || officialBusAuthDisabled || (map.getZoom?.()??0)<15 || busStopLookupInFlight>=2 || busStopLookups.size>=60)return;
     const visible=map.getBounds?.();
     const candidates=osmTransport.filter(p=>p.kind==='bus' && (!p.arsId || !p.name || p.needsOfficialName)
       && (!visible?.contains || visible.contains([p.lng,p.lat])));
@@ -2130,7 +2133,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       && Number.isFinite(item.lng)&&Number.isFinite(item.lat);
   }
   function drainOfficialBusQueue(){
-    if(streamPending===0 || officialBusAuthDisabled || (officialBusErrorAt && Date.now()-officialBusErrorAt<45000))return;
+    if(streamFailed===0 || officialBusAuthDisabled || (officialBusErrorAt && Date.now()-officialBusErrorAt<45000))return;
     while(officialBusInFlight<2 && officialBusQueue.length){
       const cell=officialBusQueue.shift();officialBusQueued.delete(cell.key);
       const last=officialBusCells.get(cell.key)||0;
@@ -2162,7 +2165,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     }
   }
   function enrichViewportBusStops(){
-    if(streamPending===0 || (map.getZoom?.()??0)<14.25)return;
+    if(streamFailed===0 || (map.getZoom?.()??0)<14.25)return;
     const samples=busCoverageSamples(map,{radiusMeters:180,maxAxis:13});
     if(!samples.length)return;
     for(const cell of samples){
@@ -2180,7 +2183,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const medianLookups=new Set();
   let medianInFlight=0;
   function enrichMedianStops(){
-    if(streamPending===0 || (map.getZoom?.()??0)<15.4||medianInFlight>=2||medianLookups.size>=36)return;
+    if(streamFailed===0 || (map.getZoom?.()??0)<15.4||medianInFlight>=2||medianLookups.size>=36)return;
     const visible=map.getBounds?.();
     const candidates=osmTransport.filter(p=>p.kind==='bus' && !p.arsId && isMedianBusStopName(p.name)
       && (!visible?.contains || visible.contains([p.lng,p.lat])));
@@ -3067,7 +3070,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     );
     const candidates=nearby.map(f=>baseMapTransitPlace(f,event.lngLat)).filter(Boolean)
       .filter(p=>(p.kind==='bus'
-        ? (!streamReady||streamPending>0) && !busRouteOverlay.hasVisibleRouteStops() && (map.getZoom?.()??16)>=15 && isDongjak(p.lng,p.lat)===true
+        ? (!streamReady||streamFailed>0) && !busRouteOverlay.hasVisibleRouteStops() && (map.getZoom?.()??16)>=15 && isDongjak(p.lng,p.lat)===true
         : isDongjak(p.lng,p.lat)===true||isNearBoundary(p.lng,p.lat)));
     if(!candidates.length)return false;
     // 지도 클릭 지점과 실제 아이콘 좌표 사이의 거리로 가까운 정류소를 선택합니다.

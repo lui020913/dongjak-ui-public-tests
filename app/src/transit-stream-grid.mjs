@@ -16,8 +16,9 @@ export function viewportKeys(bounds,zoom,preferences={},direction){
 }
 export function createTransitCellStream({load,onChange,limit=160,concurrency=6}){
  const cache=new Map(),inflight=new Map(),failed=new Set();
- let desired=new Set(),signature='',disposed=false;
- function publish(){if(disposed)return;onChange([...desired].flatMap(k=>cache.get(k)||[]),{pending:[...desired].filter(k=>!cache.has(k)).length});}
+ let desired=new Set(),signature='',disposed=false,publishTimer=null;
+ function publish(){if(disposed)return;onChange([...desired].flatMap(k=>cache.get(k)||[]),{pending:[...desired].filter(k=>!cache.has(k)&&!failed.has(k)).length,failed:[...desired].filter(k=>failed.has(k)).length});}
+ function schedulePublish(){if(disposed||publishTimer!==null)return;publishTimer=setTimeout(()=>{publishTimer=null;publish();},45);}
  function trim(){for(const key of cache.keys()){if(cache.size<=limit)break;if(!desired.has(key))cache.delete(key);}}
  function pump(){
   if(disposed)return;
@@ -31,7 +32,7 @@ export function createTransitCellStream({load,onChange,limit=160,concurrency=6})
     cache.set(key,rows);trim();
    }).catch(()=>{if(!controller.signal.aborted)failed.add(key);}).finally(()=>{
     if(inflight.get(key)===controller)inflight.delete(key);
-    if(!disposed){publish();pump();}
+    if(!disposed){schedulePublish();pump();}
    });
   }
  }
@@ -42,7 +43,7 @@ export function createTransitCellStream({load,onChange,limit=160,concurrency=6})
   signature=sig;desired=next;failed.clear();
   for(const [key,c] of inflight)if(!desired.has(key)){c.abort();inflight.delete(key);}
   for(const key of desired)if(cache.has(key)){const rows=cache.get(key);cache.delete(key);cache.set(key,rows);}
-  trim();publish();pump();
+  trim();if(publishTimer!==null){clearTimeout(publishTimer);publishTimer=null;}publish();pump();
  }
- return {update,retry(){failed.clear();pump();},dispose(){disposed=true;for(const c of inflight.values())c.abort();inflight.clear();cache.clear();desired.clear();}};
+ return {update,retry(){failed.clear();pump();},dispose(){disposed=true;if(publishTimer!==null)clearTimeout(publishTimer);for(const c of inflight.values())c.abort();inflight.clear();cache.clear();desired.clear();}};
 }
