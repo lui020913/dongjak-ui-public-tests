@@ -1,5 +1,6 @@
 import {installDongjakLiveTransit} from './features/liveTransit/integrate.js';
 import {insideBoundary} from './fixed-rail-lines.js';
+import {LOCAL_RAIL_LINE_IDS,cityRailOwnsBackground} from './city-transit-rail.mjs';
 /**
  * Base-map display preferences. Does not fetch data, remove sources, or change
  * pedestrian routes or public API settings.
@@ -25,11 +26,11 @@ export function normalizeBaseLayerSettings(raw){
     [key,typeof raw[key]==='boolean'?raw[key]:defaultValue]));
 }
 
-export function applyBaseLayerVisibility(map,settings,{manageBoundary=true}={}){
+export function applyBaseLayerVisibility(map,settings,{manageBoundary=true,transitActive=false}={}){
   const normalized=normalizeBaseLayerSettings(settings);
   for(const key of manageBoundary?['metro','bus','boundary']:['metro','bus']){
-    const desired=normalized[key]?'visible':'none';
     for(const id of BASE_LAYER_IDS[key]){
+      const desired=key==='metro'&&LOCAL_RAIL_LINE_IDS.includes(id)&&transitActive?(cityRailOwnsBackground(map,true)?'none':'visible'):(normalized[key]?'visible':'none');
       try{
         if(!map.getLayer(id))continue;
         const current=map.getLayoutProperty(id,'visibility')||'visible';
@@ -46,7 +47,7 @@ export function installBaseLayerControls({map,app,onBuildingsChange=()=>{},onBou
   let stored=null;
   try{stored=JSON.parse(localStorage.getItem(BASE_LAYER_STORAGE_KEY)||'null');}catch{}
   const state=normalizeBaseLayerSettings(stored);
-  const applyDisplay=()=>{const result=applyBaseLayerVisibility(map,state,{manageBoundary:!onBoundaryChange});onBoundaryChange?.(state.boundary);return result;};
+  const applyDisplay=()=>{const result=applyBaseLayerVisibility(map,state,{manageBoundary:!onBoundaryChange,transitActive:app.dataset.djTransitExterior==='true'});onBoundaryChange?.(state.boundary);return result;};
   const sync=()=>{
     app.dataset.baseMetro=state.metro?'on':'off';
     app.dataset.baseBus=state.bus?'on':'off';

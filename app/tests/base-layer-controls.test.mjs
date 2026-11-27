@@ -47,3 +47,10 @@ test('접근성 버튼과 별개인 기본 지도 옵션, 확대 3D 자동 표�
   assert.match(main,/baseLayerControls\?\.apply/);
   assert.match(css,/#app\[data-base-metro="off"\] \.metro-station-marker/);
 });
+
+test('reapplying preferences cannot resurrect local railway lines over the Seoul network',()=>{
+ const local=BASE_LAYER_IDS.metro.slice(0,4),city='dj-city-transit-rail';const ids=new Set([...local,city]),states=new Map([[city,'visible']]);const map={getLayer:id=>ids.has(id),getSource:id=>id===city?{}:null,getLayoutProperty:id=>states.get(id)||'visible',setLayoutProperty:(id,k,v)=>states.set(id,v)};
+ applyBaseLayerVisibility(map,BASE_LAYER_DEFAULTS,{transitActive:true});for(const id of local)assert.equal(states.get(id),'none');
+ applyBaseLayerVisibility(map,BASE_LAYER_DEFAULTS,{transitActive:true});for(const id of local)assert.equal(states.get(id),'none');
+ applyBaseLayerVisibility(map,BASE_LAYER_DEFAULTS,{transitActive:false});for(const id of local)assert.equal(states.get(id),'visible');
+});
