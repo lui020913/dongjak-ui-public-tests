@@ -407,6 +407,9 @@ export function districtScopedSymbol(layer={}){
  const id=String(layer.id||'');
  return layer.type==='symbol'&&id!=='neighbor-district-names'&&
  layer.source!=='transport-metro-geographic-markers'&&
+ // The five curated Han River crossing labels are intentionally anchored on
+ // the river, outside the district polygon. Keep only these owned labels.
+ id!=='dj-hangang-bridge-osm-labels'&&id!=='dj-hangang-bridge-geometry-labels'&&
  !/^(?:dj-transit-(?:multi|comparison|rail)|dj815-transit-|walking-route|registered-points|route-|dj-route-|dj-pri-|dongjak-pri-|nav-)/.test(id);
 }
 function containsWithin(filter,within){
