@@ -13,7 +13,7 @@ test('rail result is available offline and precedes same-named bus stops',()=>{
 });
 test('directions use known metadata and never expose ARS',()=>{
  assert.equal(routeResultSubtitle({kind:'bus',arsId:'20011',direction:'대방역'}),'버스정류장 · 대방역 방면');
- assert.equal(routeResultSubtitle({kind:'bus',address:'ARS 20011'}),'버스정류장 · 방면 정보 없음');
+ assert.equal(routeResultSubtitle({kind:'bus',address:'ARS 20011'}),'버스정류장 · 방면 정보 업데이트 예정');
 });
 test('general places and addresses remain searchable alongside transit',()=>{
  const place={name:'동작구청',category:'공공시설',lng:126.94,lat:37.51};
