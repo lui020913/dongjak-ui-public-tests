@@ -175,3 +175,13 @@ test('unavailable incident and enforcement camera layers are visible but cannot 
  assert.match(js,/add\.disabled=unavailable\|\|/);
  assert.match(js,/if\(unavailable\)return/);
 });
+
+// This file runs inside the isolated release app after mobile-next.css is
+// materialized by apply-mobile-next.mjs, not in the repository's source tree.
+test('production walking footer remains compact and full width',()=>{
+ const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
+ const block=css.slice(css.lastIndexOf('/* Compact walking recommendation footer;'));
+ assert.match(block,/:not\(\[data-dj-transit-preview\]\)/);
+ assert.match(block,/grid-template-columns:minmax\(0,1fr\)!important/);
+ assert.match(block,/#route-guide-start\{grid-column:1\/-1!important;width:100%!important/);
+});
