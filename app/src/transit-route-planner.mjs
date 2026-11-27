@@ -14,24 +14,32 @@ export function directBusPairs(stops,originIds,destinationIds){
   }
   return result;
 }
+const geometryMeters=coords=>coords.slice(1).reduce((sum,p,i)=>sum+meters({lng:coords[i][0],lat:coords[i][1]},{lng:p[0],lat:p[1]}),0);
 export function busSegment(coordinates,stops){
-  if(!Array.isArray(coordinates)||!Array.isArray(stops)||stops.length<2)return null;
-  // Match every ordered stop against the official ordered route geometry.
-  // Refuse ambiguous loops rather than invent a straight line or wrong direction.
-  let previous=-1;const indices=[];
-  for(const stop of stops){
-    let best=-1,min=Infinity;
-    for(let i=previous+1;i<coordinates.length;i++){
-      const p=coordinates[i];if(!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite))continue;
-      const d=meters(stop,{lng:p[0],lat:p[1]});
-      if(d<min){min=d;best=i;}
-      if(d<12)break;
-    }
-    if(best<0||min>75)return null;
-    indices.push(best);previous=best;
+ if(!Array.isArray(coordinates)||!Array.isArray(stops)||stops.length<2||coordinates.some(p=>!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite)))return null;
+ // Match the complete ordered stop sequence to the ordered route, not the
+ // first nearby point of an opposite-direction segment or a loop.
+ const cumulative=[0];for(let i=1;i<coordinates.length;i++)cumulative.push(cumulative.at(-1)+meters({lng:coordinates[i-1][0],lat:coordinates[i-1][1]},{lng:coordinates[i][0],lat:coordinates[i][1]}));
+ let states=[];
+ for(const [j,stop] of stops.entries()){
+  const candidates=[];
+  for(let i=0;i<coordinates.length;i++){
+   const p=coordinates[i],d=meters(stop,{lng:p[0],lat:p[1]});if(d>75)continue;
+   if(j===0){candidates.push({i,start:i,score:d});continue;}
+   let best=null;
+   for(const prev of states){if(prev.i>=i)continue;const score=prev.score+d+.12*(cumulative[i]-cumulative[prev.i]);if(!best||score<best.score)best={i,start:prev.start,score};}
+   if(best)candidates.push(best);
   }
-  return coordinates.slice(indices[0],indices.at(-1)+1);
+  if(!candidates.length)return null;states=candidates;
+ }
+ const best=states.sort((a,b)=>a.score-b.score)[0];
+ return coordinates.slice(best.start,best.i+1);
 }
+// Cost is a screening heuristic: walking meters plus ridden distance
+// scaled by approximate relative speed, plus a per-stop dwell penalty.
+const rideCost=(distance,stops)=>.25*distance+37.5*stops;
+const approximateRide=(rec,i,j)=>rideCost(rec.distanceAt[j]-rec.distanceAt[i],j-i);
+const actualRide=leg=>leg.kind==='bus'?rideCost(geometryMeters(leg.coords),leg.stops.length-1):45*(leg.stops.length-1);
 
 // Bounded, one-transfer search. Straight-line distance is a candidate
 // screening metric only; the main router verifies every actual walking leg.
@@ -51,6 +59,7 @@ export function transferCandidates(records,from,to,startIds,endIds,{limit=3,maxT
  const starts=[],ends=[];
  for(const rec of records){
   const ordered={...rec,stops:[...rec.stops].filter(s=>Number.isInteger(s.seq)&&Number.isFinite(s.lng)&&Number.isFinite(s.lat)).sort((a,b)=>a.seq-b.seq)};
+  ordered.distanceAt=[0];for(let i=1;i<ordered.stops.length;i++)ordered.distanceAt.push(ordered.distanceAt.at(-1)+meters(ordered.stops[i-1],ordered.stops[i]));
   for(let i=0;i<ordered.stops.length;i++){
    if(startIds.has(ordered.stops[i].arsId))starts.push({rec:ordered,i});
    if(endIds.has(ordered.stops[i].arsId))ends.push({rec:ordered,i});
@@ -68,14 +77,14 @@ export function transferCandidates(records,from,to,startIds,endIds,{limit=3,maxT
    for(let k=Math.max(0,b.i-35);k<b.i;k++){
     const bt=b.rec.stops[k],distance=meters(at,bt);
     if(distance>maxTransferM)continue;
-    retain(busCandidates,{score:meters(from,a.rec.stops[a.i])+distance+meters(b.rec.stops[b.i],to)+45*(j-a.i+b.i-k),a,j,b,k});
+    retain(busCandidates,{score:meters(from,a.rec.stops[a.i])+distance+meters(b.rec.stops[b.i],to)+approximateRide(a.rec,a.i,j)+approximateRide(b.rec,k,b.i),a,j,b,k});
    }
   }
   for(const station of stations){
    const distance=meters(at,station);if(distance>maxTransferM)continue;
    for(const end of nearTo){
     const rail=railLeg(station,end);if(!rail)continue;
-    retain(mixedCandidates,{score:meters(from,a.rec.stops[a.i])+distance+meters(end,to)+45*(j-a.i+rail.stops.length),a,j,rail,railFirst:false});
+    retain(mixedCandidates,{score:meters(from,a.rec.stops[a.i])+distance+meters(end,to)+approximateRide(a.rec,a.i,j)+45*(rail.stops.length-1),a,j,rail,railFirst:false});
    }
   }
  }
@@ -85,7 +94,7 @@ export function transferCandidates(records,from,to,startIds,endIds,{limit=3,maxT
    const distance=meters(bt,station);if(distance>maxTransferM)continue;
    for(const start of nearFrom){
     const rail=railLeg(start,station);if(!rail)continue;
-    retain(mixedCandidates,{score:meters(from,start)+distance+meters(b.rec.stops[b.i],to)+45*(b.i-k+rail.stops.length),b,k,rail,railFirst:true});
+    retain(mixedCandidates,{score:meters(from,start)+distance+meters(b.rec.stops[b.i],to)+approximateRide(b.rec,k,b.i)+45*(rail.stops.length-1),b,k,rail,railFirst:true});
    }
   }
  }
@@ -94,13 +103,13 @@ export function transferCandidates(records,from,to,startIds,endIds,{limit=3,maxT
  for(const a of starts)for(let j=a.i+1;j<Math.min(a.rec.stops.length,a.i+35);j++){
   for(const station of stations){
    const distance=meters(a.rec.stops[j],station);if(distance>maxTransferM)continue;
-   retain(enter,{a,j,station,score:meters(from,a.rec.stops[a.i])+distance+45*(j-a.i)});
+   retain(enter,{a,j,station,score:meters(from,a.rec.stops[a.i])+distance+approximateRide(a.rec,a.i,j)});
   }
  }
  for(const b of ends)for(let k=Math.max(0,b.i-35);k<b.i;k++){
   for(const station of stations){
    const distance=meters(b.rec.stops[k],station);if(distance>maxTransferM)continue;
-   retain(exit,{b,k,station,score:meters(to,b.rec.stops[b.i])+distance+45*(b.i-k)});
+   retain(exit,{b,k,station,score:meters(to,b.rec.stops[b.i])+distance+approximateRide(b.rec,k,b.i)});
   }
  }
  const railCache=new Map();
@@ -112,14 +121,15 @@ export function transferCandidates(records,from,to,startIds,endIds,{limit=3,maxT
   retain(multiCandidates,{score:a.score+b.score+45*(rail.stops.length-1)+250,a,b,rail});
  }
  const collect=(raw,kind,make)=>{
-  const out=[],seen=new Set();
+  const out=[],seen=new Set(),valid=[];
   for(const p of raw){
    const legs=make(p);if(legs.some(x=>!x))continue;
-   const key=legs.map(x=>x.kind==='bus'?x.routeId:[...new Set(x.lines)].join('/')).join('|');
-   if(seen.has(key))continue;seen.add(key);
-   out.push({kind,legs,origin:legs[0].origin,destination:legs.at(-1).destination,changes:legs.length-1});
-   if(out.length>=limit)break;
+   const walk=meters(from,legs[0].origin)+meters(legs.at(-1).destination,to)+legs.slice(1).reduce((sum,leg,i)=>sum+meters(legs[i].destination,leg.origin),0);
+   const score=walk+legs.reduce((sum,leg)=>sum+actualRide(leg),0);
+   valid.push({kind,legs,origin:legs[0].origin,destination:legs.at(-1).destination,changes:legs.length-1,score});
   }
+  valid.sort(rank);
+  for(const candidate of valid){const key=candidate.legs.map(x=>x.kind==='bus'?x.routeId:[...new Set(x.lines)].join('/')).join('|');if(seen.has(key))continue;seen.add(key);out.push(candidate);if(out.length>=limit)break;}
   return out;
  };
  return {
@@ -135,7 +145,7 @@ export async function findTransitOptions(from,to,{fetcher=globalThis.fetch,signa
   try{
     const data=await get('/data/transport/seoul-bus-stops.json');
     if(!officialStaticBusPlaces(data).length)throw new Error('정류소 원본 확인 불가');
-    const starts=nearbyOfficialStaticStops(data,from.lat,from.lng,650).slice(0,4);
+    const starts=nearbyOfficialStaticStops(data,from.lat,from.lng,650).slice(0,8);
     const ends=nearbyOfficialStaticStops(data,to.lat,to.lng,650).slice(0,8);
     const startIds=new Set(starts.map(x=>x.arsId)),endIds=new Set(ends.map(x=>x.arsId));
     if(starts.length||ends.length){
@@ -160,11 +170,9 @@ export async function findTransitOptions(from,to,{fetcher=globalThis.fetch,signa
           records.push({id,name,routeType,stops:data.stops,coordinates:data.coordinates});
           const pairs=directBusPairs(data.stops,startIds,endIds)
             .map(p=>({...p,walkM:meters(from,p.origin)+meters(to,p.destination)}))
-            .sort((a,b)=>a.walkM-b.walkM||a.stopCount-b.stopCount);
-          for(const p of pairs){
-            const coords=busSegment(data.coordinates,p.stops);
-            if(coords?.length>=2)return {...p,kind:'bus',routeId:id,route:name,routeType,coords};
-          }
+            .map(p=>{const coords=busSegment(data.coordinates,p.stops);return coords?.length>=2?{...p,kind:'bus',routeId:id,route:name,routeType,coords,score:p.walkM+rideCost(geometryMeters(coords),p.stopCount)}:null;}).filter(Boolean)
+            .sort((a,b)=>a.score-b.score||a.stopCount-b.stopCount);
+          if(pairs.length)return pairs[0];
           return null;
         }));
         if(signal?.aborted)throw new Error('취소');
@@ -173,7 +181,7 @@ export async function findTransitOptions(from,to,{fetcher=globalThis.fetch,signa
       }
       ({busTransfer,mixed}=transferCandidates(records,from,to,startIds,endIds));
     }
-    bus.sort((a,b)=>a.walkM-b.walkM||a.stopCount-b.stopCount);
+    bus.sort((a,b)=>a.score-b.score||a.stopCount-b.stopCount);
   }catch(error){if(signal?.aborted)throw error;busStatus='unavailable';}
   return {bus:bus.slice(0,5),busTransfer,mixed,rail,busStatus};
 }
