@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {createPlanLookup,loadConfirmedDevelopments,isConfirmedPlanLabel,developmentLabelPoints} from '../src/confirmed-development-display.mjs';
+import {createPlanLookup,loadConfirmedDevelopments,isConfirmedPlanLabel,developmentLabelPoints,developmentLabelLayout} from '../src/confirmed-development-display.mjs';
 const data=JSON.parse(readFileSync(new URL('../public/data/redevelopment/confirmed-projects-202609.geojson',import.meta.url),'utf8'));
 test('only individually verified planned projects are included; completed and preservation areas are excluded',()=>{
  assert.equal(data.features.length,25);assert.equal(new Set(data.features.map(f=>f.properties.id)).size,25);
@@ -35,3 +35,5 @@ test('every confirmed development has one explicit interior point label, includi
 });
 
  test('reported Dongjak Central Xi and both Bondong approved housing sites use official polygons',()=>{for(const id of ['11000UQ120PS202505310988','11000UQ120PS202505310962','11000UQ120PS202505311031'])assert.ok(data.features.some(f=>f.properties.id===id));});
+
+ test('overview and close-zoom redevelopment labels do not force collision overlaps',()=>{for(const detail of [false,true]){const l=developmentLabelLayout(detail);assert.equal(l['text-allow-overlap'],false);assert.equal(l['text-ignore-placement'],false);assert.ok(l['text-variable-anchor'].includes('center'));assert.deepEqual(l['text-field'],['get',detail?'label':'name']);}const source=readFileSync(new URL('../src/confirmed-development-display.mjs',import.meta.url),'utf8');assert.match(source,/minzoom:13\.2,maxzoom:15/);assert.match(source,/id:LABEL,type:'symbol',source:LABEL_POINTS,minzoom:15,layout/);});
