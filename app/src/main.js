@@ -3506,7 +3506,10 @@ function fitExposedRoute(coords,padding,{maxZoom=16,duration=350}={}){
  const camera=map.cameraForBounds(bounds,{padding,maxZoom,bearing:0});
  if(!camera)return;
  const token=++routeCameraFitToken;
+ const cancelByUser=event=>{if(event.originalEvent&&routeCameraFitToken===token)routeCameraFitToken++;};
+ map.once('dragstart',cancelByUser);map.once('zoomstart',cancelByUser);map.once('rotatestart',cancelByUser);
  const correct=event=>{
+  map.off('dragstart',cancelByUser);map.off('zoomstart',cancelByUser);map.off('rotatestart',cancelByUser);
   if(event.djRouteFitToken!==token||token!==routeCameraFitToken||!(app.dataset.tab==='map'||app.dataset.transitComparison==='true'))return;
   const rect=map.getContainer().getBoundingClientRect();
   const correction=routeProjectionCorrection(valid.map(p=>map.project(p)),rect.width,rect.height,padding);

@@ -4,6 +4,7 @@ import {createServer} from 'node:http';
 import {resolve,extname} from 'node:path';
 import assert from 'node:assert/strict';
 import {dismissOnboarding,clickRealPointer} from './e2e/helpers.js';
+import {nativeVehicleArea,quietNativeLine} from '../src/quiet-basemap.mjs';
 const root=resolve('app/dist'),out=resolve('audit-render-output');
 mkdirSync(out,{recursive:true});
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.geojson':'application/json','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.woff2':'font/woff2'};
@@ -26,6 +27,12 @@ const stops=registry.stops.filter(s=>s.name.includes('밤골')&&s.name.includes(
 assert.ok(stops.length>0,'exact reported bus stop must exist');
 const center=[stops.reduce((s,p)=>s+p.lng,0)/stops.length,stops.reduce((s,p)=>s+p.lat,0)/stops.length];
 const sites=[{key:'bamgol-lotte-castle',center},{key:'sangdo-elementary',center:[126.93615,37.50235]},{key:'nodeul-sayuksin',center:[126.94865,37.5122]}];
+const quiet=process.env.CHECK_QUIET_BASEMAP==='true';
+if(quiet){
+ const riverStops=registry.stops.filter(s=>s.name.includes('한강현대아파트')&&s.lng>126.94&&s.lng<126.99&&s.lat>37.49&&s.lat<37.53);
+ const riverCenter=riverStops.length?[riverStops.reduce((sum,p)=>sum+p.lng,0)/riverStops.length,riverStops.reduce((sum,p)=>sum+p.lat,0)/riverStops.length]:[126.964,37.511];
+ sites.push({key:'hangang-riverside-highway',center:riverCenter});
+}
 const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1,serviceWorkers:'block'});
 const page=await ctx.newPage();const errors=[],reviewRequests=[];
 page.on('pageerror',e=>errors.push(String(e)));
@@ -53,6 +60,19 @@ try{
    const f=await read();assert.equal(f.overlay,false);assert.equal(f.source,false);assert.equal(f.flag,null);assert.ok(f.nativeRoads.length>0);
    if(frames.length)assert.deepEqual(f.nativeRoads,frames[0].nativeRoads,'native road visibility/filter changed during idle');
    frames.push(f);
+   if(quiet){
+    const info=await page.evaluate(()=>{const m=window.__qaMap;return {layers:m.getStyle().layers.map(l=>({id:l.id,type:l.type,source:l.source,'source-layer':l['source-layer'],filter:m.getFilter(l.id),visibility:m.getLayoutProperty(l.id,'visibility')})),district:m.getLayer('district-border')?m.getPaintProperty('district-border','line-opacity'):null};});
+    const nativeAreas=info.layers.filter(nativeVehicleArea),nativeQuiet=info.layers.filter(quietNativeLine);
+    assert.ok(nativeAreas.length>0,'actual native road polygon layer must exist');
+    assert.ok(nativeQuiet.some(l=>l['source-layer']==='boundary'),'actual native boundary line must exist');
+    assert.ok(nativeAreas.every(l=>JSON.stringify(l.filter).includes('pedestrian')),'native vehicle area must exclude road fills');
+    assert.ok(nativeQuiet.every(l=>l.visibility==='none'),'decorative lines must remain hidden');
+    assert.ok(info.district>0,'owned Dongjak district boundary must remain visible in safety mode');
+    assert.ok(f.nativeRoads.some(l=>l.visibility!=='none'),'ordinary road lines must remain visible');
+    const ids=nativeAreas.map(l=>l.id);
+    const visible=await page.evaluate(ids=>window.__qaMap.queryRenderedFeatures({layers:ids}).map(f=>f.properties?.class||''),ids);
+    assert.ok(visible.every(k=>['path','pedestrian','footway','cycleway','steps'].includes(k)),'vehicle road fill must not render');
+   }
    if(delay===0||delay===3000)await page.screenshot({path:out+'/'+site.key+'-idle-'+delay+'.png'});
   }
   results.push({site:site.key,center:site.center,samples:frames.length,nativeRoads:frames[0].nativeRoads.length,overlayNeverVisible:true});
