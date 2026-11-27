@@ -4,15 +4,15 @@ export const GRID_ORIGIN=[126.7,37.4];
 export const GRID_WIDTH=55,GRID_HEIGHT=32;
 export function cellKey(lng,lat){return Math.floor((lng-GRID_ORIGIN[0])/GRID_STEP)+'_'+Math.floor((lat-GRID_ORIGIN[1])/GRID_STEP);}
 export function kindsAtZoom(z){return z>=16.4?['rail','bus']:z>=12.2?['rail']:[];}
-export function cellsForBounds(b,pad=1){
+export function cellsForBounds(b,pad=1,direction={x:0,y:0}){
  if(!b||![b.west,b.east,b.south,b.north].every(Number.isFinite))return [];
  const [w,s]=cellKey(b.west,b.south).split('_').map(Number),[e,n]=cellKey(b.east,b.north).split('_').map(Number);
  const out=[],cx=(w+e)/2,cy=(s+n)/2;
- for(let x=Math.max(0,w-pad);x<=Math.min(GRID_WIDTH-1,e+pad);x++)for(let y=Math.max(0,s-pad);y<=Math.min(GRID_HEIGHT-1,n+pad);y++)out.push({key:x+'_'+y,d:(x-cx)**2+(y-cy)**2});
- return out.sort((a,b)=>a.d-b.d).map(x=>x.key);
+ for(let x=Math.max(0,w-pad);x<=Math.min(GRID_WIDTH-1,e+pad);x++)for(let y=Math.max(0,s-pad);y<=Math.min(GRID_HEIGHT-1,n+pad);y++)out.push({key:x+'_'+y,d:(x-cx)**2+(y-cy)**2-.75*((x-cx)*(direction.x||0)+(y-cy)*(direction.y||0)),visible:x>=w&&x<=e&&y>=s&&y<=n});
+ return out.sort((a,b)=>Number(b.visible)-Number(a.visible)||a.d-b.d).map(x=>x.key);
 }
-export function viewportKeys(bounds,zoom,preferences={}){
- return cellsForBounds(bounds).flatMap(key=>kindsAtZoom(zoom).filter(kind=>preferences[kind]!==false).map(kind=>kind+'_'+key));
+export function viewportKeys(bounds,zoom,preferences={},direction){
+ return cellsForBounds(bounds,1,direction).flatMap(key=>kindsAtZoom(zoom).filter(kind=>preferences[kind]!==false).map(kind=>kind+'_'+key));
 }
 export function createTransitCellStream({load,onChange,limit=160,concurrency=6}){
  const cache=new Map(),inflight=new Map(),failed=new Set();
@@ -38,7 +38,7 @@ export function createTransitCellStream({load,onChange,limit=160,concurrency=6})
  function update(keys){
   if(disposed)return;
   const next=new Set(keys),sig=[...next].sort().join('|');
-  if(sig===signature){pump();return;}
+  if(sig===signature){desired=next;pump();return;}
   signature=sig;desired=next;failed.clear();
   for(const [key,c] of inflight)if(!desired.has(key)){c.abort();inflight.delete(key);}
   for(const key of desired)if(cache.has(key)){const rows=cache.get(key);cache.delete(key);cache.set(key,rows);}
