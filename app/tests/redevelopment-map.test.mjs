@@ -6,7 +6,7 @@ test('confirmed redevelopment uses its own pale district polygons and lower zoom
  const app={dataset:{}};
  installRedevelopment({map,app});
  assert.equal(added.length,3);assert.equal(added[0][0].minzoom,13.2);assert.equal(added[2][0].minzoom,14);assert.equal(added[0][0].paint['fill-color'],'#ebeae5');assert.equal(added[0][1],'dj-site-use-fill-0');
- assert.deepEqual(paint,[['landuse_construction','fill-color',REDEVELOPMENT_STYLE.fill]]);
+ assert.deepEqual(paint,[['landuse_construction','fill-color',REDEVELOPMENT_STYLE.fill],['landuse_construction','fill-antialias',true]]);assert.equal(added[1][0].layout['line-join'],'round');assert.equal(added[1][0].paint['line-blur'],.25);
  assert.deepEqual(ranges,[['landuse_construction',13.2,24]]);
  assert.equal([...sources.values()][0].data,'/data/redevelopment/confirmed-projects-202609.geojson');
  app.dataset.sangdoNight='on';repaintRedevelopment(map,app);assert.ok([...visibility.values()].every(v=>v==='none'));

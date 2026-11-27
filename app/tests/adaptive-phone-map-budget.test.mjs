@@ -1,11 +1,11 @@
 
 import test from 'node:test';import assert from 'node:assert/strict';
-import {phoneProfile,normalMapPixelRatio,nextBudget,offscreenEvictionIds,coalesceViewportWork,installPhoneRenderBudget} from '../src/adaptive-phone-map-budget.mjs';
+import {phoneProfile,normalMapPixelRatio,economyMapPixelRatio,nextBudget,offscreenEvictionIds,coalesceViewportWork,installPhoneRenderBudget} from '../src/adaptive-phone-map-budget.mjs';
 test('Note9 uses economy, recent iPhone unchanged',()=>{assert.equal(phoneProfile({phone:true,ua:'Android 10; SM-N960N'}),'economy');assert.equal(phoneProfile({phone:true,ua:'Android 15',memory:3}),'economy');assert.equal(phoneProfile({phone:true,ua:'iPhone OS 18',memory:4}),'normal');assert.equal(phoneProfile({phone:false,ua:'Android 10'}),'normal');});
 test('slow frames lower budget and sustained fast frames recover',()=>{let s={level:'normal'};for(let i=0;i<7;i++)s=nextBudget(s,35);assert.equal(s.level,'normal');s=nextBudget(s,35);assert.equal(s.level,'economy');for(let i=0;i<119;i++)s=nextBudget(s,16);assert.equal(s.level,'economy');s=nextBudget(s,16);assert.equal(s.level,'normal');});
 test('visible sheets protected',()=>{assert.deepEqual(offscreenEvictionIds(['a','b','c','d','e'],['b','e'],1),['a','c']);assert.deepEqual(offscreenEvictionIds(['a','b'],['a','b'],0),[]);});
 test('viewport events coalesce',()=>{let cb,moving=true,calls=[];const w=coalesceViewportWork(f=>calls.push(f),{isMoving:()=>moving,setTimer:f=>(cb=f,1),clearTimer:()=>{cb=null;}});w.request();w.request(true);w.request();cb();assert.deepEqual(calls,[]);moving=false;cb();assert.deepEqual(calls,[true]);w.cancel();});
-test('resolution changes only at gesture end',()=>{const handlers=new Map(),ratios=[];let t=0;const map={on:(k,v)=>handlers.set(k,v),off:k=>handlers.delete(k),setPixelRatio:r=>ratios.push(r),getPixelRatio:()=>1.5};const app={dataset:{},classList:{toggle(){},remove(){}}};const b=installPhoneRenderBudget({map,app,normalRatio:3,now:()=>t});handlers.get('movestart')();for(let i=0;i<12;i++){t+=40;handlers.get('render')();}assert.deepEqual(ratios,[]);handlers.get('moveend')();assert.deepEqual(ratios,[2]);assert.equal(b.stats().profile,'economy');b.destroy();assert.equal(handlers.size,0);});
+test('resolution changes only at gesture end',()=>{const handlers=new Map(),ratios=[];let t=0;const map={on:(k,v)=>handlers.set(k,v),off:k=>handlers.delete(k),setPixelRatio:r=>ratios.push(r),getPixelRatio:()=>1.5};const app={dataset:{},classList:{toggle(){},remove(){}}};const b=installPhoneRenderBudget({map,app,normalRatio:3,now:()=>t});handlers.get('movestart')();for(let i=0;i<12;i++){t+=40;handlers.get('render')();}assert.deepEqual(ratios,[]);handlers.get('moveend')();assert.deepEqual(ratios,[2.5]);assert.equal(b.stats().profile,'economy');b.destroy();assert.equal(handlers.size,0);});
 
 test('primary style, elevation, night building occlusion and emergency status remain distinct',async()=>{
  const {readFileSync}=await import('node:fs');
@@ -58,8 +58,8 @@ test('HUD scale docking never fights the active phone renderer for MapLibre DPR'
  }
 });
 
-test('high-density phone rendering is capped at 2.5x without upscaling lower DPR devices',()=>{
- assert.equal(normalMapPixelRatio({phone:true,ua:'iPhone OS 18_2',deviceRatio:3}),2.5);
+test('modern iPhone keeps native 3x sharpness and other devices retain bounded DPR',()=>{
+ assert.equal(normalMapPixelRatio({phone:true,ua:'iPhone OS 18_2',deviceRatio:3}),3);
  assert.equal(normalMapPixelRatio({phone:true,memory:8,deviceRatio:4}),2.5);
  assert.equal(normalMapPixelRatio({phone:true,memory:8,deviceRatio:2}),2);
  assert.equal(normalMapPixelRatio({phone:true,deviceRatio:3}),2);
@@ -99,3 +99,5 @@ test('transit mode changes only district display and camera extent, not shared b
  const focus=main.split('function focusTransitRoute(coords){')[1].split('function setTransitPreviewStops')[0];
  assert.doesNotMatch(focus,/transport-schematic-subway|transport-real-rail-overview|setLayoutProperty/);
 });
+
+test('economy keeps subpixel edges without exceeding native DPR or high-end motion budget',()=>{assert.equal(economyMapPixelRatio(3),2.5);assert.equal(economyMapPixelRatio(2.5),2);assert.equal(economyMapPixelRatio(2,'economy'),1.5);assert.equal(economyMapPixelRatio(1,'economy'),1);});

@@ -9,7 +9,12 @@ export function phoneProfile({ua='',memory,cores,phone=false,saveData=false}={})
 export function normalMapPixelRatio({phone=false,ua='',memory,cores,deviceRatio=1}={}){
   const modernApple=/iPhone.*OS (?:1[89]|[2-9]\d)_/i.test(ua);
   const highEnd=modernApple||Number(memory)>=6||Number(cores)>=8;
-  return Math.min(phone?(highEnd?2.5:2):1.5,Math.max(1,Number(deviceRatio)||1));
+  return Math.min(phone?(modernApple?3:highEnd?2.5:2):1.5,Math.max(1,Number(deviceRatio)||1));
+}
+// Retain subpixel edges even when slow devices use a lower rendering budget.
+export function economyMapPixelRatio(normalRatio,initial='normal'){
+ const ratio=Math.min(3,Math.max(1,Number(normalRatio)||1));
+ return Math.min(ratio,initial==='economy'?1.5:ratio>2.5?2.5:2);
 }
 export function nextBudget({streak=0,fast=0,level='normal'}={},ms){
   if(!Number.isFinite(ms)||ms<4||ms>1000)return {streak:0,fast:0,level};
@@ -20,14 +25,14 @@ export function nextBudget({streak=0,fast=0,level='normal'}={},ms){
   return {streak,fast,level};
 }
 export function installPhoneRenderBudget({map,app,initial='normal',normalRatio=1.5,phone=true,now=()=>performance.now(),doc=typeof document==='undefined'?null:document}={}){
-  normalRatio=Math.min(2.5,Math.max(1,Number(normalRatio)||1));
+  normalRatio=Math.min(3,Math.max(1,Number(normalRatio)||1));
   let level=initial, pending=initial, movement=false, last=0, sample={level:initial}, active=false;
   let count=0,slow=0,total=0,hidden=Boolean(doc?.hidden);
   const apply=()=>{
     app.dataset.djPhoneBudget=level;
     if(typeof map.setPixelRatio==='function'){
       // Preserve the existing normal-quality profile; no global resolution downgrade for transit.
-      const ratio=hidden?1:level==='economy'?(initial==='economy'?1:Math.min(2,normalRatio)):normalRatio;
+      const ratio=hidden?1:level==='economy'?economyMapPixelRatio(normalRatio,initial):normalRatio;
       if(map.getPixelRatio?.()!==ratio)map.setPixelRatio(ratio);
     }
   };

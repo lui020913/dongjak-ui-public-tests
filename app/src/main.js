@@ -10,7 +10,7 @@ import {installParkInfoClick} from './park-info-click.js';
 import {installFeaturedPlaceLabels} from './featured-place-labels.js';
 import {installReadable3DLabels} from './readable-3d-labels.js';
 import {installMobileMapControls} from './mobile-map-controls.js';
-import {phoneProfile,normalMapPixelRatio,installPhoneRenderBudget,offscreenEvictionIds} from './adaptive-phone-map-budget.mjs';
+import {phoneProfile,normalMapPixelRatio,economyMapPixelRatio,installPhoneRenderBudget,offscreenEvictionIds} from './adaptive-phone-map-budget.mjs';
 import {baseMapRecoveryDecision,BASE_STYLE_INITIAL_WAIT_MS} from './map-basemap-recovery.mjs';
 import './adaptive-phone-map-budget.css';
 import './button-material.css';
@@ -656,9 +656,9 @@ const map = new maplibregl.Map({
   renderWorldCopies: false,
   maxPitch: 70,
   // Cap GPU raster size on high-DPI displays (2x DPR costs 4x pixels).
-  pixelRatio: djInitialBudget==='economy'?1:djNormalPixelRatio,
-  // Multisampling smooths vector edges on normal devices; economy remains unmodified.
-  canvasContextAttributes: { antialias: djInitialBudget!=='economy' }
+  pixelRatio: djInitialBudget==='economy'?economyMapPixelRatio(djNormalPixelRatio,'economy'):djNormalPixelRatio,
+  // Keep multisampling enabled for thin polygon and route edges, even on the reduced DPR profile.
+  canvasContextAttributes: { antialias: true }
 });
 // The extra compact (i) control duplicated the attribution link in Map Options.
 // Keep source credits in '지도 옵션 > 지도 데이터 출처'; do not overlay the map.
