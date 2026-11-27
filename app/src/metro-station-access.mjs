@@ -1,7 +1,7 @@
 // Cartographic access context only, never a routing graph. Approximation is explicitly dashed.
 import {queryOverpass} from './safety-layers.js';
-export const STATION_ACCESS_ZOOM=17.15;
-export const STATION_PASSAGE_ZOOM=17.65;
+export const STATION_ACCESS_ZOOM=16.2;
+export const STATION_PASSAGE_ZOOM=16.65;
 const SOURCE='dj-metro-station-access',X=88300,Y=111320;
 const ids=[SOURCE+'-platform',SOURCE+'-passage',SOURCE+'-approximate',SOURCE+'-approximate-label',SOURCE+'-exit-circle',SOURCE+'-exit-label'];
 const empty=()=>({type:'FeatureCollection',features:[]});
@@ -10,7 +10,7 @@ const distance=(a,b)=>Math.hypot((a[0]-b[0])*X,(a[1]-b[1])*Y);
 const pointOf=e=>[Number(e.lon??e.center?.lon),Number(e.lat??e.center?.lat)];
 const coordinates=e=>(e.geometry||[]).map(p=>[Number(p.lon),Number(p.lat)]).filter(valid);
 const normalized=s=>String(s||'').normalize('NFKC').replace(/\s|역$/g,'');
-const number=t=>{const n=String(t.ref||t['exit:ref']||'').trim();return /^[0-9]{1,2}[A-Za-z]?(?:[-·][0-9A-Za-z]+)?$/.test(n)?n:'';};
+const number=t=>{const n=String(t.ref||t['exit:ref']||t['entrance:ref']||'').trim();return /^[0-9]{1,2}[A-Za-z]?(?:[-·][0-9A-Za-z]+)?$/.test(n)?n:'';};
 function nearest(p,path){
  let best=null,d=Infinity;
  for(let i=1;i<path.length;i++){const a=path[i-1],b=path[i],dx=(b[0]-a[0])*X,dy=(b[1]-a[1])*Y,len=dx*dx+dy*dy;if(!len)continue;
@@ -19,7 +19,7 @@ function nearest(p,path){
  return best?{point:best,distance:d}:null;
 }
 function stationAt(p,stations,tag=''){
- let best=null,d=240;const name=normalized(tag);
+ let best=null;const name=normalized(tag);let d=name?450:300;
  for(const s of stations){const m=distance(p,[s.lng,s.lat]);if(m<d&&(!name||normalized(s.name)===name)){d=m;best=s;}}
  return best;
 }
@@ -57,30 +57,33 @@ export function buildStationAccess(elements,stations,colors,railPaths=new Map(),
  }
  return {type:'FeatureCollection',features:result};
 }
-export function stationAccessQuery(b){
+export function stationAccessQuery(b,kind='all'){
  const box=b.map(x=>x.toFixed(6)).join(',');
- return '[out:json][timeout:12];(node["railway"="subway_entrance"]('+box+');node["subway"="yes"]["entrance"]('+box+');way["railway"="platform"]('+box+');way["public_transport"="platform"]["subway"="yes"]('+box+');way["highway"="footway"]["tunnel"="yes"]('+box+');way["highway"="footway"]["location"="underground"]('+box+');way["indoor"="corridor"]('+box+');way["highway"="steps"]["level"]('+box+'););out geom tags;';
+ const exits='node["railway"="subway_entrance"]('+box+');node["subway"="yes"]["entrance"]('+box+');';
+ const passages='way["railway"="platform"]('+box+');way["public_transport"="platform"]["subway"="yes"]('+box+');way["highway"="footway"]["tunnel"="yes"]('+box+');way["highway"="footway"]["location"="underground"]('+box+');way["indoor"="corridor"]('+box+');way["highway"="steps"]["level"]('+box+');';
+ return '[out:json][timeout:10];('+(kind==='exits'?exits:kind==='passages'?passages:exits+passages)+');out body geom;';
 }
 export function installMetroStationAccess({map,app,getStations,getRailPaths,colors,allow,fetcher=queryOverpass}){
  if(!map?.getBounds||!map?.getZoom||!map?.addSource)return {request(){}};
- const cache=new Map(),failed=new Map();let pending=null,timer=0,last='',desired=null,initialized=false;
+ const cache=new Map(),failed=new Map();let pending=null,timer=0,retryTimer=0,last='',desired=null,initialized=false;
  const enabled=()=>app?.dataset?.djTransitExterior==='true'||app?.dataset?.baseMetro!=='off';
  function setup(){
   if(map.getSource(SOURCE))return;
   map.addSource(SOURCE,{type:'geojson',data:empty(),attribution:'© OpenStreetMap contributors (ODbL)'});
   const style=map.getStyle()?.layers||[],before=style.find(l=>l.id==='dj-metro-detail-icon')?.id||style.find(l=>l.type==='symbol')?.id;
-  const add=l=>map.addLayer(l,before);
+  const add=l=>map.addLayer(l,l.id===ids[4]||l.id===ids[5]?undefined:before);
   add({id:ids[0],type:'fill',source:SOURCE,minzoom:STATION_PASSAGE_ZOOM,filter:['all',['==',['get','kind'],'platform'],['==',['geometry-type'],'Polygon']],paint:{'fill-color':['get','color'],'fill-opacity':.18,'fill-outline-color':['get','color']}});
-  add({id:ids[1],type:'line',source:SOURCE,minzoom:STATION_PASSAGE_ZOOM,filter:['all',['in',['get','kind'],['literal',['passage','platform']]],['==',['geometry-type'],'LineString']],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':['get','color'],'line-opacity':.52,'line-width':['interpolate',['linear'],['zoom'],17.65,3,20,8]}});
+  add({id:ids[1],type:'line',source:SOURCE,minzoom:STATION_PASSAGE_ZOOM,filter:['all',['in',['get','kind'],['literal',['passage','platform']]],['==',['geometry-type'],'LineString']],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':['get','color'],'line-opacity':.52,'line-width':['interpolate',['linear'],['zoom'],16.65,3,20,8]}});
   add({id:ids[2],type:'line',source:SOURCE,minzoom:STATION_PASSAGE_ZOOM,filter:['==',['get','kind'],'approximate'],layout:{'line-cap':'round'},paint:{'line-color':['get','color'],'line-opacity':.45,'line-width':2.5,'line-dasharray':[2,2]}});
   add({id:ids[3],type:'symbol',source:SOURCE,minzoom:18.7,filter:['==',['get','kind'],'approximate'],layout:{'symbol-placement':'line-center','text-field':['get','label'],'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':9,'text-optional':true,'text-padding':3},paint:{'text-color':'#65796e','text-halo-color':'#fff','text-halo-width':1}});
-  add({id:ids[4],type:'circle',source:SOURCE,minzoom:STATION_ACCESS_ZOOM,filter:['==',['get','kind'],'exit'],paint:{'circle-radius':['interpolate',['linear'],['zoom'],17.15,6,20,10],'circle-color':'#fff6d7','circle-stroke-color':['get','color'],'circle-stroke-width':1.5}});
-  add({id:ids[5],type:'symbol',source:SOURCE,minzoom:STATION_ACCESS_ZOOM,filter:['==',['get','kind'],'exit'],layout:{'text-field':['get','label'],'text-font':['Noto Sans Bold','Open Sans Semibold'],'text-size':['interpolate',['linear'],['zoom'],17.15,8,20,12],'text-allow-overlap':false,'text-padding':2},paint:{'text-color':'#534d31'}});
+  add({id:ids[4],type:'circle',source:SOURCE,minzoom:STATION_ACCESS_ZOOM,filter:['==',['get','kind'],'exit'],paint:{'circle-radius':['interpolate',['linear'],['zoom'],16.2,6.5,20,10],'circle-color':'#fff6d7','circle-stroke-color':['get','color'],'circle-stroke-width':1.5}});
+  add({id:ids[5],type:'symbol',source:SOURCE,minzoom:STATION_ACCESS_ZOOM,filter:['==',['get','kind'],'exit'],layout:{'text-field':['get','label'],'text-font':['Noto Sans Bold','Open Sans Semibold'],'text-size':['interpolate',['linear'],['zoom'],16.2,9,20,12],'text-allow-overlap':true,'text-ignore-placement':true,'text-padding':1},paint:{'text-color':'#534d31'}});
   initialized=true;
  }
  function publish(data){if(map.isMoving?.())return;setup();const sig=JSON.stringify(data);if(sig!==last){map.getSource(SOURCE)?.setData(data);last=sig;}}
  function refresh(){
   if(map.isMoving?.())return;
+  if(!map.isStyleLoaded?.()&&typeof map.isStyleLoaded==='function'){map.once?.('idle',request);return;}
   if(!enabled()||map.getZoom()<STATION_ACCESS_ZOOM){desired=null;if(initialized&&last)publish(empty());return;}
   const b=map.getBounds();if(!b?.getWest)return;
   const w=b.getWest(),s=b.getSouth(),e=b.getEast(),n=b.getNorth(),pad=.003;
@@ -90,16 +93,27 @@ export function installMetroStationAccess({map,app,getStations,getRailPaths,colo
   const keys=new Map();
   for(const p of stations){const x=Math.floor(p.lng/.006),y=Math.floor(p.lat/.006),key=x+':'+y;if(!keys.has(key))keys.set(key,[y*.006-.003,x*.006-.003,(y+1)*.006+.003,(x+1)*.006+.003]);}
   desired=keys;
-  const rows=new Map();for(const key of keys.keys())for(const p of cache.get(key)||[])rows.set(p.type+':'+p.id,p);
-  if(rows.size||initialized)publish(buildStationAccess([...rows.values()],stations,colors,getRailPaths(),allow));
+  const rows=new Map();for(const key of keys.keys())for(const kind of ['exits','passages'])for(const p of cache.get(key+'|'+kind)||[])rows.set(p.type+':'+p.id,p);
+  if(rows.size||initialized){let rail=new Map();try{rail=getRailPaths()||rail;}catch{}publish(buildStationAccess([...rows.values()],stations,colors,rail,allow));}
   if(pending)return;
-  for(const [key,box] of keys){if(cache.has(key)||Date.now()-(failed.get(key)||0)<120000)continue;
-   pending=key;Promise.resolve().then(()=>fetcher(stationAccessQuery(box),8500)).then(data=>{if(!Array.isArray(data))throw Error('station access data');cache.set(key,data);while(cache.size>64)cache.delete(cache.keys().next().value);}).catch(()=>failed.set(key,Date.now())).finally(()=>{pending=null;if(desired&&enabled())request();});break;
+  // Prioritize the inexpensive exit query across all visible cells. A slow passage query must never suppress exit markers.
+  for(const kind of ['exits','passages']){
+   if(kind==='passages'&&map.getZoom()<STATION_PASSAGE_ZOOM)continue;
+   for(const [key,box] of keys){
+    const id=key+'|'+kind;if(cache.has(id)||Date.now()-(failed.get(id)||0)<30000)continue;
+    pending=id;
+    Promise.resolve().then(()=>fetcher(stationAccessQuery(box,kind),12000)).then(data=>{
+     if(!Array.isArray(data))throw Error('station access data');
+     cache.set(id,data);failed.delete(id);while(cache.size>128)cache.delete(cache.keys().next().value);
+    }).catch(error=>{failed.set(id,Date.now());console.warn('[지하철 출입구/통로]',kind,error?.message);if(!retryTimer)retryTimer=setTimeout(()=>{retryTimer=0;request();},31000);}).finally(()=>{pending=null;if(desired&&enabled())request();});
+    return;
+   }
   }
  }
  function request(){clearTimeout(timer);timer=setTimeout(refresh,220);}
  map.on?.('moveend',request);map.on?.('zoomend',request);
  globalThis.window?.addEventListener?.('dongjak:transit-stream-scope',request);
  globalThis.document?.addEventListener?.('dongjak-base-layer-change',request);
+ request();
  return {request};
 }
