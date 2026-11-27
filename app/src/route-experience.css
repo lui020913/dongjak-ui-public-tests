@@ -691,3 +691,11 @@
   html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"][data-dj-transit-preview] #route-map-card :is(.route-map-card-actions,#dj-route-choice-list,.dj-walk-native-summary){display:none!important}
  }
 }
+
+@layer request-completion{
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"] #route-map-card:not([hidden]){max-height:min(44dvh,342px,calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 180px))!important}
+  html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"][data-dj-transit-preview] #route-map-card:not([hidden]){max-height:min(54dvh,430px,calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 180px))!important}
+  #app:has(#route-transit-confirm:not([hidden])) #route-pick-hint{display:none!important}
+ }
+}

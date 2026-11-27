@@ -23,3 +23,12 @@ export function walkingRouteViewportPadding({
   }
   return {top:Math.ceil(top),bottom:Math.ceil(bottom),left:side,right:side};
 }
+
+// Never shrink the occlusion padding: a route must fit the genuinely exposed
+// map rectangle, not the map area behind a floating sheet.
+export function strictRoutePreviewPadding({mapTop,viewportHeight,toolbarBottom,sheetTop,inset=26,side=34}={}){
+ if(![mapTop,viewportHeight,toolbarBottom,sheetTop].every(Number.isFinite))return null;
+ const top=Math.max(0,toolbarBottom-mapTop)+inset;
+ const bottom=Math.max(0,mapTop+viewportHeight-sheetTop)+inset;
+ return top+bottom<=viewportHeight-36?{top:Math.ceil(top),bottom:Math.ceil(bottom),left:side,right:side}:null;
+}

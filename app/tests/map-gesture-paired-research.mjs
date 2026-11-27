@@ -41,7 +41,7 @@ async function sample(url,variant,round){
     const state=await page.evaluate(()=>{const m=window.__qaMap,app=document.getElementById('app');return {tab:app?.dataset?.tab,transit:app?.dataset?.djTransitExterior,center:m.getCenter(),zoom:m.getZoom(),style:m.isStyleLoaded(),tiles:m.areTilesLoaded?.(),layers:m.getStyle().layers.filter(l=>l.type==='symbol').map(l=>[l.id,m.getLayoutProperty(l.id,'visibility')||'visible'])};});
     console.log('MAP_GESTURE_READINESS_FAILURE',JSON.stringify({variant,round,site:site.name,...state}));throw error;
    }
-   const data=await page.evaluate(async({center,checkSharedScope})=>{
+   const data=await page.evaluate(async({center,checkSharedScope,checkDistrictBuildings})=>{
     const m=window.__qaMap,frames=[],writes={},restores=[],sweeps=[];
     // Lock the matched DPR and wait for labels and buildings in the same
     // browser task that begins measurement. A separate readiness RPC can
@@ -59,7 +59,7 @@ async function sample(url,variant,round){
     let state,stable=0;const deadline=performance.now()+90000;
     while(performance.now()<deadline){
      state=snapshot();
-     const ready=state.ready&&state.icons>0&&(!checkSharedScope||state.building.rendered>0&&!state.building.customDistance)&&Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001&&Math.abs(state.zoom-17.8)<.02;
+     const ready=state.ready&&state.icons>0&&(!checkSharedScope||state.building.rendered>0&&state.building.customDistance===checkDistrictBuildings)&&Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001&&Math.abs(state.zoom-17.8)<.02;
      stable=ready?stable+1:0;if(stable>=2)break;
      await new Promise(r=>setTimeout(r,300));
     }
@@ -95,10 +95,10 @@ async function sample(url,variant,round){
      }
     }finally{active=false;m.off('render',frame);for(const restore of restores.reverse())restore();}
     return {frames,writes,sweeps,icons,building,visibleLayers:visibleIds.length,ratio:m.getPixelRatio?.()??null};
-   },{...site,checkSharedScope:variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'});
+   },{...site,checkSharedScope:variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true',checkDistrictBuildings:variant==='candidate'&&process.env.CHECK_DISTRICT_BUILDINGS==='true'});
    if(variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'){
     console.log('DISTRICT_BUILDING_SCOPE',site.name,JSON.stringify(data.building));
-    assert.equal(data.building.customDistance,false,'original native building filters');
+    assert.equal(data.building.customDistance,process.env.CHECK_DISTRICT_BUILDINGS==='true','district building filter');
     assert.ok(data.building.rendered>0,'actual district buildings must remain rendered');
    }
    report.samples.push({variant,round,site:site.name,...data});
@@ -107,6 +107,14 @@ async function sample(url,variant,round){
    assert.ok(Math.abs(data.ratio-2.5)<.01,'matched DPR required');
    assert.ok(data.sweeps.every(x=>Math.hypot(x.to[0]-x.from[0],x.to[1]-x.from[1])>.0004&&Math.hypot(x.target[0]-x.to[0],x.target[1]-x.to[1])<.0001&&x.elapsedMs>=4000&&Math.abs(x.afterZoom-x.zoom)<.02),'matched camera sweep did not execute');
    assert.ok(data.frames.length>=10&&data.sweeps.every(x=>x.frames>=2),'insufficient map frames');
+  }
+  if(variant==='candidate'&&process.env.CHECK_DISTRICT_BUILDINGS==='true'){
+   for(const pitch of [0,45]){
+    await page.evaluate(pitch=>window.__qaMap.jumpTo({center:[126.994,37.503],zoom:17.8,pitch,bearing:0}),pitch);
+    await page.waitForFunction(()=>{const m=window.__qaMap;return m.isStyleLoaded()&&!m.isMoving()&&m.areTilesLoaded();},{},{timeout:90000});
+    const outside=await page.evaluate(()=>{const m=window.__qaMap,ls=m.getStyle().layers.filter(l=>['fill','fill-extrusion','line'].includes(l.type)&&(l['source-layer']==='building'||l.id.startsWith('dongjak-buildings-')));const ids=ls.map(l=>l.id);return {raw:m.querySourceFeatures('openmaptiles',{sourceLayer:'building'}).length,rendered:ids.length?m.queryRenderedFeatures({layers:ids}).length:0,center:m.getCenter().toArray()};});
+    console.log('EXTERIOR_BUILDINGS',pitch,JSON.stringify(outside));assert.ok(outside.raw>0,'outside sample must contain real source buildings');assert.equal(outside.rendered,0,'outside building geometry must not render');
+   }
   }
  }finally{await ctx.close();}
 }
