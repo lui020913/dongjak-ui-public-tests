@@ -1,3 +1,4 @@
+import {paintBusBadge} from './bus-route-colors.mjs';
 import {visibleBusRoadIndex} from './bus-roadside-placement.mjs';
 import {createTransitCellStream,viewportKeys,cellKey} from './transit-stream-grid.mjs';
 import {getSeoulBoundary,inSeoul} from './seoul-transit-boundary.mjs';
@@ -929,7 +930,7 @@ function displayArrivals(container,kind,items,place=null){
       if(/^\d{5,15}$/.test(String(row.routeId||''))){
         item.dataset.busRouteId=String(row.routeId);
         item.dataset.busRouteName=String(row.route||'버스');
-        item.dataset.busRouteType=String(row.routeType||'');
+        item.dataset.busRouteType=String(row.routeType||row.routeTy||row.busType||'');
         item.setAttribute('role','button');item.setAttribute('tabindex','0');
         item.setAttribute('aria-label',`${row.route||'버스'}번 노선 지도에 표시`);
         item.setAttribute('aria-pressed','false');
@@ -937,6 +938,7 @@ function displayArrivals(container,kind,items,place=null){
       }
       const routeBadge=el('strong','',row.route||row.line||row.direction||'버스');
       routeBadge.dataset.routeType=String(row.routeType||row.routeTy||row.busType||'');
+      paintBusBadge(routeBadge,routeBadge.textContent,routeBadge.dataset.routeType);
       left.append(routeBadge);
       const direction=String(row.destination||row.direction||'').trim();
       left.append(el('small','',direction&&!/방면$/.test(direction)?`${direction} 방면`:direction));
@@ -1467,7 +1469,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       const chosen=active?.id===row.dataset.busRouteId;
       row.setAttribute('aria-pressed',String(chosen));
       row.style.removeProperty('outline');row.style.removeProperty('outline-offset');
-      row.style.setProperty('--dj-bus-selected-color',busRouteColor(row.dataset.busRouteType));
+      row.style.setProperty('--dj-bus-selected-color',busRouteColor(row.dataset.busRouteType,row.dataset.busRouteName));
     }
   }
   function compactRouteDetail(){

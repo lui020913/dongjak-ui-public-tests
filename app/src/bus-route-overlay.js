@@ -1,3 +1,4 @@
+import {busBadgeColor} from './bus-route-colors.mjs';
 import {NEUTRAL_BUS_IMAGE,ensureNeutralBusImage} from './live-bus-art.js';
 export const BUS_ROUTE_SOURCE='dj-selected-bus-route';
 const CASE=BUS_ROUTE_SOURCE+'-casing',LINE=BUS_ROUTE_SOURCE+'-line';
@@ -37,7 +38,8 @@ function vehicleArt(map){
  g.fillStyle='#ffcf66';g.fillRect(12,59,6,3);g.fillRect(30,59,6,3);
  map.addImage(VEHICLE_IMAGE,g.getImageData(0,0,48,72),{pixelRatio:3});return true;
 }
-export function busRouteColor(type){
+export function busRouteColor(type,route=''){
+  if(route)return busBadgeColor(route,type);
   return ({'1':'#52B5E5','2':'#4a9c39','3':'#3566c1','4':'#3d9b46','5':'#e5b928','6':'#c63d42','7':'#2b9d65','8':'#3566c1','9':'#3566c1'})[String(type)]||'#267f92';
 }
 export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,vehicleFetcher=null,onState=()=>{}}){
@@ -151,7 +153,7 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,vehi
         cache.set(id,{coordinates,stops:routeStops,at:Date.now()});
       }
       if(seq!==sequence)return;
-      const color=busRouteColor(routeType);
+      const color=busRouteColor(routeType,route);
       geometry={type:'FeatureCollection',features:[{type:'Feature',properties:{routeId:id,color},geometry:{type:'LineString',coordinates}},...routeStops.map(s=>({type:'Feature',properties:{routeId:id,color,name:s.name,seq:s.seq,arsId:s.arsId},geometry:{type:'Point',coordinates:[s.lng,s.lat]}}))]};
       draw();active={id,route,color,status:'shown',stopCount:routeStops.length,vehicleStatus:vehicleFetcher?'loading':'off',vehicleCount:0};onState(active);startVehiclePoll();
     }catch(error){

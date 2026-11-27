@@ -74,7 +74,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   status.textContent='';status.hidden=true;
   if(!plans.length){const p=doc.createElement('p');p.className='tr-note';p.textContent='조회 범위에서 확인된 이동안이 없습니다.';list.append(p);}
   for(const plan of plans){
-   const card=doc.createElement('button');card.type='button';card.className='tr-card';const lead=plan.legs?.[0]||plan;card.style.setProperty('--route-color',lead.kind==='bus'?busRouteColor(lead.routeType):subwayLineColor(railLabel(lead.lines[0])));
+   const card=doc.createElement('button');card.type='button';card.className='tr-card';const lead=plan.legs?.[0]||plan;card.style.setProperty('--route-color',lead.kind==='bus'?busRouteColor(lead.routeType,lead.route):subwayLineColor(railLabel(lead.lines[0])));
    const metrics=doc.createElement('div');metrics.className='tr-metrics';const metric=doc.createElement('strong');metric.textContent=routeMetric(plan,reviewed.get(plan),reviewed.has(plan));metrics.append(metric);
    const head=doc.createElement('div');head.className='tr-row';
    const mark=doc.createElement('span');mark.className='tr-bus-icon';mark.innerHTML=icon(lead.kind);
@@ -84,7 +84,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
    const meta=doc.createElement('small');meta.textContent=(plan.legs?'환승 '+(plan.legs.length-1)+'회':plan.kind==='bus'?'직행 · '+plan.stopCount+'개 정류장':'환승 '+plan.changes+'회');
    const track=doc.createElement('div');track.className='tr-route-badges';track.setAttribute('aria-label','탑승 노선 순서');
    const legs=plan.legs||[plan];let count=0;
-   for(const leg of legs){for(const line of leg.kind==='bus'?[leg.route]:[...new Set(leg.lines||[])]){if(count++){const arrow=doc.createElement('span');arrow.className='tr-badge-arrow';arrow.textContent='›';track.append(arrow);}const badge=doc.createElement('span');badge.className='tr-line-badge';badge.textContent=leg.kind==='bus'?line:railLabel(line);badge.style.setProperty('--line-color',leg.kind==='bus'?busRouteColor(leg.routeType):subwayLineColor(railLabel(line)));track.append(badge);}}
+   for(const leg of legs){for(const line of leg.kind==='bus'?[leg.route]:[...new Set(leg.lines||[])]){if(count++){const arrow=doc.createElement('span');arrow.className='tr-badge-arrow';arrow.textContent='›';track.append(arrow);}const badge=doc.createElement('span');badge.className='tr-line-badge';badge.textContent=leg.kind==='bus'?line:railLabel(line);badge.style.setProperty('--line-color',leg.kind==='bus'?busRouteColor(leg.routeType,leg.route):subwayLineColor(railLabel(line)));track.append(badge);}}
    card.append(metrics,head,track,detail,meta);
    const summary=doc.createElement('small');summary.className='tr-review-result';summary.textContent=formatTransitReview(reviewed.get(plan),reviewed.has(plan));summary.hidden=!reviewed.has(plan);card.append(summary);reviewLabels.set(plan,{summary,metric});
    card.addEventListener('click',async()=>{

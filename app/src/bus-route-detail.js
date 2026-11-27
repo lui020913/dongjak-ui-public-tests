@@ -1,3 +1,4 @@
+import {busBadgeColor} from './bus-route-colors.mjs';
 import {classifyBusRoute,BUS_CATEGORY_LABEL} from './v8215-transit-auth-bus-sheet.js';
 
 import {routeVehicleGroups,vehicleDisplay,stopHours,vehicleIntervalProgress} from './bus-route-detail-model.mjs';
@@ -126,7 +127,7 @@ export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRet
     historyRequest?.abort();historyRequest=null;historyDate='';historySeq='';
     cancelClosing();
     selection=next;state=null;stops=[];vehicles=[];view='route';pendingScroll=true;lastSignature='';routeScroll=0;root.dataset.view='route';
-    const category=classifyBusRoute(next.route,next.routeType);kind.textContent=BUS_CATEGORY_LABEL[category];root.dataset.busCategory=category;name.textContent=next.route;
+    const category=classifyBusRoute(next.route,next.routeType);kind.textContent=BUS_CATEGORY_LABEL[category];root.dataset.busCategory=category;root.style.setProperty('--dj-bus-detail-line',busBadgeColor(next.route,next.routeType));name.textContent=next.route;
     root.hidden=false;syncBounds();render();
   }
   function update(next,nextStops,nextVehicles){

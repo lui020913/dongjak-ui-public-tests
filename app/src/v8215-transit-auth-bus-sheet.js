@@ -1,25 +1,8 @@
 import {getActiveCloudClient} from './v824-favorites-cloud.js';
 /** Scoped transport information UI: sign-in prompt, and input-safe pointer handle.
  * Actual authentication and favorite persistence remain in the existing modules. */
-export function classifyBusRoute(route,explicitType=''){
-  const name=String(route||'').trim();
-  const type=String(explicitType||'').trim();
-  const official={'1':'airport','2':'village','3':'trunk','4':'branch','5':'circular','6':'metro'};
-  if(official[type])return official[type];
-  if(/^N\d{2,3}$/i.test(name))return 'night';
-  if(/^(?:공항|airport)/i.test(type)||/^(?:공항|airport)/i.test(name))return 'airport';
-  if(['641','650'].includes(name))return 'trunk';
-  if(name==='6515')return 'branch';
-  if(/^6[0-3]\d{2}$/.test(name)||/^67\d{2}$/.test(name))return 'airport';
-  if(/^(?:마을|village)/i.test(type)||/^(?:동작|관악|서초|영등포|구로|금천|마포|용산|강남|강서|양천|동대문|송파|광진|강북|성북|성동|도봉|노원|은평|종로|중구|중랑|서대문|강동|강남)[가-힣]?\d{1,3}(?:-|$)/.test(name))return 'village';
-  if(/^(?:광역|metropolitan)/i.test(type)||/^[Mm]\d{3,4}$/.test(name)||/^9\d{3}$/.test(name))return 'metro';
-  if(/^(?:간선|trunk)/i.test(type)||/^[1-7]\d{2}(?:[AB])?$/i.test(name))return 'trunk';
-  if(/^(?:지선|branch)/i.test(type)||/^[1-7]\d{3}(?:[AB])?$/i.test(name))return 'branch';
-  if(/^(?:순환|circulation)/i.test(type)||/^0\d{2,3}$/.test(name))return 'circular';
-  if(/^(?:심야|night)/i.test(type)||/^N\d{2,3}$/i.test(name))return 'night';
-  return 'unknown';
-}
-export const BUS_CATEGORY_LABEL={trunk:'간선버스',branch:'지선버스',village:'마을버스',metro:'광역버스',airport:'공항버스',circular:'순환버스',night:'심야버스',unknown:'버스 유형 미확인'};
+import {classifyBusRoute,BUS_CATEGORY_LABEL,paintBusBadge} from './bus-route-colors.mjs';
+export {classifyBusRoute,BUS_CATEGORY_LABEL};
 
 export function installTransitAuthBusSheet(doc=document,win=window){
   const panel=doc.getElementById('transport-sheet');
@@ -69,9 +52,7 @@ export function installTransitAuthBusSheet(doc=document,win=window){
     for(const route of arrivals.querySelectorAll('.transport-arrival-row .transport-arrival-main > strong')){
       if(route.classList.contains('dj-transit-bus-route'))continue;
       const name=route.textContent||'';
-      const type=classifyBusRoute(name,route.dataset.routeType||'');
-      route.classList.add('dj-transit-bus-route');route.dataset.busClass=type;
-      route.setAttribute('aria-label',`${BUS_CATEGORY_LABEL[type]} ${name}`);
+      paintBusBadge(route,name,route.dataset.routeType||'');
     }
   }
   const busObserver=typeof MutationObserver!=='undefined'?new MutationObserver(decorateRoutes):null;
