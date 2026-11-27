@@ -35,9 +35,11 @@ test('committed apartment edits match real source files and are applied by share
   const loaded=await loadBuildingTileFeatures(sheet,async url=>({ok:true,json:async()=>sourceData.get(url)}),null);
   const edits=completedApartmentDisplayEdits.edits.filter(e=>e.sheet===sheet.sheet);
   assert.equal(loaded.features.length,expected-edits.length);
+  assert.equal(loaded.apartmentExcluded.length,edits.length);
   for(const edit of edits){
    const data=sourceData.get(edit.kind==='base'?sheet.file:sheet.supplement);
    assert.ok(!loaded.features.includes(data.features[edit.row]));
+   assert.ok(loaded.apartmentExcluded.includes(data.features[edit.row]));
   }
  }
 });
