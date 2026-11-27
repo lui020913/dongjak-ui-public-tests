@@ -61,10 +61,15 @@ for f in current:
     if g.is_empty or g.area<4 or not g.intersects(district):continue
     cur.append(g);props.append(f.get('properties') or {})
 tree=STRtree(cur)
+def norm(value):return re.sub(r'\s+','',str(value or ''))
+def clavenue_address(p):
+    return (norm(p.get('street_name'))=='성대로' and re.match(r'^164(?:$|[-동])',norm(p.get('house_number'))) is not None) or any('클라베뉴' in norm(v) or '클라벤뉴' in norm(v) for v in p.values())
+clavenue_ids={i for i,p in enumerate(props) if clavenue_address(p)}
+print('CLAVENUE_ADDRESS_MATCH '+json.dumps({'count':len(clavenue_ids),'address':'서울 동작구 성대로 164','source':'https://www.k-apt.go.kr/bid/bidDetail.do?bidNum=20260929103602281','properties':[props[i] for i in sorted(clavenue_ids)]},ensure_ascii=False),flush=True)
 plans=json.loads((ROOT/'app/public/data/redevelopment/confirmed-projects-202609.geojson').read_text())
 planned=unary_union([metric(f) for f in plans['features']])
 manifest=json.loads((ROOT/'app/public/buildings/manifest.json').read_text())
-counts=collections.Counter();changes=[];clavenue=[]
+counts=collections.Counter();changes=[];clavenue=[];site_conflicts=[]
 for sheet in manifest['sheets']:
     for k in ['file','supplement']:
         if not sheet.get(k):continue
@@ -86,16 +91,19 @@ for sheet in manifest['sheets']:
             if coverage<.25:
                 counts['low_current_coverage']+=1
                 changes.append({'type':'Feature','geometry':f['geometry'],'properties':{'sheet':sheet['sheet'],'kind':k,'row':index,'x':p['x'],'y':p['y'],'coverage':round(coverage,4),'area_m2':round(g.area,2),'decision':'review_only'}})
+            for a,j in matches:
+                if j in clavenue_ids and a/g.area>=.60 and cur[j].area/g.area>=2:
+                    site_conflicts.append({'type':'Feature','geometry':f['geometry'],'properties':{'sheet':sheet['sheet'],'kind':k,'row':index,'coverage':round(a/g.area,4),'area_m2':round(g.area,2),'current_area_m2':round(cur[j].area,2),'decision':'review_only','verified_site':'상도 푸르지오 클라베뉴','address':'성대로 164'}})
             if matches:
                 a,j=max(matches)
                 if a/g.area>=.6 and cur[j].area/g.area>=2:
                     counts['large_current_over_legacy']+=1
                     changes.append({'type':'Feature','geometry':f['geometry'],'properties':{'sheet':sheet['sheet'],'kind':k,'row':index,'coverage':round(a/g.area,4),'area_m2':round(g.area,2),'current_area_m2':round(cur[j].area,2),'current_properties':props[j],'decision':'review_only'}})
-for i,p in enumerate(props):
-    if any('클라베뉴' in str(v) or '클라벤뉴' in str(v) for v in p.values()):
-        clavenue.append({'type':'Feature','geometry':mapping(transform(unproject,cur[i])),'properties':p})
-counts['current_footprints']=len(cur);counts['named_clavenue_current']=len(clavenue)
-for name,features in [('current-vs-legacy-review.geojson',changes),('clavenue-current-footprints.geojson',clavenue)]:
+# The current service permits online analysis, not unrestricted offline export.
+# Only existing app geometry and aggregate comparison statistics are written.
+counts['current_footprints']=len(cur);counts['clavenue_address_matches']=len(clavenue_ids);counts['clavenue_legacy_overlap_candidates']=len({(f['properties']['sheet'],f['properties']['kind'],f['properties']['row']) for f in site_conflicts})
+for name,features in [('current-vs-legacy-review.geojson',changes),('clavenue-legacy-overlap-review.geojson',site_conflicts)]:
     (OUT/name).write_text(json.dumps({'type':'FeatureCollection','features':features},ensure_ascii=False,separators=(',',':')))
 print('CURRENT_BUILDING_COMPARISON '+json.dumps(dict(counts),ensure_ascii=False),flush=True)
-print('CLAVENUE_CURRENT '+json.dumps([f['properties'] for f in clavenue],ensure_ascii=False),flush=True)
+for f in site_conflicts:
+    print('CLAVENUE_LEGACY_OVERLAP '+json.dumps(f['properties'],ensure_ascii=False),flush=True)
