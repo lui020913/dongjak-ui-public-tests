@@ -35,7 +35,7 @@ test('dark map theme restores ground and 3D building colors after zoom',()=>{
   const main=read('src/main.js');
   const appearance=read('src/map-appearance.js');
   assert.ok(guard.includes("role!=='ground'&&role!=='vegetation'"));
-  assert.ok(guard.includes("theme==='dark'?'#2b3138':'#f7f7f7'"));
+  assert.ok(guard.includes("theme==='dark'?'#2b3138':'#eeeeec'"));
   assert.ok(main.includes('buildingExtrusionAppearance(theme,pitch'));
   assert.ok(main.includes('fill-extrusion-color'));
   assert.ok(main.includes('fill-extrusion-opacity'));
