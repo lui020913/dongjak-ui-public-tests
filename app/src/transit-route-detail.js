@@ -24,6 +24,12 @@ export function transitPriText(value){
 }
 export function mountTransitDetail({doc,win,app,mapCard,actions}){
  const root=doc.createElement('section');root.id='dj-transit-detail';root.hidden=true;root.setAttribute('aria-label','대중교통 경로 상세');actions?.before(root);
+ const followMap=doc.createElement('button');followMap.id='dj-transit-map-follow';followMap.type='button';followMap.hidden=true;followMap.setAttribute('aria-label','현재 위치 고정');followMap.setAttribute('aria-pressed','false');
+ followMap.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.8" fill="currentColor"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>';
+ app.append(followMap);followMap.addEventListener('click',()=>win.dispatchEvent(new CustomEvent('dongjak:transit-guide-follow')));
+ const syncFollowMap=()=>{followMap.hidden=app.dataset.djTransitGuiding!=='true'||app.dataset.tab!=='map';followMap.setAttribute('aria-pressed',String(app.dataset.djTransitFollowing==='true'));const head=doc.getElementById('dj-walk-map-head');if(head&&!followMap.hidden)followMap.style.top=Math.ceil(head.getBoundingClientRect().bottom+12)+'px';};
+ const followObserver=new MutationObserver(syncFollowMap);followObserver.observe(app,{attributes:true,attributeFilter:['data-dj-transit-guiding','data-dj-transit-following','data-tab']});win.addEventListener('resize',syncFollowMap);
+
  let current=null,arrivalRequest=null,step=null,gps=null,nearCount=0,lastPosition=null,arrived=false;
  // Explicit inline hiding wins over legacy mobile !important action docks.
  // Restore only the attributes this presenter owns on departure.
@@ -74,7 +80,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
  function endGuide(){stopGps();step=null;arrived=false;win.dispatchEvent(new CustomEvent('dongjak:transit-guide-state',{detail:{active:false}}));updateStep();}
  function gpsControls(){
   const box=el('div','dj-tr-gps');const status=el('small','dj-tr-gps-status','GPS 연결 중');status.setAttribute('role','status');
-  const retry=button('다시 연결','dj-tr-gps-retry',startGps);retry.hidden=true;const follow=button('내 위치 따라가기','dj-tr-gps-retry',()=>win.dispatchEvent(new CustomEvent('dongjak:transit-guide-follow')));const next=button('다음 단계','dj-tr-gps-retry',()=>{if(step===null||arrived)return;const rows=root.querySelectorAll('.dj-tr-leg').length;if(step>=rows-2){arrived=true;step=rows-1;stopGps();win.dispatchEvent(new CustomEvent('dongjak:transit-guide-state',{detail:{active:false}}));}else{step++;if(current?.walks?.[step/2]?.sameStop&&step%2===0)step++;nearCount=0;}updateStep();});next.setAttribute('aria-label','현재 단계 완료 확인 후 다음 단계');box.append(status,retry,follow,next);return box;
+  const retry=button('다시 연결','dj-tr-gps-retry',startGps);retry.hidden=true;const next=button('다음 단계','dj-tr-gps-retry',()=>{if(step===null||arrived)return;const rows=root.querySelectorAll('.dj-tr-leg').length;if(step>=rows-2){arrived=true;step=rows-1;stopGps();win.dispatchEvent(new CustomEvent('dongjak:transit-guide-state',{detail:{active:false}}));}else{step++;if(current?.walks?.[step/2]?.sameStop&&step%2===0)step++;nearCount=0;}updateStep();});next.setAttribute('aria-label','현재 단계 완료 확인 후 다음 단계');box.append(status,retry,next);return box;
  }
  const pauseGps=()=>{if(doc.hidden){stopGps();if(step!==null&&!arrived)setGpsStatus('GPS 연결 대기 중');}else if(step!==null&&!arrived)startGps();};
  const pagehide=()=>stopGps();
@@ -247,5 +253,5 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
  }
 
  const listener=e=>render(e.detail);win.addEventListener('dongjak:transit-detail',listener);
- return ()=>{restoreNativeActions();stopGps();doc.removeEventListener('visibilitychange',pauseGps);win.removeEventListener('pagehide',pagehide);win.removeEventListener('dongjak:transit-detail',listener);arrivalRequest?.abort();cancelSurfaceMotion(root);root.remove();};
+ return ()=>{followObserver.disconnect();win.removeEventListener('resize',syncFollowMap);followMap.remove();restoreNativeActions();stopGps();doc.removeEventListener('visibilitychange',pauseGps);win.removeEventListener('pagehide',pagehide);win.removeEventListener('dongjak:transit-detail',listener);arrivalRequest?.abort();cancelSurfaceMotion(root);root.remove();};
 }
