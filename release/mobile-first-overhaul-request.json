@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.223",
+  "application_version": "9.2.224",
   "public_work_branch": "main",
-  "purpose": "PR #596: restore shared safety-map building and terrain rendering; hide only Dongjak boundary outline in transit; automatically advance transit guidance using accurate GPS readings; simplify guide UI. Source CI, picker/navigation, protected mobile compatibility and paired gesture performance passed. Real-device GPS remains unverified.",
-  "attempt": 458,
+  "purpose": "PR #600: shared district-only native building filtering, GIS tile parsing in a dedicated Web Worker, retained cache, reduced repeated POI mutations, transit exterior tint removal, complete route fit above measured sheet, and picker hint occlusion fix. Source CI, protected overlay, route endpoint, picker and paired gesture checks passed; physical-device performance and exact boundary-crossing polygon clipping are unverified. Require protected Preview/mobile QA before Production.",
+  "attempt": 459,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
