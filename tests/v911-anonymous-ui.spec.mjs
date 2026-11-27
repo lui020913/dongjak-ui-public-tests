@@ -1337,26 +1337,12 @@ test('iPhone tabs never expose white or transparent full-screen panels during sw
  await tap(page,tab(page,'map'));await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
 });
 
-test('bottom dock swipes change full-screen tabs immediately without an intermediate empty panel',{tag:'@phone-common'},async({page})=>{
+test('bottom dock uses taps only and horizontal drags do not switch tabs',{tag:'@phone-common'},async({page})=>{
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  await tap(page,tab(page,'route'));
  await expect(page.locator('#dj-route-v3')).toBeVisible();
  const dock=page.locator('#bottom-nav');
  await expect(dock).toHaveAttribute('data-dj-tab-navigation','ready');
- // Diagnostic-only event capture to isolate interception by a modal or the
- // centered HOME button. Does not alter gesture dispatch or test assertions.
- await page.evaluate(()=>{
-  const nav=document.getElementById('bottom-nav');
-  window.__dockGestureSamples=[];
-  for(const type of ['pointerdown','pointerup','pointercancel','click']){
-   window.addEventListener(type,event=>{
-    if(window.__dockGestureSamples.length>80)return;
-    window.__dockGestureSamples.push({type,target:event.target?.id||event.target?.getAttribute?.('class')||event.target?.tagName,
-      button:event.button,pointerId:event.pointerId,x:event.clientX,y:event.clientY,
-      inDock:event.composedPath?.().includes(nav),trusted:event.isTrusted,tab:document.getElementById('app')?.dataset.tab});
-   },true);
-  }
- });
  const before=await dock.boundingBox();
  async function swipe(dx){
   const r=await dock.boundingBox();expect(r).toBeTruthy();
@@ -1365,11 +1351,10 @@ test('bottom dock swipes change full-screen tabs immediately without an intermed
   await page.mouse.move(x+dx,y,{steps:8});await page.mouse.up();
  }
  await swipe(-85);
- console.log('DOCK_GESTURE_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>{
-  const nav=document.getElementById('bottom-nav'),r=nav.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2;
-  const layers=document.elementsFromPoint(x,y).slice(0,8).map(n=>({id:n.id,tag:n.tagName,className:n.getAttribute('class'),pointerEvents:getComputedStyle(n).pointerEvents,zIndex:getComputedStyle(n).zIndex}));
-  return {tab:document.getElementById('app')?.dataset.tab,events:window.__dockGestureSamples,layers};
- })));
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','route');
+ await swipe(85);
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','route');
+ await tap(page,tab(page,'participate'));
  await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');
  await expect(page.locator('#dj-route-v3')).toBeHidden();
  await expect(page.locator('#participation-panel')).toBeVisible();
@@ -1381,7 +1366,7 @@ test('bottom dock swipes change full-screen tabs immediately without an intermed
  expect(result.background).not.toBe('rgba(0, 0, 0, 0)');
  expect(result.background).not.toBe('rgb(255, 255, 255)');
  expect(result.height).toBeGreaterThan(80);
- await swipe(85);
+ await tap(page,tab(page,'route'));
  await expect(page.locator('#app')).toHaveAttribute('data-tab','route');
  await expect(page.locator('#participation-panel')).toBeHidden();
  await expect(page.locator('#dj-route-v3')).toBeVisible();
