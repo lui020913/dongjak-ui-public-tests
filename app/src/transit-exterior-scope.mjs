@@ -40,34 +40,11 @@ export function transitContextBounds(districtBounds,endpoints=[],routeCoords=[])
  return [[Math.max(TRANSIT_SEARCH_BOUNDS[0][0],x-lngPad),Math.max(TRANSIT_SEARCH_BOUNDS[0][1],y-latPad)],
  [Math.min(TRANSIT_SEARCH_BOUNDS[1][0],X+lngPad),Math.min(TRANSIT_SEARCH_BOUNDS[1][1],Y+latPad)]];
 }
-// Vector building polygons cannot use the point/line-only within expression.
-// Distance to the district polygon is zero for intersecting footprints.
-// Preserve boundary-crossing buildings rather than deleting their inside portion.
-export function districtScopedNativeLayer(layer){
- const kind=String(layer['source-layer']||''),id=String(layer.id||'');
- if(!kind||!['fill','fill-extrusion','line'].includes(layer.type))return false;
- if(kind==='building')return true;
- return /^(?:landuse|landcover|park|aeroway|housenumber|poi)$/.test(kind)&&!/road|highway|transportation/i.test(id);
-}
-export function installSharedDistrictScope(map,geometry){
- const boundary={type:geometry.type,coordinates:geometry.coordinates};
- const clause=['<=',['distance',boundary],0.1];
- const applied=new Map();let waiting=false;
- const sync=()=>{
-  if(map.isMoving?.()){if(!waiting){waiting=true;map.once('moveend',()=>{waiting=false;sync();});}return;}
-  for(const layer of map.getStyle()?.layers||[]){
-   if(!districtScopedNativeLayer(layer))continue;
-   const current=map.getFilter(layer.id)||null;
-   if(JSON.stringify(current)===applied.get(layer.id))continue;
-   // Avoid stacking our own predicate if a theme modifies a different clause.
-   const same=x=>JSON.stringify(x)===JSON.stringify(clause);
-   const base=Array.isArray(current)&&current[0]==='all'?current.slice(1).filter(x=>!same(x)):current&&!same(current)?[current]:[];
-   const filter=['all',...base,clause];
-   map.setFilter(layer.id,filter);applied.set(layer.id,JSON.stringify(filter));
-  }
- };
- sync();map.on?.('style.load',()=>{applied.clear();sync();});
- // The normal native layers exist at initial style load. Newly added building
- // labels are handled by the existing district label owner.
- return {sync};
+// The original safety map is authoritative. No geometry, filter, source,
+// visibility or terrain changes are made when entering transit.
+export function applyTransitBoundaryVisibility(map,active,phone=false){
+ for(const [id,opacity] of [['district-border',.96],['district-border-halo',phone?.42:.92]]){
+  if(map.getLayer(id)&&map.getPaintProperty(id,'line-opacity')!==(active?0:opacity))
+   map.setPaintProperty(id,'line-opacity',active?0:opacity);
+ }
 }

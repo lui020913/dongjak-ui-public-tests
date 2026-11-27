@@ -88,6 +88,7 @@ test('transit mode changes only district display and camera extent, not shared b
  const scope=main.split('function syncTransitExterior(force=false){')[1].split('function clearTransitPreview(){')[0];
  assert.match(scope,/syncTransitContextBounds\(active\)/);
  assert.match(main,/active\?transitContextBounds\(bufferedDistrictBounds\(boundaryGeometry,0\)/);
+ assert.match(scope,/applyTransitBoundaryVisibility\(map,active,/);
  assert.doesNotMatch(scope,/setPaintProperty|setLayoutProperty|setTerrain/);
  assert.match(scope,/transitHomeCamera/);
  assert.doesNotMatch(scope,/setFilter|setStyle|restoreBasemapLabelsOutsideDistrict|clipBasemapLabelsToDistrict|syncTiltWithBuildings|line-dasharray/);

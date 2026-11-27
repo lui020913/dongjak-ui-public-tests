@@ -42,9 +42,13 @@ async function sample(url,variant,round){
     console.log('MAP_GESTURE_READINESS_FAILURE',JSON.stringify({variant,round,site:site.name,...state}));throw error;
    }
    if(variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'){
-    const district=await page.evaluate(()=>{const m=window.__qaMap;const layers=m.getStyle().layers.filter(l=>l['source-layer']==='building'&&['fill','fill-extrusion','line'].includes(l.type));return {ids:layers.map(l=>l.id),scoped:layers.every(l=>JSON.stringify(m.getFilter(l.id)).includes('\"distance\"')),rendered:m.queryRenderedFeatures({layers:layers.filter(l=>l.type==='fill').map(l=>l.id)}).length};});
-    console.log('DISTRICT_BUILDING_SCOPE',JSON.stringify(district));
-    if(district.ids.length){assert.ok(district.scoped,'candidate native buildings must use district geographic scope');assert.ok(district.rendered>0,'district buildings must remain visible');}
+    // Verify both native and district GIS building layers. Native tile count
+    // alone is not evidence of missing buildings where GIS owns rendering.
+    await page.waitForFunction(()=>{const m=window.__qaMap;const ids=m.getStyle().layers.filter(l=>l.type==='fill'&&(l['source-layer']==='building'||l.id.startsWith('dongjak-buildings-footprint-'))&&m.getLayoutProperty(l.id,'visibility')!=='none').map(l=>l.id);return ids.length>0&&m.queryRenderedFeatures({layers:ids}).length>0;},{},{timeout:90000,polling:500});
+    const evidence=await page.evaluate(()=>{const m=window.__qaMap;const native=m.getStyle().layers.filter(l=>l['source-layer']==='building');const gis=m.getStyle().layers.filter(l=>l.id.startsWith('dongjak-buildings-footprint-'));const ids=[...native,...gis].filter(l=>l.type==='fill'&&m.getLayoutProperty(l.id,'visibility')!=='none').map(l=>l.id);return {native:native.map(l=>l.id),gis:gis.map(l=>l.id),customDistance:native.some(l=>JSON.stringify(m.getFilter(l.id)||null).includes('"distance"')),rendered:m.queryRenderedFeatures({layers:ids}).length};});
+    console.log('DISTRICT_BUILDING_SCOPE',JSON.stringify(evidence));
+    assert.equal(evidence.customDistance,false,'restore the original native building filters');
+    assert.ok(evidence.rendered>0,'actual district buildings must remain rendered');
    }
    const data=await page.evaluate(async({center})=>{
     const m=window.__qaMap,frames=[],writes={},restores=[],sweeps=[];

@@ -48,7 +48,7 @@ import {readSharedCommunity,publishCommunityPost,deleteSharedCommunityPost,setSh
 import {initPedestrianTools} from './pedestrian-tools.js';
 import {fetchDongjakPedestrianVariants} from './dongjak-local-routing.js';
 import {routeWithinDistrict} from './route-district-guard.mjs';
-import {TRANSIT_SEARCH_BOUNDS,transitPointInScope,transitCoordinatesInScope,transitEndpointPolicy,exteriorMapActive,transitWalkStyle,transitContextBounds,installSharedDistrictScope} from './transit-exterior-scope.mjs';
+import {TRANSIT_SEARCH_BOUNDS,transitPointInScope,transitCoordinatesInScope,transitEndpointPolicy,exteriorMapActive,transitWalkStyle,transitContextBounds,applyTransitBoundaryVisibility} from './transit-exterior-scope.mjs';
 import {installDongjakOfficialDataLayers} from './dongjak-verified-data-layers.js';
 import {installDongjakLiveTransit} from './features/liveTransit/integrate.js';
 import './features/liveTransit/live-transit.css';
@@ -1169,9 +1169,8 @@ async function loadDongjakBoundary(){
     if(app.dataset.djTransitExterior!=='true')map.setMaxBounds(bufferedDistrictBounds(boundaryGeometry));
     // 동작구 밖 원본 시설명은 가리되, 추가 자치구 라벨은 별도 심벌로 표시합니다.
     clipBasemapLabelsToDistrict(map,boundaryGeometry);
-    // One district scope for both normal and transit presentation. Native
-    // polygon geometry uses distance/intersection, not point-only within.
-    installSharedDistrictScope(map,boundaryGeometry);
+    // Retain the original native building filters and reviewed GIS coverage.
+    // Transit must never change the shared basemap geometry or layer owners.
     districtBuildingsReady=true;
     syncTiltWithBuildings();
     scheduleBuildingLoad();
@@ -2935,8 +2934,9 @@ function syncTransitExterior(force=false){
  if(active&&!previous&&!transitHomeCamera){
   transitHomeCamera={center:map.getCenter(),zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing()};
  }
- // Both modes use exactly the same district palette, geometry, controls,
- // and layer visibility. Only camera extent changes for a transit trip.
+ // Hide only the district outline during transit; preserve original map
+ // rendering, including the existing exterior tint and building filters.
+ applyTransitBoundaryVisibility(map,active,matchMedia('(max-width:699px)').matches);
  syncTransitContextBounds(active);
  if(!active&&previous&&app.dataset.tab==='map'&&transitHomeCamera){
   const camera=transitHomeCamera;transitHomeCamera=null;
