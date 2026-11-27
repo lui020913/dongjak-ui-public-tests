@@ -1715,6 +1715,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(!map.getLayer('poi_transit'))return;
     const rules=[];
     if(originalTransitFilter)rules.push(originalTransitFilter);
+    const district=getDistrictGeometry();if(district)rules.push(['within',{type:district.type,coordinates:district.coordinates}]);
     if((map.getZoom?.()??16)<14.25 || document.getElementById('app')?.dataset?.baseBus==='off')rules.push(['all',
       ['!=',['get','class'],'bus'],['!=',['get','subclass'],'bus_stop'],['!=',['get','subclass'],'bus_station']]);
     if(suppressNativeRail || (map.getZoom?.()??16)<12.45 || document.getElementById('app')?.dataset?.baseMetro==='off')rules.push(['!=',['get','class'],'rail']);
@@ -1837,6 +1838,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     for(const p of geo.features){
       registerStationIcon(p.properties.iconId,p.properties.iconLines||[p.properties.line]);
     }
+    // External stations remain searchable and usable for actual route endpoints,
+    // but do not display their labels or badges on the ordinary base map.
+    geo.features=geo.features.filter(f=>isDongjak(...f.geometry.coordinates)===true);
     map.getSource(stationSource)?.setData(geo);
   }
   function updateMetroMarkerPresentation(){

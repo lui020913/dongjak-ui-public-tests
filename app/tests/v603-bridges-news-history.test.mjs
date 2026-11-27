@@ -74,15 +74,17 @@ test('v6.0.3 sequential history includes v1-v5 originals, followed by v6 fixes',
   assert.equal(DEVELOPMENT_PHASES.length,7);
 });
 
-test('v6.0.3 administrative label clipping does not hide Han River bridge names',async()=>{
+test('administrative label clipping hides external bridge and other non-administrative labels',async()=>{
   const {clipBasemapLabelsToDistrict}=await import('../src/ui-environment.js');
   const filtered=[];
   const map={getStyle:()=>({layers:[
     {id:'dj-hangang-bridge-osm-labels',type:'symbol'},
     {id:'dj-hangang-bridge-geometry-labels',type:'symbol'},
     {id:'base-city-label',type:'symbol'},
-    {id:'dongjak-custom-label',type:'symbol'}
+    {id:'dongjak-custom-label',type:'symbol'},
+    {id:'neighbor-district-names',type:'symbol'},
+    {id:'dj-transit-multi-stops-transfer-label',type:'symbol'}
   ]}),getFilter:()=>null,setFilter:(id,filter)=>filtered.push([id,filter])};
   clipBasemapLabelsToDistrict(map,{type:'Polygon',coordinates:[[[126.9,37.49],[127,37.49],[127,37.52],[126.9,37.49]]]});
-  assert.deepEqual(filtered.map(([id])=>id),['base-city-label']);
+  assert.deepEqual(filtered.map(([id])=>id),['dj-hangang-bridge-osm-labels','dj-hangang-bridge-geometry-labels','base-city-label','dongjak-custom-label']);
 });

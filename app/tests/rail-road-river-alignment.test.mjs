@@ -61,3 +61,13 @@ test('공식 GIS 응답이 비었거나 불완전할 경우 기존 노선은 사
   assert.equal(mergeOfficialRail(input,[{line:'7',coordinates:[[126.94,37.50],[126.941,37.501]]}]).lines.length,0);
   assert.throws(()=>extractOfficialPaths({error:{code:403,message:'Access denied'}}));
 });
+
+
+test('incomplete official 4호선 river crossing cannot replace continuous reference line',()=>{
+ const coords=line('4');const mid=Math.floor(coords.length/2);
+ const input=fixedRailCollection();
+ const gap=[{line:'4',coordinates:coords.slice(0,Math.max(2,mid-9))},{line:'4',coordinates:coords.slice(mid+9)}];
+ const result=mergeOfficialRail(input,gap);
+ assert.equal(result.lines.includes('4'),false);
+ assert.deepEqual(result.collection.features.filter(f=>f.properties.line==='4호선'),input.features.filter(f=>f.properties.line==='4호선'));
+});
