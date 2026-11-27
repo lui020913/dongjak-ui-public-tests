@@ -97,6 +97,7 @@ import {installDistantHaze} from './distant-haze.js';
 import {installNightVisibility,promoteNightAnalysisLayers} from './night-visibility-map.js';
 import {installPriMap} from './pri-map.js';
 import {installSolidMapLines} from './solid-map-lines.js';
+import {installQuietBasemap} from './quiet-basemap.mjs';
 import {evaluateCompositePriRouteCandidates} from './pri-route-client.js';
 import {chooseTransitWalk} from './transit-walk-priority.mjs';
 import {summarizeTransitWalks,transitReviewPairs} from './transit-candidate-review.mjs';
@@ -645,6 +646,7 @@ const map = new maplibregl.Map({
 // The extra compact (i) control duplicated the attribution link in Map Options.
 // Keep source credits in '지도 옵션 > 지도 데이터 출처'; do not overlay the map.
 
+installQuietBasemap(map);
 installSolidMapLines(map);
 // Keep the original ground-road style during both movement and idle.
 // The reviewed polygon fill was activated after moveend and could paint wide
@@ -2042,6 +2044,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   }
   if(previousTab!==tab)closePriPreferences();
   if((tab!=='map'||suppressOverview)&&transitPreview)clearTransitPreview();
+  if(previousTab==='map'&&tab==='route'&&routeResult&&!navMode)invalidateRoute();
   if(tab!=='map')closeCommunityLocation();
   const communityPanel=document.getElementById('participation-panel');
   const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
@@ -3478,14 +3481,33 @@ function transitVisiblePadding(sheetTop,toolbarBottom){
  const top=Math.max(0,toolbarBottom-rect.top)+18,bottom=Math.max(0,rect.bottom-sheetTop)+18;
  return top+bottom<rect.height-48?{top,bottom,left:28,right:28}:null;
 }
+function fitExposedRoute(coords,padding,{maxZoom=16,duration=350}={}){
+ if(!coords?.length||!padding)return;
+ const valid=coords.filter(p=>Array.isArray(p)&&p.length>=2&&p.slice(0,2).every(Number.isFinite));
+ if(!valid.length)return;
+ const bounds=valid.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(valid[0],valid[0]));
+ const zero={top:0,bottom:0,left:0,right:0};
+ // cameraForBounds computes the offset center from the measured unobscured
+ // rectangle. Do not retain previous global map padding on the camera.
+ map.stop();map.setPadding(zero);
+ const camera=map.cameraForBounds(bounds,{padding,maxZoom,bearing:0});
+ if(camera)map.easeTo({...camera,padding:zero,pitch:0,bearing:0,duration});
+}
 window.addEventListener('dongjak:transit-comparison-focus',event=>{
- if(app.dataset.tab!=='route'||!routeEnd)return;
+ if(app.dataset.tab!=='route'||!routeEnd||!routeStart)return;
  const {sheetTop,toolbarBottom}=event.detail||{};
  const padding=transitVisiblePadding(sheetTop,toolbarBottom);if(!padding)return;
  app.dataset.transitComparison='true';drawRouteMarkers(true);
- map.easeTo({center:[routeEnd.lng,routeEnd.lat],offset:[0,(padding.top-padding.bottom)/2],padding:{top:0,bottom:0,left:0,right:0},pitch:0,duration:350});
+ // The comparison list has no selected geometry yet: fit both real endpoints.
+ // A chosen route is fitted to every actual geometry vertex below.
+ fitExposedRoute([[routeStart.lng,routeStart.lat],[routeEnd.lng,routeEnd.lat]],padding);
 });
-window.addEventListener('dongjak:transit-comparison-dismiss',()=>{delete app.dataset.transitComparison;drawRouteMarkers();});
+window.addEventListener('dongjak:transit-comparison-dismiss',event=>{
+ const wasComparison=app.dataset.transitComparison==='true';
+ delete app.dataset.transitComparison;
+ if(wasComparison&&!event.detail?.keepPreview&&app.dataset.tab==='route'&&(transitPreview||routeResult))invalidateRoute();
+ drawRouteMarkers();
+});
 let routePreviewFitTimer=null,routePreviewFitObserver=null,routePreviewFitKey='',routePreviewFitWatching=false;
 function scheduleVisibleRouteFit(){
  clearTimeout(routePreviewFitTimer);
@@ -3502,7 +3524,7 @@ function scheduleVisibleRouteFit(){
   const bounds=all.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(all[0],all[0]));
   const key=JSON.stringify([padding,bounds.toArray()]);if(key===routePreviewFitKey)return;
   routePreviewFitKey=key;
-  map.stop();map.fitBounds(bounds,{padding,maxZoom:16,duration:480,pitch:0,bearing:0});
+  fitExposedRoute(all,padding,{maxZoom:16,duration:480});
  },260);
 }
 function watchVisibleRouteFit(){
@@ -3513,6 +3535,7 @@ function watchVisibleRouteFit(){
  if(typeof ResizeObserver==='function'){routePreviewFitObserver=new ResizeObserver(scheduleVisibleRouteFit);routePreviewFitObserver.observe(card);routePreviewFitObserver.observe(head);}
  window.addEventListener('resize',scheduleVisibleRouteFit);
  window.visualViewport?.addEventListener('resize',scheduleVisibleRouteFit);
+ card.addEventListener('transitionend',scheduleVisibleRouteFit);
  new MutationObserver(()=>{if(card.hidden){routePreviewFitKey='';clearTimeout(routePreviewFitTimer);}else scheduleVisibleRouteFit();}).observe(card,{attributes:true,attributeFilter:['hidden']});
 }
 function fitWalkingRoute(coords) {
@@ -3831,7 +3854,7 @@ document.getElementById('route-return-map').addEventListener('click',()=>{
   if(!routeResult)return;
   navigate('map');fitWalkingRoute(routeResult.coords);syncRoutePresentation();
 });
-document.getElementById('route-map-edit').addEventListener('click',()=>{const returning=Boolean(transitPreview);navigate('route');if(returning)window.dispatchEvent(new CustomEvent('dongjak:transit-return-comparison'));});
+document.getElementById('route-map-edit').addEventListener('click',()=>{const returning=Boolean(transitPreview);invalidateRoute();navigate('route');if(returning)window.dispatchEvent(new CustomEvent('dongjak:transit-return-comparison'));});
 document.getElementById('route-map-close').addEventListener('click',resetRoute);
 updateRouteLabels();
 syncRoutePresentation();

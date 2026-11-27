@@ -22,7 +22,8 @@ export function bindTransitSheetHeader({doc,win,panel,header,safeTop,onDismiss})
    const dy=e.clientY-g.y,dx=e.clientX-g.x,now=win.performance.now();
    g.velocity=(e.clientY-g.lastY)/Math.max(1,now-g.lastTime);g.lastY=e.clientY;g.lastTime=now;
    if(!g.active){if(Math.abs(dy)<4)return;if(Math.abs(dx)>Math.abs(dy)){gesture=null;return;}g.active=true;panel.classList.add('dj-sheet-dragging');}
-   const offset=Math.max(-g.limit,sheetDragOffset(dy,g.limit,true));
+   // Compact route sheets may expand upward, never move downward or dismiss.
+   const offset=Math.max(-g.limit,expanded()?sheetDragOffset(dy,g.limit,true):Math.min(0,sheetDragOffset(dy,g.limit,true)));
    panel.style.setProperty('--dj-sheet-drag-y',offset+'px');
    panel.style.setProperty('transition','none','important');
    panel.style.setProperty('translate','0 '+offset+'px','important');
@@ -34,7 +35,7 @@ export function bindTransitSheetHeader({doc,win,panel,header,safeTop,onDismiss})
    if(!g.active)return;
    const action=sheetStageAction(e.clientY-g.y,g.velocity,expanded(),true);
    if(action==='expand'||action==='collapse'){setMobileSheetExpanded(panel,action==='expand',doc,win);return;}
-   if(action==='dismiss'){clearMobileSheetDrag(panel);onDismiss();return;}
+   if(action==='dismiss'){settleMobileSheetDrag(panel,win);return;}
    settleMobileSheetDrag(panel,win);
   },
   cancel(){gesture=null;settleMobileSheetDrag(panel,win);}
