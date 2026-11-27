@@ -1,6 +1,6 @@
 // Use mapped site/landuse polygons only; no synthetic lots or building recoloring.
 export const SITE_LANDUSE_PALETTE=Object.freeze({
- light:Object.freeze({residential:'#b58b68',commercial:'#f0e5cb',education:'#dbe6ee',industrial:'#e0dce6',hospital:'#f3dfda',public:'#d8e8e3'})
+ light:Object.freeze({residential:'#a77b58',commercial:'#f0e5cb',education:'#dbe6ee',industrial:'#e0dce6',hospital:'#f3dfda',public:'#d8e8e3'})
 });
 const PREFIX='dj-site-use-fill-';
 // Prefer specific institutional uses over generic mixed-use classifications.
