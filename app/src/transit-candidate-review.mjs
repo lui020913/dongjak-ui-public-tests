@@ -48,4 +48,4 @@ export function formatTransitReview(result,done=false){
 }
 
 // Align walk request endpoints with the actual vehicle geometry, retaining stop identity.
-export function transitAccessPoint(leg,boarding){const p=boarding?leg.origin:leg.destination;const coord=leg.kind==='bus'?(boarding?leg.coords?.[0]:leg.coords?.at(-1)):null;return coord?.length===2&&coord.every(Number.isFinite)?{...p,lng:coord[0],lat:coord[1]}:p;}
+export function transitAccessPoint(leg,boarding){const p=boarding?leg.origin:leg.destination;const coord=leg.kind==='bus'?(boarding?leg.coords?.[0]:leg.coords?.at(-1)):null;return coord?.length===2&&coord.every(Number.isFinite)?{...p,lng:coord[0],lat:coord[1],vehicleAccess:true}:p;}
