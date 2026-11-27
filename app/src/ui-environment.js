@@ -1,4 +1,5 @@
 import {repaintSiteLanduse} from './site-landuse-palette.mjs';
+import {repaintRedevelopment} from './redevelopment-map.mjs';
 // v17.7: 현지 날씨 · 수동/시스템 테마 · 일반 POI 정리
 const THEME_KEY='dongjak_safety_color_theme_v1';
 const weatherLabels = new Map([
@@ -284,6 +285,7 @@ export function initTheme({map,app}){
     applyBusStopLabelTheme(map,themeState.value);
     repaintVegetation(map,app); // Include forest shade installed after baseline capture.
     repaintSiteLanduse(map,app); // One daytime site palette; night safety analysis keeps its own map.
+    repaintRedevelopment(map,app);
     syncMapLabelContrast(true); // Base and late map labels share the same theme contrast.
     // existing building polygons are handled separately when each tile is loaded.
     for(const layer of map.getStyle().layers){

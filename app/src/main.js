@@ -1,4 +1,5 @@
 import {installSiteLanduse} from './site-landuse-palette.mjs';
+import {installRedevelopment} from './redevelopment-map.mjs';
 import {loadSeoulBoundary,getSeoulBoundary} from './seoul-transit-boundary.mjs';
 import {sameBusTransfer,transitFollowFix} from './transit-transfer-guidance.mjs';
 import {installReviewedBaseRoads} from './reviewed-base-road-layer.mjs';
@@ -1747,6 +1748,7 @@ map.on('load',()=>{
   }});
   installMapOrientationControls(map,maplibregl);
   try{installSiteLanduse({map,app});}catch(error){console.warn('[부지 유형 색상]',error?.message);}
+  try{installRedevelopment({map,app});}catch(error){console.warn('[정비사업 구역]',error?.message);}
   installGrassTexture({map,app});
   installForestShade({map,app});
   const nativeBuildingLayers=installBaseBuildingPalette({map,app});
