@@ -1,3 +1,4 @@
+import {installSiteLanduse} from './site-landuse-palette.mjs';
 import {loadSeoulBoundary,getSeoulBoundary} from './seoul-transit-boundary.mjs';
 import {sameBusTransfer,transitFollowFix} from './transit-transfer-guidance.mjs';
 import {installReviewedBaseRoads} from './reviewed-base-road-layer.mjs';
@@ -1745,6 +1746,7 @@ map.on('load',()=>{
     syncTiltWithBuildings();
   }});
   installMapOrientationControls(map,maplibregl);
+  try{installSiteLanduse({map,app});}catch(error){console.warn('[부지 유형 색상]',error?.message);}
   installGrassTexture({map,app});
   installForestShade({map,app});
   const nativeBuildingLayers=installBaseBuildingPalette({map,app});
@@ -3587,7 +3589,7 @@ window.addEventListener('dongjak:transit-comparison-focus',event=>{
   const walks=summary.walkSegments;
   if(walks.some(w=>!transitCoordinatesInScope(w.coords)))return;
   const parts=await Promise.all(legs.map(async leg=>{
-   if(leg.kind==='bus')return transitCoordinatesInScope(leg.coords)?[feature(leg.coords,busRouteColor(leg.routeType))]:null;
+   if(leg.kind==='bus')return transitCoordinatesInScope(leg.coords)?[feature(leg.coords,busRouteColor(leg.routeType,leg.route))]:null;
    if(leg.kind!=='rail')return null;
    const rail=await sharedTransitRailSegments(leg.stops,leg.lines);
    return rail.length&&rail.every(s=>transitCoordinatesInScope(s.coordinates))?rail.map(s=>feature(s.coordinates,subwayLineColor(s.line==='신림'?'신림선':s.line+'호선'))):null;
@@ -4138,7 +4140,7 @@ async function previewMultiTransit(plan,signal,preferPri=true){
  invalidateRoute();
  transitRailData(railSegments);
  const feature=(coordinates,color)=>({type:'Feature',properties:{color},geometry:{type:'LineString',coordinates}});
- const color=leg=>leg.kind==='bus'?busRouteColor(leg.routeType):subwayLineColor(leg.lines[0]==='신림'?'신림선':leg.lines[0]+'호선');
+ const color=leg=>leg.kind==='bus'?busRouteColor(leg.routeType,leg.route):subwayLineColor(leg.lines[0]==='신림'?'신림선':leg.lines[0]+'호선');
  const data=[
   ['dj-transit-multi-walk',walks.filter(x=>x.coords.length>=2).map(x=>feature(x.coords,transitWalkStyle(x))),true],
   ['dj-transit-multi-bus',legs.filter(x=>x.kind==='bus').map(x=>feature(x.coords,color(x))),false]
@@ -4273,14 +4275,14 @@ window.addEventListener('dongjak:transit-route-preview',event=>{
     if(!a||!b||!map.isStyleLoaded?.())throw new Error('실제 보행 연결 경로 또는 지도를 확인하지 못했습니다.');
     invalidateRoute();
     const collection=lines=>({type:'FeatureCollection',features:lines.map(coordinates=>({type:'Feature',properties:{},geometry:{type:'LineString',coordinates}}))});
-    for(const [id,data,color] of [['dj815-transit-walk',{type:'FeatureCollection',features:[a,b].map(w=>({type:'Feature',properties:{color:transitWalkStyle(w)},geometry:{type:'LineString',coordinates:w.coords}}))},['get','color']],['dj815-transit-bus',collection([plan.coords]),busRouteColor(plan.routeType)]]){
+    for(const [id,data,color] of [['dj815-transit-walk',{type:'FeatureCollection',features:[a,b].map(w=>({type:'Feature',properties:{color:transitWalkStyle(w)},geometry:{type:'LineString',coordinates:w.coords}}))},['get','color']],['dj815-transit-bus',collection([plan.coords]),busRouteColor(plan.routeType,plan.route)]]){
       if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
       if(!map.getLayer(id+'-line'))map.addLayer({id:id+'-line',type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':color,'line-width':5,'line-opacity':.9}});
     }
     app.dataset.djTransitPreview='bus';
     window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
     transitPreview={kind:'bus',route:String(plan.route),time:estimateTransitTime(plan,a.seconds+b.seconds),minutes:estimateTransitTime(plan,a.seconds+b.seconds)?.totalMinutes??null,walkM:(a.kilometers+b.kilometers)*1000};
-    navigate('map');syncRoutePresentation();publishTransitDetail(plan,from,to,a,b);setTransitPreviewStops([transitAccessPoint(plan,true),transitAccessPoint(plan,false)].map(p=>({type:'Feature',properties:{color:busRouteColor(plan.routeType)},geometry:{type:'Point',coordinates:[p.lng,p.lat]}})));focusTransitRoute([...a.coords,...plan.coords,...b.coords]);
+    navigate('map');syncRoutePresentation();publishTransitDetail(plan,from,to,a,b);setTransitPreviewStops([transitAccessPoint(plan,true),transitAccessPoint(plan,false)].map(p=>({type:'Feature',properties:{color:busRouteColor(plan.routeType,plan.route)},geometry:{type:'Point',coordinates:[p.lng,p.lat]}})));focusTransitRoute([...a.coords,...plan.coords,...b.coords]);
   })().then(resolve,reject);
 });
 

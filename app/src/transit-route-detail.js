@@ -146,7 +146,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   cancelSurfaceMotion(root);root.style.removeProperty('pointer-events');hideNativeActions();
   stopGps();arrived=false;arrivalRequest?.abort();arrivalRequest=null;current=detail;step=null;root.replaceChildren();root.hidden=false;
   if(detail.legs){renderMulti(detail);return;}
-  const kind=detail.kind,color=kind==='bus'?busRouteColor(detail.routeType):subwayLineColor(railLabel(detail.lines[0]));root.style.setProperty('--tr-line-color',color);
+  const kind=detail.kind,color=kind==='bus'?busRouteColor(detail.routeType,detail.route):subwayLineColor(railLabel(detail.lines[0]));root.style.setProperty('--tr-line-color',color);
   const name=kind==='bus'?detail.route:[...new Set(detail.lines)].map(railLabel).join(' · ');
   const header=el('div','dj-tr-heading');
   const title=el('strong','',name+' · '+labels[kind]);
@@ -196,7 +196,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
 
  function renderMulti(detail){
   const label=leg=>leg.kind==='bus'?leg.route:[...new Set(leg.lines)].map(railLabel).join(' · ');
-  const color=leg=>leg.kind==='bus'?busRouteColor(leg.routeType):subwayLineColor(railLabel(leg.lines[0]));
+  const color=leg=>leg.kind==='bus'?busRouteColor(leg.routeType,leg.route):subwayLineColor(railLabel(leg.lines[0]));
   const header=el('div','dj-tr-heading');header.append(el('strong','',detail.legs.map(label).join(' + ')),el('b','','환승 '+(detail.legs.length-1)+'회'),el('small','',detail.railQuality?railShapeNote(detail.railQuality):'공식 버스 노선'));
   const track=el('div','dj-tr-order dj-tr-multi-order');track.setAttribute('aria-label','이동 순서, 시간 비율 아님');
   track.append(el('span','','도보'));
