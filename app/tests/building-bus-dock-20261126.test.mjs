@@ -14,7 +14,9 @@ test('2D and 3D building modes are mutually exclusive and reversible',()=>{
  c.setExtruding(false);assert.equal(states.get('building'),'visible');assert.equal(states.get('optional-building'),'none');
  const main=read('src/main.js');
  assert.match(main,/const fillVisible=visibleBuilding2D\(\) && !show/);
- assert.match(main,/const desired=modeVisibility.extrusion/);
+ assert.match(main,/const desired=info\.owned\?modeVisibility\.extrusion:'none'/);
+ assert.match(main,/const desired=info\.owned&&fillVisible\?modeVisibility\.plan:'none'/);
+ assert.deepEqual([false,true].flatMap(owned=>[false,true].map(show=>{const mode=buildingModeVisibility(show);return [owned&&!show?mode.plan:'none',owned?mode.extrusion:'none'];})),[['none','none'],['none','none'],['visible','none'],['none','visible']]);
 });
 test('selected route icons use official point coordinates and competing markers are restored on clear',async()=>{
  const layers=new Map(BASE_BUS_STOP_LAYERS.map(id=>[id,{id,layout:{visibility:'visible'}}])),sources=new Map();let data;
