@@ -198,7 +198,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     root.dataset.closing='true';
     if(frame){win.cancelAnimationFrame(frame);frame=0;}
     doc.body.dataset.djCommunityEditor='closing';
-    restoreDock();
+    // Keep dock hidden until the editor is fully dismissed and keyboard closes.
   }
   function dismiss({animate=true,onClosed=()=>{}}={}){
     if(!root||root.hidden||root.dataset.closing==='true')return;

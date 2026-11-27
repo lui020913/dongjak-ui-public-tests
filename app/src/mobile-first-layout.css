@@ -1769,10 +1769,13 @@
       visibility:visible!important;
       scale:1!important;
     }
-    /* Preserve the existing outer inset only on the other three full screens.
-       My Info has no phantom footer; its scrolling content clears the dock. */
-    html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel).page-panel:not([hidden]) {
-      padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;
+    /* The opaque page reaches the screen edge; clearance is inside the
+       scroll owner, not an opaque fixed strip over the content. */
+    html body #app#app#app#app#app :is(#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) {
+      padding-bottom:0!important;
+    }
+    html body #app#app#app#app#app #route-panel.page-panel:not([hidden]){
+      padding-bottom:0!important;
     }
 
     /* Preserve the established My Info dark palette and existing theme QA. */
@@ -2232,5 +2235,30 @@ html body #app #community-list .community-post-detail .community-report-facts+.c
  }
  @media(max-width:350px){
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map .dj-place-detail-popup .dj-place-row{grid-template-columns:64px minmax(0,1fr)!important;gap:5px!important}
+ }
+}
+
+/* A single keyboard dock policy for all primary phone surfaces. */
+@layer mobile-first-shell {
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-dj-editing-keyboard="true"] > #bottom-nav{
+   visibility:hidden!important;pointer-events:none!important;opacity:0!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app :is(#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]){
+   padding-bottom:0!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app :is(#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden])>.dj836-sheet-body{
+   padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))!important;
+   scroll-padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app[data-dj-editing-keyboard="true"] :is(#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]){
+   bottom:auto!important;top:var(--dj-editing-top,0px)!important;height:var(--dj-editing-height,100dvh)!important;max-height:var(--dj-editing-height,100dvh)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app[data-dj-editing-keyboard="true"] :is(#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden])>.dj836-sheet-body{
+   padding-bottom:20px!important;scroll-padding-bottom:20px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #route-panel.page-panel:not([hidden])>#dj910-route-footer{
+   margin-bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;
+  }
  }
 }

@@ -1,3 +1,4 @@
+import {enhanceBusDirection,busDirectionNames} from './bus-search-directions.mjs';
 import {samePhysicalBusStop} from './bus-stop-dedup.js';
 import {createSearchToolbarCrossfade} from './map-toolbar-crossfade.js';
 import {facilitySearchGlyph} from './v912-poi-presentation.js';
@@ -37,7 +38,7 @@ export function mergeMapSearchResults(local=[],remote=[]){
     const key=searchResultKey({...item,lng,lat});
     const previous=found.find(p=>searchResultKey(p)===key||(searchPlaceKind(p)==='bus'&&searchPlaceKind(item)==='bus'&&samePhysicalBusStop({...p,kind:'bus'},{...item,kind:'bus',lng,lat}))||(!isTransitMapSearchResult(item)&&!isTransitMapSearchResult(p)&&sameFacility(p,item)));
     if(previous){
-      if(previous){previous.direction||=item.direction;previous.address||=item.address;if(!facilityRoadAddress(previous)&&facilityRoadAddress(item))previous.roadAddress=facilityRoadAddress(item);previous.lines=[...new Set([...(previous.lines||[]),...(item.lines||[])])];}
+      if(previous){previous.directions=busDirectionNames([previous.direction,item.direction,...(previous.directions||[]),...(item.directions||[])]);previous.address||=item.address;if(!facilityRoadAddress(previous)&&facilityRoadAddress(item))previous.roadAddress=facilityRoadAddress(item);previous.lines=[...new Set([...(previous.lines||[]),...(item.lines||[])])];}
       continue;
     }
     seen.add(key);found.push({...item,lng,lat});
@@ -46,10 +47,10 @@ export function mergeMapSearchResults(local=[],remote=[]){
   // every nearby station/stop out of the visible result set.
   const transit=found.filter(isTransitMapSearchResult),general=found.filter(item=>!isTransitMapSearchResult(item));
   if(!transit.length||!general.length)return found.slice(0,12);
-  const balanced=[...transit.slice(0,6),...general.slice(0,6)];
+  const balanced=[...general.slice(0,6),...transit.slice(0,6)];
   const chosen=new Set(balanced);
   for(const item of found){if(balanced.length>=12)break;if(!chosen.has(item)){balanced.push(item);chosen.add(item);}}
-  return balanced;
+  return balanced.sort((a,b)=>Number(isTransitMapSearchResult(a)&&searchPlaceKind(a)==='bus')-Number(isTransitMapSearchResult(b)&&searchPlaceKind(b)==='bus'));
 }
 export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition,errorLocationCode=error=>Number(error?.code)}){
   const shell=document.getElementById('map-quick-search');
@@ -209,6 +210,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
     const address=document.createElement('small');address.className='dj-search-road-address';
     const road=facilityRoadAddress(place);address.textContent=road||'도로명 주소 미확인';
     button.append(strong,info,address);
+    if(place.arsId)enhanceBusDirection(place,p=>{if(button.isConnected)info.textContent=searchResultSubtitle({...p,address:'',distanceMeters:undefined});},{apiBase:globalThis.location?.protocol==='https:'&&globalThis.location?.hostname!=='localhost'?'/api/transport':'https://dongjak-walk-safety-preview.pages.dev/api/transport'});
     if(Number.isFinite(place.distanceMeters)){
       const distance=document.createElement('span');distance.className='dj-search-distance';distance.textContent=formatFacilityDistance(place.distanceMeters);button.append(distance);
     }
@@ -302,7 +304,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
       .slice(0,8).map(([name,[lng,lat]])=>({name:name.endsWith('역')?name:`${name}역`,lng,lat,
         category:'지하철·철도역',address:'저장된 역 위치 · 출입구와 다를 수 있습니다'})):[];
     const all=mergeMapSearchResults([...cached,...stations,...searchLocalPlaces(text)],localVectorFacilities(text));
-    return rankKoreanSearch(text,all,{limit:20,minScore:55,getText:item=>facilityNameMatches(item,text)?text:item.name});
+    return rankKoreanSearch(text,all,{limit:20,minScore:55,getText:item=>facilityNameMatches(item,text)?text:item.name}).sort((a,b)=>Number(searchPlaceKind(a)==='bus')-Number(searchPlaceKind(b)==='bus'));
   };
   // Search always covers the Dongjak/Seoul source bounds; the former
   // viewport-only checkbox was confusing and silently hid valid matches.
