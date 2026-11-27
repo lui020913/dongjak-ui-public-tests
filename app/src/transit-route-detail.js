@@ -93,7 +93,8 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   if(step===null){stopGps();return;}
   progress.textContent=arrived?'목적지 도착':(step+1)+' / '+rows.length;
   if(!arrived)setGpsStatus('GPS 위치 확인 중');
-  rows[step]?.scrollIntoView?.({block:'nearest',behavior:'instant'});
+  const row=rows[step],scroll=root.querySelector('.dj-tr-scroll');
+  if(row&&scroll){const a=row.getBoundingClientRect(),b=scroll.getBoundingClientRect();if(a.top<b.top)scroll.scrollTop+=a.top-b.top;else if(a.bottom>b.bottom)scroll.scrollTop+=Math.min(a.top-b.top,a.bottom-b.bottom);}
  }
  function appendRailArrival(board,station,lineId){
   if(!station||!lineId)return;
@@ -134,7 +135,8 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
  }
  function layoutDetail(header,track,fare,timeline,footer,guideBody){
   const fixed=el('header','dj-tr-fixed-head');fixed.append(header,track);
-  const body=el('div','dj-tr-scroll');body.append(fare,timeline,guideBody);
+  const body=el('div','dj-tr-scroll');body.append(fare,timeline);
+  footer.prepend(guideBody);
   root.append(fixed,body,footer);
  }
  function render(detail){

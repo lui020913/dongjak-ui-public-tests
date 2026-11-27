@@ -130,7 +130,8 @@ test('real transit detail buttons navigate to the visible route editor, includin
      return page.evaluate(({sheet,header,coords})=>{
       const m=window.__qaMap,rect=m.getContainer().getBoundingClientRect();
       if(m.isMoving())return false;
-      return coords.every(p=>{const a=m.project(p);return a.x+rect.left>=10&&a.x+rect.left<=rect.right-10&&a.y+rect.top>=header.y+header.height+5&&a.y+rect.top<=sheet.y-5;});
+      const pins=[...document.querySelectorAll('.dj-route-endpoint-marker')].map(n=>n.getBoundingClientRect());
+      return pins.length===2&&pins.every(p=>p.top>=header.y+header.height+5&&p.bottom<=sheet.y-5&&p.left>=rect.left+5&&p.right<=rect.right-5)&&coords.every(p=>{const a=m.project(p);return a.x+rect.left>=10&&a.x+rect.left<=rect.right-10&&a.y+rect.top>=header.y+header.height+5&&a.y+rect.top<=sheet.y-5;});
      },{sheet,header,coords:stops.map(p=>[p.lng,p.lat])});
     },{timeout:20000}).toBe(true);
    }

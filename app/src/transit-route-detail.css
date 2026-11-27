@@ -86,3 +86,12 @@
 #app #dj-transit-detail .dj-tr-gps{flex-wrap:wrap;gap:6px}
 #app #dj-transit-detail .dj-tr-gps-status{flex:1 0 100%;min-width:0;overflow-wrap:anywhere}
 #app #dj-transit-detail .dj-tr-gps-retry:not([hidden]){flex:1 1 auto;min-width:0;padding-inline:9px;white-space:normal}
+
+/* Guidance actions are part of the permanent bottom dock, not the timeline. */
+#app #dj-transit-detail .dj-tr-footer{flex:0 0 auto;position:relative;z-index:2;gap:6px;padding-top:7px}
+#app #dj-transit-detail .dj-tr-footer .dj-tr-guide-body{flex:none;min-width:0}
+#app #dj-transit-detail .dj-tr-footer .dj-tr-gps{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5px}
+#app #dj-transit-detail .dj-tr-footer .dj-tr-gps-status{grid-column:1/-1;line-height:1.25}
+#app #dj-transit-detail .dj-tr-footer .dj-tr-gps-retry:not([hidden]){width:100%;min-height:40px;padding:5px 8px;font-size:12px}
+#app #dj-transit-detail .dj-tr-footer .dj-tr-gps-retry:first-of-type:not([hidden]){grid-column:1/-1}
+#app #dj-transit-detail .dj-tr-footer .dj-tr-step-guide{min-height:40px}

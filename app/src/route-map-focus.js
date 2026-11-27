@@ -48,3 +48,13 @@ export function routeProjectionCorrection(points,width,height,padding){
  const vx=(padding.left+width-padding.right)/2,vy=(padding.top+height-padding.bottom)/2;
  return {x:(l+r)/2+(width/2-vx)/scale,y:(t+b)/2+(height/2-vy)/scale,zoomOut:-Math.log2(scale)};
 }
+
+/** Transit endpoint pins extend upward from the coordinate. Keep the complete
+ * marker silhouette and stroke within the truly unobscured viewport. */
+export function transitRouteViewportPadding({mapTop,viewportHeight,toolbarBottom,sheetTop,markerHeight=44,markerWidth=32}={}){
+ if(![mapTop,viewportHeight,toolbarBottom,sheetTop,markerHeight,markerWidth].every(Number.isFinite))return null;
+ const top=Math.max(0,toolbarBottom-mapTop)+Math.max(44,markerHeight)+10;
+ const bottom=Math.max(0,mapTop+viewportHeight-sheetTop)+18;
+ const side=Math.max(28,Math.ceil(markerWidth/2)+12);
+ return top+bottom<=viewportHeight-24?{top:Math.ceil(top),bottom:Math.ceil(bottom),left:side,right:side}:null;
+}

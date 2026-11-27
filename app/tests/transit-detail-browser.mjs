@@ -46,6 +46,13 @@ try{
     await page.evaluate(()=>{window.addEventListener('dongjak:transit-gps-start',e=>{window.fixtureGpsSignal=e.detail.signal;window.fixtureGpsFix=e.detail.onPosition;},{once:true});});
     await root.locator('.dj-tr-start').click();
     assert.match(await root.locator('.dj-tr-progress').innerText(),/1 \/ 8/);
+    assert.equal(await root.locator('.dj-tr-footer .dj-tr-guide-body').count(),1);
+    assert.equal(await root.locator('.dj-tr-scroll .dj-tr-guide-body').count(),0);
+    const actionsBefore=await root.locator('.dj-tr-footer').boundingBox();
+    await root.locator('.dj-tr-scroll').evaluate(n=>{n.scrollTop=n.scrollHeight;});
+    const actionsAfter=await root.locator('.dj-tr-footer').boundingBox();
+    assert.ok(Math.abs(actionsBefore.y-actionsAfter.y)<1,engine+' '+width+' guidance dock must not scroll');
+    for(const name of ['내 위치 따라가기','다음 단계','안내 종료']){const b=await root.getByRole('button',{name,exact:true}).boundingBox();assert.ok(b&&b.y>=actionsAfter.y-1&&b.y+b.height<=actionsAfter.y+actionsAfter.height+1&&b.y+b.height<=height,engine+' '+width+' guidance action clipped '+name);}
     assert.equal(await root.locator('[data-step-next],[data-step-prev],.dj-tr-gps-toggle').count(),0);
     await page.evaluate(()=>{const now=Date.now();for(const timestamp of [now-300,now-200])window.fixtureGpsFix({timestamp,coords:{latitude:37.5,longitude:126.95,accuracy:10}});});
     assert.match(await root.locator('.dj-tr-progress').innerText(),/2 \/ 8/);

@@ -65,7 +65,7 @@ import {searchPlaces,searchLocalPlaces} from './route-search.js';
 import {cachedOfficialSearchPlaces,queryOfficialPlaces} from './seoul-official-facilities.js';
 import {enhanceBusDirection} from './bus-search-directions.mjs';
 import {routeStationMatches,mergeRouteSearchResults,routeResultSubtitle} from './route-search-results.js';
-import {walkingRouteViewportPadding,strictRoutePreviewPadding,routeProjectionCorrection} from './route-map-focus.js';
+import {walkingRouteViewportPadding,strictRoutePreviewPadding,routeProjectionCorrection,transitRouteViewportPadding} from './route-map-focus.js';
 import {installDistrictBuildingScope} from './district-building-scope.mjs';
 import {installExteriorRoadScope,reducedTileProtocolRequest,registerReducedTileProtocol} from './exterior-road-scope.mjs';
 import {loadConfirmedDevelopments,installConfirmedDevelopmentDisplay} from './confirmed-development-display.mjs';
@@ -3513,8 +3513,8 @@ function readRouteMetrics() {
 }
 function transitVisiblePadding(sheetTop,toolbarBottom){
  const rect=map.getContainer().getBoundingClientRect();
- const top=Math.max(0,toolbarBottom-rect.top)+18,bottom=Math.max(0,rect.bottom-sheetTop)+18;
- return top+bottom<rect.height-48?{top,bottom,left:28,right:28}:null;
+ const markers=[routeStartMarker,routeEndMarker].filter(Boolean).map(m=>m.getElement().getBoundingClientRect());
+ return transitRouteViewportPadding({mapTop:rect.top,viewportHeight:rect.height,toolbarBottom,sheetTop,markerHeight:Math.max(44,...markers.map(r=>r.height)),markerWidth:Math.max(32,...markers.map(r=>r.width))});
 }
 function clearComparisonRoute(){
  comparisonRouteGeneration++;comparisonRoutePlan=null;comparisonRouteSummary=null;comparisonRouteFeatures=[];comparisonRouteFitKey='';comparisonRoutePadding=null;routeCameraFitToken++;
@@ -3533,18 +3533,20 @@ function fitExposedRoute(coords,padding,{maxZoom=16,duration=350}={}){
  const camera=map.cameraForBounds(bounds,{padding,maxZoom,bearing:0});
  if(!camera)return;
  const token=++routeCameraFitToken;
- const cancelByUser=event=>{if(event.originalEvent&&routeCameraFitToken===token)routeCameraFitToken++;};
- map.once('dragstart',cancelByUser);map.once('zoomstart',cancelByUser);map.once('rotatestart',cancelByUser);
+ let corrections=0;
+ const cleanup=()=>{map.off('dragstart',cancelByUser);map.off('zoomstart',cancelByUser);map.off('rotatestart',cancelByUser);map.off('moveend',correct);};
+ const cancelByUser=event=>{if(event.originalEvent&&routeCameraFitToken===token){routeCameraFitToken++;cleanup();}};
+ map.on('dragstart',cancelByUser);map.on('zoomstart',cancelByUser);map.on('rotatestart',cancelByUser);
  const correct=event=>{
-  map.off('dragstart',cancelByUser);map.off('zoomstart',cancelByUser);map.off('rotatestart',cancelByUser);
-  if(event.djRouteFitToken!==token||token!==routeCameraFitToken||!(app.dataset.tab==='map'||app.dataset.transitComparison==='true'))return;
+  if(event.djRouteFitToken!==token||token!==routeCameraFitToken||!(app.dataset.tab==='map'||app.dataset.transitComparison==='true')){cleanup();return;}
   const rect=map.getContainer().getBoundingClientRect();
   const correction=routeProjectionCorrection(valid.map(p=>map.project(p)),rect.width,rect.height,padding);
-  if(!correction)return;
+  if(!correction||corrections>=3){cleanup();return;}
+  corrections++;
   const center=map.unproject([correction.x,correction.y]);
-  map.easeTo({center,zoom:Math.max(map.getMinZoom(),map.getZoom()-correction.zoomOut),padding:zero,pitch:0,bearing:0,duration:220});
+  map.easeTo({center,zoom:Math.max(map.getMinZoom(),map.getZoom()-correction.zoomOut),padding:zero,pitch:0,bearing:0,duration:220},{djRouteFitToken:token});
  };
- map.once('moveend',correct);
+ map.on('moveend',correct);
  map.easeTo({...camera,padding:zero,pitch:0,bearing:0,duration},{djRouteFitToken:token});
 }
 function paintComparisonRoute(features){
@@ -3612,7 +3614,7 @@ function scheduleVisibleRouteFit(){
   const all=[...coords,...[routeStart,routeEnd].filter(Boolean).map(p=>[p.lng,p.lat])];
   if(all.length<2)return;
   const rect=map.getContainer().getBoundingClientRect();
-  const padding=strictRoutePreviewPadding({mapTop:rect.top,viewportHeight:rect.height,toolbarBottom:head.getBoundingClientRect().bottom,sheetTop:card.getBoundingClientRect().top});
+  const padding=transitPreview?transitVisiblePadding(card.getBoundingClientRect().top,head.getBoundingClientRect().bottom):strictRoutePreviewPadding({mapTop:rect.top,viewportHeight:rect.height,toolbarBottom:head.getBoundingClientRect().bottom,sheetTop:card.getBoundingClientRect().top});
   if(!padding)return;
   const bounds=all.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(all[0],all[0]));
   const key=JSON.stringify([padding,bounds.toArray()]);if(key===routePreviewFitKey)return;
