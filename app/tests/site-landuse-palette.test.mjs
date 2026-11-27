@@ -27,6 +27,6 @@ test('healthcare and civic polygons get distinct colors ahead of generic site cl
   ])assert.equal(evaluate(e,tags),p[kind],JSON.stringify(tags));
   assert.equal(evaluate(e,{class:'park'}),'rgba(0,0,0,0)');
   assert.equal(evaluate(e,{class:'residential'}),'rgba(0,0,0,0)');
-  assert.equal(p.residential,'#d6c2ad');
+  assert.equal(p.residential,'#b58b68');
  }
 });
