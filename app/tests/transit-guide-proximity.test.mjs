@@ -25,3 +25,12 @@ test('GPS progression requires fresh distinct accurate fixes and completes once 
  assert.equal(tick(2,1,now-100,now).step,3);
  assert.equal(tick(0,1,null,now-16000).ignored,true);
 });
+
+test('confirmed same-stop transfer goes directly to next vehicle but a different stop requires walking',()=>{
+ const now=100000,targets=Array(6).fill(target),position={...pos(37.5,10),timestamp:now};
+ const base={position,targets,step:1,rows:6,count:1,lastTimestamp:now-100,now};
+ assert.equal(advanceTransitGps({...base,sameStopSteps:[2]}).step,3);
+ assert.equal(advanceTransitGps({...base,sameStopSteps:[2]}).transfer,'same-stop');
+ assert.equal(advanceTransitGps(base).step,2);
+ assert.equal(advanceTransitGps({...base,position:{...pos(37.5,60),timestamp:now},sameStopSteps:[2]}).step,1);
+});
