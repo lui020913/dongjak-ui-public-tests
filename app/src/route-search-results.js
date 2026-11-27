@@ -1,3 +1,4 @@
+import {busDirectionLabel,busDirectionNames} from './bus-search-directions.mjs';
 import {VERIFIED_STATIONS,FIXED_RAIL_STATION_ORDER} from './fixed-rail-data.js';
 import {normalizeKoreanSearch,koreanSearchScore} from './korean-search.js';
 
@@ -23,7 +24,7 @@ export function mergeRouteSearchResults(query,...groups){
       kind==='bus'&&p.arsId&&x.arsId?x.arsId===p.arsId:
       normalizeKoreanSearch(x.name)===name&&Math.abs(x.lng-p.lng)<.00015&&Math.abs(x.lat-p.lat)<.00015));
     if(duplicate){
-      duplicate.direction||=p.direction;
+      duplicate.directions=busDirectionNames([duplicate.direction,p.direction,...(duplicate.directions||[]),...(p.directions||[])]);
       duplicate.address||=p.address;
       duplicate.lines=[...new Set([...(duplicate.lines||[]),...(p.lines||[])])];
       continue;
@@ -35,9 +36,7 @@ export function mergeRouteSearchResults(query,...groups){
 }
 export function routeResultSubtitle(place){
   if(typeOf(place)==='bus'){
-    const direction=String(place.direction||'').trim();
-    const valid=direction&&!/^\d+$/.test(direction)&&!/^ARS\b/i.test(direction);
-    return ['버스정류장',valid?(direction.endsWith('방면')?direction:direction+' 방면'):'방면 정보 없음'].join(' · ');
+    return ['버스정류장',busDirectionLabel(place)].join(' · ');
   }
   const address=String(place.address||'').replace(/(?:^|\s*·\s*)ARS\s*\d+/gi,'').trim();
   return [...new Set([place.category||'장소',...(place.lines||[]),address].filter(Boolean))].join(' · ');
