@@ -1,0 +1,29 @@
+name: Research - Dongjak district green building audit
+on:
+  push:
+    branches:
+      - diagnostic/dongjak-green-building-audit-20261126
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned spatial libraries
+        run: python -m pip install --disable-pip-version-check --quiet shapely==2.1.2 pyproj==3.7.2
+      - name: Audit all building sheets
+        run: python scripts/research/dongjak_green_building_audit.py
+      - name: Upload research outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-green-building-audit
+          path: audit-output/green-building/
+          if-no-files-found: warn
+          retention-days: 14
