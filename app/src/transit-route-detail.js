@@ -124,7 +124,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   const box=el('div','dj-tr-fare');
   const walks=detail.walks||[detail.first,detail.last];
   const meters=walks.reduce((sum,w)=>sum+(w?.meters||0),0),minutes=walks.reduce((sum,w)=>sum+(w?.minutes||0),0);
-  box.append(el('strong','','도보 '+meters+'m · 약 '+minutes+'분'));
+  if(detail.time){const t=detail.time;box.append(el('strong','','예상 '+t.totalMinutes+'분'),el('small','','탑승 '+t.rideMinutes+'분 · 대기 약 '+t.waitMinutes+'분'+(t.transferMinutes?' · 역내 환승 약 '+t.transferMinutes+'분':'')),el('small','','도보 '+meters+'m · 약 '+t.walkMinutes+'분'),el('small','','실시간 교통·배차 미반영 추정치'));}else box.append(el('strong','','도보 '+meters+'m · 약 '+minutes+'분'));
   return box;
  }
  function busHours(board,leg){
