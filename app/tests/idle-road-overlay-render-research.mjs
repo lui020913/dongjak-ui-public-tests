@@ -66,6 +66,24 @@ try{
   }
   console.log('CURATED_BRIDGE_LABELS_RENDER_OK',JSON.stringify(names));
  }
+ if(process.env.CHECK_NATIVE_BUILDING_SCOPE==='true'){
+  await page.waitForFunction(()=>window.__qaMap.getLayer('district-border'),{},{timeout:90000});
+  const scans=[];
+  // Outside centers are well beyond the district, including the west-side
+  // industrial/rail corridor. Query a center crop, not the whole viewport.
+  for(const center of [[126.883,37.497],[126.945,37.475],[126.997,37.531]])for(const zoom of [13.8,14.6,15.4,16.8,18]){
+   await page.evaluate(v=>window.__qaMap.jumpTo({...v,pitch:0,bearing:0}),{center,zoom});
+   await page.waitForFunction(()=>window.__qaMap.isStyleLoaded()&&!window.__qaMap.isMoving(),{},{timeout:90000});
+   const scan=await page.evaluate(()=>{
+    const m=window.__qaMap,layers=m.getStyle().layers.filter(l=>['fill','line','fill-extrusion'].includes(l.type)&&(l['source-layer']==='building'||l.id.startsWith('dongjak-buildings-'))),p=m.project(m.getCenter());
+    const hits=layers.length?m.queryRenderedFeatures([[p.x-36,p.y-36],[p.x+36,p.y+36]],{layers:layers.map(l=>l.id)}):[];
+    return {center:m.getCenter().toArray(),zoom:m.getZoom(),hits:hits.map(f=>({id:f.layer.id,source:f.source,sourceLayer:f.sourceLayer})),native:layers.filter(l=>l['source-layer']==='building').map(l=>({id:l.id,scoped:JSON.stringify(m.getFilter(l.id)).includes('"distance"')}))};
+   });scans.push(scan);console.log('EXTERIOR_BUILDING_SCAN',JSON.stringify(scan));assert.equal(scan.hits.length,0,'building geometry in exterior crop');assert.ok(scan.native.length&&scan.native.every(l=>l.scoped));
+  }
+  await page.evaluate(()=>window.__qaMap.jumpTo({center:[126.947,37.5],zoom:16.8,pitch:0}));
+  await page.waitForFunction(()=>{const m=window.__qaMap,ids=m.getStyle().layers.filter(l=>l['source-layer']==='building'&&l.type==='fill').map(l=>l.id);return ids.length&&m.queryRenderedFeatures({layers:ids}).length>0;},{},{timeout:90000});
+  console.log('NATIVE_BUILDING_SCOPE_OK',scans.length);await page.screenshot({path:out+'/interior-native-buildings.png'});
+ }
  for(const site of sites){
   await page.evaluate(({center})=>window.__qaMap.jumpTo({center,zoom:18.4,pitch:0}),site);
   await page.waitForFunction(()=>{const m=window.__qaMap;return m.isStyleLoaded()&&m.getStyle().layers.some(l=>l['source-layer']==='transportation'&&l.type==='line')&&m.getStyle().layers.some(l=>l.id.startsWith('dongjak-buildings-footprint-')&&m.isSourceLoaded(l.source));},{},{timeout:90000}).catch(async error=>{console.log('IDLE_MAP_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>{const m=window.__qaMap;return {styleLoaded:m.isStyleLoaded(),moving:m.isMoving(),layers:m.getStyle().layers.filter(l=>l.id.startsWith('dongjak-buildings-footprint-')).map(l=>({id:l.id,loaded:m.isSourceLoaded(l.source)})),boundary:document.querySelector('#app')?.dataset.djBoundaryReady};})));throw error;});
