@@ -159,6 +159,23 @@ for south,north in [(37.47,37.505),(37.505,37.54)]:
             osm['elements'].extend(part['elements']);successful_boxes+=1;break
         except Exception as e:print('OSM_SITE_SOURCE_ERROR '+json.dumps({'bbox':bbox,'endpoint':endpoint,'error':type(e).__name__}),flush=True)
 osm_state='retrieved' if successful_boxes==2 else 'partial' if successful_boxes else 'unavailable'
+# Exact IDs observed in successful run 45952872901; re-fetch live geometry
+# from the OSM API if Overpass discovery is incomplete. No cached outline
+# is treated as current without a fresh response.
+KNOWN_RESIDENTIAL_WAYS=[284585430,284585436,284984041,293810275,305837437,305837440,305888840,324689860,419527850,419534346,466301342,466304714,466306128,466306129,466307799,467307119,467478052,467542289,467893058,468580439,469340177,469406269,471977079,471986368,586227273,610392229,619486999,876638788,888807585,888807586,888809615,961832077,1030895320,1030895324,1252016292,1384270177,1452649878]
+if osm_state!='retrieved':
+    seen={e.get('id') for e in osm['elements']}
+    for way_id in KNOWN_RESIDENTIAL_WAYS:
+        if way_id in seen:continue
+        try:
+            d=get('https://api.openstreetmap.org/api/0.6/way/'+str(way_id)+'/full.json')
+            nodes={e['id']:{'lat':e['lat'],'lon':e['lon']} for e in d['elements'] if e.get('type')=='node'}
+            way=next(e for e in d['elements'] if e.get('type')=='way' and e.get('id')==way_id)
+            if not all(n in nodes for n in way['nodes']):continue
+            way['geometry']=[nodes[n] for n in way['nodes']]
+            osm['elements'].append(way);seen.add(way_id)
+        except Exception as e:print('OSM_KNOWN_WAY_ERROR '+str(way_id)+' '+type(e).__name__,flush=True)
+    if osm['elements']:osm_state='partial'
 def complex_name(n):
     n=norm(n)
     for suffix in ('아파트','공동주택'):
