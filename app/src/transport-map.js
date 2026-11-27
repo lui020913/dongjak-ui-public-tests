@@ -1619,6 +1619,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   map.addSource('transport-rail-tracks',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
   map.addSource('transport-rail-platforms',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
   const localRailGeometry=withMappedLine4(fixedRailCollection(boundaryGeometry));
+  let displayedLocalRail=localRailGeometry;
   let renderedRailPaths=indexRenderedMetroRail(localRailGeometry);
   let lastMetroMarkerItems=[];
   map.addSource('transport-schematic-connections',{type:'geojson',data:localRailGeometry,tolerance:0,buffer:128,maxzoom:19});
@@ -1635,6 +1636,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       const source=map.getSource('transport-schematic-connections');
       if(!source)return;
       source.setData(result.collection);
+      displayedLocalRail=result.collection;cityRail.sync();
       // Keep station badges anchored to the actual displayed official curves.
       renderedRailPaths=indexRenderedMetroRail(result.collection);
       setDisplayedRailPaths(map,renderedRailPaths,renderedRailQuality(result.collection));
@@ -1712,7 +1714,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     }
   }
   bringRailToForeground();
-  const cityRail=installCityTransitRail({map,app:streamApp,colors:SUBWAY_LINE_COLORS,getBoundary:getSeoulBoundary,isInside:inSeoul});
+  const cityRail=installCityTransitRail({map,app:streamApp,colors:SUBWAY_LINE_COLORS,getBoundary:getSeoulBoundary,isInside:inSeoul,getLocalCollection:()=>displayedLocalRail});
   const refreshNearbyBusStopNames=()=>syncNearbyBusStopNameFilters(map,getDistrictGeometry());
   refreshNearbyBusStopNames();
   const viewportLabels=coalesceViewportWork(full=>{refreshNearbyBusStopNames();if(full)updateTileBusFallbackFilter();},{delay:100,isMoving:()=>map.isMoving?.()===true});
