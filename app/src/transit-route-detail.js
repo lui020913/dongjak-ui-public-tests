@@ -5,7 +5,6 @@ import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fa
 import './transit-route-detail.css';
 import {transitProximity} from './transit-guide-proximity.mjs';
 import {transitRailArrival} from './transit-rail-arrival.mjs';
-import {transitFareText,TRANSIT_FARE_SOURCE} from './transit-fare-reference.mjs';
 const labels={walk:'도보',bus:'버스',rail:'지하철'};
 const paths={
  walk:WALK_ICON_PATH,
@@ -124,13 +123,11 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   });refresh.innerHTML=icon('refresh');refresh.setAttribute('aria-label',line+' 승차역 도착정보 새로고침');
   bar.append(message,refresh);arrival.append(bar,rows);board.append(arrival);
  }
- function fareInfo(detail){
+ function walkInfo(detail){
   const box=el('div','dj-tr-fare');
   const walks=detail.walks||[detail.first,detail.last];
   const meters=walks.reduce((sum,w)=>sum+(w?.meters||0),0),minutes=walks.reduce((sum,w)=>sum+(w?.minutes||0),0);
-  box.append(el('strong','','도보 '+meters+'m · 약 '+minutes+'분'),el('small','',transitFareText(detail)));
-  const source=el('a','dj-tr-fare-source','서울시 공식 운임 안내');source.href=TRANSIT_FARE_SOURCE;source.target='_blank';source.rel='noopener noreferrer';
-  source.textContent='운임 기준';source.setAttribute('aria-label','서울시 공식 운임 안내 · 거리 및 환승 조건에 따라 실제 요금은 달라질 수 있습니다.');box.append(source);
+  box.append(el('strong','','도보 '+meters+'m · 약 '+minutes+'분'));
   return box;
  }
  function busHours(board,leg){
@@ -153,9 +150,8 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   const name=kind==='bus'?detail.route:[...new Set(detail.lines)].map(railLabel).join(' · ');
   const header=el('div','dj-tr-heading');
   const title=el('strong','',name+' · '+labels[kind]);
-  const metric=el('b','',Number.isFinite(detail.minutes)?'참고 약 '+Math.ceil(detail.minutes)+'분':'전체 시간 미확인');
-  const sub=el('small','',kind==='rail'?railShapeNote(detail.railQuality)+' · 배차·대기·요금 미반영':'공식 버스 노선 · 운행시간·요금 미확인');
-  header.append(title,metric,sub);
+  const sub=el('small','',kind==='rail'?railShapeNote(detail.railQuality):'공식 버스 노선');
+  header.append(title,sub);
   const track=el('div','dj-tr-order');track.setAttribute('aria-label','이동 순서, 시간 비율 아님');track.append(el('span','','도보'),el('span','dj-tr-vehicle',name),el('span','','도보'));
   const timeline=el('div','dj-tr-timeline');
   function row(type,title,sub){
@@ -199,13 +195,13 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   controls.append(prev,next);guide.append(progress,controls);
   const guideBody=el('div','dj-tr-guide-body');guideBody.hidden=true;guideBody.append(gpsControls(),el('small','','승하차 단계는 직접 전환합니다. 위치 확인과 하차 접근 진동은 화면이 켜진 동안의 참고 정보이며 지하에서는 오차가 클 수 있습니다.'));
   footer.append(start,guide);
-  layoutDetail(header,track,fareInfo(detail),timeline,note,footer,guideBody);updatePri();revealSurface(root);
+  layoutDetail(header,track,walkInfo(detail),timeline,note,footer,guideBody);updatePri();revealSurface(root);
  }
 
  function renderMulti(detail){
   const label=leg=>leg.kind==='bus'?leg.route:[...new Set(leg.lines)].map(railLabel).join(' · ');
   const color=leg=>leg.kind==='bus'?busRouteColor(leg.routeType):subwayLineColor(railLabel(leg.lines[0]));
-  const header=el('div','dj-tr-heading');header.append(el('strong','',detail.legs.map(label).join(' + ')),el('b','','환승 '+(detail.legs.length-1)+'회'),el('small','','전체 시간·요금 미확인'+(detail.railQuality?' · '+railShapeNote(detail.railQuality):'')));
+  const header=el('div','dj-tr-heading');header.append(el('strong','',detail.legs.map(label).join(' + ')),el('b','','환승 '+(detail.legs.length-1)+'회'),el('small','',detail.railQuality?railShapeNote(detail.railQuality):'공식 버스 노선'));
   const track=el('div','dj-tr-order dj-tr-multi-order');track.setAttribute('aria-label','이동 순서, 시간 비율 아님');
   track.append(el('span','','도보'));
   detail.legs.forEach((leg,i)=>{if(i)track.append(el('span','','환승'));const v=el('span','dj-tr-vehicle',label(leg));v.style.setProperty('--vehicle-color',color(leg));track.append(v);});
@@ -256,7 +252,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   const next=button('다음 단계','',()=>{step=step>=root.querySelectorAll('.dj-tr-leg').length-1?null:step+1;updateStep();});next.dataset.stepNext='';
   controls.append(prev,next);guide.append(progress,controls);
   const guideBody=el('div','dj-tr-guide-body');guideBody.hidden=true;guideBody.append(gpsControls(),el('small','','승하차 단계는 직접 전환합니다. 위치 확인과 하차 접근 진동은 화면이 켜진 동안의 참고 정보이며 지하에서는 오차가 클 수 있습니다.'));
-  footer.append(start,guide);layoutDetail(header,track,fareInfo(detail),timeline,note,footer,guideBody);updatePri();revealSurface(root);
+  footer.append(start,guide);layoutDetail(header,track,walkInfo(detail),timeline,note,footer,guideBody);updatePri();revealSurface(root);
  }
 
  const listener=e=>render(e.detail);win.addEventListener('dongjak:transit-detail',listener);

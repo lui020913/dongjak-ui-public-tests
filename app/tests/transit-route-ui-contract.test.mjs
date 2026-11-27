@@ -74,3 +74,19 @@ test('selected route casing and line remain beneath icons; transfer labels are e
  assert.match(main,/pathBetweenDisplayedStations\(displayed\?\.get\(name\)/);
  assert.match(main,/'-transfer-label'/);
 });
+
+test('transit comparison and detail omit fare and full-trip estimates; preserve walking data',()=>{
+ const list=read('transit-route-comparison.js'),detail=read('transit-route-detail.js');
+ for(const code of [list,detail])assert.doesNotMatch(code,/transitFareText|TRANSIT_FARE_SOURCE|전체 시간 미확인|전체 시간·요금 미확인|운임 기준/);
+ assert.match(list,/result\?'도보 '\+result.walkMinutes/);
+ assert.match(detail,/도보 '\+meters\+'m · 약 '\+minutes/);
+});
+test('transit framing uses actual visible map area and complete endpoint bounds',()=>{
+ const main=read('main.js'),comparison=read('transit-route-comparison.js');
+ assert.match(comparison,/sheetTop:panel.getBoundingClientRect\(\).top/);
+ assert.match(main,/dongjak:transit-comparison-focus/);
+ assert.match(main,/center:\[routeEnd.lng,routeEnd.lat\]/);
+ assert.match(main,/transitVisiblePadding\(card.getBoundingClientRect\(\).top,head.getBoundingClientRect\(\).bottom\)/);
+ assert.match(main,/const all=\[\.\.\.coords,\.\.\.\[routeStart,routeEnd\]/);
+ assert.match(main,/map.fitBounds\(bounds,\{padding,maxZoom:16,duration:480/);
+});

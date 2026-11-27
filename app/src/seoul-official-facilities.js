@@ -172,19 +172,21 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
  if(!map||!getBoundary)return {ok:false};
  let cache=EMPTY,active=true,timer=null,inflight=false,lastBox='',latest=0,lastAttempt=0,forceRefresh=false,pendingPublish=null;
  let publishTimer=null;
+ const transitContextActive=()=>app?.dataset?.djTransitExterior==='true';
  const statusNode=document.getElementById('general-facility-status');
  const status=(message)=>{if(statusNode)statusNode.textContent=message;};
  let groups=new Set(DEFAULT_POI_GROUPS);
- function restore(){try{buildLayers(map,cache,groups,app?.dataset?.theme==='dark');}catch(error){console.warn('[서울 시설 레이어 복원]',error?.message);}}
+ function restore(){if(transitContextActive())return;try{buildLayers(map,cache,groups,app?.dataset?.theme==='dark');}catch(error){console.warn('[서울 시설 레이어 복원]',error?.message);}}
  function flushPending(){
    clearTimeout(publishTimer);publishTimer=null;
    if(!active||map.isMoving?.()||!pendingPublish)return;
+   if(transitContextActive())return;
    const result=pendingPublish;pendingPublish=null;const boundary=getBoundary();if(!boundary)return;
    // GeoJSON normalization and boundary tests also wait until the gesture ends.
    cache=officialFeatures(result.merged,boundary);searchableGeneralPlaces=result.merged.filter(p=>insideBoundary([Number(p.lng),Number(p.lat)],boundary));restore();
    app?.dispatchEvent(new CustomEvent('dongjak:official-facilities-ready',{detail:cache.features.map(f=>({...f.properties,lng:f.geometry.coordinates[0],lat:f.geometry.coordinates[1]}))}));lastBox=result.bbox;latest=Date.now();status(`${result.source} ${cache.features.length.toLocaleString()}곳 · ${result.partial?'일부 자료 조회 제한 · ':''}표시 정보는 현장 확인 필요`);
  }
- function schedulePublish(){clearTimeout(publishTimer);if(!active||map.isMoving?.()||!pendingPublish)return;publishTimer=setTimeout(flushPending,350);}
+ function schedulePublish(){clearTimeout(publishTimer);if(!active||map.isMoving?.()||!pendingPublish)return;if(transitContextActive())return;publishTimer=setTimeout(flushPending,350);}
  function targetBBox(){
    const b=map.getBounds?.();if(!b)return '';
    const west=Math.max(126.87,b.getWest()-.004),east=Math.min(127.05,b.getEast()+.004);
@@ -193,6 +195,7 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
  }
  async function refresh(){
    if(!active||!getBoundary()||map.isMoving?.())return;
+   if(transitContextActive())return;
    flushPending();
    if(map.getZoom?.()<14){status('지도를 확대하면 주변 시설을 불러옵니다.');return;}
    const bbox=targetBBox();if(!bbox)return;
@@ -205,12 +208,14 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
      // Fetch pharmacy independently: commercial rows must never crowd out safety data.
      const wanted=['약국',...(groups.has('convenience')?['동물약국','편의점']:[]),...(groups.has('food')?['음식점','휴게음식점']:[]),...(groups.has('cafe')?['카페']:[])];
      const official=await collectOfficialFacilityPages(wanted,async(category,page)=>{
+       if(transitContextActive())throw new Error('transit context suspended');
        const u=new URL('/api/seoul-facilities',location.origin);
        u.searchParams.set('bbox',bbox);u.searchParams.set('category',category);u.searchParams.set('limit','1200');u.searchParams.set('offset',String(page*1200));
        const response=await fetch(u.toString(),{headers:{Accept:'application/json'},signal:AbortSignal.timeout(8000)});
        if(!response.ok)throw new Error('facility page unavailable');
        return response.json();
      });
+     if(transitContextActive()){forceRefresh=true;return;}
      const merged=[...official.places],ids=new Set(merged.map(p=>p.id));
      let source='서울시 등록 시설',osmFailed=false;
      // OSM also supplies categories not present in the Seoul licensing database.
@@ -225,6 +230,7 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
      if(!merged.length&&osmFailed&&official.failed.length)throw new Error('facility sources unavailable');
      const partial=official.failed.length||official.truncated.length||osmFailed;
      if(!active)return;
+     if(transitContextActive()){forceRefresh=true;return;}
      pendingPublish={merged,bbox,source,partial};
      schedulePublish();
    }catch(error){
@@ -232,13 +238,13 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
      console.warn('[일반 시설 조회]',String(error?.message||error).slice(0,120));
    }finally{
      inflight=false;
-     if(forceRefresh&&active){forceRefresh=false;schedule();}
+     if(forceRefresh&&active&&!transitContextActive()){forceRefresh=false;schedule();}
    }
  }
- function schedule(){clearTimeout(timer);timer=setTimeout(refresh,900);}
+ function schedule(){clearTimeout(timer);if(transitContextActive())return;timer=setTimeout(refresh,900);}
  groups=installFacilityCategories(app,next=>{groups=next;restore();forceRefresh=true;schedule();});
  restore();
- const themeObserver=app?new MutationObserver(restore):null;themeObserver?.observe(app,{attributes:true,attributeFilter:['data-theme']});
+ const themeObserver=app?new MutationObserver(records=>{if(transitContextActive()){clearTimeout(timer);clearTimeout(publishTimer);return;}restore();if(records.some(r=>r.attributeName==='data-dj-transit-exterior')){schedulePublish();schedule();}}):null;themeObserver?.observe(app,{attributes:true,attributeFilter:['data-theme','data-dj-transit-exterior']});
  const movementStart=()=>{clearTimeout(timer);clearTimeout(publishTimer);publishTimer=null;};
  const movementEnd=()=>{schedulePublish();schedule();};
  map.on('movestart',movementStart);map.on('moveend',movementEnd);map.on('zoomend',movementEnd);map.on('style.load',restore);

@@ -28,7 +28,8 @@ try{
     await root.waitFor({state:'visible'});
     assert.equal(await root.locator('.dj-tr-leg').count(),8);
     assert.match(await root.locator('.dj-tr-heading').innerText(),/환승 2회/);
-    assert.match(await root.locator('.dj-tr-fare').innerText(),/1,550원/);
+    assert.match(await root.locator('.dj-tr-fare').innerText(),/도보 640m · 약 11분/);
+    assert.doesNotMatch(await root.innerText(),/기본운임|운임 기준|전체 시간/);
     const geometry=await root.evaluate(n=>{const track=n.querySelector('.dj-tr-order');return {width:n.clientWidth,scroll:n.scrollWidth,trackWidth:track.clientWidth,trackScroll:track.scrollWidth};});
     assert.ok(geometry.scroll<=geometry.width+1&&geometry.trackScroll<=geometry.trackWidth+1,engine+' '+width+' horizontal overflow');
     assert.equal(await page.locator('#route-guide-start').isVisible(),false);

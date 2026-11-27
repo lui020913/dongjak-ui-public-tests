@@ -82,16 +82,19 @@ test('transit teardown removes owned map layers before sources and defers tile w
  assert.match(main,/offscreenEvictionIds\(\[\.\.\.loadedBuildingTiles.keys\(\)\],visible,djRenderBudget.isEconomy\(\)\?2:6\)/);
 });
 
-test('transit mode changes only district display and camera extent, not shared basemap filters or buildings',async()=>{
+test('transit mode suspends unrelated layers and restores the shared map without replacing its style',async()=>{
  const {readFileSync}=await import('node:fs');
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  const scope=main.split('function syncTransitExterior(force=false){')[1].split('function clearTransitPreview(){')[0];
- assert.match(scope,/map.setMaxBounds\(active\?TRANSIT_SEARCH_BOUNDS:bufferedDistrictBounds\(boundaryGeometry\)\)/);
+ assert.match(scope,/syncTransitContextBounds\(active\)/);
+ assert.match(main,/active\?transitContextBounds\(bufferedDistrictBounds\(boundaryGeometry,0\)/);
+ assert.match(scope,/transitContextLayers\.enforce\(\)/);
+ assert.match(scope,/transitContextLayers\.restore\(\)/);
  assert.match(scope,/district-border','line-opacity',active\?0:0.96/);
  assert.match(scope,/transitHomeCamera/);
- assert.doesNotMatch(scope,/setFilter|setStyle|restoreBasemapLabelsOutsideDistrict|clipBasemapLabelsToDistrict|syncTiltWithBuildings|line-dasharray/);
+ assert.doesNotMatch(scope,/setFilter|setStyle|restoreBasemapLabelsOutsideDistrict|clipBasemapLabelsToDistrict|line-dasharray/);
  const building=main.split('function visibleBuilding3D(){')[1].split('function syncTiltWithBuildings')[0];
- assert.doesNotMatch(building,/djTransitExterior/);
+ assert.match(building,/djTransitExterior!=='true'/);
  const focus=main.split('function focusTransitRoute(coords){')[1].split('function setTransitPreviewStops')[0];
  assert.doesNotMatch(focus,/transport-schematic-subway|transport-real-rail-overview|setLayoutProperty/);
 });

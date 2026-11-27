@@ -1705,7 +1705,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   bringRailToForeground();
   const refreshNearbyBusStopNames=()=>syncNearbyBusStopNameFilters(map);
   refreshNearbyBusStopNames();
-  const viewportLabels=coalesceViewportWork(full=>{refreshNearbyBusStopNames();if(full)updateTileBusFallbackFilter();},{delay:100,isMoving:()=>map.isMoving?.()===true});
+  const transitContextActive=()=>document.getElementById('app')?.dataset?.djTransitExterior==='true';
+  const viewportLabels=coalesceViewportWork(full=>{if(transitContextActive())return;refreshNearbyBusStopNames();if(full)updateTileBusFallbackFilter();},{delay:100,isMoving:()=>map.isMoving?.()===true});
   map.on('moveend',()=>viewportLabels.request(true));
   map.on('zoomend',()=>viewportLabels.request(true));
   map.on('styledata',()=>viewportLabels.request());
@@ -1801,23 +1802,22 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
         'text-size':mobile?['interpolate',['linear'],['zoom'],13.3,10,16,11.6]
           :isSummary?['interpolate',['linear'],['zoom'],METRO_MARKER_MIN_ZOOM,10.3,METRO_PLATFORM_SPLIT_ZOOM,11.7]:11.5,
         'text-offset':['get','labelOffset'],
-        'text-anchor':'bottom','text-optional':true,
+        'text-anchor':['get','labelAnchor'],'text-optional':true,
         'text-allow-overlap':false,'text-ignore-placement':false,
         'text-padding':mobile?4:2,
-        // Keep station names on the upper side of the line, never flip underneath.
+        // Overview is above the badge; separated platforms use opposite anchors.
 
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},
       paint:{'text-color':'#21483c','text-halo-color':'rgba(255,255,255,0.98)','text-halo-width':2.1}});
   }
-  // At platform-level zoom, all route-specific station names should remain
-  // visible. Earlier deduplication silently removed the second 9호선 label.
+  // Close zoom retains each platform name and resolves collisions without forcing overlap.
   map.addLayer({id:'dj-metro-detail-name-very-close',type:'symbol',source:stationSource,minzoom:17.15,
     filter:['all',markerFilter('detail'),['==',['get','labelOn'],true]],
     layout:{'text-field':['get','label'],
       'text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'],
       'text-size':11.7,'text-offset':['get','labelOffset'],
-      'text-anchor':'bottom',
-      'text-allow-overlap':true,'text-ignore-placement':true,
+      'text-anchor':['get','labelAnchor'],
+      'text-allow-overlap':false,'text-ignore-placement':false,'text-padding':4,
       'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},
     paint:{'text-color':'#21483c','text-halo-color':'rgba(255,255,255,0.99)','text-halo-width':2.3}});
   // Hide metro lines and badges at the actual widest camera zoom on *both* PC and mobile.
@@ -2127,6 +2127,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       && Number.isFinite(item.lng)&&Number.isFinite(item.lat);
   }
   function drainOfficialBusQueue(){
+    if(transitContextActive())return;
     if(officialStaticStopCount>0 || officialBusAuthDisabled || (officialBusErrorAt && Date.now()-officialBusErrorAt<45000))return;
     while(officialBusInFlight<2 && officialBusQueue.length){
       const cell=officialBusQueue.shift();officialBusQueued.delete(cell.key);
@@ -2206,6 +2207,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   }
   let fallbackScans=0;
   const viewportEnrichment=coalesceViewportWork(scan=>{
+    if(transitContextActive())return;
     if(scan&&fallbackScans<20){fallbackScans++;augmentWithBasemapStations();}
     enrichNearbyBusStops();enrichMedianStops();enrichViewportBusStops();void fillHighZoomOSMBusStops();
   },{delay:200,isMoving:()=>map.isMoving?.()===true});

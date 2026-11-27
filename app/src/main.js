@@ -9,6 +9,7 @@ import {installMobileMapControls} from './mobile-map-controls.js';
 import {phoneProfile,normalMapPixelRatio,installPhoneRenderBudget,offscreenEvictionIds} from './adaptive-phone-map-budget.mjs';
 import {baseMapRecoveryDecision,BASE_STYLE_INITIAL_WAIT_MS} from './map-basemap-recovery.mjs';
 import './adaptive-phone-map-budget.css';
+import './transit-exterior-scope.css';
 import './button-material.css';
 import './browser-install-menu.css';
 import {installMobileLayoutCoordinator,installBottomTabNavigation} from './mobile-ui/index.js';
@@ -48,7 +49,7 @@ import {readSharedCommunity,publishCommunityPost,deleteSharedCommunityPost,setSh
 import {initPedestrianTools} from './pedestrian-tools.js';
 import {fetchDongjakPedestrianVariants} from './dongjak-local-routing.js';
 import {routeWithinDistrict} from './route-district-guard.mjs';
-import {TRANSIT_SEARCH_BOUNDS,transitPointInScope,transitCoordinatesInScope,transitEndpointPolicy,exteriorMapActive,transitWalkStyle} from './transit-exterior-scope.mjs';
+import {TRANSIT_SEARCH_BOUNDS,transitPointInScope,transitCoordinatesInScope,transitEndpointPolicy,exteriorMapActive,transitWalkStyle,transitContextBounds,createTransitContextLayers} from './transit-exterior-scope.mjs';
 import {installDongjakOfficialDataLayers} from './dongjak-verified-data-layers.js';
 import {installDongjakLiveTransit} from './features/liveTransit/integrate.js';
 import './features/liveTransit/live-transit.css';
@@ -740,7 +741,7 @@ let lastPitchStatus = '';
 let djBuildingBatchBusy=false;
 let lastFootprintPaintKey='';
 function syncAutomaticTerrain(_pitch) {
-  if(!mapReady || !terrainAvailable || terrainEnabled)return;
+  if(!mapReady || !terrainAvailable || terrainEnabled || app.dataset.djTransitExterior==='true')return;
   try {
     map.setTerrain({source:'dongjak-terrain-dem',exaggeration:1.0});
     terrainEnabled=true;
@@ -758,15 +759,15 @@ function syncAutomaticTerrain(_pitch) {
 function visibleBuilding2D(){
   // Loaded layers remain visible across the threshold; minzoom and paint
   // expressions smoothly fade them rather than flipping visibility on zoomend.
-  return mapReady && Boolean(boundaryGeometry);
+  return mapReady && Boolean(boundaryGeometry) && app.dataset.djTransitExterior!=='true';
 }
 function visibleBuilding3D(){
   // Camera movement and slow frames are never a visibility predicate.
   // The minzoom and paint expressions handle zoom without a layout flip.
-  return baseBuildingsVisible && mapReady && Boolean(boundaryGeometry) && buildingPitchActive && loadedBuildingTiles.size>0;
+  return baseBuildingsVisible && mapReady && Boolean(boundaryGeometry) && buildingPitchActive && loadedBuildingTiles.size>0 && app.dataset.djTransitExterior!=='true';
 }
 function syncTiltWithBuildings() {
-  if (!mapReady) return;
+  if (!mapReady || app.dataset.djTransitExterior==='true') return;
   const pitch=map.getPitch();
   is3D=pitch>=PITCH_BUILDING_START;
   buildingPitchActive=nextBuildingPitchMode(buildingPitchActive,pitch,PITCH_BUILDING_START,PITCH_BUILDING_EXIT);
@@ -841,7 +842,7 @@ function getVisibleBBox(){
 function scheduleBuildingLoad(){
   if (app.dataset.djTransitPreview || !visibleBuilding2D() || map.getZoom()<BUILDING_ZOOM_MIN || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
   clearTimeout(buildingLoadTimer);
-  buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},230);
+  buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},djPhone?600:230);
 }
 async function ensureBuildingManifest(){
   if(buildingManifest)return buildingManifest;
@@ -860,6 +861,7 @@ export function shouldRender3DBuilding(geometry){
 // v17.12: 기존 국가기본도와 GIS건물 보완 GeoJSON을 모두 로딩합니다.
 
 async function loadOneBuildingSheet(sheet){
+  if(app.dataset.djTransitExterior==='true')return;
   const existing=loadedBuildingTiles.get(sheet.sheet);
   if(existing?.complete||buildingLoading.has(sheet.sheet)||(buildingRetryAfter.get(sheet.sheet)||0)>Date.now())return;
   buildingLoading.add(sheet.sheet);
@@ -868,7 +870,7 @@ async function loadOneBuildingSheet(sheet){
     for(const problem of errors) console.warn(`[동작하는 안전지도] ${sheet.sheet}번 ${problem.label} 로딩 실패:`,problem.error);
     // Defer geometry filtering and indexing until the phone camera is settled.
     while(djPhone&&map.isMoving?.())await new Promise(resolve=>map.once('moveend',resolve));
-    if(!boundaryGeometry||app.dataset.djTransitPreview)return;
+    if(!boundaryGeometry||app.dataset.djTransitExterior==='true')return;
     // Tile-native buildings are incomplete in parts of Sangdo 1-dong. The
     // supplied base+supplement GIS footprints must also be available overhead.
     const districtBuildings=features.filter(f=>Number.isFinite(f.properties?.x)&&Number.isFinite(f.properties?.y)&&
@@ -926,7 +928,7 @@ function scheduleInitialBuildingWarmup(){
   if(initialBuildingWarmupScheduled||!boundaryGeometry||!mapReady||djRenderBudget.isEconomy())return;
   initialBuildingWarmupScheduled=true;
   const run=async()=>{
-    if(!boundaryGeometry)return;
+    if(!boundaryGeometry||app.dataset.djTransitExterior==='true')return;
     try{
       const manifest=await ensureBuildingManifest();
       const center=map.getCenter();
@@ -940,7 +942,7 @@ function scheduleInitialBuildingWarmup(){
           if(typeof requestIdleCallback==='function')requestIdleCallback(resolve,{timeout:2200});
           else setTimeout(resolve,350);
         });
-        if(!map.getStyle?.()?.layers?.length||app.dataset.djTransitPreview)return;
+        if(!map.getStyle?.()?.layers?.length||app.dataset.djTransitExterior==='true')return;
         await loadOneBuildingSheet(sheet);
       }
     }catch(error){console.info('[3D 건물 사전 준비] 요청 시 재시도 가능:',error?.message);}
@@ -988,6 +990,7 @@ async function loadVisibleBuildingSheets(){
     if(buildingRetryAfter.size&&visibleBuilding2D()&&map.getZoom()>=BUILDING_ZOOM_MIN){buildingRetryTimer=setTimeout(()=>scheduleBuildingLoad(),16000);}
   }
 }
+map.on('movestart',()=>{if(djPhone)clearTimeout(buildingLoadTimer);});
 map.on('moveend',scheduleBuildingLoad);
 map.on('zoomend',()=>{syncTiltWithBuildings();});
 // Preserve the loaded building representation during pan, rotation and pitch.
@@ -1165,7 +1168,7 @@ async function loadDongjakBoundary(){
     boundaryBounds=computeBounds(boundaryGeometry);
     if(gpsLastPosition)outsideDistrictAlert.check(...gpsLastPosition,boundaryGeometry,gpsLastAccuracy);
     // 다운로드한 실제 경계 기준 + 10km까지 지도 이동 범위 갱신.
-    map.setMaxBounds(app.dataset.djTransitExterior==='true'?TRANSIT_SEARCH_BOUNDS:bufferedDistrictBounds(boundaryGeometry));
+    if(app.dataset.djTransitExterior!=='true')map.setMaxBounds(bufferedDistrictBounds(boundaryGeometry));
     // 동작구 밖 원본 시설명은 가리되, 추가 자치구 라벨은 별도 심벌로 표시합니다.
     clipBasemapLabelsToDistrict(map,boundaryGeometry);
     // 건물은 검증된 원본 벡터 타일을 유지합니다. 별도 지리 필터로 건물을 누락시키지 않습니다.
@@ -1716,7 +1719,7 @@ map.on('load',()=>{
   installGrassTexture({map,app});
   installForestShade({map,app});
   const nativeBuildingLayers=installBaseBuildingPalette({map,app});
-  buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers);
+  buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers,()=>app.dataset.djTransitExterior==='true');
   buildingCoverage.setExtruding(visibleBuilding3D());
   status('지도 준비 완료 · 동작구 경계 불러오는 중');
   // 공개 Terrarium DEM: API 키 없이 지형을 표시합니다. 지형 데이터의 상세도는 지역별로 다릅니다.
@@ -1889,6 +1892,7 @@ map.on('load',()=>{
   onRoutePick:(place)=>selectNamedRouteMapPlace(place),
   onRouteSelect:(which,place)=>selectExternalRouteLocation(which,place), canOpen:()=>!navMode&&app.dataset.tab==='map' && !addMode && !routePickMode && !communityPickMode})).then(()=>{
     baseLayerControls?.apply();
+    if(app.dataset.djTransitExterior==='true')syncTransitExterior(true);
     accessibilityLayer.bringToFront();
     startupLoader.transportReady();
     try{installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice:toast});}catch(error){console.warn('실시간 차량 레이어 초기화 실패:',error);}
@@ -2868,13 +2872,13 @@ function syncRoutePresentation() {
     detail.hidden=true;
     editor.hidden=true;
     const metric=readRouteMetrics();
-    document.getElementById('route-map-metrics').textContent = transitPreview?(Number.isFinite(transitPreview.minutes)?'참고 약 '+Math.ceil(transitPreview.minutes)+'분 · 도보 '+Math.round(transitPreview.walkM)+'m':'도보 '+Math.round(transitPreview.walkM)+'m · 전체 시간 미확인'):`${metric.duration} · ${metric.distance}`;
+    document.getElementById('route-map-metrics').textContent = transitPreview?('도보 '+Math.round(transitPreview.walkM)+'m'):`${metric.duration} · ${metric.distance}`;
     const pri=routeResult?.priExposure;
     const priInfo=Number.isFinite(pri?.risk) && pri?.coverage>=0.65
       ? '보행 위험도(PRI) 부분평가 '+pri.risk.toFixed(1)+'점 · 구간 관측 '+Math.round(pri.coverage*100)+'%'
       : '보행 위험도 평가 자료 부족';
     document.getElementById('route-guide-start').disabled=Boolean(transitPreview);
-    document.getElementById('route-map-source').textContent=transitPreview?(transitPreview.kind==='bus'?'버스 '+transitPreview.route+' · 운행시간·요금 미확인':transitPreview.kind==='rail'?'지하철 연계 · 배차·대기 미반영':'환승 '+transitPreview.changes+'회 · 운행시간·요금 미확인'):(routeResult?.source==='seoul-pedestrian-graph'
+    document.getElementById('route-map-source').textContent=transitPreview?(transitPreview.kind==='bus'?'버스 '+transitPreview.route:transitPreview.kind==='rail'?'지하철 연계':'환승 '+transitPreview.changes+'회'):(routeResult?.source==='seoul-pedestrian-graph'
       ? '서울시 도보 네트워크' : '외부 보행경로 서버')+' · '+priInfo;
   } else if (onMap && !picking && detail.hidden && editor.hidden && app.dataset.djSafetyHomeOnly!=='1') {
     showOverviewOnlyWithContent();
@@ -2898,31 +2902,40 @@ function updateRouteLabels() {
   const clear=document.getElementById('route-clear');
   if(clear)clear.hidden=!(routeStart||routeEnd||routeResult||routeWaypoints.length);
   updateRouteCalcAvailability();
+  if(app.dataset.djTransitExterior==='true')syncTransitExterior();
 }
 function makeRouteMarker(position, color) {
   const marker=new maplibregl.Marker({color,scale:0.95}).setLngLat([position.lng,position.lat]).addTo(map);
   marker.getElement?.()?.classList.add('dj-route-endpoint-marker');
   return marker;
 }
-function drawRouteMarkers(visible=app.dataset.tab==='map'&&!communityPickMode&&!addMode&&Boolean(routePickMode||((routeResult||transitPreview)&&app.dataset.djWalkArrived!=='1')||navMode)) {
+function drawRouteMarkers(visible=(app.dataset.tab==='map'||app.dataset.transitComparison==='true')&&!communityPickMode&&!addMode&&Boolean(app.dataset.transitComparison==='true'||routePickMode||((routeResult||transitPreview)&&app.dataset.djWalkArrived!=='1')||navMode)) {
   const update=(marker,point,key,color)=>{
     const next=visible&&point?`${point.lng},${point.lat}`:null;
     if(marker&&routeEndpointMarkerKeys[key]===next&&next)return marker;
     marker?.remove();routeEndpointMarkerKeys[key]=next;
     return next?makeRouteMarker(point,color):null;
   };
-  routeStartMarker=update(routeStartMarker,routeStart,'start','#2563eb');
+  routeStartMarker=update(routeStartMarker,app.dataset.transitComparison==='true'?null:routeStart,'start','#2563eb');
   routeEndMarker=update(routeEndMarker,routeEnd,'end','#0ba876');
 }
-// Keep the existing map, style, symbols, buildings and caches. Transit only
-// changes the district mask/boundary and the permitted camera extent.
+// Keep the shared map instance, but suspend non-route presentation while transit is active.
 var transitHomeCamera;
+var transitRouteContext=[];
+var transitContextSignature='';
+var transitContextLayers;
+var transitContextDirty=false;
+function syncTransitContextBounds(active){
+ const bounds=active?transitContextBounds(bufferedDistrictBounds(boundaryGeometry,0),[routeStart,routeEnd],transitRouteContext):bufferedDistrictBounds(boundaryGeometry);
+ const signature=JSON.stringify(bounds);
+ if(signature!==transitContextSignature){transitContextSignature=signature;map.setMaxBounds(bounds);}
+}
 function syncTransitExterior(force=false){
  const active=exteriorMapActive({mode:app.dataset.djTransitMode,tab:app.dataset.tab,pick:routePickMode,preview:transitPreview});
  const previous=app.dataset.djTransitExterior==='true';
- if(!force&&active===previous)return;
  app.dataset.djTransitExterior=String(active);
  if(!boundaryGeometry||!mapReady)return;
+ if(!force&&active===previous){if(active)syncTransitContextBounds(true);return;}
  if(active&&!previous&&!transitHomeCamera){
   transitHomeCamera={center:map.getCenter(),zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing()};
  }
@@ -2933,7 +2946,17 @@ function syncTransitExterior(force=false){
  }
  if(map.getLayer('district-border'))map.setPaintProperty('district-border','line-opacity',active?0:0.96);
  if(map.getLayer('district-border-halo'))map.setPaintProperty('district-border-halo','line-opacity',active?0:(window.matchMedia('(max-width:699px)').matches?0.42:0.92));
- map.setMaxBounds(active?TRANSIT_SEARCH_BOUNDS:bufferedDistrictBounds(boundaryGeometry));
+ transitContextLayers??=createTransitContextLayers(map);
+ if(active){
+  clearTimeout(buildingLoadTimer);
+  if(terrainEnabled){map.setTerrain(null);terrainEnabled=false;}
+  transitContextLayers.enforce();transitContextDirty=false;
+ }else{
+  transitContextDirty=false;transitContextLayers.restore();
+  baseLayerControls?.apply();
+  syncTiltWithBuildings();
+ }
+ syncTransitContextBounds(active);
  if(!active&&previous&&app.dataset.tab==='map'&&transitHomeCamera){
   const camera=transitHomeCamera;transitHomeCamera=null;
   map.stop();map.jumpTo({...camera,padding:{top:0,bottom:0,left:0,right:0}});
@@ -2941,7 +2964,11 @@ function syncTransitExterior(force=false){
   transitHomeCamera=null;
  }
 }
+// Recheck only after actual style changes, not every idle/zoom cycle.
+map.on('styledata',()=>{if(app.dataset.djTransitExterior==='true')transitContextDirty=true;});
+map.on('idle',()=>{if(app.dataset.djTransitExterior==='true'&&transitContextDirty&&!map.isMoving?.()){transitContextLayers?.enforce();transitContextDirty=false;}});
 function clearTransitPreview(){
+  transitRouteContext=[];
   const wasPreview=Boolean(transitPreview);
   transitPreview=null;transitGeneration++;delete app.dataset.djTransitPreview;
   syncTransitExterior();
@@ -3457,6 +3484,19 @@ function readRouteMetrics() {
   const kilometers=routeResult.kilometers;
   return {duration:`약 ${Math.max(1,Math.ceil(seconds/60))}분`,distance:kilometers<1?`${Math.round(kilometers*1000)}m`:`${kilometers.toFixed(2)}km`};
 }
+function transitVisiblePadding(sheetTop,toolbarBottom){
+ const rect=map.getContainer().getBoundingClientRect();
+ const top=Math.max(0,toolbarBottom-rect.top)+18,bottom=Math.max(0,rect.bottom-sheetTop)+18;
+ return top+bottom<rect.height-48?{top,bottom,left:28,right:28}:null;
+}
+window.addEventListener('dongjak:transit-comparison-focus',event=>{
+ if(app.dataset.tab!=='route'||!routeEnd)return;
+ const {sheetTop,toolbarBottom}=event.detail||{};
+ const padding=transitVisiblePadding(sheetTop,toolbarBottom);if(!padding)return;
+ app.dataset.transitComparison='true';drawRouteMarkers(true);
+ map.easeTo({center:[routeEnd.lng,routeEnd.lat],offset:[0,(padding.top-padding.bottom)/2],padding:{top:0,bottom:0,left:0,right:0},pitch:0,duration:350});
+});
+window.addEventListener('dongjak:transit-comparison-dismiss',()=>{delete app.dataset.transitComparison;drawRouteMarkers();});
 function fitWalkingRoute(coords) {
   if(!Array.isArray(coords)||coords.length<2)return;
   const bounds=coords.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(coords[0],coords[0]));
@@ -3848,6 +3888,8 @@ async function sharedTransitRailSegments(stops,lines){
 }
 // Selected transit preview is visually distinct from the underlying rail network.
 function focusTransitRoute(coords){
+ transitRouteContext=coords;
+ syncTransitExterior();
  for(const id of ['dj-transit-rail-verified','dj-transit-rail-schematic','dj815-transit-bus','dj-transit-multi-bus','dj815-transit-walk','dj-transit-multi-walk']){
   const line=id+'-line',casing=id+'-focus-casing';
   if(!map.getLayer(line))continue;
@@ -3864,13 +3906,21 @@ function focusTransitRoute(coords){
  if(map.getLayer(circle))map.moveLayer(circle,before);
  const transferLabel='dj-transit-multi-stops-transfer-label';if(map.getLayer(transferLabel))map.moveLayer(transferLabel);
  const selected=transitPreview;
- requestAnimationFrame(()=>{if(transitPreview===selected&&selected&&app.dataset.tab==='map')fitWalkingRoute(coords);});
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  if(transitPreview!==selected||!selected||app.dataset.tab!=='map')return;
+  const card=document.getElementById('route-map-card'),head=document.getElementById('dj-walk-map-head');
+  const padding=card&&head?transitVisiblePadding(card.getBoundingClientRect().top,head.getBoundingClientRect().bottom):null;
+  const all=[...coords,...[routeStart,routeEnd].filter(Boolean).map(p=>[p.lng,p.lat])];
+  if(!padding||all.length<2){fitWalkingRoute(all);return;}
+  const bounds=all.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(all[0],all[0]));
+  map.fitBounds(bounds,{padding,maxZoom:16,duration:480,pitch:0,bearing:0});
+ }));
 }
 function setTransitPreviewStops(features){
  const id='dj-transit-multi-stops',data={type:'FeatureCollection',features};
  if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
  if(!map.getLayer(id+'-circle'))map.addLayer({id:id+'-circle',type:'circle',source:id,paint:{'circle-radius':['case',['==',['get','transfer'],true],7,6],'circle-color':'#fff','circle-stroke-color':['get','color'],'circle-stroke-width':2.5}});
- if(!map.getLayer(id+'-transfer-label'))map.addLayer({id:id+'-transfer-label',type:'symbol',source:id,filter:['==',['get','transfer'],true],layout:{'text-field':'환승','text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'],'text-size':11.7,'text-anchor':'bottom','text-offset':[0,-1.25],'text-allow-overlap':true,'text-ignore-placement':true,'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},paint:{'text-color':'#21483c','text-halo-color':'#fff','text-halo-width':1.1}});
+ if(!map.getLayer(id+'-transfer-label'))map.addLayer({id:id+'-transfer-label',type:'symbol',source:id,filter:['==',['get','transfer'],true],layout:{'text-field':'환승','text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'],'text-size':11.7,'text-variable-anchor':['bottom','top','left','right'],'text-radial-offset':2.4,'text-allow-overlap':false,'text-ignore-placement':false,'text-padding':5,'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},paint:{'text-color':'#21483c','text-halo-color':'#fff','text-halo-width':1.1}});
 }
 function transitRailData(segments){
  const color=line=>subwayLineColor(line==='신림'?'신림선':line+'호선');

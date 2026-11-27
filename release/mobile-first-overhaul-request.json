@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.221",
+  "application_version": "9.2.222",
   "public_work_branch": "main",
-  "purpose": "Integrated transit design and map performance patch: filled route-color pill badges, route search/detail local fades, station-reference label font and zoom sizing, idle-only label style/reorder updates, idempotent native transit filter, shared displayed rail geometry for selected routes, route lines beneath station/POI symbols, transfer labels and teardown regression. Preserve v9.2.220 community dismissal and transit/POI improvements. Require protected source CI, mobile QA, Production and APK; physical device FPS not yet verified.",
-  "attempt": 456,
+  "purpose": "Transit viewport and independent platform labels; remove fares/full-trip estimates; preserve previous 2.5x quality policy, avoid route-editor rebuilds on map motion class changes, defer building load during repeated gestures. Require matched pre-transit pan and zoom benchmark and all protected checks before deployment. Real iPhone latency is not yet measured.",
+  "attempt": 457,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

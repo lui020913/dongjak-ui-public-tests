@@ -159,7 +159,9 @@ export function installEducationLayer({map,maplibregl,isDongjak}){
       map.setFilter(layer.id,['all',...(filter?[filter]:[]),['!', ['any',...clauses]]]);
     }catch(error){console.debug('[대학 중복] 원본 레이블 숨김 제외:',layer.id,error);}
   }
+  const transitContextActive=()=>document.getElementById('app')?.dataset?.djTransitExterior==='true';
   function syncZoom(){
+    if(transitContextActive())return;
     const zoom=map.getZoom();
     for(const {marker,place} of markers.values()){
       const el=marker.getElement();
@@ -215,7 +217,7 @@ export function installEducationLayer({map,maplibregl,isDongjak}){
   // Defer the network request until base tile settling. A tile layer existing
   // without data no longer blocks the supplemental search for missing schools.
   const runCoverageCheck=()=>{
-    if(started||abort.signal.aborted)return;
+    if(transitContextActive()||started||abort.signal.aborted)return;
     // Do not download hundreds of school markers at the initial district-wide zoom.
     if((map.getZoom?.()??0)<14.5)return;
     const vectorLayerExists=Boolean(map.getLayer?.('dj-civic-poi-school'));
@@ -230,7 +232,8 @@ export function installEducationLayer({map,maplibregl,isDongjak}){
     }
   };
   map.once?.('idle',runCoverageCheck);
+  map.on?.('moveend',runCoverageCheck);
   map.on?.('zoomend',runCoverageCheck);
-  return ()=>{abort.abort();map.off?.('zoom',syncZoom);map.off?.('move',onMove);map.off?.('moveend',syncZoom);map.off?.('idle',syncZoom);map.off?.('zoomend',runCoverageCheck);
+  return ()=>{abort.abort();map.off?.('zoom',syncZoom);map.off?.('move',onMove);map.off?.('moveend',syncZoom);map.off?.('idle',syncZoom);map.off?.('zoomend',runCoverageCheck);map.off?.('moveend',runCoverageCheck);
     map.off?.('idle',runCoverageCheck);for(const {marker} of markers.values())marker.remove();markers.clear();};
 }

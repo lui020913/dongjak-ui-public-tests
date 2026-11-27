@@ -52,11 +52,12 @@ export function nextBuildingPitchMode(active,pitch,enter=10,exit=7){
 export function buildingModeVisibility(extruding){
  return extruding?{plan:'none',extrusion:'visible'}:{plan:'visible',extrusion:'none'};
 }
-export function createBuildingCoverage(map,layers){
+export function createBuildingCoverage(map,layers,isSuspended=()=>false){
  let extruding=false,dirty=true;
  const original=new Map(),excludedBySheet=new Map(),reviewBySheet=new Map(),retainedBySheet=new Map(),hidden=new Map();
  const clearHidden=()=>{for(const target of hidden.values())try{map.removeFeatureState(target,'djGisCovered');}catch{}hidden.clear();};
  const sync=()=>{
+  if(isSuspended())return;
   for(const id of layers){
    if(!map.getLayer(id))continue;
    const current=map.getLayoutProperty?.(id,'visibility')||'visible';
@@ -69,7 +70,7 @@ export function createBuildingCoverage(map,layers){
  // GIS footprint independently confirms the small shape, or a reliable
  // explicitly square-metre area is supplied. Never hide from greenery alone.
  const reconcile=()=>{
-  if(!dirty||extruding||map.isMoving?.()||!map.queryRenderedFeatures||!map.setFeatureState)return;
+  if(isSuspended()||!dirty||extruding||map.isMoving?.()||!map.queryRenderedFeatures||!map.setFeatureState)return;
   const ids=layers.filter(id=>map.getLayer(id));if(!ids.length)return;
   let features;try{features=map.queryRenderedFeatures({layers:ids});}catch{return;}
   const seen=new Map();

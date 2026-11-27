@@ -26,7 +26,7 @@ export function installPhoneRenderBudget({map,app,initial='normal',normalRatio=1
   const apply=()=>{
     app.dataset.djPhoneBudget=level;
     if(typeof map.setPixelRatio==='function'){
-      // Native economy devices retain 1x; capable phones never settle below 2x after a slow gesture.
+      // Preserve the existing normal-quality profile; no global resolution downgrade for transit.
       const ratio=hidden?1:level==='economy'?(initial==='economy'?1:Math.min(2,normalRatio)):normalRatio;
       if(map.getPixelRatio?.()!==ratio)map.setPixelRatio(ratio);
     }
