@@ -31,7 +31,7 @@ export function mergeRouteSearchResults(query,...groups){
     rows.push({...p,kind});
   }
   const score=p=>Math.max(koreanSearchScore(term,p.name),koreanSearchScore(term,p.address||''))+(p.kind==='subway'&&normalizeKoreanSearch(p.name).replace(/역$/,'')===term.replace(/역$/,'')?12:0);
-  return rows.sort((a,b)=>score(b)-score(a)||Number(a.kind==='bus')-Number(b.kind==='bus')).slice(0,40);
+  return rows.sort((a,b)=>Number(a.kind==='bus')-Number(b.kind==='bus')||score(b)-score(a)).slice(0,40);
 }
 export function routeResultSubtitle(place){
   if(typeOf(place)==='bus'){
