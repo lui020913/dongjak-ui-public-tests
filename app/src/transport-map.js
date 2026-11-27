@@ -1838,9 +1838,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     for(const p of geo.features){
       registerStationIcon(p.properties.iconId,p.properties.iconLines||[p.properties.line]);
     }
-    // External stations remain searchable and usable for actual route endpoints,
-    // but do not display their labels or badges on the ordinary base map.
-    geo.features=geo.features.filter(f=>isDongjak(...f.geometry.coordinates)===true);
+    // Preserve the existing metro radius and per-station zoom rules. A platform
+    // or interchange badge may lie just outside Dongjak; administrative POI
+    // clipping must not remove it. Native external bus and POI symbols stay scoped.
     map.getSource(stationSource)?.setData(geo);
   }
   function updateMetroMarkerPresentation(){

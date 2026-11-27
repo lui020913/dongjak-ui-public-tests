@@ -57,6 +57,18 @@ try{
   await page.waitForFunction(()=>{const m=window.__qaMap;if(!m.getLayer('transport-schematic-subway'))return false;const p=m.project([126.9822,37.512]);return m.queryRenderedFeatures([[p.x-30,p.y-30],[p.x+30,p.y+30]],{layers:['transport-schematic-subway']}).some(f=>f.properties.line==='4호선'&&f.properties.schematic===false);},{},{timeout:90000});
   await page.screenshot({path:out+'/line4-dongjak-bridge.png'});console.log('ADMIN_RAIL_RENDER_OK',JSON.stringify(names));
  }
+ if(process.env.CHECK_NEIGHBOR_METRO==='true'){
+  const stations=[{name:'대방',center:[126.926382,37.513342]},{name:'이촌',center:[126.974733,37.522295]},{name:'신림',center:[126.929715,37.484201]}];
+  const checks=[];
+  for(const station of stations){
+   await page.evaluate(({center})=>window.__qaMap.jumpTo({center,zoom:16.2,pitch:0}),station);
+   await page.waitForFunction(({name})=>{const m=window.__qaMap;const ids=['dj-metro-detail-icon','dj-metro-detail-name'].filter(id=>m.getLayer(id));if(ids.length!==2)return false;return ids.every(id=>m.queryRenderedFeatures({layers:[id]}).some(f=>f.properties.stationKey===name));},station,{timeout:90000});
+   const data=await page.evaluate(({name})=>{const m=window.__qaMap;return m.queryRenderedFeatures({layers:['dj-metro-detail-icon','dj-metro-detail-name']}).filter(f=>f.properties.stationKey===name).map(f=>({layer:f.layer.id,line:f.properties.line,label:f.properties.label}));},station);
+   checks.push({station:station.name,rendered:data});
+   await page.screenshot({path:out+'/metro-'+station.name+'.png'});
+  }
+  console.log('NEIGHBOR_METRO_RENDER_OK',JSON.stringify(checks));
+ }
  for(const site of sites){
   await page.evaluate(({center})=>window.__qaMap.jumpTo({center,zoom:18.4,pitch:0}),site);
   await page.waitForFunction(()=>{const m=window.__qaMap;return m.isStyleLoaded()&&m.getStyle().layers.some(l=>l['source-layer']==='transportation'&&l.type==='line')&&m.getStyle().layers.some(l=>l.id.startsWith('dongjak-buildings-footprint-')&&m.isSourceLoaded(l.source));},{},{timeout:90000}).catch(async error=>{console.log('IDLE_MAP_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>{const m=window.__qaMap;return {styleLoaded:m.isStyleLoaded(),moving:m.isMoving(),layers:m.getStyle().layers.filter(l=>l.id.startsWith('dongjak-buildings-footprint-')).map(l=>({id:l.id,loaded:m.isSourceLoaded(l.source)})),boundary:document.querySelector('#app')?.dataset.djBoundaryReady};})));throw error;});

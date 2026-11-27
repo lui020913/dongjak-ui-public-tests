@@ -83,10 +83,14 @@ test('administrative label clipping hides external bridge and other non-administ
     {id:'base-city-label',type:'symbol'},
     {id:'dongjak-custom-label',type:'symbol'},
     {id:'neighbor-district-names',type:'symbol'},
+    {id:'dj-metro-summary-icon',type:'symbol',source:'transport-metro-geographic-markers'},
+    {id:'dj-metro-detail-name',type:'symbol',source:'transport-metro-geographic-markers'},
+    {id:'dj-metro-summary-mobile-hubs-icon',type:'symbol',source:'transport-metro-geographic-markers'},
+    {id:'dj-metro-native-test',type:'symbol',source:'openmaptiles'},
     {id:'dj-transit-multi-stops-transfer-label',type:'symbol'}
   ]}),getFilter:()=>null,setFilter:(id,filter)=>filtered.push([id,filter])};
   clipBasemapLabelsToDistrict(map,{type:'Polygon',coordinates:[[[126.9,37.49],[127,37.49],[127,37.52],[126.9,37.49]]]});
-  assert.deepEqual(filtered.map(([id])=>id),['dj-hangang-bridge-osm-labels','dj-hangang-bridge-geometry-labels','base-city-label','dongjak-custom-label']);
+  assert.deepEqual(filtered.map(([id])=>id),['dj-hangang-bridge-osm-labels','dj-hangang-bridge-geometry-labels','base-city-label','dongjak-custom-label','dj-metro-native-test']);
 });
 
 
@@ -100,4 +104,19 @@ test('bus label owner and district scope agree without recurring filter writes',
  const within=['within',geometry],filters=new Map([['transport-bus-names',['all',['!=',['get','label'],''],within]]]);
  const handlers={},writes=[];const map={getStyle:()=>({layers:[{id:'transport-bus-names',type:'symbol'}]}),getFilter:id=>filters.get(id),setFilter:(id,v)=>{writes.push(id);filters.set(id,v);},on:(e,fn)=>handlers[e]=fn,off(){}};
  clipBasemapLabelsToDistrict(map,geometry);handlers.styledata();assert.equal(writes.length,0);restoreBasemapLabelsOutsideDistrict(map);
+});
+
+
+test('original metro station radius and district-boundary platforms survive general exterior label clipping',async()=>{
+ const {metroMarkerGeojson}=await import('../src/metro-marker-geodata.js');
+ const {fixedMetroStations}=await import('../src/fixed-rail-lines.js');
+ const {withinMetroRadius}=await import('../src/transport-map.js');
+ const {districtScopedSymbol}=await import('../src/ui-environment.js');
+ const canonical=fixedMetroStations();
+ const colors=Object.fromEntries(['1호선','2호선','4호선','7호선','9호선','신림선'].map(x=>[x,'#123456']));
+ const geo=metroMarkerGeojson(canonical,{canonicalStations:canonical,normalizeName:s=>s.replace(/역$/,''),placements:(n,lines,lng,lat)=>lines.map(line=>({line,lng,lat})),colors,radiusPredicate:withinMetroRadius,isDistrict:()=>false,nearby:()=>true});
+ for(const station of ['대방','이촌','신길','신림','사당','구반포','관악산'])for(const role of ['summary','detail'])assert.ok(geo.features.some(f=>f.properties.stationKey===station&&f.properties.role===role),station+' '+role);
+ for(const suffix of ['summary-icon','summary-name','detail-icon','detail-name','detail-name-very-close','summary-mobile-hubs-icon'])assert.equal(districtScopedSymbol({type:'symbol',id:'dj-metro-'+suffix,source:'transport-metro-geographic-markers'}),false);
+ const code=readFileSync(new URL('../src/transport-map.js',import.meta.url),'utf8');const block=code.slice(code.indexOf('function renderMetroMarkers('),code.indexOf('function updateMetroMarkerPresentation('));
+ assert.doesNotMatch(block,/geo\.features\s*=\s*geo\.features\.filter/);assert.match(block,/radiusPredicate:withinMetroRadius/);assert.match(block,/map\.getSource\(stationSource\)\?\.setData\(geo\)/);
 });

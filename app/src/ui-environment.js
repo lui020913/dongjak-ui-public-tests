@@ -405,6 +405,9 @@ const districtLabelOwners=new WeakMap();
 // Selected route labels, safety reports and live navigation are not basemap POIs.
 export function districtScopedSymbol(layer={}){
  const id=String(layer.id||'');
+ // The dedicated metro source owns its original radius, zoom, and station eligibility.
+ // Never apply a generic district polygon to these symbols (including transfer platforms).
+ if(layer.source==='transport-metro-geographic-markers'&&id.startsWith('dj-metro-'))return false;
  return layer.type==='symbol'&&id!=='neighbor-district-names'&&
  !/^(?:dj-transit-(?:multi|comparison|rail)|dj815-transit-|walking-route|registered-points|route-|dj-route-|dj-pri-|dongjak-pri-|nav-)/.test(id);
 }
