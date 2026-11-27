@@ -4,6 +4,7 @@ export function solidifyMapLines(map){
  let changed=0;
  for(const layer of map.getStyle()?.layers||[]){
   if(layer.type!=='line'||layer.paint?.['line-dasharray']==null)continue;
+  if(/^(dj815-transit-walk|dj-transit-multi-walk|dj-transit-comparison-walk)-line$/.test(layer.id))continue;
   try{map.setPaintProperty(layer.id,'line-dasharray',null);changed++;}catch{/* Style is being replaced. Next styledata retries. */}
  }
  return changed;
