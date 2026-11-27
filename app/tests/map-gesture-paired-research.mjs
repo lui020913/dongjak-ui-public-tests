@@ -108,6 +108,46 @@ async function sample(url,variant,round){
    assert.ok(data.sweeps.every(x=>Math.hypot(x.to[0]-x.from[0],x.to[1]-x.from[1])>.0004&&Math.hypot(x.target[0]-x.to[0],x.target[1]-x.to[1])<.0001&&x.elapsedMs>=4000&&Math.abs(x.afterZoom-x.zoom)<.02),'matched camera sweep did not execute');
    assert.ok(data.frames.length>=10&&data.sweeps.every(x=>x.frames>=2),'insufficient map frames');
   }
+  if(round===1&&process.env.CHECK_SHARED_SCOPE==='true'){
+   // Probe the same real external tiles in both revisions, without letting
+   // the production camera bounds prevent the test from reaching them.
+   const audit=await page.evaluate(async({candidate})=>{
+    const m=window.__qaMap,app=document.getElementById('app'),pause=ms=>new Promise(r=>setTimeout(r,ms));
+    const results=[];
+    const sample=async(name,center,pitch,expected)=>{
+     m.setMaxBounds(null);m.jumpTo({center,zoom:17.8,pitch,bearing:0});
+     let stable=0,state;const deadline=performance.now()+90000;
+     while(performance.now()<deadline){
+      const layers=m.getStyle().layers;
+      const ids=layers.filter(l=>['fill','fill-extrusion','line'].includes(l.type)&&(l['source-layer']==='building'||l.id.startsWith('dongjak-buildings-'))).map(l=>l.id);
+      const rendered=m.queryRenderedFeatures({layers:ids});
+      const source=layers.find(l=>l['source-layer']==='building'&&l.source);
+      let raw=0;try{raw=m.querySourceFeatures(source.source,{sourceLayer:'building'}).length;}catch{}
+      state={name,pitch,raw,rendered:rendered.length,types:[...new Set(rendered.map(f=>f.layer.type))],center:m.getCenter().toArray(),ready:m.isStyleLoaded()&&!m.isMoving()&&m.areTilesLoaded()};
+      const pass=state.ready&&raw>0&&Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001&&(expected==='none'?state.rendered===0:expected==='3d'?state.types.includes('fill-extrusion'):state.rendered>0);
+      stable=pass?stable+1:0;if(stable>=3)break;
+      await pause(500);
+     }
+     if(stable<3)throw Error('BUILDING_SCOPE_AUDIT '+JSON.stringify(state));
+     results.push(state);
+    };
+    await sample('external 2D',[126.999,37.501],0,candidate?'none':'positive');
+    await sample('external 3D',[126.999,37.501],48,candidate?'none':'positive');
+    if(candidate){
+     await sample('internal 2D',[126.94791,37.502834],0,'positive');
+     await sample('internal 3D',[126.94791,37.502834],48,'3d');
+     // Exercise the actual transit state event, not a distinct map instance.
+     app.dataset.tab='route';app.dataset.djTransitMode='transit';
+     window.dispatchEvent(new CustomEvent('dongjak:transit-mode-change',{detail:'transit'}));
+     await sample('transit external 2D',[126.999,37.501],0,'none');
+     await sample('transit external 3D',[126.999,37.501],48,'none');
+     await sample('transit internal 2D',[126.94791,37.502834],0,'positive');
+     await sample('transit internal 3D',[126.94791,37.502834],48,'3d');
+    }
+    return results;
+   },{candidate:variant==='candidate'});
+   console.log('BUILDING_SCOPE_AUDIT',variant,JSON.stringify(audit));report.buildingAudit??={};report.buildingAudit[variant]=audit;
+  }
  }finally{await ctx.close();}
 }
 try{

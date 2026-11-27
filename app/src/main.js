@@ -60,7 +60,7 @@ import {initStationAccessibility} from './station-accessibility.js';
 import {searchPlaces,searchLocalPlaces} from './route-search.js';
 import {cachedOfficialSearchPlaces,queryOfficialPlaces} from './seoul-official-facilities.js';
 import {routeStationMatches,mergeRouteSearchResults,routeResultSubtitle} from './route-search-results.js';
-import {walkingRouteViewportPadding,strictRouteViewportPadding,waitForRouteViewport} from './route-map-focus.js';
+import {strictRouteViewportPadding,waitForRouteViewport} from './route-map-focus.js';
 import {createDistrictBuildingScope} from './district-building-scope.mjs';
 import {initMapQuickSearch} from './map-quick-search.js';
 import './map-search-refinement.css';
