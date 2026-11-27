@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.227",
+  "application_version": "9.2.228",
   "public_work_branch": "main",
-  "purpose": "PR #603: restore offline Seoul district and Gyeonggi city labels from compact verified geographic anchors; preserve actual OSM Line 4 geometry across Dongjak railway bridge and use it as reference/fallback for incomplete remote railway data. All four executed CI/browser workflows passed. Require protected Preview and mobile QA before Production; physical-device verification remains open.",
-  "attempt": 462,
+  "purpose": "PR #604: restore Daebang (both Line 1 and Sillim) and limited curated neighboring subway stations, keep unrelated external stations/POIs hidden and retain existing track alignment. User requested immediate deployment without additional manual validation. PR merged before optional CI completion; existing protected Preview/mobile QA remain mandatory; no physical-device verification yet.",
+  "attempt": 463,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
