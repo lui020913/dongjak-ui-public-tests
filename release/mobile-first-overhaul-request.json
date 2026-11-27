@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.246",
+  "application_version": "9.2.247",
   "public_work_branch": "main",
-  "purpose": "Deploy merged PR #627: versioned Seoul single-alignment rail dataset and one colored rail layer without casing, roadside display-only bus stop alignment preserving original official coordinates and side, mode-specific bus label clipping. Full source CI 2420 passed, 13 skipped, all 36 phone cases and picker/facility and protected overlay regression passed. Preserve Preview/mobile QA/Production/APK gates.",
-  "attempt": 482,
+  "purpose": "Deploy merged PR #628: shared bus route colors including ended services, district boundary bus stop coverage, removal of decorative park trees, mapped subway exits and passages with explicit schematic fallback, and six distinct mapped site landuse colors including healthcare and civic facilities in light and dark modes. Preserve facility zoom thresholds and protected Preview/mobile QA/Production/APK gates. Source CI, picker/facility, endpoint navigation and overlay compatibility checks passed; visual and performance verification still pending.",
+  "attempt": 483,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
