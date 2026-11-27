@@ -69,7 +69,7 @@ test('route input uses mode-specific guard while walking and waypoints remain st
   assert.match(route,/function setRouteLocation\(which,position\) \{\s*if\(!requireRouteEndpoint\(position,which\)\)return false/);
   assert.match(route,/function showTransitRouteConfirmation\(place\) \{\s*if\(!routePickMode\|\|app\.dataset\.tab!=='map'\|\|!requireRouteEndpoint\(place,routePickMode\)\)return false/);
   assert.match(route,/function chooseSearchResult\(place\)\{[\s\S]*?if\(!requireRouteEndpoint\(place,which\)\)return/);
-  assert.match(route,/function requireRouteEndpoint\(position,which\)\{\s*if\(transitLocationAllowed\(position,which\)\)return true;\s*return requireDongjakRouteLocation\(position\);/);
+  assert.match(route,/function requireRouteEndpoint\(position,which\)\{[\s\S]*?if\(transitLocationAllowed\(position,which\)\)return true;[\s\S]*?return false;[\s\S]*?return requireDongjakRouteLocation\(position\);/);
   assert.match(route,/app\.dataset\.djTransitMode==='transit'&&\['start','end'\]\.includes\(which\)&&Boolean\(boundaryGeometry\)&&transitPointInScope\(position\)/);
   assert.match(route,/routeWaypoints\.push\(/);
   assert.match(route,/!next\.every\(requireDongjakRouteLocation\)/);

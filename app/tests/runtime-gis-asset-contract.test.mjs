@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,readdirSync,existsSync,statSync} from 'node:fs';
 import {dirname,join,relative,resolve,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {transitStreamAssetsPlugin} from '../scripts/transit-stream-assets.mjs';
 
 const app=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const walk=dir=>readdirSync(dir,{withFileTypes:true}).flatMap(entry=>{
@@ -20,13 +21,16 @@ const staticFile=url=>{
 };
 
 test('all literal GIS URLs in the runtime source resolve to packaged public files',()=>{
+ const generated=new Set();
+ transitStreamAssetsPlugin().generateBundle.call({emitFile(asset){generated.add('/'+asset.fileName);}});
+ assert.ok(generated.has('/data/transit-stream/v1/index.json'));
  const missing=[],observed=new Set();
  for(const file of sourceFiles){
   const value=readFileSync(file,'utf8');
   for(const m of value.matchAll(/['"`](\/data\/[A-Za-z0-9_./-]+\.(?:geojson|json|csv|txt))(?=['"`?#])/g)){
    const url=m[1];
    observed.add(url);
-   if(!existsSync(staticFile(url)))missing.push(relative(app,file)+' -> '+url);
+   if(!existsSync(staticFile(url))&&!generated.has(url))missing.push(relative(app,file)+' -> '+url);
   }
  }
  assert.deepEqual(missing,[],'a source referenced GIS file was deleted or renamed');

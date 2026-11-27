@@ -23,11 +23,11 @@ test('official dataset must be validated and never invent absent stops',()=>{
   assert.equal(officialStaticBusPlaces(data,()=>true).length,1002);
 });
 
-test('official static file loaded at startup before any subsequent viewport-dependent refresh',()=>{
-  assert.match(code,/preloadOfficialStaticBusStops/);
-  assert.match(code,/fetch\('\/data\/transport\/seoul-bus-stops\.json'/);
-  assert.match(code,/void preloadOfficialStaticBusStops\(\)/);
-  assert.match(code,/officialStaticStopCount>0/);
+test('official static data is loaded by viewport cells instead of whole-city startup fetch',()=>{
+  assert.match(code,/createTransitCellStream\(/);
+  assert.match(code,/fetch\('\/data\/transit-stream\/v1\//);
+  assert.match(code,/cellStream\.update\(keys\)/);
+  assert.match(code,/streamReady&&streamFailed===0/);
   assert.match(code,/transport-bus-names-close',type:'symbol',source:'transport-bus',minzoom:18\.4/);
   assert.match(code,/text-allow-overlap':true,'text-ignore-placement':true/);
 });

@@ -24,7 +24,7 @@ test('comparison geometry is isolated and stale asynchronous paths cannot reopen
  assert.match(main,/comparisonRouteGeneration\+\+;comparisonRoutePlan=null/);
  assert.match(main,/generation!==comparisonRouteGeneration\|\|app.dataset.tab!=='route'/);
  assert.match(main,/if\(previousTab==='route'&&tab!=='route'\)\{\s*clearComparisonRoute\(\)/);
- assert.match(main,/framing\?transitFramingBounds\(\)/);
+ assert.match(main,/active\?transitFramingBounds\(\)/);
  assert.match(main,/walkSegments:walks.filter/);
 });
 

@@ -1,14 +1,16 @@
 /** Transit-only pilot service area: the existing Seoul geocoder rectangle,
  * not a claim of complete metropolitan coverage. Ordinary walking stays strict.
  */
+import {getSeoulBoundary,inSeoul,routeInSeoul} from './seoul-transit-boundary.mjs';
 export const TRANSIT_SEARCH_BOUNDS=Object.freeze([[126.78,37.40],[127.20,37.70]].map(Object.freeze));
 export function transitPointInScope(p){
- return Number.isFinite(p?.lng)&&Number.isFinite(p?.lat)&&p.lng>=TRANSIT_SEARCH_BOUNDS[0][0]&&p.lng<=TRANSIT_SEARCH_BOUNDS[1][0]&&p.lat>=TRANSIT_SEARCH_BOUNDS[0][1]&&p.lat<=TRANSIT_SEARCH_BOUNDS[1][1];
+ return inSeoul(p?.lng,p?.lat);
 }
 export function transitCoordinatesInScope(coords){
- return Array.isArray(coords)&&coords.length>=2&&coords.every(p=>Array.isArray(p)&&p.length===2&&transitPointInScope({lng:p[0],lat:p[1]}));
+ return Array.isArray(coords)&&coords.every(p=>Array.isArray(p)&&p.length===2)&&routeInSeoul(coords);
 }
 export function transitEndpointPolicy(from,to,inside){
+ if(!getSeoulBoundary())return 'boundary-unavailable';
  if(!transitPointInScope(from)||!transitPointInScope(to))return 'outside-service-area';
  if(typeof inside!=='function')return 'boundary-unavailable';
  const a=inside(from.lng,from.lat),b=inside(to.lng,to.lat);
@@ -60,7 +62,7 @@ export function applyDistrictOutlineVisibility(map,active,phone=false,enabled=tr
  }
 }
 export function applyTransitBoundaryVisibility(map,active,phone=false,exteriorOpacity=.65,outlineEnabled=true){
- const opacity=active?0:exteriorOpacity;
+ const opacity=exteriorOpacity;
  setDistrictOpacity(map,'district-exterior-fade','fill-opacity',opacity);
- applyDistrictOutlineVisibility(map,active,phone,outlineEnabled);
+ applyDistrictOutlineVisibility(map,false,phone,active||outlineEnabled);
 }

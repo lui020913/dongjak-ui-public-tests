@@ -151,12 +151,14 @@ test('real transit detail buttons navigate to the visible route editor, includin
    await expect(app).toHaveAttribute('data-dj-transit-exterior','false');
    await route.locator('[data-transit-mode="transit"]').click();
    await expect(app).toHaveAttribute('data-dj-transit-exterior','true');
-   const districtPaint=()=>page.evaluate(()=>{const m=window.__qaMap;if(!m?.getLayer('district-border'))return null;return ['district-border','district-border-halo','district-exterior-fade'].map((id,i)=>{const key=i===2?'fill-opacity':'line-opacity';return {opacity:m.getPaintProperty(id,key),duration:m.getPaintProperty(id,key+'-transition')?.duration,visibility:m.getLayoutProperty(id,'visibility')||'visible'};});});
+   const districtPaint=()=>page.evaluate(()=>{const m=window.__qaMap;if(!m?.getLayer('district-border'))return null;return ['district-border','district-border-halo','district-exterior-fade'].map((id,i)=>{const key=i===2?'fill-opacity':'line-opacity';return {opacity:m.getPaintProperty(id,key),visibility:m.getLayoutProperty(id,'visibility')||'visible'};});});
    if(await page.evaluate(()=>Boolean(window.__qaMap))){
-    await expect.poll(districtPaint,{timeout:15000}).toEqual([{opacity:0,duration:250,visibility:'visible'},{opacity:0,duration:250,visibility:'visible'},{opacity:0,duration:250,visibility:'visible'}]);
+    await expect.poll(districtPaint,{timeout:15000}).toEqual([{opacity:.96,visibility:'visible'},{opacity:.42,visibility:'visible'},{opacity:.65,visibility:'visible'}]);
    }
    const register=async(which,place)=>page.evaluate(({which,place})=>{const detail={which,place};window.dispatchEvent(new CustomEvent('dongjak:route-select',{detail}));return detail.accepted;},{which,place});
    const outside={kind:'point',name:'외부 테스트 장소',lng:127.026,lat:37.497};
+   await expect(app).toHaveAttribute('data-dj-transit-boundary','seoul',{timeout:25000});
+   expect(await register('end',{...outside,name:'서울 밖',lng:127.14,lat:37.43})).toBe(false);
    expect(await register('end',outside)).toBe(true);
    await expect(route.locator('#v3-end')).toContainText(outside.name);
    await route.locator('[data-v3="end"]').click();
@@ -172,8 +174,9 @@ test('real transit detail buttons navigate to the visible route editor, includin
    await expect(results).toBeHidden();
    await route.locator('[data-transit-mode="walk"]').click();
    await expect(app).toHaveAttribute('data-dj-transit-exterior','false');
+   await expect(app).toHaveAttribute('data-dj-transit-boundary','dongjak');
    if(await page.evaluate(()=>Boolean(window.__qaMap))){
-    await expect.poll(districtPaint,{timeout:15000}).toEqual([{opacity:.96,duration:250,visibility:'visible'},{opacity:.42,duration:250,visibility:'visible'},{opacity:.65,duration:250,visibility:'visible'}]);
+    await expect.poll(districtPaint,{timeout:15000}).toEqual([{opacity:.96,visibility:'visible'},{opacity:.42,visibility:'visible'},{opacity:.65,visibility:'visible'}]);
    }
    await expect(route.locator('[data-v3="calculate"]')).toBeDisabled();
    expect(await register('end',outside)).toBe(false);

@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {transitEndpointPolicy,transitCoordinatesInScope,transitPointInScope,exteriorMapActive,transitWalkStyle,transitContextBounds,applyTransitBoundaryVisibility,applyDistrictOutlineVisibility,DISTRICT_FADE_MS} from '../src/transit-exterior-scope.mjs';
+import {setSeoulBoundary} from '../src/seoul-transit-boundary.mjs';
+setSeoulBoundary({type:'Polygon',coordinates:[[[126.78,37.4],[127.2,37.4],[127.2,37.7],[126.78,37.7],[126.78,37.4]]]});
 const a={lng:126.95,lat:37.50},b={lng:127.01,lat:37.55},c={lng:127.1,lat:37.6};
 const inside=(lng,lat)=>lng===a.lng&&lat===a.lat;
 test('one endpoint must be in Dongjak; neither endpoint may exceed pilot search rectangle',()=>{
@@ -43,12 +45,12 @@ test('local render extent is narrower than service search and includes complete 
  for(const [x,y] of coords)assert.ok(x>=bounds[0][0]&&x<=bounds[1][0]&&y>=bounds[0][1]&&y<=bounds[1][1]);
  assert.ok(bounds[0][0]>126.78&&bounds[1][0]<127.20);
 });
-test('transit hides district outline and exterior tint; both restore without changing shared map filters',()=>{
+test('transit retains exterior tint and outline while source geometry changes',()=>{
  const paint=new Map([['district-border',.96],['district-border-halo',.42],['district-exterior-fade',.65]]),writes=[];
  const map={getLayer:id=>paint.has(id),getPaintProperty:id=>paint.get(id),setPaintProperty:(id,key,value)=>{paint.set(id,value);writes.push([id,key,value]);}};
  applyTransitBoundaryVisibility(map,true,true);applyTransitBoundaryVisibility(map,true,true);
- assert.deepEqual(writes.filter(w=>!w[1].endsWith('-transition')),[['district-exterior-fade','fill-opacity',0],['district-border','line-opacity',0],['district-border-halo','line-opacity',0]]);
- assert.equal(writes.filter(w=>w[1].endsWith('-transition')).length,3);
+ assert.deepEqual(writes,[]);
+ assert.equal(writes.filter(w=>w[1].endsWith('-transition')).length,0);
  applyTransitBoundaryVisibility(map,false,true,.48);
  assert.equal(paint.get('district-exterior-fade'),.48);
  assert.equal(paint.get('district-border'),.96);assert.equal(paint.get('district-border-halo'),.42);
@@ -61,7 +63,7 @@ test('transit hides district outline and exterior tint; both restore without cha
  const scope=main.split('function syncTransitExterior(force=false){')[1].split('function clearTransitPreview(){')[0];
  assert.match(scope,/applyTransitBoundaryVisibility\(map,active,/);
  const theme=readFileSync(new URL('../src/ui-environment.js',import.meta.url),'utf8');
- assert.match(theme,/if\(app.dataset.djTransitExterior==='true'\)maskPaint\['fill-opacity'\]=0/);
+ assert.doesNotMatch(theme,/if\(app.dataset.djTransitExterior==='true'\)maskPaint\['fill-opacity'\]=0/);
  assert.match(scope,/districtExteriorThemePaint\(visualTheme.currentTheme\(\)\)\['fill-opacity'\]/);
  assert.doesNotMatch(scope,/setLayoutProperty|setFilter|setStyle|setTerrain/);
 });

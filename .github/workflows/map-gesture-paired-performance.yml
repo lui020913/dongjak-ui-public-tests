@@ -14,11 +14,11 @@ concurrency:
   cancel-in-progress: true
 jobs:
   compare:
-    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && (github.event.pull_request.head.ref == 'fix/transit-pill-label-motion-20261127' || github.event.pull_request.head.ref == 'fix/transit-visible-camera-zoom-20261127' || github.event.pull_request.head.ref == 'fix/transit-gps-auto-guide-20261127' || github.event.pull_request.head.ref == 'fix/district-building-route-viewport-20261127' || github.event.pull_request.head.ref == 'audit/redevelopment-building-overlap-20261127'))
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && (github.event.pull_request.head.ref == 'fix/transit-pill-label-motion-20261127' || github.event.pull_request.head.ref == 'fix/transit-visible-camera-zoom-20261127' || github.event.pull_request.head.ref == 'fix/transit-gps-auto-guide-20261127' || github.event.pull_request.head.ref == 'fix/district-building-route-viewport-20261127' || github.event.pull_request.head.ref == 'audit/redevelopment-building-overlap-20261127' || github.event.pull_request.head.ref == 'fix/seoul-transit-spatial-stream-20261127'))
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      BASELINE_SHA: 98764077336ecb9ef291dc18290de7a8a489e6ce
+      BASELINE_SHA: ${{ github.event.pull_request.head.ref == 'fix/seoul-transit-spatial-stream-20261127' && github.event.pull_request.base.sha || '98764077336ecb9ef291dc18290de7a8a489e6ce' }}
       VITE_SUPABASE_URL: https://placeholder.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
     steps:
@@ -27,7 +27,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          ref: 98764077336ecb9ef291dc18290de7a8a489e6ce
+          ref: ${{ github.event.pull_request.head.ref == 'fix/seoul-transit-spatial-stream-20261127' && github.event.pull_request.base.sha || '98764077336ecb9ef291dc18290de7a8a489e6ce' }}
           path: before-transit
           persist-credentials: false
       - uses: actions/setup-node@v4
