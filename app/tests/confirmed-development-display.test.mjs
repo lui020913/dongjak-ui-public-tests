@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {createPlanLookup,loadConfirmedDevelopments,isConfirmedPlanLabel} from '../src/confirmed-development-display.mjs';
+import {createPlanLookup,loadConfirmedDevelopments,isConfirmedPlanLabel,developmentLabelPoints} from '../src/confirmed-development-display.mjs';
 const data=JSON.parse(readFileSync(new URL('../public/data/redevelopment/confirmed-projects-202609.geojson',import.meta.url),'utf8'));
 test('only individually verified planned projects are included; completed and preservation areas are excluded',()=>{
  assert.equal(data.features.length,22);assert.equal(new Set(data.features.map(f=>f.properties.id)).size,22);
@@ -26,4 +26,10 @@ test('verified planned move-in month must match the displayed name and include a
  assert.ok(data.features.some(f=>f.properties.label==='라클라체 자이 드파인 (2028년 12월 예정)'));
  assert.ok(data.features.some(f=>f.properties.label==='써밋 더힐 (2030년 6월 예정)'));
  assert.equal(isConfirmedPlanLabel({label:'가짜 (2030년 3월 예정)',occupancy_month:'2030-03'}),false);
+});
+
+
+test('every confirmed development has one explicit interior point label, including multipart sites',()=>{
+ const points=developmentLabelPoints(data);assert.equal(points.features.length,data.features.length);
+ for(const p of points.features){const f=data.features.find(f=>f.properties.id===p.properties.id);assert.ok(createPlanLookup({features:[f]})(...p.geometry.coordinates));assert.equal(p.properties.label,f.properties.label);}
 });

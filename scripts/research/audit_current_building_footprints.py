@@ -381,7 +381,7 @@ for i,(site_g,ref,confirmed) in site_boundaries.items():
 # matches. Re-audit all legacy layers on the reported complexes. Report
 # exact conflicting rows, retained geometry and current coverage; do not
 # infer demolition from a missing record or remove a whole complex.
-reported_terms=['클라베뉴','흑석자이','흑석한강푸르지오','이수힐스테이트','동작금강','사당삼성','이수푸르지오','로이파크','이수교','이수스위첸','상도프레스티지','상도센트럴파크','마크힐스','리버하임','사당극동','사당롯데캐슬','사당우성3','동작삼성래미안','사당현대','사당대림','노량진우성','본동삼성','본동신동아']
+reported_terms=['클라베뉴','흑석자이','흑석한강푸르지오','이수힐스테이트','동작금강','사당삼성','이수푸르지오','로이파크','이수교','이수스위첸','상도프레스티지','상도센트럴파크','마크힐스','리버하임','사당극동','사당롯데캐슬','사당우성3','동작삼성래미안','사당현대','사당대림','노량진우성','본동삼성','본동신동아','흑석한강센트레빌','이수역리가','상도역롯데캐슬파크엘','상도2차두산위브트레지움','이수교신동아']
 remaining=[]
 for i,site in enumerate(sites):
     if not any(norm(t) in norm(site['name']) for t in reported_terms):continue
