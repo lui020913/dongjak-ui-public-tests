@@ -46,10 +46,10 @@ export function mergeMapSearchResults(local=[],remote=[]){
   // every nearby station/stop out of the visible result set.
   const transit=found.filter(isTransitMapSearchResult),general=found.filter(item=>!isTransitMapSearchResult(item));
   if(!transit.length||!general.length)return found.slice(0,12);
-  const balanced=[...transit.slice(0,6),...general.slice(0,6)];
+  const balanced=[...general.slice(0,6),...transit.slice(0,6)];
   const chosen=new Set(balanced);
   for(const item of found){if(balanced.length>=12)break;if(!chosen.has(item)){balanced.push(item);chosen.add(item);}}
-  return balanced;
+  return balanced.sort((a,b)=>Number(isTransitMapSearchResult(a)&&searchPlaceKind(a)==='bus')-Number(isTransitMapSearchResult(b)&&searchPlaceKind(b)==='bus'));
 }
 export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition,errorLocationCode=error=>Number(error?.code)}){
   const shell=document.getElementById('map-quick-search');
@@ -302,7 +302,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
       .slice(0,8).map(([name,[lng,lat]])=>({name:name.endsWith('역')?name:`${name}역`,lng,lat,
         category:'지하철·철도역',address:'저장된 역 위치 · 출입구와 다를 수 있습니다'})):[];
     const all=mergeMapSearchResults([...cached,...stations,...searchLocalPlaces(text)],localVectorFacilities(text));
-    return rankKoreanSearch(text,all,{limit:20,minScore:55,getText:item=>facilityNameMatches(item,text)?text:item.name});
+    return rankKoreanSearch(text,all,{limit:20,minScore:55,getText:item=>facilityNameMatches(item,text)?text:item.name}).sort((a,b)=>Number(searchPlaceKind(a)==='bus')-Number(searchPlaceKind(b)==='bus'));
   };
   // Search always covers the Dongjak/Seoul source bounds; the former
   // viewport-only checkbox was confusing and silently hid valid matches.
