@@ -699,3 +699,14 @@
   #app:has(#route-transit-confirm:not([hidden])) #route-pick-hint{display:none!important}
  }
 }
+
+/* Walking comparison: shrink to content, with a full-width pinned action. */
+@layer request-completion{
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"]:not([data-dj-transit-preview]) #route-map-card:not([hidden]):not(.dj871-sheet-expanded){height:auto!important;min-height:0!important;gap:7px!important;padding-bottom:12px!important}
+  html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"]:not([data-dj-transit-preview]) #route-map-card:not(.dj871-sheet-expanded) #dj-route-choice-list:not([hidden]),
+  html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"]:not([data-dj-transit-preview]) #route-map-card:not(.dj871-sheet-expanded) #dj-route-choice-scroll{flex:0 1 auto!important;min-height:0!important}
+  html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"]:not([data-dj-transit-preview]) #route-map-card .route-map-card-actions{display:grid!important;grid-template-columns:minmax(0,1fr)!important;width:100%!important;flex:none!important;margin:0!important;padding:4px 0 0!important;gap:0!important}
+  html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"]:not([data-dj-transit-preview]) #route-map-card #route-guide-start{grid-column:1/-1!important;width:100%!important;min-width:0!important;max-width:none!important;min-height:44px!important}
+ }
+}

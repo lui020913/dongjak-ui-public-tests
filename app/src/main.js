@@ -881,7 +881,7 @@ async function loadOneBuildingSheet(sheet){
       isDongjak(f.properties.x,f.properties.y)===true&&['Polygon','MultiPolygon'].includes(f.geometry?.type));
     const {visible:eligible,excluded}=partitionDisplayBuildings(districtBuildings);
     const {visible,reviewExcluded}=partitionGreenReview(eligible,reviewCandidates,greenBuildingFilterEnabled(globalThis.location?.search));
-    const within=visible.map(f=>({...f,geometry:displayGeometries.get(f)||f.geometry,properties:{...f.properties,_render3d:true}}));
+    const within=visible.map(f=>({...f,geometry:displayGeometries.get(f)||f.geometry,properties:{...f.properties,_render3d:true}})).filter(f=>districtBuildingScope?.contains(f.geometry)===true);
     const sourceId=`dongjak-buildings-data-${sheet.sheet}`;
     const layerId=`dongjak-buildings-3d-${sheet.sheet}`;
     const footprintFillId=`dongjak-buildings-footprint-${sheet.sheet}`;
@@ -889,7 +889,7 @@ async function loadOneBuildingSheet(sheet){
     const collection={type:'FeatureCollection',features:within};
     if(existing){
       if(successfulSources===totalSources&&map.getSource(sourceId)){
-        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,visible);buildingRetryAfter.delete(sheet.sheet);
+        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.collection=collection;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,visible);buildingRetryAfter.delete(sheet.sheet);
       }else buildingRetryAfter.set(sheet.sheet,Date.now()+15000);
       return;
     }
@@ -912,7 +912,7 @@ async function loadOneBuildingSheet(sheet){
         'fill-extrusion-height':['interpolate',['linear'],['zoom'],BUILDING_ZOOM_FADE_START,0,BUILDING_ZOOM_FADE_END,['get','h']],
         'fill-extrusion-base':0}
     },firstSymbol);
-    loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources,complete:successfulSources===totalSources,footprint3DMode:visibleBuilding3D()});
+    loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,collection,sourceCount:successfulSources,complete:successfulSources===totalSources,footprint3DMode:visibleBuilding3D()});
     buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,successfulSources===totalSources?visible:[]);
     if(successfulSources<totalSources)buildingRetryAfter.set(sheet.sheet,Date.now()+15000);else buildingRetryAfter.delete(sheet.sheet);
     lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
@@ -1722,9 +1722,10 @@ map.on('load',()=>{
   installMapOrientationControls(map,maplibregl);
   installGrassTexture({map,app});
   installForestShade({map,app});
-  const nativeBuildingLayers=installBaseBuildingPalette({map,app});
+  installBaseBuildingPalette({map,app});
   districtBuildingScope=installDistrictBuildingScope(map);
-  buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers);
+  // GIS footprints now own both plan and extrusion modes; never restore native fills.
+  buildingCoverage=createBuildingCoverage(map,[]);
   buildingCoverage.setExtruding(visibleBuilding3D());
   status('지도 준비 완료 · 동작구 경계 불러오는 중');
   // 공개 Terrarium DEM: API 키 없이 지형을 표시합니다. 지형 데이터의 상세도는 지역별로 다릅니다.
@@ -1845,7 +1846,7 @@ map.on('load',()=>{
       boundaryGeometry=feature.geometry;
       districtBuildingScope?.update(boundaryGeometry);
       boundaryBounds=computeBounds(boundaryGeometry);
-      if(changed){for(const info of loadedBuildingTiles.values())info.complete=false;scheduleBuildingLoad();}
+      if(changed){for(const [id,info] of loadedBuildingTiles){info.complete=false;if(info.collection){info.collection={type:'FeatureCollection',features:info.collection.features.filter(f=>districtBuildingScope?.contains(f.geometry)===true)};info.count=info.collection.features.length;map.getSource('dongjak-buildings-data-'+id)?.setData(info.collection);}}scheduleBuildingLoad();}
       if(gpsLastPosition)outsideDistrictAlert.check(...gpsLastPosition,boundaryGeometry,gpsLastAccuracy);
       map.getSource('district-outline')?.setData({type:'FeatureCollection',features:[feature]});
       map.getSource('district-exterior')?.setData(maskOutside(boundaryGeometry));
