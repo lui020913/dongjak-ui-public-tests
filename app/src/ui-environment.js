@@ -406,6 +406,7 @@ const districtLabelOwners=new WeakMap();
 export function districtScopedSymbol(layer={}){
  const id=String(layer.id||'');
  return layer.type==='symbol'&&id!=='neighbor-district-names'&&
+ layer.source!=='transport-metro-geographic-markers'&&
  !/^(?:dj-transit-(?:multi|comparison|rail)|dj815-transit-|walking-route|registered-points|route-|dj-route-|dj-pri-|dongjak-pri-|nav-)/.test(id);
 }
 function containsWithin(filter,within){
