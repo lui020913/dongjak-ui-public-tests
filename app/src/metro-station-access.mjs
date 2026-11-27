@@ -22,7 +22,8 @@ const valid=p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite);
 const distance=(a,b)=>Math.hypot((a[0]-b[0])*X,(a[1]-b[1])*Y);
 const pointOf=e=>[Number(e.lon??e.center?.lon),Number(e.lat??e.center?.lat)];
 const coordinates=e=>(e.geometry||[]).map(p=>[Number(p.lon),Number(p.lat)]).filter(valid);
-const normalized=s=>String(s||'').normalize('NFKC').replace(/\s|역$/g,'');
+export function normalizeExitStation(s){const plain=String(s||'').normalize('NFKC').replace(/\s*\([^)]*\)\s*/g,'').replace(/\s|역$/g,'');return plain==='총신대입구'?'이수':plain;}
+const normalized=normalizeExitStation;
 const number=t=>{const n=String(t.ref||t['exit:ref']||t['entrance:ref']||'').trim();return /^[0-9]{1,2}[A-Za-z]?(?:[-·][0-9A-Za-z]+)?$/.test(n)?n:'';};
 function nearest(p,path){
  let best=null,d=Infinity;
@@ -43,9 +44,13 @@ export function buildStationAccess(elements,stations,colors,railPaths=new Map(),
  for(const e of elements||[]){const t=e.tags||{};
   if(e.type!=='node'||!(t.railway==='subway_entrance'||t.subway==='yes'&&t.entrance))continue;
   const p=pointOf(e);if(!valid(p)||!allow(...p))continue;
-  const station=stationAt(p,stations,t.station||t['station:name']||'')||stationAt(p,stations);if(!station)continue;
-  const n=number(t),key=normalized(station.name)+'|'+(n||e.id);if(seen.has(key))continue;seen.add(key);
-  const props={kind:'exit',station:station.name,number:n,label:n||'출입구',color:lineColor(station,colors),quality:'mapped',source:t.source||'OpenStreetMap'};
+  const officialName=normalized(t.station||t['station:name']||'');
+  const named=stationAt(p,stations,t.station||t['station:name']||'');
+  const isOfficial=String(t.source||'').startsWith('MOIS')&&officialName;
+  const line=String(t.station||'').match(/\((\d+호선)\)/)?.[1];
+  const station=named||(isOfficial?{name:officialName,lng:p[0],lat:p[1],lines:line?[line]:[]}:stationAt(p,stations));if(!station)continue;
+  const n=number(t),key=normalized(station.name)+'|'+(n||e.id)+'|'+p.map(v=>v.toFixed(5)).join(',');if(seen.has(key))continue;seen.add(key);
+  const props={kind:'exit',station:station.name,number:n,label:n||'출입구',color:colors[line]||lineColor(station,colors),quality:'mapped',source:t.source||'OpenStreetMap'};
   result.push(feature('Point',p,props));exits.push({p,station,props});
  }
  for(const e of elements||[]){if(e.type!=='way')continue;const t=e.tags||{},p=coordinates(e);if(p.length<2||!p.every(q=>allow(...q)))continue;
@@ -106,7 +111,7 @@ export function installMetroStationAccess({map,app,getStations,getRailPaths,colo
   const w=b.getWest(),s=b.getSouth(),e=b.getEast(),n=b.getNorth(),pad=.004,eBound=e;
   const center=map.getCenter?.()||{lng:(w+e)/2,lat:(s+n)/2};
   const stations=(getStations()||[]).filter(p=>p.lng>=w-pad&&p.lng<=e+pad&&p.lat>=s-pad&&p.lat<=n+pad).sort((a,b)=>distance([a.lng,a.lat],[center.lng,center.lat])-distance([b.lng,b.lat],[center.lng,center.lat])).slice(0,8);
-  if(!stations.length){if(initialized&&last)publish(empty());return;}
+  // Official named exits are independent of station marker streaming.
   if(!snapshot){loadSnapshot();return;}
   const rows=snapshot.filter(e=>{
    if(e.type==='node'){const [x,y]=pointOf(e);return x>=w-pad&&x<=eBound+pad&&y>=s-pad&&y<=n+pad;}
