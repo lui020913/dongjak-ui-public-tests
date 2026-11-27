@@ -132,20 +132,26 @@ for i,site in enumerate(sites):
 # Keep only closed named ways with a unique K-apt identity. Never use a hull
 # or buffer as a substitute for a site boundary, or infer closure of roads.
 site_boundaries={};osm_state='unavailable'
-query='[out:json][timeout:90];(way["landuse"="residential"]["name"](37.47,126.89,37.54,127.01);way["place"="neighbourhood"]["name"](37.47,126.89,37.54,127.01);way["building"="apartments"]["name"](37.47,126.89,37.54,127.01););out geom;'
-for endpoint in ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter']:
-    try:
-        req=urllib.request.Request(endpoint,data=urllib.parse.urlencode({'data':query}).encode(),headers={'User-Agent':'Dongjak safety map read-only apartment review'})
-        with urllib.request.urlopen(req,timeout=115) as response:osm=json.load(response)
-        if not isinstance(osm.get('elements'),list) or osm.get('remark'):raise ValueError('Incomplete OSM response')
-        osm_state='retrieved';break
-    except Exception as e:print('OSM_SITE_SOURCE_ERROR '+type(e).__name__,flush=True)
+# Request only site polygons; building-level data are already available.
+# Small independent queries keep a failed endpoint from discarding all results.
+osm={'elements':[]};successful_boxes=0
+for south,north in [(37.47,37.505),(37.505,37.54)]:
+    bbox=f'{south},126.89,{north},127.01'
+    query=f'[out:json][timeout:35];way["landuse"="residential"]["name"]({bbox});out geom;'
+    for endpoint in ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter']:
+        try:
+            req=urllib.request.Request(endpoint+'?'+urllib.parse.urlencode({'data':query}),headers={'User-Agent':'Dongjak safety map read-only apartment review'})
+            with urllib.request.urlopen(req,timeout=48) as response:part=json.load(response)
+            if not isinstance(part.get('elements'),list) or part.get('remark'):raise ValueError('Incomplete OSM response')
+            osm['elements'].extend(part['elements']);successful_boxes+=1;break
+        except Exception as e:print('OSM_SITE_SOURCE_ERROR '+json.dumps({'bbox':bbox,'endpoint':endpoint,'error':type(e).__name__}),flush=True)
+osm_state='retrieved' if successful_boxes==2 else 'partial' if successful_boxes else 'unavailable'
 def complex_name(n):
     n=norm(n)
     for suffix in ('아파트','공동주택'):
         if n.endswith(suffix):n=n[:-len(suffix)]
     return n
-if osm_state=='retrieved':
+if osm_state in ('retrieved','partial'):
     names=collections.defaultdict(list)
     for i,site in enumerate(sites):names[complex_name(site['name'])].append(i)
     for el in osm['elements']:
@@ -169,6 +175,36 @@ if osm_state=='retrieved':
             site_ids[i].add(j);site_by_current[j].add(i)
         site_match_methods[i]['osm_site_footprints']=len(inside)
         print('OSM_APARTMENT_SITE '+json.dumps({'name':sites[i]['name'],'osm_way':el['id'],'area_m2':round(g.area),'official_location_corroborated':bool(exact&inside),'current_footprints':len(inside)},ensure_ascii=False),flush=True)
+# Official project polygons acquired by the already successful SeoulPlan
+# download job. Only explicitly corroborated completed project identities,
+# never generic development districts or a guessed circle.
+official_file=OUT/'seoulplan-202609-dongjak-review.geojson'
+official_aliases={
+    '11000UQ120PS202407010590':('흑석자이','흑석3구역'),
+    '11000UQ120PS202602240054':('힐스테이트장승배기역','힐스테이트 장승배기역(5차공급)'),
+    '11000UQ120PS202505310986':('보라매자이 더 포레스트','신대방동 724'),
+    '11000UQ120PS202407010447':('스타팰리스 이수','사당동 1008-1 일원'),
+    '11000UQ120PS202407010459':('골드타워신대방청년주택','신대방동 351-5'),
+}
+official_matches=0
+if official_file.exists():
+    official=json.loads(official_file.read_text())
+    for f in official['features']:
+        p=f['properties'];alias=official_aliases.get(p.get('PRESENT_SN'))
+        if not alias or p.get('SIGNGU_SE')!='11590' or p.get('DGM_NM')!=alias[1]:continue
+        ids=[i for i,site in enumerate(sites) if norm(site['name'])==norm(alias[0])]
+        if len(ids)!=1:continue
+        i=ids[0];g=metric(f)
+        if g.is_empty or not district.covers(g):continue
+        inside={int(j) for j in tree.query(g,predicate='intersects') if g.covers(cur[int(j)].representative_point())}
+        # Even when the registry uses the post-completion lot number, the
+        # independently identified official site polygon provides location.
+        site_boundaries[i]=(g,'seoulplan:'+p['PRESENT_SN'],True)
+        for j in inside:
+            site_ids[i].add(j);site_by_current[j].add(i)
+        site_match_methods[i]['official_site_footprints']=len(inside);official_matches+=1
+        print('OFFICIAL_COMPLETED_SITE '+json.dumps({'site':sites[i]['name'],'project':p['DGM_NM'],'id':p['PRESENT_SN'],'matched_footprints':len(inside)},ensure_ascii=False),flush=True)
+print('OFFICIAL_COMPLETED_SITE_STATUS '+str(official_matches),flush=True)
 print('OSM_SITE_BOUNDARY_STATUS '+json.dumps({'status':osm_state,'matched_sites':len(site_boundaries)}),flush=True)
 plans=json.loads((ROOT/'app/public/data/redevelopment/confirmed-projects-202609.geojson').read_text())
 planned=unary_union([metric(f) for f in plans['features']])
@@ -202,7 +238,7 @@ for sheet in manifest['sheets']:
             if coverage<.25 and not in_plan:
                 for i,(site_g,osm_id,confirmed) in site_boundaries.items():
                     if site_g.covers(g) and sites[i]['approved']>='2020-01-01':
-                        site_gap_rows.append({'type':'Feature','geometry':f['geometry'],'properties':{'sheet':sheet['sheet'],'kind':k,'row':index,'site':sites[i]['name'],'approved':sites[i]['approved'],'coverage':round(coverage,4),'osm_way':osm_id,'official_location_corroborated':confirmed,'decision':'review_only'}})
+                        site_gap_rows.append({'type':'Feature','geometry':f['geometry'],'properties':{'sheet':sheet['sheet'],'kind':k,'row':index,'site':sites[i]['name'],'approved':sites[i]['approved'],'coverage':round(coverage,4),'boundary_reference':osm_id,'official_location_corroborated':confirmed,'decision':'review_only'}})
                 counts['low_current_coverage']+=1
                 changes.append({'type':'Feature','geometry':f['geometry'],'properties':{'sheet':sheet['sheet'],'kind':k,'row':index,'x':p['x'],'y':p['y'],'coverage':round(coverage,4),'area_m2':round(g.area,2),'decision':'review_only'}})
             for a,j in matches:
@@ -225,7 +261,7 @@ edits={};decisions=[]
 for j,indices in site_by_current.items():
     if len(indices)!=1:continue
     i=next(iter(indices));site=sites[i]
-    if not (site_match_methods[i]['exact_parcel'] or site_match_methods[i]['exact_name_in_dong']):continue
+    if not (site_match_methods[i]['exact_parcel'] or site_match_methods[i]['exact_name_in_dong'] or site_match_methods[i].get('official_site_footprints')):continue
     if planned.covers(cur[j].representative_point()):continue
     try:floors=int(props[j].get('gro_flo_co') or 0)
     except (TypeError,ValueError):continue
@@ -255,7 +291,7 @@ for j,indices in site_by_current.items():
         print('VERIFIED_DISPLAY_EDIT '+json.dumps(edit,ensure_ascii=False,separators=(',',':')),flush=True)
 (OUT/'verified-apartment-display-edits.json').write_text(json.dumps({'schema':1,'edits':list(edits.values())},ensure_ascii=False,separators=(',',':')))
 (OUT/'apartment-site-gap-review.geojson').write_text(json.dumps({'type':'FeatureCollection','features':site_gap_rows},ensure_ascii=False,separators=(',',':')))
-counts['verified_display_edits']=len(edits);counts['completed_site_gap_candidates']=len(site_gap_rows)
+counts['official_completed_boundary_matches']=official_matches;counts['verified_display_edits']=len(edits);counts['completed_site_gap_candidates']=len(site_gap_rows)
 # Only derived comparisons, official registry metadata and existing app
 # geometry are output; do not export the reference building polygons.
 reports=[]
