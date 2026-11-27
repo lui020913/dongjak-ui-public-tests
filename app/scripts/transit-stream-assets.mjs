@@ -29,5 +29,5 @@ export function transitStreamAssetsPlugin(){
   if(!key||!get().has(key))return next();
   res.setHeader('Content-Type','application/json');res.end(JSON.stringify(get().get(key)));
  });
- return {name:'transit-cell-assets',configureServer:serve,configurePreviewServer:serve,generateBundle(){this.emitFile({type:'asset',fileName:prefix+'index.json',source:JSON.stringify(manifest())});for(const [key,rows] of get())if(rows.length)this.emitFile({type:'asset',fileName:prefix+key+'.json',source:JSON.stringify(rows)});}};
+ return {name:'transit-cell-assets',configureServer(server){serve(server);},generateBundle(){this.emitFile({type:'asset',fileName:prefix+'index.json',source:JSON.stringify(manifest())});for(const [key,rows] of get())if(rows.length)this.emitFile({type:'asset',fileName:prefix+key+'.json',source:JSON.stringify(rows)});}};
 }
