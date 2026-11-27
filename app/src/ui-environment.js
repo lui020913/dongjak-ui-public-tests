@@ -264,7 +264,7 @@ export function initTheme({map,app}){
     // 토글할 때마다 현재 존재하는 레이어의 색상과 불투명도를 별도로 갱신합니다.
     if(map.getLayer('district-exterior-fade')){
       const maskPaint=districtExteriorThemePaint(themeState.value);
-
+      if(app.dataset.djTransitExterior==='true')maskPaint['fill-opacity']=0;
       for(const [key,value] of Object.entries(maskPaint)){
         try{map.setPaintProperty('district-exterior-fade',key,value);}catch(error){console.warn('[외부지역 마스크] 테마 전환 실패:',error);}
       }

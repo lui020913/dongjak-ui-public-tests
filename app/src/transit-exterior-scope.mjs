@@ -42,7 +42,10 @@ export function transitContextBounds(districtBounds,endpoints=[],routeCoords=[])
 }
 // The original safety map is authoritative. No geometry, filter, source,
 // visibility or terrain changes are made when entering transit.
-export function applyTransitBoundaryVisibility(map,active,phone=false){
+export function applyTransitBoundaryVisibility(map,active,phone=false,exteriorOpacity=.65){
+ const opacity=active?0:exteriorOpacity;
+ if(map.getLayer('district-exterior-fade')&&map.getPaintProperty('district-exterior-fade','fill-opacity')!==opacity)
+  map.setPaintProperty('district-exterior-fade','fill-opacity',opacity);
  for(const [id,opacity] of [['district-border',.96],['district-border-halo',phone?.42:.92]]){
   if(map.getLayer(id)&&map.getPaintProperty(id,'line-opacity')!==(active?0:opacity))
    map.setPaintProperty(id,'line-opacity',active?0:opacity);

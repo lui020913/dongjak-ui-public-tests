@@ -43,17 +43,21 @@ test('local render extent is narrower than service search and includes complete 
  for(const [x,y] of coords)assert.ok(x>=bounds[0][0]&&x<=bounds[1][0]&&y>=bounds[0][1]&&y<=bounds[1][1]);
  assert.ok(bounds[0][0]>126.78&&bounds[1][0]<127.20);
 });
-test('transit changes only the two original boundary line opacities; all map filters and layers are untouched',()=>{
- const paint=new Map([['district-border',.96],['district-border-halo',.42]]),writes=[];
+test('transit hides district outline and exterior tint; both restore without changing shared map filters',()=>{
+ const paint=new Map([['district-border',.96],['district-border-halo',.42],['district-exterior-fade',.65]]),writes=[];
  const map={getLayer:id=>paint.has(id),getPaintProperty:id=>paint.get(id),setPaintProperty:(id,key,value)=>{paint.set(id,value);writes.push([id,key,value]);}};
  applyTransitBoundaryVisibility(map,true,true);applyTransitBoundaryVisibility(map,true,true);
- assert.deepEqual(writes,[['district-border','line-opacity',0],['district-border-halo','line-opacity',0]]);
- applyTransitBoundaryVisibility(map,false,true);
+ assert.deepEqual(writes,[['district-exterior-fade','fill-opacity',0],['district-border','line-opacity',0],['district-border-halo','line-opacity',0]]);
+ applyTransitBoundaryVisibility(map,false,true,.48);
+ assert.equal(paint.get('district-exterior-fade'),.48);
  assert.equal(paint.get('district-border'),.96);assert.equal(paint.get('district-border-halo'),.42);
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  assert.doesNotMatch(main,/installSharedDistrictScope|createTransitContextLayers|map\.setTerrain\(null\)|import '\.\/transit-exterior-scope.css'/);
  const scope=main.split('function syncTransitExterior(force=false){')[1].split('function clearTransitPreview(){')[0];
  assert.match(scope,/applyTransitBoundaryVisibility\(map,active,/);
+ const theme=readFileSync(new URL('../src/ui-environment.js',import.meta.url),'utf8');
+ assert.match(theme,/if\(app.dataset.djTransitExterior==='true'\)maskPaint\['fill-opacity'\]=0/);
+ assert.match(scope,/districtExteriorThemePaint\(visualTheme.currentTheme\(\)\)\['fill-opacity'\]/);
  assert.doesNotMatch(scope,/setLayoutProperty|setFilter|setStyle|setTerrain/);
 });
 test('initial camera keeps about 750 metres of context',()=>{

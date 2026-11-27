@@ -2943,9 +2943,9 @@ function syncTransitExterior(force=false){
  if(active&&!previous&&!transitHomeCamera){
   transitHomeCamera={center:map.getCenter(),zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing()};
  }
- // Hide only the district outline during transit; preserve original map
- // rendering, including the existing exterior tint and building filters.
- applyTransitBoundaryVisibility(map,active,matchMedia('(max-width:699px)').matches);
+ // Transit suppresses the district outline and exterior tint only.
+ // Shared building filters, geometry, terrain and data sources stay intact.
+ applyTransitBoundaryVisibility(map,active,matchMedia('(max-width:699px)').matches,districtExteriorThemePaint(visualTheme.currentTheme())['fill-opacity']);
  syncTransitContextBounds(active);
  if(!active&&previous&&app.dataset.tab==='map'&&transitHomeCamera){
   const camera=transitHomeCamera;transitHomeCamera=null;
