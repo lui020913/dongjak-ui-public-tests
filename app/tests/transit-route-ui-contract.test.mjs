@@ -71,7 +71,7 @@ test('selected route casing and line remain beneath icons; transfer labels are e
  const focus=main.split('function focusTransitRoute(coords){')[1].split('function setTransitPreviewStops')[0];
  assert.match(focus,/map.moveLayer\(casing,before\);map.moveLayer\(line,before\)/);
  assert.match(focus,/l.type==='symbol'/);
- assert.match(main,/text-field':'환승'/);assert.match(main,/transfer:j===0&&i>0/);
+ assert.match(main,/text-field':\['case',\['==',\['get','sameStop'\],true\],'↓ 제자리 환승','↓ 환승'\]/);assert.match(main,/transfer:j===0&&i>0/);
  assert.match(main,/pathBetweenDisplayedStations\(displayed\?\.get\(name\)/);
  assert.match(main,/'-transfer-label'/);
 });
