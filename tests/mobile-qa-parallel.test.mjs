@@ -149,3 +149,5 @@ test('dynamic phone matrix display name safely quotes its nested condition',()=>
  assert.ok(line.trim().endsWith(')"'),'Expected closed YAML double-quoted job name');
  assert.ok(line.includes("vars.ENABLE_FULL_MOBILE_QA == 'true'"));
 });
+
+test('direct visual promotion starts from the exact successful build independently of Preview and browser QA',()=>{const w=read('.github/workflows/mobile-first-overhaul-preview.yml');const d=w.split('\n  production-direct:')[1].split('\n  notify-preview:')[0];assert.match(d,/needs: \[build\]/);assert.doesNotMatch(d,/needs\.preview|needs\.mobile-qa/);assert.match(d,/environment: public-cloudflare-production/);assert.match(d,/verify-release-monotonic/);assert.match(d,/trap rollback EXIT/);assert.match(w,/mobile-qa:\s*\n\s*needs: \[build, preview\]/);});

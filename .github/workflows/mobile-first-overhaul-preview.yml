@@ -613,8 +613,8 @@ jobs:
         run: rm -rf "$RUNNER_TEMP/encrypted" "$RUNNER_TEMP/release" "$RUNNER_TEMP/mobile-overhaul.tar.gz" "$RUNNER_TEMP/release-marker.json" "$RUNNER_TEMP/project-before.json" "$RUNNER_TEMP/bindings-before" "$RUNNER_TEMP/bindings-after" "$RUNNER_TEMP/production-deploy.log" "$RUNNER_TEMP/production-before-marker.json"
 
   production-direct:
-    needs: [build, preview]
-    if: needs.build.result == 'success' && needs.preview.result == 'success' && needs.build.outputs.release_mode == 'direct_visual' && needs.build.outputs.app_version != '9.3.0' && vars.ENABLE_GEMINI_QA != 'true' && vars.ENABLE_DESIGN_CAPTURE_QA != 'true'
+    needs: [build]
+    if: needs.build.result == 'success' && needs.build.outputs.release_mode == 'direct_visual' && needs.build.outputs.app_version != '9.3.0' && vars.ENABLE_GEMINI_QA != 'true' && vars.ENABLE_DESIGN_CAPTURE_QA != 'true'
     name: '4. Production 배포 및 확인 (병렬)'
     runs-on: ubuntu-24.04
     environment: public-cloudflare-production
@@ -648,7 +648,7 @@ jobs:
         with:
           path: ~/.cache/dongjak/wrangler-npm/_cacache
           key: ${{ runner.os }}-${{ runner.arch }}-wrangler-v4-npm-v1
-      - name: Decrypt the exact built Preview artifact
+      - name: Decrypt the exact sealed build artifact
         run: |
           set -euo pipefail
           umask 077
@@ -668,7 +668,7 @@ jobs:
           echo 'Owner requested direct visual deployment; independent browser QA is not a prerequisite and is not claimed passed.' >> "$GITHUB_STEP_SUMMARY"
           test "$SOURCE_SHA" = "$PUBLIC_SHA"
           test "$(jq -er '.source' release/mobile-first-overhaul-request.json)" = "public-app"
-      - name: Deploy exact Preview artifact with guarded rollback
+      - name: Deploy exact build artifact with guarded rollback
         id: promote
         run: |
           set -euo pipefail
