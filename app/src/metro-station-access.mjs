@@ -1,5 +1,18 @@
 // Cartographic access context only, never a routing graph. Approximation is explicitly dashed.
 export const STATION_ACCESS_SNAPSHOT='/data/transport/seoul-station-access-v1.json';
+let sharedSnapshot=null;
+export function fetchStationAccessSnapshot(fetcher=globalThis.fetch){
+ if(fetcher!==globalThis.fetch)return loadStationAccessFile(fetcher);
+ if(!sharedSnapshot)sharedSnapshot=loadStationAccessFile(fetcher).catch(e=>{sharedSnapshot=null;throw e;});
+ return sharedSnapshot;
+}
+async function loadStationAccessFile(fetcher){
+ const r=await fetcher(STATION_ACCESS_SNAPSHOT);
+ if(!r.ok)throw Error('snapshot '+r.status);
+ const d=await r.json();
+ if(d.schema!==1||!Array.isArray(d.elements)||!d.elements.length)throw Error('invalid station snapshot');
+ return d;
+}
 export const STATION_ACCESS_ZOOM=16.2;
 export const STATION_PASSAGE_ZOOM=16.65;
 const SOURCE='dj-metro-station-access',X=88300,Y=111320;
@@ -68,12 +81,12 @@ export function installMetroStationAccess({map,app,getStations,getRailPaths,colo
  let snapshot=null,pending=null,timer=0,last='',initialized=false,failedAt=0;
  function loadSnapshot(){
   if(snapshot||pending||Date.now()-failedAt<30000)return;
-  pending=Promise.resolve().then(()=>fetcher(STATION_ACCESS_SNAPSHOT)).then(r=>{if(!r.ok)throw Error('snapshot '+r.status);return r.json();}).then(data=>{if(data.schema!==1||!Array.isArray(data.elements)||!data.elements.length)throw Error('invalid station snapshot');snapshot=data.elements;request();}).catch(error=>{failedAt=Date.now();console.warn('[지하철 정적 출입구]',error?.message);}).finally(()=>{pending=null;});
+  pending=fetchStationAccessSnapshot(fetcher).then(data=>{snapshot=data.elements;request();}).catch(error=>{failedAt=Date.now();console.warn('[지하철 정적 출입구]',error?.message);}).finally(()=>{pending=null;});
  }
  const enabled=()=>app?.dataset?.djTransitExterior==='true'||app?.dataset?.baseMetro!=='off';
  function setup(){
   if(map.getSource(SOURCE))return;
-  map.addSource(SOURCE,{type:'geojson',data:empty(),attribution:'© OpenStreetMap contributors (ODbL)'});
+  map.addSource(SOURCE,{type:'geojson',data:empty(),attribution:'MOIS public subway entrance data; © OpenStreetMap contributors (ODbL)'});
   const style=map.getStyle()?.layers||[],before=style.find(l=>l.id==='dj-metro-detail-icon')?.id||style.find(l=>l.type==='symbol')?.id;
   const add=l=>map.addLayer(l,l.id===ids[4]||l.id===ids[5]?undefined:before);
   add({id:ids[0],type:'fill',source:SOURCE,minzoom:STATION_PASSAGE_ZOOM,filter:['all',['==',['get','kind'],'platform'],['==',['geometry-type'],'Polygon']],paint:{'fill-color':['get','color'],'fill-opacity':.18,'fill-outline-color':['get','color']}});
