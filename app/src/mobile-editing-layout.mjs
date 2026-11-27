@@ -19,6 +19,9 @@ export function createMobileEditingLayout({app,doc,win,nav}){
   const vv=win.visualViewport,top=Math.max(0,vv?.offsetTop||0),height=Math.round(vv?.height||win.innerHeight||0);
   const full=Math.max(win.innerHeight||0,doc.documentElement?.clientHeight||0),focus=input(),owned=focus&&(app.contains(focus)||focus.getRootNode?.().host&&app.contains(focus.getRootNode().host));
   if(owned&&focus!==focusedLast){editingSession=true;seenShrink=false;}
+  // iOS may retain focus when the keyboard closes; a new viewport contraction
+  // re-enters the editing state even if the input node did not change.
+  if(owned&&!editingSession&&baseline-height>80){editingSession=true;seenShrink=true;}
   if(editingSession&&baseline-height>80)seenShrink=true;
   if(editingSession&&seenShrink&&baseline-height<=60)editingSession=false;
   if(!owned&&baseline-height<=60)editingSession=false;
