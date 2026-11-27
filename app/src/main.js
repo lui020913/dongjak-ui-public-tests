@@ -104,7 +104,7 @@ import {installSolidMapLines} from './solid-map-lines.js';
 import {installQuietBasemap} from './quiet-basemap.mjs';
 import {evaluateCompositePriRouteCandidates} from './pri-route-client.js';
 import {chooseTransitWalk} from './transit-walk-priority.mjs';
-import {summarizeTransitWalks,transitReviewPairs} from './transit-candidate-review.mjs';
+import {summarizeTransitWalks,transitReviewPairs,transitAccessPoint} from './transit-candidate-review.mjs';
 import {estimateTransitTime} from './transit-time-estimate.mjs';
 import {installRoutePriPreferences} from './route-pri-preferences.js';
 import './v841-route-and-tips.css';
@@ -3516,7 +3516,7 @@ function transitVisiblePadding(sheetTop,toolbarBottom){
 function clearComparisonRoute(){
  comparisonRouteGeneration++;comparisonRoutePlan=null;comparisonRouteSummary=null;comparisonRouteFeatures=[];comparisonRouteFitKey='';comparisonRoutePadding=null;routeCameraFitToken++;
  delete app.dataset.transitComparison;
- try{for(const suffix of ['-line','-casing'])if(map.getLayer(COMPARISON_ROUTE_SOURCE+suffix))map.removeLayer(COMPARISON_ROUTE_SOURCE+suffix);if(map.getSource(COMPARISON_ROUTE_SOURCE))map.removeSource(COMPARISON_ROUTE_SOURCE);}catch(error){console.debug('[추천 경로 정리]',error?.message);}
+ try{for(const suffix of ['-line','-casing','-walk-line'])if(map.getLayer(COMPARISON_ROUTE_SOURCE+suffix))map.removeLayer(COMPARISON_ROUTE_SOURCE+suffix);if(map.getSource(COMPARISON_ROUTE_SOURCE))map.removeSource(COMPARISON_ROUTE_SOURCE);}catch(error){console.debug('[추천 경로 정리]',error?.message);}
 }
 function fitExposedRoute(coords,padding,{maxZoom=16,duration=350}={}){
  if(!coords?.length||!padding)return;
@@ -3551,7 +3551,8 @@ function paintComparisonRoute(features){
   map.addSource(id,{type:'geojson',data});
   const before=map.getStyle()?.layers?.find(l=>l.type==='symbol')?.id;
   map.addLayer({id:id+'-casing',type:'line',source:id,layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#fff','line-width':8}},before);
-  map.addLayer({id:id+'-line',type:'line',source:id,layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':['get','color'],'line-width':5}},before);
+  map.addLayer({id:id+'-line',type:'line',source:id,filter:['!=',['get','walking'],true],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':['get','color'],'line-width':5}},before);
+  map.addLayer({id:id+'-walk-line',type:'line',source:id,filter:['==',['get','walking'],true],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':['get','color'],'line-width':4,'line-dasharray':[.35,1.55]}},before);
  }
 }
 window.addEventListener('dongjak:transit-comparison-focus',event=>{
@@ -3587,7 +3588,7 @@ window.addEventListener('dongjak:transit-comparison-focus',event=>{
    return rail.length&&rail.every(s=>transitCoordinatesInScope(s.coordinates))?rail.map(s=>feature(s.coordinates,subwayLineColor(s.line==='신림'?'신림선':s.line+'호선'))):null;
   }));
   if(parts.some(v=>!v)||generation!==comparisonRouteGeneration||app.dataset.tab!=='route'||app.dataset.transitComparison!=='true'||routeStart!==from||routeEnd!==to)return;
-  comparisonRouteFeatures=[...walks.map(w=>feature(w.coords,w.color)),...parts.flat()];
+  comparisonRouteFeatures=[...walks.map(w=>({...feature(w.coords,w.color),properties:{color:w.color,walking:true}})),...parts.flat()];
   paintComparisonRoute(comparisonRouteFeatures);fit();
  })().catch(error=>console.debug('[추천 경로 형상]',error?.message));
 });
@@ -4049,7 +4050,7 @@ function focusTransitRoute(coords){
   if(!map.getLayer(casing))map.addLayer({id:casing,type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':'#fff','line-width':walking?7:10,'line-opacity':.95}},line);
   map.setPaintProperty(line,'line-width',walking?4:6);
   map.setPaintProperty(line,'line-opacity',1);
-  if(walking)map.setPaintProperty(line,'line-dasharray',[1.5,1.5]);
+  if(walking){map.setPaintProperty(line,'line-dasharray',[.35,1.55]);map.setLayoutProperty(line,'line-cap','round');}
   const before=map.getStyle()?.layers?.find(l=>l.type==='symbol'&&l.id!=='dj-transit-multi-stops-transfer-label')?.id;
   map.moveLayer(casing,before);map.moveLayer(line,before);
  }
@@ -4111,7 +4112,7 @@ async function previewMultiTransit(plan,signal,preferPri=true){
  if(!Array.isArray(legs)||(legs.length<2||legs.length>3)||legs.some(leg=>!['bus','rail'].includes(leg.kind)||!Array.isArray(leg.coords)||leg.coords.length<2||!transitCoordinatesInScope(leg.coords)))throw new Error('검증된 환승 경로 또는 지원 범위를 확인하지 못했습니다.');
  const from=routeStart,to=routeEnd,gen=routeRequestGeneration,req=++transitGeneration;
  const current=()=>!signal?.aborted&&gen===routeRequestGeneration&&req===transitGeneration&&routeStart===from&&routeEnd===to&&app.dataset.tab==='route'&&!navMode&&!routeWaypoints.length;
- const pairs=[[from,legs[0].origin],...legs.slice(1).map((leg,i)=>[legs[i].destination,leg.origin]),[legs.at(-1).destination,to]];
+ const pairs=transitReviewPairs(plan,from,to);
  const walks=[];
  for(const [a,b] of pairs){
    if(!current())throw new Error('경로 조건이 변경됐습니다.');
@@ -4131,7 +4132,7 @@ async function previewMultiTransit(plan,signal,preferPri=true){
  const feature=(coordinates,color)=>({type:'Feature',properties:{color},geometry:{type:'LineString',coordinates}});
  const color=leg=>leg.kind==='bus'?busRouteColor(leg.routeType):subwayLineColor(leg.lines[0]==='신림'?'신림선':leg.lines[0]+'호선');
  const data=[
-  ['dj-transit-multi-walk',walks.filter(x=>x.coords.length>=2).map(x=>feature(x.coords,transitWalkStyle(x))),false],
+  ['dj-transit-multi-walk',walks.filter(x=>x.coords.length>=2).map(x=>feature(x.coords,transitWalkStyle(x))),true],
   ['dj-transit-multi-bus',legs.filter(x=>x.kind==='bus').map(x=>feature(x.coords,color(x))),false]
  ];
  for(const [id,features,dash] of data){
@@ -4139,7 +4140,7 @@ async function previewMultiTransit(plan,signal,preferPri=true){
   if(!map.getSource(id))map.addSource(id,{type:'geojson',data:collection});else map.getSource(id).setData(collection);
   if(!map.getLayer(id+'-line'))map.addLayer({id:id+'-line',type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':['get','color'],'line-width':5,'line-opacity':.9,...(dash?{'line-dasharray':[2,2]}:{})}});
  }
- const stopFeatures=legs.flatMap((leg,i)=>[leg.origin,leg.destination].map((p,j)=>({type:'Feature',properties:{color:color(leg),transfer:j===0&&i>0},geometry:{type:'Point',coordinates:[p.lng,p.lat]}})));
+ const stopFeatures=legs.flatMap((leg,i)=>[transitAccessPoint(leg,true),transitAccessPoint(leg,false)].map((p,j)=>({type:'Feature',properties:{color:color(leg),transfer:j===0&&i>0},geometry:{type:'Point',coordinates:[p.lng,p.lat]}})));
  setTransitPreviewStops(stopFeatures);
  app.dataset.djTransitPreview=plan.kind;
  window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
@@ -4220,9 +4221,9 @@ window.addEventListener('dongjak:transit-route-preview',event=>{
     if(plan.kind!=='bus'||!Array.isArray(plan.coords)||plan.coords.length<2||!transitCoordinatesInScope(plan.coords))throw new Error('검증된 버스 경로 또는 지원 범위를 확인하지 못했습니다.');
     const from=routeStart,to=routeEnd,gen=routeRequestGeneration,req=++transitGeneration;
     const current=()=>!signal?.aborted&&gen===routeRequestGeneration&&req===transitGeneration&&routeStart===from&&routeEnd===to&&app.dataset.tab==='route'&&!navMode&&!routeWaypoints.length;
-    const first=await fetchTransitPedestrianPair(from,plan.origin,signal);
+    const first=await fetchTransitPedestrianPair(from,transitAccessPoint(plan,true),signal);
     if(!current())throw new Error('경로 조건이 변경됐습니다.');
-    const last=await fetchTransitPedestrianPair(plan.destination,to,signal);
+    const last=await fetchTransitPedestrianPair(transitAccessPoint(plan,false),to,signal);
     if(!current())throw new Error('경로 조건이 변경됐습니다.');
     const [a,b]=await Promise.all([selectTransitWalk(first,preferPri,signal),selectTransitWalk(last,preferPri,signal)]);
     if(!current())throw new Error('경로 조건이 변경됐습니다.');
@@ -4236,7 +4237,7 @@ window.addEventListener('dongjak:transit-route-preview',event=>{
     app.dataset.djTransitPreview='bus';
     window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
     transitPreview={kind:'bus',route:String(plan.route),time:estimateTransitTime(plan,a.seconds+b.seconds),minutes:estimateTransitTime(plan,a.seconds+b.seconds)?.totalMinutes??null,walkM:(a.kilometers+b.kilometers)*1000};
-    navigate('map');syncRoutePresentation();publishTransitDetail(plan,from,to,a,b);setTransitPreviewStops([plan.origin,plan.destination].map(p=>({type:'Feature',properties:{color:busRouteColor(plan.routeType)},geometry:{type:'Point',coordinates:[p.lng,p.lat]}})));focusTransitRoute([...a.coords,...plan.coords,...b.coords]);
+    navigate('map');syncRoutePresentation();publishTransitDetail(plan,from,to,a,b);setTransitPreviewStops([transitAccessPoint(plan,true),transitAccessPoint(plan,false)].map(p=>({type:'Feature',properties:{color:busRouteColor(plan.routeType)},geometry:{type:'Point',coordinates:[p.lng,p.lat]}})));focusTransitRoute([...a.coords,...plan.coords,...b.coords]);
   })().then(resolve,reject);
 });
 
