@@ -1,14 +1,17 @@
-/** Transit-only pilot service area: the existing Seoul geocoder rectangle,
- * not a claim of complete metropolitan coverage. Ordinary walking stays strict.
- */
-export const TRANSIT_SEARCH_BOUNDS=Object.freeze([[126.78,37.40],[127.20,37.70]].map(Object.freeze));
+import {pointInSeoulGeometry} from './seoul-transit-boundary.mjs';
+// Rectangle is a camera/search prefilter, never the administrative boundary.
+export const TRANSIT_SEARCH_BOUNDS=Object.freeze([[126.73,37.40],[127.21,37.71]].map(Object.freeze));
+let seoulGeometry=null;
+export function setTransitServiceGeometry(geometry){seoulGeometry=geometry||null;}
+export function transitServiceReady(){return Boolean(seoulGeometry);}
 export function transitPointInScope(p){
- return Number.isFinite(p?.lng)&&Number.isFinite(p?.lat)&&p.lng>=TRANSIT_SEARCH_BOUNDS[0][0]&&p.lng<=TRANSIT_SEARCH_BOUNDS[1][0]&&p.lat>=TRANSIT_SEARCH_BOUNDS[0][1]&&p.lat<=TRANSIT_SEARCH_BOUNDS[1][1];
+ return Number.isFinite(p?.lng)&&Number.isFinite(p?.lat)&&pointInSeoulGeometry(seoulGeometry,p.lng,p.lat);
 }
 export function transitCoordinatesInScope(coords){
  return Array.isArray(coords)&&coords.length>=2&&coords.every(p=>Array.isArray(p)&&p.length===2&&transitPointInScope({lng:p[0],lat:p[1]}));
 }
 export function transitEndpointPolicy(from,to,inside){
+ if(!transitServiceReady())return 'boundary-unavailable';
  if(!transitPointInScope(from)||!transitPointInScope(to))return 'outside-service-area';
  if(typeof inside!=='function')return 'boundary-unavailable';
  const a=inside(from.lng,from.lat),b=inside(to.lng,to.lat);
