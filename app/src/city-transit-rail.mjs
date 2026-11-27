@@ -1,5 +1,8 @@
 // A separate route-context overlay; the selected route and safety-map settings are independent.
-const ID='dj-city-transit-rail',LOCAL=['transport-schematic-subway-casing','transport-schematic-subway','transport-real-rail-overview-casing','transport-real-rail-overview'];
+export const CITY_RAIL_ID='dj-city-transit-rail';
+export const LOCAL_RAIL_LINE_IDS=Object.freeze(['transport-schematic-subway-casing','transport-schematic-subway','transport-real-rail-overview-casing','transport-real-rail-overview']);
+const ID=CITY_RAIL_ID,LOCAL=LOCAL_RAIL_LINE_IDS;
+export function cityRailOwnsBackground(map,active){return Boolean(active&&map.getLayer?.(ID)&&map.getSource?.(ID));}
 export function clipCityRail(collection,geometry,isInside,colors){
  const features=[];
  for(const f of collection?.features||[]){
