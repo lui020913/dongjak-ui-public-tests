@@ -53,7 +53,7 @@ test('transit badge uses actual map route palette as a filled pill and search/de
  const css=read('transit-route-comparison.css'),js=read('transit-route-comparison.js'),detail=read('transit-route-detail.js'),entry=read('route-screen-v3.js');
  const rule=css.match(/\.tr-line-badge\{[^}]+\}/)[0];
  assert.match(rule,/background:var\(--line-color\)/);assert.match(rule,/color:#fff/);assert.match(rule,/border-radius:999px/);
- assert.match(js,/badge.style.setProperty\('--line-color',leg.kind==='bus'\?busRouteColor\(leg.routeType\):subwayLineColor/);
+ assert.match(js,/badge.style.setProperty\('--line-color',leg.kind==='bus'\?busRouteColor\(leg.routeType,leg.route\):subwayLineColor/);
  assert.match(entry,/revealSurface\(searchScreen/);assert.match(entry,/exitSurface\(searchScreen/);
  assert.match(detail,/revealSurface\(root\)/);assert.match(detail,/exitSurface\(root,finish\)/);
 });

@@ -1,3 +1,4 @@
+import {installMetroStationAccess} from './metro-station-access.mjs';
 import {paintBusBadge} from './bus-route-colors.mjs';
 import {visibleBusRoadIndex} from './bus-roadside-placement.mjs';
 import {createTransitCellStream,viewportKeys,cellKey} from './transit-stream-grid.mjs';
@@ -1844,6 +1845,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   // Hide metro lines and badges at the actual widest camera zoom on *both* PC and mobile.
   installResponsiveMetroVisibility({map,app:document.getElementById('app')});
   let stationLookups=new Map();
+  const stationAccess=installMetroStationAccess({map,app:streamApp,colors:SUBWAY_LINE_COLORS,getStations:()=>[...new Map([...officialMetro,...streamedRows.filter(p=>p.kind==='subway')].filter(placeInDisplayScope).map(p=>[normalizeStationQueryName(p.name),p])).values()],getRailPaths:()=>cityScope()&&cityRail.getCollection()?indexRenderedMetroRail(cityRail.getCollection()):renderedRailPaths,allow:(lng,lat)=>cityScope()?inSeoul(lng,lat):isDongjak(lng,lat)===true||isNearBoundary(lng,lat)===true});
   let lastMetroGeoSignature='';
   function renderMetroMarkers(items){
     lastMetroMarkerItems=items;
@@ -1865,7 +1867,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     // boundary transfer station, but exclude unrelated external stations.
     geo.features=geo.features.filter(f=>{const p=stationLookups.get(f.properties.stationKey)||officialMetro.find(p=>normalizeStationQueryName(p.name)===f.properties.stationKey);return p&&stationScope(p.name,f.properties.line,p.lng,p.lat)&&(!cityScope()||inSeoul(...f.geometry.coordinates))&&!overlapsRouteStop(...f.geometry.coordinates,'subway');});
     const signature=JSON.stringify(geo);
-    if(signature!==lastMetroGeoSignature){map.getSource(stationSource)?.setData(geo);lastMetroGeoSignature=signature;}
+    if(signature!==lastMetroGeoSignature){map.getSource(stationSource)?.setData(geo);lastMetroGeoSignature=signature;stationAccess.request();}
   }
   function updateMetroMarkerPresentation(){
     // MapLibre reprojects markers itself on every frame; nothing here changes
