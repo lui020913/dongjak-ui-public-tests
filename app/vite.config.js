@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import {statSync} from 'node:fs';
 import {onRequestGet,onRequestPost} from './functions/api/place-insight.js';
 import {serveDistrictRoadTile} from './server/district-road-tile.mjs';
+import {onRequestPost as matchBusTrace} from './functions/api/basemap/bus-trace.js';
 import {platformHtml} from './platforms/shared/platform-html.js';
 // Cloudflare Pages serves the identical /api/place-insight route in production.
 // Vite alone has no Workers AI binding. Use npm run dev:ai for local inference.
@@ -11,6 +12,13 @@ const outputs={
   android:'build/android'
 };
 function districtTileMiddleware(server){
+ server.middlewares.use('/api/basemap/bus-trace',async(req,res,next)=>{
+  if(req.method!=='POST')return next();
+  try{const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>90000){res.writeHead(413);res.end();return;}chunks.push(chunk);}
+   const reply=await matchBusTrace({request:new Request('http://localhost/api/basemap/bus-trace',{method:'POST',body:Buffer.concat(chunks)})});
+   res.writeHead(reply.status,Object.fromEntries(reply.headers.entries()));res.end(Buffer.from(await reply.arrayBuffer()));
+  }catch{res.writeHead(502);res.end();}
+ });
  server.middlewares.use('/api/basemap/tile',async(req,res,next)=>{
   if(req.method!=='GET')return next();
   const reply=await serveDistrictRoadTile(new Request('http://localhost/api/basemap/tile'+req.url));
