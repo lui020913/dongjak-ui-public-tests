@@ -1,3 +1,4 @@
+import {apartmentDisplayExclusions} from './completed-apartment-display.mjs';
 import {applyBuildingDisplayTrims,loadBuildingDisplayTrimPack} from './building-display-road-trims.js';
 import {collectGreenReviewCandidates} from './green-building-filter.js';
 /**
@@ -33,7 +34,8 @@ export async function loadBuildingTileFeatures(sheet, fetchFn = globalThis.fetch
   for(let i=0;i<results.length;i++) {
     const result=results[i];
     if(result.status === 'fulfilled') {
-      features.push(...result.value);
+      const excluded=apartmentDisplayExclusions(sheet.sheet,i===0?'base':'supplement',result.value);
+      features.push(...result.value.filter(f=>!excluded.has(f)));
       reviewCandidates.push(...collectGreenReviewCandidates(sheet.sheet,i===0?'base':'supplement',result.value));
       for(const [feature,geometry] of applyBuildingDisplayTrims(sheet.sheet,i===0?'base':'supplement',sources[i].url,result.value,pack))displayGeometries.set(feature,geometry);
       successfulSources++;
