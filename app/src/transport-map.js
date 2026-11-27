@@ -1377,7 +1377,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const streamApp=document.getElementById('app');
   const cityScope=()=>streamApp?.dataset.djTransitExterior==='true'&&Boolean(getSeoulBoundary());
   const scopeContains=(lng,lat)=>cityScope()?inSeoul(lng,lat):isDongjak(lng,lat)===true;
-  let streamedRows=[],activeStreamKeys=new Set(),streamPending=0,streamReady=false;
+  let streamedRows=[],activeStreamKeys=new Set(),streamPending=0,streamReady=false,routeStopCoordinates=[];
+  const overlapsRouteStop=(lng,lat,kind)=>routeStopCoordinates.some(([x,y])=>meterDistance([lng,lat],[x,y])<=(kind==='bus'?22:40));
   const inActiveCell=p=>activeStreamKeys.has((p.kind==='bus'?'bus':'rail')+'_'+cellKey(p.lng,p.lat));
   let stops=new Map();
   let selected=null;
@@ -1848,7 +1849,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     }
     // Scope by station identity before track snapping; keep both badges at a
     // boundary transfer station, but exclude unrelated external stations.
-    geo.features=geo.features.filter(f=>scopeContains(...f.geometry.coordinates));
+    geo.features=geo.features.filter(f=>scopeContains(...f.geometry.coordinates)&&!overlapsRouteStop(...f.geometry.coordinates,'subway'));
     map.getSource(stationSource)?.setData(geo);
   }
   function updateMetroMarkerPresentation(){
@@ -1921,7 +1922,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     lastStopDataSignature=signature;
     stops=new Map(filtered.map(x=>[x.id,x]));
     cachedTransportPlaces=filtered;
-    map.getSource('transport-bus').setData(featureCollection(filtered.filter(x=>x.kind==='bus')));
+    map.getSource('transport-bus').setData(featureCollection(filtered.filter(x=>x.kind==='bus'&&!overlapsRouteStop(x.lng,x.lat,'bus'))));
     map.getSource('transport-subway').setData(featureCollection(filtered.filter(x=>x.kind==='subway')));
     renderMetroMarkers(filtered);
     currentVisibleBusStops=filtered.filter(x=>x.kind==='bus');
@@ -1967,6 +1968,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   map.on('resize',()=>streamViewportWork.request());
   map.on('dongjak:boundary-updated',()=>streamViewportWork.request());
   globalThis.window?.addEventListener?.('dongjak:transit-stream-scope',()=>{lastStopDataSignature='';streamViewportWork.request();});
+  globalThis.window?.addEventListener?.('dongjak:transit-route-stops',event=>{routeStopCoordinates=Array.isArray(event.detail)?event.detail:[];lastStopDataSignature='';refreshStops();});
   document.addEventListener?.('dongjak-base-layer-change',()=>streamViewportWork.request());
   refreshTransitViewport();
   // 별도 Overpass 호출 없이 배경지도 벡터 POI에서 정류소/역을 보충합니다.
