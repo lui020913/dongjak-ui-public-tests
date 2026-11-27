@@ -1,5 +1,5 @@
 // Display-only legacy footprint exclusions; not a legal demolition register.
-// Evidence: GitHub Actions 45957123459, corroborated site boundaries and current footprint comparison.
+// Evidence: GitHub Actions 45958455039, corroborated site boundaries and current footprint comparison.
 // Original GIS source files remain unchanged.
 export const completedApartmentDisplayEdits={
   "schema": 1,
@@ -538,7 +538,7 @@ export const completedApartmentDisplayEdits={
       "approved": "2002-02-27",
       "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
       "boundary_reference": 305837437,
-      "retained_towers": 7,
+      "retained_towers": 5,
       "expected_towers": 6
     },
     {
@@ -712,6 +712,92 @@ export const completedApartmentDisplayEdits={
       "boundary_reference": 305888840,
       "retained_towers": 4,
       "expected_towers": 4
+    },
+    {
+      "sheet": 6,
+      "kind": "base",
+      "row": 7235,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.938962,
+              37.496882
+            ],
+            [
+              126.938981,
+              37.49697
+            ],
+            [
+              126.939024,
+              37.496964
+            ],
+            [
+              126.939006,
+              37.496876
+            ],
+            [
+              126.938962,
+              37.496882
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 21866,
+      "source_sha256": "e5ac861dba98819b84fbfdf1c00f26338b10e0d94ba9bdcbb6bcba8d81812333",
+      "site": "상도 푸르지오 클라베뉴",
+      "approved": "2024-02-29",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 324689860,
+      "retained_towers": 10,
+      "expected_towers": 10
+    },
+    {
+      "sheet": 6,
+      "kind": "base",
+      "row": 7253,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.94,
+              37.497506
+            ],
+            [
+              126.940016,
+              37.497485
+            ],
+            [
+              126.939962,
+              37.49746
+            ],
+            [
+              126.93994,
+              37.497488
+            ],
+            [
+              126.939994,
+              37.497514
+            ],
+            [
+              126.94,
+              37.497506
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 21866,
+      "source_sha256": "e5ac861dba98819b84fbfdf1c00f26338b10e0d94ba9bdcbb6bcba8d81812333",
+      "site": "상도 푸르지오 클라베뉴",
+      "approved": "2024-02-29",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 324689860,
+      "retained_towers": 10,
+      "expected_towers": 10
     },
     {
       "sheet": 3,
@@ -3251,7 +3337,7 @@ export const completedApartmentDisplayEdits={
       "approved": "2023-02-27",
       "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
       "boundary_reference": "seoulplan:11000UQ120PS202407010590",
-      "retained_towers": 26,
+      "retained_towers": 27,
       "expected_towers": 26
     },
     {
@@ -3292,7 +3378,7 @@ export const completedApartmentDisplayEdits={
       "approved": "2023-02-27",
       "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
       "boundary_reference": "seoulplan:11000UQ120PS202407010590",
-      "retained_towers": 26,
+      "retained_towers": 27,
       "expected_towers": 26
     },
     {
@@ -3417,6 +3503,219 @@ export const completedApartmentDisplayEdits={
       "boundary_reference": 888807585,
       "retained_towers": 12,
       "expected_towers": 12
+    },
+    {
+      "sheet": 8,
+      "kind": "base",
+      "row": 12622,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.98029,
+              37.491933
+            ],
+            [
+              126.980269,
+              37.492034
+            ],
+            [
+              126.980538,
+              37.49207
+            ],
+            [
+              126.980559,
+              37.491969
+            ],
+            [
+              126.98029,
+              37.491933
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 14967,
+      "source_sha256": "13fc6af6e83150bc31d6f6bb1c59ac9546fcf66bdca30e90d1337953f2f61dbd",
+      "site": "이수푸르지오더프레티움",
+      "approved": "2021-06-29",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 888809615,
+      "retained_towers": 10,
+      "expected_towers": 11
+    },
+    {
+      "sheet": 8,
+      "kind": "base",
+      "row": 2108,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.979736,
+              37.492279
+            ],
+            [
+              126.979691,
+              37.492245
+            ],
+            [
+              126.979625,
+              37.492299
+            ],
+            [
+              126.97967,
+              37.492335
+            ],
+            [
+              126.979736,
+              37.492279
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 14967,
+      "source_sha256": "13fc6af6e83150bc31d6f6bb1c59ac9546fcf66bdca30e90d1337953f2f61dbd",
+      "site": "이수푸르지오더프레티움",
+      "approved": "2021-06-29",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 888809615,
+      "retained_towers": 10,
+      "expected_towers": 11
+    },
+    {
+      "sheet": 8,
+      "kind": "base",
+      "row": 3587,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.980138,
+              37.492759
+            ],
+            [
+              126.980105,
+              37.492734
+            ],
+            [
+              126.980048,
+              37.492782
+            ],
+            [
+              126.980079,
+              37.492808
+            ],
+            [
+              126.980138,
+              37.492759
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 14967,
+      "source_sha256": "13fc6af6e83150bc31d6f6bb1c59ac9546fcf66bdca30e90d1337953f2f61dbd",
+      "site": "이수푸르지오더프레티움",
+      "approved": "2021-06-29",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 888809615,
+      "retained_towers": 10,
+      "expected_towers": 11
+    },
+    {
+      "sheet": 8,
+      "kind": "base",
+      "row": 2820,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.980869,
+              37.492664
+            ],
+            [
+              126.980812,
+              37.492619
+            ],
+            [
+              126.980776,
+              37.492644
+            ],
+            [
+              126.980835,
+              37.49269
+            ],
+            [
+              126.980869,
+              37.492664
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 14967,
+      "source_sha256": "13fc6af6e83150bc31d6f6bb1c59ac9546fcf66bdca30e90d1337953f2f61dbd",
+      "site": "이수푸르지오더프레티움",
+      "approved": "2021-06-29",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 888809615,
+      "retained_towers": 10,
+      "expected_towers": 11
+    },
+    {
+      "sheet": 8,
+      "kind": "base",
+      "row": 3582,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.980166,
+              37.493597
+            ],
+            [
+              126.980112,
+              37.49355
+            ],
+            [
+              126.980078,
+              37.493573
+            ],
+            [
+              126.980096,
+              37.493589
+            ],
+            [
+              126.980101,
+              37.493585
+            ],
+            [
+              126.980136,
+              37.493617
+            ],
+            [
+              126.980166,
+              37.493597
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 14967,
+      "source_sha256": "13fc6af6e83150bc31d6f6bb1c59ac9546fcf66bdca30e90d1337953f2f61dbd",
+      "site": "이수푸르지오더프레티움",
+      "approved": "2021-06-29",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 888809615,
+      "retained_towers": 10,
+      "expected_towers": 11
     },
     {
       "sheet": 7,
@@ -3595,7 +3894,7 @@ export const completedApartmentDisplayEdits={
       "approved": "2021-10-29",
       "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
       "boundary_reference": "seoulplan:11000UQ120PS202505310986",
-      "retained_towers": 9,
+      "retained_towers": 6,
       "expected_towers": 8
     },
     {
@@ -3636,7 +3935,7 @@ export const completedApartmentDisplayEdits={
       "approved": "2021-10-29",
       "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
       "boundary_reference": "seoulplan:11000UQ120PS202505310986",
-      "retained_towers": 9,
+      "retained_towers": 6,
       "expected_towers": 8
     }
   ]

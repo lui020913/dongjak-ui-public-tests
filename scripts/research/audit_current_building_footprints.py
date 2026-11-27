@@ -443,6 +443,38 @@ for f in walk['features']:
         road_counts['apartment_ground_link_conflicts']+=1
         road_conflicts.append({'type':'Feature','geometry':f['geometry'],'properties':{'link_properties':p,'site_names':site_names,'sheet':sheet,'kind':kind,'row':row,'building_interior_crossing_m':round(overlap,2),'decision':'verify_ground_passage_before_display_or_routing_edit'}})
 (OUT/'apartment-road-interior-conflicts.geojson').write_text(json.dumps({'type':'FeatureCollection','features':road_conflicts},ensure_ascii=False,separators=(',',':')))
+# Compare the six exact ground-link conflicts with current mapped roads.
+# Lack of an OSM road is not a closure determination. Keep graph/PRI stable.
+from shapely.geometry import LineString
+from concurrent.futures import ThreadPoolExecutor
+def corroborate_road(conflict):
+    p=conflict['properties'];link=p['link_properties'];line=transform(project,shape(conflict['geometry']))
+    idx=next((i for i,v in enumerate(legacy_rows) if v[0]==p['sheet'] and v[1]==p['kind'] and v[2]==p['row']),None)
+    if idx is None:return None
+    g=legacy_geoms[idx];local=line.intersection(g.buffer(20))
+    if local.is_empty:return None
+    w,s,e,north=transform(unproject,local.buffer(10)).bounds
+    query=f'[out:json][timeout:20];way["highway"]({s},{w},{north},{e});out geom;'
+    response=None
+    for endpoint in ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter']:
+        try:
+            req=urllib.request.Request(endpoint+'?'+urllib.parse.urlencode({'data':query}),headers={'User-Agent':'Dongjak safety map road conflict audit'})
+            with urllib.request.urlopen(req,timeout=30) as resp:response=json.load(resp)
+            if not isinstance(response.get('elements'),list) or response.get('remark'):response=None;continue
+            break
+        except Exception:response=None
+    nearby=[]
+    for way in (response or {}).get('elements',[]):
+        coords=[(v['lon'],v['lat']) for v in way.get('geometry',[])]
+        if len(coords)<2:continue
+        mapped=transform(project,LineString(coords));tags=way.get('tags',{})
+        if mapped.distance(local)>12:continue
+        nearby.append({'id':way['id'],'highway':tags.get('highway'),'name':tags.get('name'),'layer':tags.get('layer'),'bridge':tags.get('bridge'),'tunnel':tags.get('tunnel'),'covered':tags.get('covered'),'access':tags.get('access'),'inside_building_m':round(mapped.intersection(g.buffer(-1.5)).length,2),'distance_to_official_link_m':round(mapped.distance(local),2),'geometry':{'type':'LineString','coordinates':coords}})
+    return {'link_id':link.get('link_id'),'site_names':p['site_names'],'source_status':'retrieved' if response is not None else 'unavailable','link_geometry':conflict['geometry'],'building_original':legacy_rows[idx][3]['geometry'],'nearby_mapped_ways':nearby}
+with ThreadPoolExecutor(max_workers=3) as pool:
+    road_evidence=[v for v in pool.map(corroborate_road,road_conflicts) if v]
+for evidence in road_evidence:print('APARTMENT_ROAD_EVIDENCE '+json.dumps(evidence,ensure_ascii=False,separators=(',',':')),flush=True)
+(OUT/'apartment-road-evidence.json').write_text(json.dumps(road_evidence,ensure_ascii=False,separators=(',',':')))
 print('APARTMENT_ROAD_CONFLICTS '+json.dumps(dict(road_counts),ensure_ascii=False),flush=True)
 for f in sorted(road_conflicts,key=lambda f:f['properties']['building_interior_crossing_m'],reverse=True)[:30]:
     print('APARTMENT_ROAD_CONFLICT '+json.dumps(f['properties'],ensure_ascii=False),flush=True)
