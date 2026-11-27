@@ -41,7 +41,7 @@ test('접근성 버튼과 별개인 기본 지도 옵션, 확대 3D 자동 표�
   assert.match(main,/function visibleBuilding2D\(\)\{[\s\S]*?return mapReady && Boolean\(boundaryGeometry\)/);
   const building=main.split('function visibleBuilding3D(){')[1].split('function syncTiltWithBuildings')[0];
   assert.match(building,/return baseBuildingsVisible && mapReady/);
-  assert.match(building,/djTransitExterior!=='true'/,'buildings are suspended only in the transit context');
+  assert.doesNotMatch(building,/djTransitExterior/,'shared buildings remain governed by the same toggle in transit mode');
   assert.match(main,/buildingPitchActive && loadedBuildingTiles\.size>0/);
   assert.doesNotMatch(main,/movementIsSlow/);
   assert.match(main,/baseLayerControls\?\.apply/);

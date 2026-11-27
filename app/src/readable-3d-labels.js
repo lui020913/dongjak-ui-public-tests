@@ -94,12 +94,12 @@ function applyReadableLayerOrder(map){
   return moved;
 }
 
-export function installReadable3DLabels({map,app}={}){
+export function installReadable3DLabels({map}={}){
   if(!map?.getStyle||!map?.setLayoutProperty)return ()=>{};
   let removed=false,pending=false,updating=false,lastOrder='';
   function update(){
     pending=false;
-    if(app?.dataset?.djTransitExterior==='true'||removed||updating||map.isMoving?.()||nightOwnsLayerOrder(map))return;
+    if(removed||updating||map.isMoving?.()||nightOwnsLayerOrder(map))return;
     const order=(map.getStyle()?.layers||[]).map(l=>l.id).join('|');
     if(order===lastOrder)return;
     updating=true;
@@ -120,7 +120,7 @@ export function installReadable3DLabels({map,app}={}){
     }finally{updating=false;}
   }
   function schedule(){
-    if(app?.dataset?.djTransitExterior==='true'||pending||removed||updating||map.isMoving?.())return;
+    if(pending||removed||updating||map.isMoving?.())return;
     pending=true;
     if(typeof requestAnimationFrame==='function')requestAnimationFrame(update);
     else update();
