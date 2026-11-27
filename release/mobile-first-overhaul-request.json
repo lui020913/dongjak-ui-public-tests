@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.237",
+  "application_version": "9.2.238",
   "public_work_branch": "main",
-  "purpose": "Deploy merged PR #618 map data connection recovery: isolate cache failures, follow upstream redirects, expose reduction headers, recover reduced tile requests by fetching and reducing original vector bytes before MapLibre decoding. Required source CI and reduced tile verification passed. Preserve protected Preview/Production/APK gates.",
-  "attempt": 473,
+  "purpose": "Deploy verified PR #619: redevelopment display only at close zoom on safety map, facility-first search, official ARS-specific multi-direction bus search subtitles, shared mobile keyboard dock isolation and scroll-owned bottom clearance. Preserve prior map connectivity recovery and all protected Preview/Production/APK gates.",
+  "attempt": 474,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
