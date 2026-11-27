@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.233",
+  "application_version": "9.2.234",
   "public_work_branch": "main",
-  "purpose": "Deploy merged PRs #610 and #611: 992 existing display exclusions, 25 confirmed redevelopment areas and labels, separate rail transfer pills and legs, ordered bus direction cost and independent pedestrian network comparison. Required source CI and protected overlay passed. Field route validation continues separately and does not block this release. No further building survey or overlap corrections; preserve all protected Preview/Production/APK gates.",
-  "attempt": 469,
+  "purpose": "Deploy verified PR #614: collision-aware redevelopment labels at all detailed zoom levels and 28 additional source-bound low-rise footprint exclusions at the three reported complexes (1020 total). Required source CI and protected overlay passed. Separate pedestrian network work remains independent; retain protected Preview/Production/APK gates.",
+  "attempt": 470,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
