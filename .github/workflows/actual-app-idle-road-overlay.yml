@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   render:
-    if: github.event.pull_request.head.repo.full_name == github.repository && (github.event.pull_request.head.ref == 'fix/idle-white-road-overlay-20261126' || github.event.pull_request.head.ref == 'fix/road-background-route-sheet-20261127' || github.event.pull_request.head.ref == 'fix/ferry-boundary-fade-20261127' || github.event.pull_request.head.ref == 'fix/admin-names-real-line4-20261127' || github.event.pull_request.head.ref == 'fix/restore-curated-bridge-labels-20261127')
+    if: github.event.pull_request.head.repo.full_name == github.repository && (github.event.pull_request.head.ref == 'fix/idle-white-road-overlay-20261126' || github.event.pull_request.head.ref == 'fix/road-background-route-sheet-20261127' || github.event.pull_request.head.ref == 'fix/ferry-boundary-fade-20261127' || github.event.pull_request.head.ref == 'fix/admin-names-real-line4-20261127' || github.event.pull_request.head.ref == 'fix/restore-curated-bridge-labels-20261127' || github.event.pull_request.head.ref == 'fix/strict-buildings-compact-walk-footer-20261127')
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -39,6 +39,7 @@ jobs:
         env:
           CHECK_QUIET_BASEMAP: ${{ github.event.pull_request.head.ref == 'fix/road-background-route-sheet-20261127' || github.event.pull_request.head.ref == 'fix/ferry-boundary-fade-20261127' || github.event.pull_request.head.ref == 'fix/admin-names-real-line4-20261127' }}
           CHECK_BRIDGE_LABELS: ${{ github.event.pull_request.head.ref == 'fix/restore-curated-bridge-labels-20261127' }}
+          CHECK_NATIVE_BUILDING_SCOPE: ${{ github.event.pull_request.head.ref == 'fix/strict-buildings-compact-walk-footer-20261127' }}
           CHECK_ADMIN_RAIL: ${{ github.event.pull_request.head.ref == 'fix/admin-names-real-line4-20261127' }}
           CHECK_FERRY_FADE: ${{ github.event.pull_request.head.ref == 'fix/ferry-boundary-fade-20261127' }}
       - uses: actions/upload-artifact@v4

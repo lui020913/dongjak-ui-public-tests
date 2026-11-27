@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {installDistrictBuildingScope,containsDistrictPoint} from '../src/district-building-scope.mjs';
+import {installDistrictBuildingScope,containsDistrictPoint,districtBuildingFilter} from '../src/district-building-scope.mjs';
 import {strictRoutePreviewPadding,routeProjectionCorrection} from '../src/route-map-focus.js';
 const boundary={type:'Polygon',coordinates:[[[0,0],[2,0],[2,2],[0,2],[0,0]]]};
 test('district scope applies only to building geometry and updates once per boundary',()=>{
@@ -9,7 +9,7 @@ test('district scope applies only to building geometry and updates once per boun
  const original=['==',['get','class'],'building'];const filters=new Map([['building',original]]),writes=[];
  const map={getStyle:()=>({layers}),getFilter:id=>filters.get(id),setFilter:(id,filter)=>{filters.set(id,filter);writes.push(id);},on(){}};
  const scope=installDistrictBuildingScope(map);scope.update(boundary);scope.update(boundary);
- assert.equal(writes.length,6);assert.deepEqual(filters.get('building'),['all',original,['<=',['distance',boundary],0]]);
+ assert.equal(writes.length,6);assert.deepEqual(filters.get('building'),['all',original,districtBuildingFilter(boundary)]);
  assert.equal(filters.has('road'),false);assert.equal(filters.has('park'),false);
  assert.equal(containsDistrictPoint(boundary,1,1),true);assert.equal(containsDistrictPoint(boundary,3,1),false);
 });
@@ -43,4 +43,12 @@ test('walking-only footer uses one full-width column without expanding the compa
  const css=readFileSync(new URL('../src/route-experience.css',import.meta.url),'utf8');
  const overlay=readFileSync(new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
  for(const source of [css,overlay]){const tail=source.slice(source.lastIndexOf('/* '));assert.match(tail,/:not\(\[data-dj-transit-preview\]\)/);assert.match(tail,/grid-template-columns:minmax\(0,1fr\)!important/);assert.match(tail,/#route-guide-start\{grid-column:1\/-1!important;width:100%!important/);}
+});
+
+test('native building scope keeps original rendering and repairs overwritten filters only at idle',()=>{
+ const layers=[{id:'building',type:'fill','source-layer':'building'},{id:'building-top',type:'fill','source-layer':'building'},{id:'dongjak-buildings-footprint-1',type:'fill',source:'dongjak-buildings-data-1'}],events={},filters=new Map(),writes=[];
+ const map={getStyle:()=>({layers}),getFilter:id=>filters.get(id),setFilter:(id,v)=>{filters.set(id,v);writes.push(id);},on:(k,fn)=>events[k]=fn};
+ const owner=installDistrictBuildingScope(map);owner.update(boundary);const rule=districtBuildingFilter(boundary);
+ assert.deepEqual(rule[1],['<=',['distance',boundary],0]);assert.equal(rule[2][0],'>');assert.deepEqual(rule[2][1][1].coordinates[0][1],boundary.coordinates[0]);
+ filters.set('building-top',null);events.styledata();assert.equal(writes.length,4);events.idle();assert.equal(writes.length,5);assert.deepEqual(filters.get('building-top'),rule);events.styledata();events.idle();assert.equal(writes.length,5);assert.equal(filters.has('dongjak-buildings-footprint-1'),false);
 });
