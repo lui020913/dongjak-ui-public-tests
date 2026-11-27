@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.239",
+  "application_version": "9.2.240",
   "public_work_branch": "main",
-  "purpose": "Deploy merged PR #620 and all PR #619 improvements. Correct the two failed v9.2.238 mobile report dismissal cases by restoring the destination dock behind the fading composer only when keyboard inset is closed, preserving keyboard intrusion protection. Source CI and protected overlay compatibility passed; require Preview/mobile QA/Production/APK gates.",
-  "attempt": 475,
+  "purpose": "Deploy merged PR #621: authoritative mobile editing layout owner with inline keyboard dock suppression, complete comment controls kept above visual viewport, scroll-owned bottom clearance, keyboard close/reopen restoration and removal of duplicate comment keyboard handler. Preserve earlier fixes and protected Preview/mobile QA/Production/APK gates. Source CI and targeted regressions passed.",
+  "attempt": 476,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
