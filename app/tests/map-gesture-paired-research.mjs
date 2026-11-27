@@ -5,12 +5,14 @@ const urls=[process.env.BASELINE_URL,process.env.CANDIDATE_URL];
 assert.ok(urls.every(Boolean));
 const browser=await chromium.launch({args:['--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader']});
 const report={baseline:process.env.BASELINE_SHA,candidate:process.env.CANDIDATE_SHA,notes:'Same software-rendered Chromium runner; not physical iPhone FPS. Matched pan AND zoom with equal initial DPR; icons stay enabled.',samples:[]};
+const checkDistrict=process.env.CHECK_DISTRICT_BUILDINGS==='true';
 const sites=[{name:'Sangdo',center:[126.94791,37.502834]},{name:'Noryangjin',center:[126.941005,37.513534]}];
 async function sample(url,variant,round){
  const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:3,serviceWorkers:'block',reducedMotion:'no-preference',userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Mobile/15E148 Safari/604.1'});
  // Benchmark only camera behavior, with identical returning-user setup on both revisions.
  await ctx.addInitScript(()=>{localStorage.setItem('dongjak_onboarding_seen_v860','1');sessionStorage.setItem('dj-map-guide-initial-shown-v7121','1');});
  const page=await ctx.newPage();
+ const requests={};page.on('request',r=>{const u=r.url();const kind=/overpass|bus\/stops-nearby|bus\/median-nearby/.test(u)?'stop-network':/building/i.test(u)?'buildings':/\.pbf|\.mvt|tiles\//.test(u)?'tiles':null;if(kind)requests[kind]=(requests[kind]||0)+1;});
  try{
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
   const menu=page.locator('#dj-install-menu');await menu.waitFor({state:'attached',timeout:30000});
@@ -41,8 +43,9 @@ async function sample(url,variant,round){
     const state=await page.evaluate(()=>{const m=window.__qaMap,app=document.getElementById('app');return {tab:app?.dataset?.tab,transit:app?.dataset?.djTransitExterior,center:m.getCenter(),zoom:m.getZoom(),style:m.isStyleLoaded(),tiles:m.areTilesLoaded?.(),layers:m.getStyle().layers.filter(l=>l.type==='symbol').map(l=>[l.id,m.getLayoutProperty(l.id,'visibility')||'visible'])};});
     console.log('MAP_GESTURE_READINESS_FAILURE',JSON.stringify({variant,round,site:site.name,...state}));throw error;
    }
-   const data=await page.evaluate(async({center,checkSharedScope})=>{
-    const m=window.__qaMap,frames=[],writes={},restores=[],sweeps=[];
+   const data=await page.evaluate(async({center,checkSharedScope,checkDistrict})=>{
+    const m=window.__qaMap,frames=[],writes={},buildingWrites={},restores=[],sweeps=[],longTasks=[];
+    const observer=typeof PerformanceObserver==='function'&&PerformanceObserver.supportedEntryTypes?.includes('longtask')?new PerformanceObserver(list=>{for(const e of list.getEntries())longTasks.push(e.duration);}):null;observer?.observe({entryTypes:['longtask']});
     // Lock the matched DPR and wait for labels and buildings in the same
     // browser task that begins measurement. A separate readiness RPC can
     // observe a previous tile frame before a pending GIS update clears it.
@@ -59,19 +62,19 @@ async function sample(url,variant,round){
     let state,stable=0;const deadline=performance.now()+90000;
     while(performance.now()<deadline){
      state=snapshot();
-     const ready=state.ready&&state.icons>0&&(!checkSharedScope||state.building.rendered>0&&!state.building.customDistance)&&Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001&&Math.abs(state.zoom-17.8)<.02;
+     const ready=state.ready&&state.icons>0&&(!checkSharedScope||state.building.rendered>0&&(checkDistrict?state.building.customDistance:!state.building.customDistance))&&Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001&&Math.abs(state.zoom-17.8)<.02;
      stable=ready?stable+1:0;if(stable>=2)break;
      await new Promise(r=>setTimeout(r,300));
     }
     if(stable<2){for(const restore of restores.reverse())restore();throw Error('MAP_SAMPLE_NOT_READY '+JSON.stringify(state));}
     const {icons,visibleIds,building}=state;
     let last=0,active=false;
-    const record=(kind,id)=>{if(active&&m.isMoving()&&label.test(String(id)))writes[kind+':'+id]=(writes[kind+':'+id]||0)+1;};
-    for(const kind of ['setLayoutProperty','setPaintProperty','setFilter','moveLayer']){
+    const record=(kind,id)=>{if(!active||!m.isMoving())return;const key=kind+':'+id;if(label.test(String(id)))writes[key]=(writes[key]||0)+1;if(/building/i.test(String(id)))buildingWrites[key]=(buildingWrites[key]||0)+1;};
+    for(const kind of ['setLayoutProperty','setPaintProperty','setFilter','moveLayer','addSource','addLayer','removeSource','removeLayer']){
      const original=m[kind];if(typeof original!=='function')continue;
-     m[kind]=function(id,...args){record(kind,id);return original.call(this,id,...args);};restores.push(()=>{m[kind]=original;});
+     m[kind]=function(id,...args){record(kind,typeof id==='object'?id.id:id);return original.call(this,id,...args);};restores.push(()=>{m[kind]=original;});
     }
-    for(const id of Object.keys(m.getStyle().sources).filter(x=>label.test(x))){
+    for(const id of Object.keys(m.getStyle().sources).filter(x=>label.test(x)||/building/i.test(x))){
      const source=m.getSource(id),original=source?.setData;
      if(typeof original!=='function')continue;
      source.setData=function(...args){record('setData',id);return original.apply(this,args);};restores.push(()=>{source.setData=original;});
@@ -93,20 +96,48 @@ async function sample(url,variant,round){
       sweeps.push({elapsedMs:ended-started,frames:frames.length-count,from:[before.lng,before.lat],to:[after.lng,after.lat],target,zoom,beforeZoom,afterZoom:m.getZoom(),tailMs:ended-last});
       await new Promise(r=>setTimeout(r,650));
      }
-    }finally{active=false;m.off('render',frame);for(const restore of restores.reverse())restore();}
-    return {frames,writes,sweeps,icons,building,visibleLayers:visibleIds.length,ratio:m.getPixelRatio?.()??null};
-   },{...site,checkSharedScope:variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'});
-   if(variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'){
+    }finally{active=false;m.off('render',frame);observer?.disconnect();for(const restore of restores.reverse())restore();}
+    return {frames,writes,buildingWrites,longTasks,sweeps,icons,building,visibleLayers:visibleIds.length,ratio:m.getPixelRatio?.()??null};
+   },{...site,checkSharedScope:variant==='candidate'&&(checkDistrict||process.env.CHECK_SHARED_SCOPE==='true'),checkDistrict});
+   if(variant==='candidate'&&(checkDistrict||process.env.CHECK_SHARED_SCOPE==='true')){
     console.log('DISTRICT_BUILDING_SCOPE',site.name,JSON.stringify(data.building));
-    assert.equal(data.building.customDistance,false,'original native building filters');
+    assert.equal(data.building.customDistance,checkDistrict,'district building filter state');
     assert.ok(data.building.rendered>0,'actual district buildings must remain rendered');
    }
-   report.samples.push({variant,round,site:site.name,...data});
-   console.log('MAP_GESTURE_SAMPLE',JSON.stringify({variant,round,site:site.name,icons:data.icons,frames:data.frames.length,writes:data.writes,sweeps:data.sweeps,ratio:data.ratio}));
+   report.samples.push({variant,round,site:site.name,...data,requests:{...requests}});
+   console.log('MAP_GESTURE_SAMPLE',JSON.stringify({variant,round,site:site.name,icons:data.icons,frames:data.frames.length,writes:data.writes,buildingWrites:data.buildingWrites,longTasks:data.longTasks,requests,sweeps:data.sweeps,ratio:data.ratio}));
    assert.ok(data.icons>0,'actual visible POI/transport labels required');
    assert.ok(Math.abs(data.ratio-2.5)<.01,'matched DPR required');
    assert.ok(data.sweeps.every(x=>Math.hypot(x.to[0]-x.from[0],x.to[1]-x.from[1])>.0004&&Math.hypot(x.target[0]-x.to[0],x.target[1]-x.to[1])<.0001&&x.elapsedMs>=4000&&Math.abs(x.afterZoom-x.zoom)<.02),'matched camera sweep did not execute');
    assert.ok(data.frames.length>=10&&data.sweeps.every(x=>x.frames>=2),'insufficient map frames');
+  }
+  if(checkDistrict&&variant==='candidate'&&round===1){
+   const evidence=[];
+   for(const mode of ['walk','transit']){
+    await page.evaluate(mode=>window.__qaBuildingMode(mode),mode);
+    for(const [location,center] of [['inside',[126.941005,37.513534]],['outside',[126.9775,37.4728]]]){
+     for(const pitch of [0,45]){
+      await page.evaluate(({center,pitch})=>window.__qaMap.jumpTo({center,zoom:17.8,pitch,bearing:0}),{center,pitch});
+      const result=await page.evaluate(async({mode,location,center,pitch})=>{
+       const m=window.__qaMap;let state,stable=0;const deadline=performance.now()+90000;
+       while(performance.now()<deadline){
+        const layers=m.getStyle().layers,building=layers.filter(l=>['fill','fill-extrusion','line'].includes(l.type)&&(l['source-layer']==='building'||l.id.startsWith('dongjak-buildings-')||/building|structure/i.test(l.id)&&!/road|route|bridge|tree|canopy|label|name|district|night|safety/i.test(l.id)));
+        const shown=building.filter(l=>m.getLayoutProperty(l.id,'visibility')!=='none'),ids=shown.filter(l=>l.type===(pitch?'fill-extrusion':'fill')).map(l=>l.id);
+        const native=building.find(l=>l['source-layer']==='building');const raw=native?m.querySourceFeatures(native.source,{sourceLayer:'building'}).length:0;
+        const rendered=ids.length?m.queryRenderedFeatures({layers:ids}).length:0;
+        const all=shown.length?m.queryRenderedFeatures({layers:shown.map(l=>l.id)}).length:0;
+        const outline=m.getPaintProperty('district-border','line-opacity'),transit=document.getElementById('app').dataset.djTransitExterior==='true';
+        state={mode,location,pitch,rendered,all,raw,outline,transit,center:m.getCenter().toArray(),filters:building.every(l=>JSON.stringify(m.getFilter(l.id)||null).includes('"distance"'))};
+        const ready=m.isStyleLoaded()&&m.areTilesLoaded()&&!m.isMoving()&&Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001&&Math.abs(m.getPitch()-pitch)<.1&&state.filters&&transit===(mode==='transit')&&outline===(mode==='transit'?0:.96)&&(location==='inside'?rendered>0:raw>0&&all===0);
+        stable=ready?stable+1:0;if(stable>=2)return state;
+        await new Promise(r=>setTimeout(r,400));
+       }
+       throw Error('DISTRICT_RENDER_NOT_READY '+JSON.stringify(state));
+      },{mode,location,center,pitch});evidence.push(result);console.log('DISTRICT_2D_3D_MODE',JSON.stringify(result));
+     }
+    }
+   }
+   report.districtEvidence=evidence;
   }
  }finally{await ctx.close();}
 }

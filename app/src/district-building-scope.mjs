@@ -15,11 +15,11 @@ export function districtBuildingClause(geometry){
 export function createDistrictBuildingScope(map){
  let geometry=null,signature='',clause=districtBuildingClause(null);
  const originals=new Map(),applied=new Map();
- function apply(){
+ function apply(force=false){
   for(const layer of map.getStyle()?.layers||[]){
    if(!isBuildingGeometryLayer(layer))continue;
    const id=layer.id,current=map.getFilter(id)||null,key=JSON.stringify(current);
-   if(key===applied.get(id)&&originals.has(id))continue;
+   if(!force&&key===applied.get(id)&&originals.has(id))continue;
    if(!originals.has(id)||key!==applied.get(id))originals.set(id,current);
    const base=originals.get(id),filter=base?['all',base,clause]:clause;
    map.setFilter(id,filter);applied.set(id,JSON.stringify(filter));
@@ -28,10 +28,8 @@ export function createDistrictBuildingScope(map){
  function setBoundary(next){
   const key=JSON.stringify(next);
   if(key===signature)return;
-  // Restore the original predicates before replacing our own predicate.
-  // Never stack a stale district filter on top of the authoritative boundary.
-  for(const [id,base] of originals)if(map.getLayer(id))map.setFilter(id,base);
-  applied.clear();geometry=next;signature=key;clause=districtBuildingClause(geometry);apply();
+  // Replace our own clause in one write, without an unfiltered frame.
+  geometry=next;signature=key;clause=districtBuildingClause(geometry);apply(true);
  }
  function forget(ids){for(const id of ids){originals.delete(id);applied.delete(id);}}
  return {apply,setBoundary,forget};

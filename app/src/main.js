@@ -842,7 +842,7 @@ function getVisibleBBox(){
   return [minX-dx,minY-dy,maxX+dx,maxY+dy];
 }
 function scheduleBuildingLoad(){
-  if (!visibleBuilding2D() || map.getZoom()<BUILDING_ZOOM_MIN || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
+  if (!districtBuildingsReady || !visibleBuilding2D() || map.getZoom()<BUILDING_ZOOM_MIN || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
   clearTimeout(buildingLoadTimer);
   buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},djPhone?600:230);
 }
@@ -1183,12 +1183,7 @@ async function loadDongjakBoundary(){
     clipBasemapLabelsToDistrict(map,boundaryGeometry);
     districtBuildingScope?.setBoundary(boundaryGeometry);
     // Shared building scope is independent of transit or walking mode.
-    districtBuildingsReady=true;
     syncTiltWithBuildings();
-    scheduleBuildingLoad();
-    // Warm nearby building layers on idle even when the initial camera is flat
-    // or too far out to meet the normal on-demand building visibility gate.
-    scheduleInitialBuildingWarmup();
 
     // v17: 동작구 외부를 회색 65% 마스크로 시각적으로 구분합니다. 실제 지도 및 도로 데이터는 유지합니다.
     // 밝은 영역은 지도 데이터 삭제나 화면 자르기가 아니라 선택적 시각적 강조입니다.
@@ -1868,7 +1863,10 @@ map.on('load',()=>{
   installDongjakOfficialDataLayers({map,maplibregl,getBoundary:()=>boundaryGeometry,
     canOpen:()=>!navMode&&!addMode&&!routePickMode&&!communityPickMode});
   const boundaryReady = loadDongjakBoundary();
-  boundaryReady.then(adminInit).catch(error=>console.warn('행정동 설치 실패:',error));
+  boundaryReady.then(adminInit).catch(error=>console.warn('행정동 설치 실패:',error)).finally(()=>{
+    if(!boundaryGeometry)return;
+    districtBuildingsReady=true;scheduleBuildingLoad();scheduleInitialBuildingWarmup();
+  });
   boundaryReady.then(()=>startupLoader.boundaryReady()).catch(()=>startupLoader.error());
   boundaryReady.then(()=>{if(map.getLayer('dj-nearby-place-names'))map.moveLayer('dj-nearby-place-names');requestAnimationFrame(()=>visualTheme.refresh());}).catch(()=>{});
   // 안전시설/횡단보도는 사용자가 버튼을 눌렀을 때 공개 OSM 자료를 조회합니다.
