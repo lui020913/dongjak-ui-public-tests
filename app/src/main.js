@@ -1873,8 +1873,7 @@ map.on('load',()=>{
       boundaryBounds=computeBounds(boundaryGeometry);
       if(changed){for(const info of loadedBuildingTiles.values())info.complete=false;scheduleBuildingLoad();}
       if(gpsLastPosition)outsideDistrictAlert.check(...gpsLastPosition,boundaryGeometry,gpsLastAccuracy);
-      map.getSource('district-outline')?.setData({type:'FeatureCollection',features:[feature]});
-      map.getSource('district-exterior')?.setData(maskOutside(boundaryGeometry));
+      syncTransitExterior(true);
       // Reclip bus tile fallback against the updated SGIS district polygon.
       map.fire('dongjak:boundary-updated');
       // 통계청 SGIS 기준 시군구 외곽으로 변경되어 행정동 경계와 불일치를 줄입니다.
