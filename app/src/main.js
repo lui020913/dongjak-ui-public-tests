@@ -106,6 +106,8 @@ import {evaluateCompositePriRouteCandidates} from './pri-route-client.js';
 import {chooseTransitWalk} from './transit-walk-priority.mjs';
 import {summarizeTransitWalks,transitReviewPairs,transitAccessPoint} from './transit-candidate-review.mjs';
 import {estimateTransitTime} from './transit-time-estimate.mjs';
+import {prepareTransitRoadPlan,isTransitAccessWalkValid} from './transit-road-match.mjs';
+const transitRoadMatchOptions=signal=>({signal,apiBase:Capacitor.isNativePlatform()?'https://dongjak-walk-safety-preview.pages.dev':''});
 import {installRoutePriPreferences} from './route-pri-preferences.js';
 import './v841-route-and-tips.css';
 import {slimMapTextHalos} from './map-label-halo.js';
@@ -4080,10 +4082,11 @@ function transitRailQuality(segments){
 // Assess each pair of alternatives independently, never compare disjoint legs.
 async function fetchTransitPedestrianPair(from,to,signal){
  if(!transitPointInScope(from)||!transitPointInScope(to))throw new Error('보행 연결 지점이 지원 범위 밖입니다.');
- if(routeLocationInside(from)===true&&routeLocationInside(to)===true){try{return await fetchPreferredPedestrianPair(from,to,signal,{comparison:'detour'});}catch(e){if(signal?.aborted||e?.name==='AbortError')throw e;}}
+ if(routeLocationInside(from)===true&&routeLocationInside(to)===true){try{const pair=await fetchPreferredPedestrianPair(from,to,signal,{comparison:'detour'});const standard=isTransitAccessWalkValid(pair.standard,from,to)?pair.standard:null,gentle=isTransitAccessWalkValid(pair.gentle,from,to)?pair.gentle:null;if(standard||gentle)return {...pair,standard,gentle};}catch(e){if(signal?.aborted||e?.name==='AbortError')throw e;}}
  // External legs use the existing bounded pedestrian proxy only. No duplicate
  // gentle request or fabricated PRI for areas without evaluation coverage.
  const standard=await fetchPedestrianRoute(from,to,'standard',signal,{transitExterior:true});
+ if(!isTransitAccessWalkValid(standard,from,to))throw new Error('실제 보행망과 승하차 위치 연결 확인 불가');
  return {standard:{...standard,transitExterior:!routeWithinDistrict(standard.coords,boundaryGeometry,isDongjak)},gentle:null};
 }
 async function selectTransitWalk(pair,preferPri,signal){
@@ -4189,6 +4192,8 @@ window.addEventListener('dongjak:transit-candidate-review',event=>{
   const current=()=>!signal?.aborted&&app.dataset.tab==='route'&&!navMode&&routeStart===from&&routeEnd===to&&gen===routeRequestGeneration&&!routeWaypoints.length;
   if(!from||!to||!current())throw new Error('경로 조건이 변경됐습니다.');
   assertTransitScope();
+  await prepareTransitRoadPlan(plan,transitRoadMatchOptions(signal));
+  if(!current())throw new Error('경로 조건이 변경됐습니다.');
   const legs=plan.legs||[plan];
   if(legs.some(leg=>{const coords=leg.kind==='rail'?leg.stops?.map(n=>VERIFIED_STATIONS[n]):leg.coords;return !Array.isArray(coords)||coords.length<2||coords.some(p=>!p)||!transitCoordinatesInScope(coords);}))throw new Error('교통 구간 확인 불가');
   const pairs=transitReviewPairs(plan,from,to),walks=[];
@@ -4216,6 +4221,8 @@ window.addEventListener('dongjak:transit-route-preview',event=>{
   void (async()=>{
     if(!routeStart||!routeEnd||routeWaypoints.length||navMode||app.dataset.tab!=='route')throw new Error('출발지와 목적지를 다시 확인해 주세요.');
     assertTransitScope();
+    await prepareTransitRoadPlan(plan,transitRoadMatchOptions(signal));
+    if(signal?.aborted)throw new DOMException('요청이 취소됐습니다.','AbortError');
     if(plan.kind==='rail')return previewRailTransit(plan,signal,preferPri);
     if(plan.kind==='transfer'||plan.kind==='mixed')return previewMultiTransit(plan,signal,preferPri);
     if(plan.kind!=='bus'||!Array.isArray(plan.coords)||plan.coords.length<2||!transitCoordinatesInScope(plan.coords))throw new Error('검증된 버스 경로 또는 지원 범위를 확인하지 못했습니다.');
