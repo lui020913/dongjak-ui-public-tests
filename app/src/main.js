@@ -105,6 +105,7 @@ import {installQuietBasemap} from './quiet-basemap.mjs';
 import {evaluateCompositePriRouteCandidates} from './pri-route-client.js';
 import {chooseTransitWalk} from './transit-walk-priority.mjs';
 import {summarizeTransitWalks,transitReviewPairs} from './transit-candidate-review.mjs';
+import {estimateTransitTime} from './transit-time-estimate.mjs';
 import {installRoutePriPreferences} from './route-pri-preferences.js';
 import './v841-route-and-tips.css';
 import {slimMapTextHalos} from './map-label-halo.js';
@@ -4010,7 +4011,7 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
     setTransitPreviewStops(plan.stops.flatMap((station,i)=>{const transfer=i>0&&i<plan.stops.length-1&&plan.lines[i-1]!==plan.lines[i];if(i!==0&&i!==plan.stops.length-1&&!transfer)return [];const line=plan.lines[Math.min(i,plan.lines.length-1)];return [{type:'Feature',properties:{color:subwayLineColor(line==='신림'?'신림선':line+'호선'),transfer},geometry:{type:'Point',coordinates:VERIFIED_STATIONS[station]}}];}));
     app.dataset.djTransitPreview='rail';
     window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
-    transitPreview={kind:'rail',minutes:plan.railHeuristicMinutes+(startWalk.seconds+endWalk.seconds)/60,walkM:(startWalk.kilometers+endWalk.kilometers)*1000};
+    transitPreview={kind:'rail',time:estimateTransitTime(plan,startWalk.seconds+endWalk.seconds),minutes:estimateTransitTime(plan,startWalk.seconds+endWalk.seconds)?.totalMinutes??null,walkM:(startWalk.kilometers+endWalk.kilometers)*1000};
     navigate('map');syncRoutePresentation();publishTransitDetail({...plan,railQuality:transitRailQuality(railSegments)},from,to,startWalk,endWalk);focusTransitRoute(coords);
   }
 });
@@ -4098,7 +4099,7 @@ function publishTransitDetail(plan,from,to,first,last){
   const walk=r=>({meters:Math.round(r.kilometers*1000),minutes:Math.max(0,Math.ceil(r.seconds/60)),priChoice:r.transitPriChoice,exterior:Boolean(r.transitExterior)});
   const detail={kind:plan.kind,railQuality:plan.railQuality,route:plan.route,routeType:plan.routeType,routeId:plan.routeId,lines:plan.lines||[],changes:plan.changes||0,
     from:label(from),to:label(to),board:label(plan.origin),alight:label(plan.destination),arsId:plan.origin?.arsId,firstTime:plan.origin?.firstTime,lastTime:plan.origin?.lastTime,
-    stops:plan.kind==='bus'?plan.stops.map(s=>s.name):plan.stops,targets:[plan.origin,plan.destination,to,to].map(p=>({lat:p.lat,lng:p.lng})),first:walk(first),last:walk(last),minutes:preview.minutes,pri:{first:first.transitPri||null,last:last.transitPri||null}};
+    stops:plan.kind==='bus'?plan.stops.map(s=>s.name):plan.stops,targets:[plan.origin,plan.destination,to,to].map(p=>({lat:p.lat,lng:p.lng})),first:walk(first),last:walk(last),minutes:preview.minutes,time:preview.time,pri:{first:first.transitPri||null,last:last.transitPri||null}};
   const emit=()=>{if(transitPreview===preview)window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:{...detail}}));};
   emit();
 
@@ -4142,9 +4143,9 @@ async function previewMultiTransit(plan,signal,preferPri=true){
  setTransitPreviewStops(stopFeatures);
  app.dataset.djTransitPreview=plan.kind;
  window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
- const preview=transitPreview={kind:plan.kind,changes:legs.length-1,minutes:null,walkM:walks.reduce((sum,w)=>sum+w.kilometers*1000,0)};
+ const preview=transitPreview={kind:plan.kind,changes:legs.length-1,time:estimateTransitTime(plan,walks.reduce((sum,w)=>sum+w.seconds,0)),minutes:estimateTransitTime(plan,walks.reduce((sum,w)=>sum+w.seconds,0))?.totalMinutes??null,walkM:walks.reduce((sum,w)=>sum+w.kilometers*1000,0)};
  const label=p=>p?.name||p?.label||'선택한 장소';
- const detail={kind:plan.kind,railQuality:railSegments.length?transitRailQuality(railSegments):null,from:label(from),to:label(to),legs:legs.map(leg=>({...leg,origin:label(leg.origin),destination:label(leg.destination),arsId:leg.origin?.arsId,firstTime:leg.origin?.firstTime,lastTime:leg.origin?.lastTime,stops:leg.kind==='bus'?leg.stops.map(s=>s.name):leg.stops})),walks:walks.map(w=>({meters:Math.round(w.kilometers*1000),minutes:Math.ceil(w.seconds/60),priChoice:w.transitPriChoice,exterior:Boolean(w.transitExterior)})),targets:[...legs.flatMap(leg=>[leg.origin,leg.destination]),to,to].map(p=>({lat:p.lat,lng:p.lng})),priLegs:walks.map(w=>w.transitPri||null)};
+ const detail={kind:plan.kind,time:preview.time,minutes:preview.minutes,railQuality:railSegments.length?transitRailQuality(railSegments):null,from:label(from),to:label(to),legs:legs.map(leg=>({...leg,origin:label(leg.origin),destination:label(leg.destination),arsId:leg.origin?.arsId,firstTime:leg.origin?.firstTime,lastTime:leg.origin?.lastTime,stops:leg.kind==='bus'?leg.stops.map(s=>s.name):leg.stops})),walks:walks.map(w=>({meters:Math.round(w.kilometers*1000),minutes:Math.ceil(w.seconds/60),priChoice:w.transitPriChoice,exterior:Boolean(w.transitExterior)})),targets:[...legs.flatMap(leg=>[leg.origin,leg.destination]),to,to].map(p=>({lat:p.lat,lng:p.lng})),priLegs:walks.map(w=>w.transitPri||null)};
  const emit=()=>{if(transitPreview===preview)window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:{...detail}}));};
  navigate('map');syncRoutePresentation();emit();
  focusTransitRoute([...walks.flatMap(w=>w.coords),...legs.filter(l=>l.kind==='bus').flatMap(leg=>leg.coords),...railSegments.flatMap(s=>s.coordinates)]);
@@ -4205,7 +4206,7 @@ window.addEventListener('dongjak:transit-candidate-review',event=>{
    walks.push(walk);
   }
   const summary=summarizeTransitWalks(walks);
-  return summary?{...summary,walkSegments:walks.filter(w=>Array.isArray(w.coords)&&w.coords.length>=2).map(w=>({coords:w.coords,color:transitWalkStyle(w)}))}:null;
+  return summary?{...summary,time:estimateTransitTime(plan,walks.reduce((sum,w)=>sum+w.seconds,0)),walkSegments:walks.filter(w=>Array.isArray(w.coords)&&w.coords.length>=2).map(w=>({coords:w.coords,color:transitWalkStyle(w)}))}:null;
  })().then(resolve,reject);
 });
 window.addEventListener('dongjak:transit-route-preview',event=>{
@@ -4234,7 +4235,7 @@ window.addEventListener('dongjak:transit-route-preview',event=>{
     }
     app.dataset.djTransitPreview='bus';
     window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
-    transitPreview={kind:'bus',route:String(plan.route),minutes:null,walkM:(a.kilometers+b.kilometers)*1000};
+    transitPreview={kind:'bus',route:String(plan.route),time:estimateTransitTime(plan,a.seconds+b.seconds),minutes:estimateTransitTime(plan,a.seconds+b.seconds)?.totalMinutes??null,walkM:(a.kilometers+b.kilometers)*1000};
     navigate('map');syncRoutePresentation();publishTransitDetail(plan,from,to,a,b);setTransitPreviewStops([plan.origin,plan.destination].map(p=>({type:'Feature',properties:{color:busRouteColor(plan.routeType)},geometry:{type:'Point',coordinates:[p.lng,p.lat]}})));focusTransitRoute([...a.coords,...plan.coords,...b.coords]);
   })().then(resolve,reject);
 });
