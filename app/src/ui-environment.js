@@ -89,7 +89,7 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
   });
 }
 
-import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,nativeBuildingFootprintPaint,nativeBuildingFootprint,repaintVegetation} from './map-appearance.js';
+import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingZoomOpacityExpression,nativeBuildingFootprintPaint,nativeBuildingFootprint,repaintVegetation} from './map-appearance.js';
 import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
 import {setDistrictOpacity} from './transit-exterior-scope.mjs';
 import {createThemeState} from './theme-state-core.mjs';
@@ -293,7 +293,7 @@ export function initTheme({map,app}){
             buildingExtrusionAppearance(themeState.value,map.getPitch?.()??30),
             themeState.value==='dark'&&app.dataset.sangdoNight==='on');
           map.setPaintProperty(layer.id,'fill-extrusion-color',appearance.color);
-          map.setPaintProperty(layer.id,'fill-extrusion-opacity',appearance.opacity);
+          map.setPaintProperty(layer.id,'fill-extrusion-opacity',buildingZoomOpacityExpression(appearance.opacity));
         }catch{}
       }
     }
