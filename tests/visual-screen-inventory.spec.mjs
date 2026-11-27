@@ -58,7 +58,7 @@ async function dismissTour(page) {
 }
 
 for (const viewport of viewports) {
- for (const theme of ['light', 'dark']) {
+ for (const theme of ['light']) {
   test('anonymous deployed screen audit: ' + viewport.name + ' / ' + theme, async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== 'mobile');
     test.setTimeout(240000);
@@ -73,25 +73,11 @@ for (const viewport of viewports) {
     await selectBrowserWeb(page);
     await dismissTour(page);
     const app = page.locator('#app');
-    const report = { viewport, theme, themeSetup: 'visible-profile-theme-confirmation-if-needed', source: page.url(), captured_at: new Date().toISOString(), screens: [] };
+    const report = { viewport, theme, themeSetup: 'light-only', source: page.url(), captured_at: new Date().toISOString(), screens: [] };
     const save=()=>writeFileSync(output + '/' + viewport.name + '-' + theme + '.json',JSON.stringify(report,null,2));
     try {
-    // Use the verified user-facing theme confirmation flow.
-    if (await app.getAttribute('data-theme') !== theme) {
-      await dismissTour(page);
-      await (await navigationControl(page,'mine')).click({timeout:25000,noWaitAfter:true});
-      await expect(app).toHaveAttribute('data-tab','mine');
-      await dismissTour(page);
-      await page.getByRole('button',{name:/화면 테마/}).click({timeout:25000,noWaitAfter:true});
-      await expect(page.getByText('화면 테마를 전환할까요?',{exact:true})).toBeVisible();
-      await page.getByRole('button',{name:'전환',exact:true}).filter({visible:true}).click({timeout:12000,noWaitAfter:true});
-      await expect(app).toHaveAttribute('data-theme',theme,{timeout:30000});
-      if (await app.getAttribute('data-tab') !== 'map') {
-        await (await navigationControl(page,'map')).click({timeout:25000,noWaitAfter:true});
-        await expect(app).toHaveAttribute('data-tab','map');
-      }
-    }
-    await expect(app).toHaveAttribute('data-theme', theme, {timeout:30000});
+    // Ordinary interface is light-only. Night vision is separately controlled.
+    await expect(app).toHaveAttribute('data-theme','light',{timeout:30000});
     for (const [tab, panel] of [['initial-map', 'map'], ...tabs]) {
       try {
       await dismissTour(page);

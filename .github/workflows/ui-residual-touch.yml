@@ -1,0 +1,51 @@
+name: Diagnose two residual real mobile touch controls (read only)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tests/ui-residual-touch.spec.mjs'
+      - '.github/workflows/ui-residual-touch.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ui-residual-diagnostics-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      CI: 'true'
+      DONGJAK_TARGET_URL: https://dongjak-walk-safety-preview.pages.dev/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node --check tests/ui-residual-touch.spec.mjs
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Record read-only Production identity
+        run: |
+          mkdir -p quality-report/ui-touch-diagnosis
+          curl -fsS --max-time 20 "${DONGJAK_TARGET_URL}release-source.json" > quality-report/ui-touch-diagnosis/release-before.json
+      - name: Real mobile finger and DOM replacement diagnostic
+        run: npx playwright test tests/ui-residual-touch.spec.mjs --project=mobile --workers=2 --reporter=list
+      - name: Verify production deployment remains unchanged
+        if: always()
+        run: |
+          curl -fsS --max-time 20 "${DONGJAK_TARGET_URL}release-source.json" > quality-report/ui-touch-diagnosis/release-after.json
+          cmp quality-report/ui-touch-diagnosis/release-before.json quality-report/ui-touch-diagnosis/release-after.json
+      - name: Archive actionable diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-residual-touch-diagnostics-${{ github.run_id }}
+          path: |
+            quality-report/ui-touch-diagnosis/
+            test-results/
+          retention-days: 7
