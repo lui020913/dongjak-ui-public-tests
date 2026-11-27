@@ -74,3 +74,11 @@ test('location picker snapshots the actual destination and ignores late duplicat
  const toggle=section("document.getElementById('community-compose-toggle').addEventListener","document.getElementById('community-compose-close').addEventListener");
  assert.match(toggle,/if\(app\.dataset\.tab!=='participate'\)navigate\('participate'\)/);
 });
+
+
+test('draft picker establishes the paint gate before navigation and removes stale tab ownership',()=>{
+ const start=section("document.getElementById('community-map-pick').addEventListener","document.getElementById('community-map-cancel').addEventListener");
+ assert.ok(start.indexOf("app.dataset.communityPicking='true'")<start.indexOf("navigate('map'"));
+ assert.match(start,/panel\.hidden=true;delete panel\.dataset\.djTabOutgoing;delete panel\.dataset\.djPrimaryTransition/);
+ const css=read('community-composer-portal.css');assert.match(css,/\[data-community-picking="true"\] #participation-panel\{display:none!important;visibility:hidden!important/);
+});

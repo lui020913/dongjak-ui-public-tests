@@ -1,11 +1,17 @@
 import {containsDistrictPoint,isNativeBuildingGeometry} from './district-building-scope.mjs';
 const PATH='/data/redevelopment/confirmed-projects-202609.geojson';
 const SOURCE='dj-confirmed-development-areas',FILL='dj-confirmed-development-fill',LINE='dj-confirmed-development-line',LABEL='dj-confirmed-development-label';
+export function isConfirmedPlanLabel(p){
+ if(typeof p?.label!=='string')return false;
+ if(p.label.endsWith(' (예정)'))return !p.occupancy_month;
+ const match=p.occupancy_month?.match(/^(20\d{2})-(0[1-9]|1[0-2])$/);
+ return Boolean(match&&p.occupancy_source_url?.startsWith('https://')&&p.label.endsWith(' ('+match[1]+'년 '+Number(match[2])+'월 예정)'));
+}
 export async function loadConfirmedDevelopments(fetcher=globalThis.fetch){
  const response=await fetcher(PATH,{cache:'force-cache'});
  if(!response.ok)throw Error('정비사업 공간정보 HTTP '+response.status);
  const data=await response.json();
- if(data.type!=='FeatureCollection'||!Array.isArray(data.features)||!data.features.length||!data.features.every(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type)&&f.properties?.display_only===true&&f.properties.label?.endsWith(' (예정)')))throw Error('정비사업 공간정보 형식 오류');
+ if(data.type!=='FeatureCollection'||!Array.isArray(data.features)||!data.features.length||!data.features.every(f=>['Polygon','MultiPolygon'].includes(f.geometry?.type)&&f.properties?.display_only===true&&isConfirmedPlanLabel(f.properties)))throw Error('정비사업 공간정보 형식 오류');
  return data;
 }
 export function createPlanLookup(plans){
@@ -40,7 +46,7 @@ export function installConfirmedDevelopmentDisplay({map,app,plans}){
   if(!map.getSource(SOURCE))map.addSource(SOURCE,{type:'geojson',data:plans,attribution:'서울특별시 서울플랜+ 2026-09 · 예정 부지(현황과 다를 수 있음)'});
   if(!map.getLayer(FILL))map.addLayer({id:FILL,type:'fill',source:SOURCE,minzoom:13,paint:{'fill-color':c.fill,'fill-opacity':1,'fill-antialias':false}},next.id);
   if(!map.getLayer(LINE))map.addLayer({id:LINE,type:'line',source:SOURCE,minzoom:13,paint:{'line-color':c.line,'line-width':1,'line-opacity':.75}},next.id);
-  if(!map.getLayer(LABEL))map.addLayer({id:LABEL,type:'symbol',source:SOURCE,minzoom:14.5,layout:{'text-field':['get','label'],'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':['interpolate',['linear'],['zoom'],14.5,10,18,13],'text-max-width':13,'text-padding':6,'text-allow-overlap':false},paint:{'text-color':c.text,'text-halo-color':c.halo,'text-halo-width':1.4}});
+  if(!map.getLayer(LABEL))map.addLayer({id:LABEL,type:'symbol',source:SOURCE,minzoom:14.5,layout:{'text-field':['get','label'],'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':['interpolate',['linear'],['zoom'],14.5,10,18,13],'text-max-width':13,'text-padding':6,'text-allow-overlap':true},paint:{'text-color':c.text,'text-halo-color':c.halo,'text-halo-width':1.4}});
   applyTheme();
  };
  install();
