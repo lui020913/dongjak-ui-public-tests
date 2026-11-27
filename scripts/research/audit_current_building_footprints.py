@@ -403,4 +403,47 @@ counts['current_footprints']=len(cur);counts['official_apartment_sites']=len(sit
 (OUT/'all-apartment-site-review.json').write_text(json.dumps({'source':REGISTRY,'sites':reports},ensure_ascii=False,indent=2))
 for name,features in [('current-vs-legacy-review.geojson',changes),('all-apartment-legacy-overlap-review.geojson',site_conflicts)]:
     (OUT/name).write_text(json.dumps({'type':'FeatureCollection','features':features},ensure_ascii=False,separators=(',',':')))
+# Reconcile the actual district pedestrian geometry with the corroborated
+# retained buildings. A crossing of the interior is a conflict to classify,
+# not proof of closure (arcades, entrances, underground and elevated links).
+# Keep original link IDs and PRI/routing data immutable until independently
+# verified. Export only existing app geometry and derived measurements.
+walk_path=ROOT/'app/public/data/safety/walk/dongjak_walk_links.geojson'
+walk=json.loads(walk_path.read_text())
+road_conflicts=[];road_counts=collections.Counter()
+for f in walk['features']:
+    p=f.get('properties') or {}
+    raw_flags=p.get('flags',{})
+    if isinstance(raw_flags,dict):flags={str(k).lower() for k,v in raw_flags.items() if v}
+    elif isinstance(raw_flags,list):flags={str(v).lower() for v in raw_flags}
+    else:flags=set(re.split(r'[,;| ]+',str(raw_flags).lower()))
+    for k in ('bridge','tunnel','indoor','metro','footbridge'):
+        if p.get(k) is True or str(p.get(k)).lower() in ('1','yes','true'):flags.add(k)
+    if flags&{'bridge','tunnel','indoor','metro','footbridge'}:continue
+    if f.get('geometry',{}).get('type') not in ('LineString','MultiLineString'):continue
+    try:line=transform(project,shape(f['geometry']))
+    except Exception:continue
+    if line.is_empty or line.length<4:continue
+    for n0 in legacy_tree.query(line,predicate='intersects'):
+        n=int(n0);sheet,kind,row,b,g=legacy_rows[n]
+        if float(b['properties'].get('h') or 0)<12 or (sheet,kind,row) in edits:continue
+        # Ignore facades and near-edge cartographic misalignment.
+        interior=g.buffer(-1.5)
+        if interior.is_empty:continue
+        overlap=line.intersection(interior).length
+        if overlap<4:continue
+        corroborated=False
+        for j0 in tree.query(g,predicate='intersects'):
+            j=int(j0);a=g.intersection(cur[j]).area
+            if a/g.area>=.65 and a/cur[j].area>=.65 and cur[j].buffer(-1.5).intersection(line).length>=4:
+                corroborated=True;break
+        if not corroborated:continue
+        site_names=[sites[i]['name'] for i,(site_g,ref,ok) in site_boundaries.items() if ok and site_g.covers(g.representative_point())]
+        if not site_names:continue
+        road_counts['apartment_ground_link_conflicts']+=1
+        road_conflicts.append({'type':'Feature','geometry':f['geometry'],'properties':{'link_properties':p,'site_names':site_names,'sheet':sheet,'kind':kind,'row':row,'building_interior_crossing_m':round(overlap,2),'decision':'verify_ground_passage_before_display_or_routing_edit'}})
+(OUT/'apartment-road-interior-conflicts.geojson').write_text(json.dumps({'type':'FeatureCollection','features':road_conflicts},ensure_ascii=False,separators=(',',':')))
+print('APARTMENT_ROAD_CONFLICTS '+json.dumps(dict(road_counts),ensure_ascii=False),flush=True)
+for f in sorted(road_conflicts,key=lambda f:f['properties']['building_interior_crossing_m'],reverse=True)[:30]:
+    print('APARTMENT_ROAD_CONFLICT '+json.dumps(f['properties'],ensure_ascii=False),flush=True)
 print('CURRENT_BUILDING_COMPARISON '+json.dumps(dict(counts),ensure_ascii=False),flush=True)
