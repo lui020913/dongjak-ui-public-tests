@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.236",
+  "application_version": "9.2.237",
   "public_work_branch": "main",
-  "purpose": "Deploy merged PRs #616 and #617: verified district OSM walking network, physically reduced exterior road vector tile delivery, estimated transit total duration, airport bus sky blue, dotted pedestrian segments, ordered bus stop projection and bounded road trace matching, and safety data update messaging. All required CI and actual upstream reduced tile comparison passed; preserve protected Preview/Production/APK gates.",
-  "attempt": 472,
+  "purpose": "Deploy merged PR #618 map data connection recovery: isolate cache failures, follow upstream redirects, expose reduction headers, recover reduced tile requests by fetching and reducing original vector bytes before MapLibre decoding. Required source CI and reduced tile verification passed. Preserve protected Preview/Production/APK gates.",
+  "attempt": 473,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
