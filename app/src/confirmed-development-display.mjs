@@ -48,13 +48,17 @@ export function developmentLabelPoints(plans){
  return {type:'FeatureCollection',features};
 }
 const LABEL_POINTS='dj-confirmed-development-label-points';
+const OVERVIEW=LABEL+'-overview';
+export function developmentLabelLayout(detail){
+ return {'text-field':detail?['get','label']:['get','name'],'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':detail?['interpolate',['linear'],['zoom'],15,11,18,13,21,14]:10,'text-max-width':detail?13:10,'text-padding':detail?3:5,'text-allow-overlap':false,'text-ignore-placement':false,'text-variable-anchor':['center','top','bottom','left','right'],'text-radial-offset':.35,'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport','symbol-sort-key':['case',['has','occupancy_month'],0,1]};
+}
 export function installConfirmedDevelopmentDisplay({map,app,plans}){
  const contains=createPlanLookup(plans);
  // Keep native buildings and the existing 2D/3D renderer everywhere else.
  // A single ground-plan polygon masks only the selected sites, below roads;
  // GIS building footprints/extrusions are excluded using the same polygons.
  const colors=()=>app.dataset.theme==='dark'?{fill:'#37453f',line:'#758a7e',text:'#dce6df',halo:'#273a32'}:{fill:'#e8e7e0',line:'#b2b9ae',text:'#52665b',halo:'#f7f8f4'};
- const applyTheme=()=>{const c=colors();for(const [id,key,v] of [[FILL,'fill-color',c.fill],[LINE,'line-color',c.line],[LABEL,'text-color',c.text],[LABEL,'text-halo-color',c.halo]])if(map.getLayer(id))map.setPaintProperty(id,key,v);};
+ const applyTheme=()=>{const c=colors();for(const [id,key,v] of [[FILL,'fill-color',c.fill],[LINE,'line-color',c.line],[LABEL,'text-color',c.text],[LABEL,'text-halo-color',c.halo],[OVERVIEW,'text-color',c.text],[OVERVIEW,'text-halo-color',c.halo]])if(map.getLayer(id))map.setPaintProperty(id,key,v);};
  const install=()=>{
   const layers=map.getStyle()?.layers||[];
   const last=layers.findLastIndex(isNativeBuildingGeometry);
@@ -63,17 +67,18 @@ export function installConfirmedDevelopmentDisplay({map,app,plans}){
   const next=layers.slice(last+1).find(l=>l['source-layer']==='transportation'||l.type==='line');
   const c=colors();
   if(!map.getSource(LABEL_POINTS))map.addSource(LABEL_POINTS,{type:'geojson',data:developmentLabelPoints(plans)});
-  if(!map.getLayer(LABEL))map.addLayer({id:LABEL,type:'symbol',source:LABEL_POINTS,minzoom:13.2,layout:{'text-field':['get','label'],'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':['interpolate',['linear'],['zoom'],13.2,10.5,16,12,18,14],'text-max-width':16,'text-padding':2,'text-allow-overlap':true,'text-ignore-placement':true,'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},paint:{'text-color':c.text,'text-halo-color':c.halo,'text-halo-width':1.8}});
+  if(!map.getLayer(OVERVIEW))map.addLayer({id:OVERVIEW,type:'symbol',source:LABEL_POINTS,minzoom:13.2,maxzoom:15,layout:developmentLabelLayout(false),paint:{'text-color':c.text,'text-halo-color':c.halo,'text-halo-width':1.2}});
+  if(!map.getLayer(LABEL))map.addLayer({id:LABEL,type:'symbol',source:LABEL_POINTS,minzoom:15,layout:developmentLabelLayout(true),paint:{'text-color':c.text,'text-halo-color':c.halo,'text-halo-width':1.4}});
   if(last<0||!next)return;
   if(!map.getSource(SOURCE))map.addSource(SOURCE,{type:'geojson',data:plans,attribution:'서울특별시 서울플랜+ 2026-09 · 예정 부지(현황과 다를 수 있음)'});
   if(!map.getLayer(FILL))map.addLayer({id:FILL,type:'fill',source:SOURCE,minzoom:13,paint:{'fill-color':c.fill,'fill-opacity':1,'fill-antialias':false}},next.id);
   if(!map.getLayer(LINE))map.addLayer({id:LINE,type:'line',source:SOURCE,minzoom:13,paint:{'line-color':c.line,'line-width':1,'line-opacity':.75}},next.id);
-  if(map.getStyle().layers.at(-1)?.id!==LABEL)map.moveLayer(LABEL);
+  if(map.getStyle().layers.at(-2)?.id!==OVERVIEW||map.getStyle().layers.at(-1)?.id!==LABEL){map.moveLayer(OVERVIEW);map.moveLayer(LABEL);}
   applyTheme();
  };
  install();
  map.on('style.load',install);
- const recover=()=>{if(!map.getLayer(FILL)||!map.getLayer(LABEL))install();};
+ const recover=()=>{if(!map.getLayer(FILL)||!map.getLayer(LABEL)||!map.getLayer(OVERVIEW))install();};
  map.on('idle',recover);
  // Recolor only on a real theme mutation, not on map camera events.
  const observer=new MutationObserver(applyTheme);observer.observe(app,{attributes:true,attributeFilter:['data-theme']});
