@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {exteriorTileRequest,installExteriorRoadScope} from '../src/exterior-road-scope.mjs';
-import {reduceExteriorRoadTile,parseRoadTilePath} from '../server/district-road-tile.mjs';
+import {exteriorTileRequest,installExteriorRoadScope,reducedTileProtocolRequest,loadReducedTile} from '../src/exterior-road-scope.mjs';
+import {reduceExteriorRoadTile,parseRoadTilePath,serveDistrictRoadTile} from '../server/district-road-tile.mjs';
 const url='https://tiles.openfreemap.org/planet/20261126_001_pt/14/13969/6351.pbf';
 test('ordinary mode uses a separate tile data endpoint; transit requests the original',()=>{
  const reduced=exteriorTileRequest(url,'Tile',false,'https://example.com').url;
@@ -34,4 +34,21 @@ test('reduced output physically omits exterior minor features but preserves inte
  const expected=Uint8Array.from([...tile('transportation',[inside,major]),...water]);
  const result=reduceExteriorRoadTile(input,0,0,0,boundary);
  assert.equal(result.removed,1);assert.deepEqual(result.bytes,expected);
+});
+
+test('edge cache failure cannot block a valid reduced tile, and upstream redirects are allowed',async()=>{
+ const request=new Request(exteriorTileRequest(url,'Tile',false,'https://example.com').url);
+ const input=Uint8Array.from(tile('water',[feature(0,100,100)]));
+ const r=await serveDistrictRoadTile(request,{cache:{match:async()=>{throw Error('cache unavailable');},put:async()=>{throw Error('cache unavailable');}},fetcher:async(u,options)=>{assert.equal(u,url);assert.equal(options.redirect,'follow');return new Response(input);}});
+ assert.equal(r.status,200);assert.deepEqual(new Uint8Array(await r.arrayBuffer()),input);
+});
+test('failed edge endpoint recovers original bytes and strips roads before passing tile to map',async()=>{
+ const input=Uint8Array.from(tile('transportation',[feature(0,100,100),feature(1,100,100)]));
+ const purl=reducedTileProtocolRequest(url,'Tile',false,'https://example.com').url;
+ const parsed=parseRoadTilePath(new URL(exteriorTileRequest(url,'Tile',false,'https://example.com').url).pathname);
+ const expected=reduceExteriorRoadTile(input,parsed.z,parsed.x,parsed.y).bytes;
+ const calls=[];
+ const out=await loadReducedTile(purl,new AbortController().signal,{fetcher:async u=>{calls.push(u);return calls.length===1?new Response('upstream error',{status:502}):new Response(input,{headers:{'content-type':'application/vnd.mapbox-vector-tile'}});}});
+ assert.deepEqual(calls,[exteriorTileRequest(url,'Tile',false,'https://example.com').url,url]);assert.deepEqual(new Uint8Array(out.data),expected);
+ assert.equal(reducedTileProtocolRequest(url,'Tile',true,'https://example.com').url,url);
 });

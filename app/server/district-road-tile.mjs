@@ -44,18 +44,25 @@ export function reduceExteriorRoadTile(input,z,x,y,boundary=districtTileBoundary
 export function parseRoadTilePath(path){const m=path.match(/^\/api\/basemap\/tile\/(planet|backup_planet)\/([A-Za-z0-9_\-]{1,50})\/(\d{1,2})\/(\d{1,8})\/(\d{1,8})\.pbf$/);if(!m)return null;const z=Number(m[3]),x=Number(m[4]),y=Number(m[5]);if(z<0||z>16||x>=2**z||y>=2**z)return null;return {z,x,y,url:'https://tiles.openfreemap.org/'+m.slice(1).join('/').replace(/$/,'')+'.pbf'};}
 export async function serveDistrictRoadTile(request,{fetcher=fetch,cache}={}){
  const parsed=parseRoadTilePath(new URL(request.url).pathname);
- const headers={'Access-Control-Allow-Origin':'*','Cache-Control':'public, max-age=86400','Content-Type':'application/vnd.mapbox-vector-tile'};
+ const headers={'Access-Control-Allow-Origin':'*','Access-Control-Expose-Headers':'X-Dongjak-Removed-Road-Features, Cache-Control','Cache-Control':'public, max-age=86400','Content-Type':'application/vnd.mapbox-vector-tile'};
  if(!parsed)return new Response('Invalid tile',{status:400});
  const key=new Request(request.url);
+ // Cache availability is optional; a cache API exception must never prevent
+ // a valid map tile from being returned.
+ try{const hit=await cache?.match(key);if(hit)return hit;}catch(e){console.warn('[basemap] cache read unavailable',e?.name);}
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
+ let stage='upstream';
  try{
-  const hit=await cache?.match(key);if(hit)return hit;
-  const upstream=await fetcher(parsed.url,{redirect:'error',signal:AbortSignal.timeout(12000)});
+  const upstream=await fetcher(parsed.url,{redirect:'follow',signal:controller.signal});
   if(!upstream.ok)throw Error('Upstream '+upstream.status);
+  stage='decode';
   let data=new Uint8Array(await upstream.arrayBuffer());
   if(data[0]===31&&data[1]===139)data=new Uint8Array(await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+  stage='reduce';
   const result=reduceExteriorRoadTile(data,parsed.z,parsed.x,parsed.y);
   const response=new Response(result.bytes,{headers:{...headers,'X-Dongjak-Removed-Road-Features':String(result.removed)}});
-  try{await cache?.put(key,response.clone());}catch{}
+  try{await cache?.put(key,response.clone());}catch(e){console.warn('[basemap] cache write unavailable',e?.name);}
   return response;
- }catch(e){return new Response('Reduced vector tile unavailable',{status:502,headers:{'Access-Control-Allow-Origin':'*','Cache-Control':'no-store'}});}
+ }catch(e){console.warn('[basemap] reduced tile failure',stage,e?.name,e?.message);return new Response('Reduced vector tile unavailable',{status:502,headers:{'Access-Control-Allow-Origin':'*','Cache-Control':'no-store','X-Dongjak-Tile-Failure-Stage':stage}});}
+ finally{clearTimeout(timer);}
 }
