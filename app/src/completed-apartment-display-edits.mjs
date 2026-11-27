@@ -1,5 +1,5 @@
 // Display-only legacy footprint exclusions; not a legal demolition register.
-// Evidence: GitHub Actions 45958455039, corroborated site boundaries and current footprint comparison.
+// Evidence: GitHub Actions 45960125056, corroborated site boundaries and current footprint comparison.
 // Original GIS source files remain unchanged.
 export const completedApartmentDisplayEdits={
   "schema": 1,
@@ -3849,6 +3849,516 @@ export const completedApartmentDisplayEdits={
       "approved": "2005-09-16",
       "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
       "boundary_reference": 1030895324,
+      "retained_towers": 2,
+      "expected_towers": 2
+    },
+    {
+      "sheet": 2,
+      "kind": "base",
+      "row": 7013,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.94109,
+              37.506469
+            ],
+            [
+              126.941053,
+              37.50644
+            ],
+            [
+              126.941017,
+              37.506468
+            ],
+            [
+              126.941016,
+              37.506476
+            ],
+            [
+              126.941018,
+              37.506484
+            ],
+            [
+              126.941019,
+              37.506492
+            ],
+            [
+              126.941022,
+              37.506496
+            ],
+            [
+              126.941031,
+              37.506501
+            ],
+            [
+              126.941045,
+              37.506501
+            ],
+            [
+              126.941056,
+              37.506499
+            ],
+            [
+              126.94109,
+              37.506469
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 10896,
+      "source_sha256": "3f2873934c9c949b5a80e648abe95bcfcf99e13a8b7d7b490c79bd7b34998727",
+      "site": "신동아리버파크",
+      "approved": "2001-02-15",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 284585460,
+      "retained_towers": 11,
+      "expected_towers": 7
+    },
+    {
+      "sheet": 2,
+      "kind": "base",
+      "row": 3493,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.942858,
+              37.506671
+            ],
+            [
+              126.942824,
+              37.506639
+            ],
+            [
+              126.942789,
+              37.506663
+            ],
+            [
+              126.942832,
+              37.506697
+            ],
+            [
+              126.942838,
+              37.506698
+            ],
+            [
+              126.942844,
+              37.506695
+            ],
+            [
+              126.942853,
+              37.506687
+            ],
+            [
+              126.942855,
+              37.506681
+            ],
+            [
+              126.942858,
+              37.506671
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 10896,
+      "source_sha256": "3f2873934c9c949b5a80e648abe95bcfcf99e13a8b7d7b490c79bd7b34998727",
+      "site": "신동아리버파크",
+      "approved": "2001-02-15",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 284585460,
+      "retained_towers": 11,
+      "expected_towers": 7
+    },
+    {
+      "sheet": 2,
+      "kind": "base",
+      "row": 118,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.94437,
+              37.507592
+            ],
+            [
+              126.944372,
+              37.507552
+            ],
+            [
+              126.944305,
+              37.507552
+            ],
+            [
+              126.944302,
+              37.507591
+            ],
+            [
+              126.94437,
+              37.507592
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 10896,
+      "source_sha256": "3f2873934c9c949b5a80e648abe95bcfcf99e13a8b7d7b490c79bd7b34998727",
+      "site": "신동아리버파크",
+      "approved": "2001-02-15",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 284585460,
+      "retained_towers": 11,
+      "expected_towers": 7
+    },
+    {
+      "sheet": 2,
+      "kind": "base",
+      "row": 8001,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.930298,
+              37.510731
+            ],
+            [
+              126.930254,
+              37.510712
+            ],
+            [
+              126.930221,
+              37.510759
+            ],
+            [
+              126.930266,
+              37.510777
+            ],
+            [
+              126.930298,
+              37.510731
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 10896,
+      "source_sha256": "3f2873934c9c949b5a80e648abe95bcfcf99e13a8b7d7b490c79bd7b34998727",
+      "site": "대방주공1단지",
+      "approved": "1993-04-18",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 284793429,
+      "retained_towers": 5,
+      "expected_towers": 5
+    },
+    {
+      "sheet": 2,
+      "kind": "base",
+      "row": 690,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.938044,
+              37.505491
+            ],
+            [
+              126.938002,
+              37.505439
+            ],
+            [
+              126.937965,
+              37.505458
+            ],
+            [
+              126.938007,
+              37.50551
+            ],
+            [
+              126.938044,
+              37.505491
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 10896,
+      "source_sha256": "3f2873934c9c949b5a80e648abe95bcfcf99e13a8b7d7b490c79bd7b34998727",
+      "site": "상도파크자이 아파트",
+      "approved": "2016-08-26",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 305888893,
+      "retained_towers": 7,
+      "expected_towers": 7
+    },
+    {
+      "sheet": 2,
+      "kind": "base",
+      "row": 264,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.938729,
+              37.505303
+            ],
+            [
+              126.938718,
+              37.505319
+            ],
+            [
+              126.938624,
+              37.505274
+            ],
+            [
+              126.938611,
+              37.505275
+            ],
+            [
+              126.93859,
+              37.505275
+            ],
+            [
+              126.938584,
+              37.505275
+            ],
+            [
+              126.938611,
+              37.505289
+            ],
+            [
+              126.938614,
+              37.505286
+            ],
+            [
+              126.938716,
+              37.505334
+            ],
+            [
+              126.938718,
+              37.505334
+            ],
+            [
+              126.938739,
+              37.505308
+            ],
+            [
+              126.938729,
+              37.505303
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 10896,
+      "source_sha256": "3f2873934c9c949b5a80e648abe95bcfcf99e13a8b7d7b490c79bd7b34998727",
+      "site": "상도파크자이 아파트",
+      "approved": "2016-08-26",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 305888893,
+      "retained_towers": 7,
+      "expected_towers": 7
+    },
+    {
+      "sheet": 2,
+      "kind": "base",
+      "row": 499,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.938583,
+              37.505501
+            ],
+            [
+              126.938566,
+              37.50548
+            ],
+            [
+              126.938542,
+              37.505492
+            ],
+            [
+              126.938539,
+              37.505488
+            ],
+            [
+              126.938488,
+              37.505516
+            ],
+            [
+              126.938509,
+              37.505543
+            ],
+            [
+              126.938559,
+              37.505516
+            ],
+            [
+              126.938558,
+              37.505515
+            ],
+            [
+              126.938583,
+              37.505501
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 10896,
+      "source_sha256": "3f2873934c9c949b5a80e648abe95bcfcf99e13a8b7d7b490c79bd7b34998727",
+      "site": "상도파크자이 아파트",
+      "approved": "2016-08-26",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 305888893,
+      "retained_towers": 7,
+      "expected_towers": 7
+    },
+    {
+      "sheet": 2,
+      "kind": "base",
+      "row": 498,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.938697,
+              37.505549
+            ],
+            [
+              126.938673,
+              37.505521
+            ],
+            [
+              126.938612,
+              37.505555
+            ],
+            [
+              126.938635,
+              37.505582
+            ],
+            [
+              126.938697,
+              37.505549
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 10896,
+      "source_sha256": "3f2873934c9c949b5a80e648abe95bcfcf99e13a8b7d7b490c79bd7b34998727",
+      "site": "상도파크자이 아파트",
+      "approved": "2016-08-26",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 305888893,
+      "retained_towers": 7,
+      "expected_towers": 7
+    },
+    {
+      "sheet": 2,
+      "kind": "base",
+      "row": 8217,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.927893,
+              37.513872
+            ],
+            [
+              126.927892,
+              37.513831
+            ],
+            [
+              126.927836,
+              37.513831
+            ],
+            [
+              126.92784,
+              37.513873
+            ],
+            [
+              126.927893,
+              37.513872
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 10896,
+      "source_sha256": "3f2873934c9c949b5a80e648abe95bcfcf99e13a8b7d7b490c79bd7b34998727",
+      "site": "대방동신일해피트리 아파트",
+      "approved": "2005-11-25",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 1031533488,
+      "retained_towers": 2,
+      "expected_towers": 2
+    },
+    {
+      "sheet": 2,
+      "kind": "base",
+      "row": 9747,
+      "original": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              126.92558,
+              37.511564
+            ],
+            [
+              126.925556,
+              37.511556
+            ],
+            [
+              126.92553,
+              37.511561
+            ],
+            [
+              126.925518,
+              37.511584
+            ],
+            [
+              126.925528,
+              37.511604
+            ],
+            [
+              126.925554,
+              37.511612
+            ],
+            [
+              126.925582,
+              37.511604
+            ],
+            [
+              126.92559,
+              37.511584
+            ],
+            [
+              126.92558,
+              37.511564
+            ]
+          ]
+        ]
+      },
+      "original_height": 3,
+      "source_count": 10896,
+      "source_sha256": "3f2873934c9c949b5a80e648abe95bcfcf99e13a8b7d7b490c79bd7b34998727",
+      "site": "대방경남아너스빌",
+      "approved": "2006-03-27",
+      "reason": "completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified",
+      "boundary_reference": 1113246891,
       "retained_towers": 2,
       "expected_towers": 2
     },

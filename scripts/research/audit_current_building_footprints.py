@@ -463,6 +463,19 @@ def corroborate_road(conflict):
             if not isinstance(response.get('elements'),list) or response.get('remark'):response=None;continue
             break
         except Exception:response=None
+    if response is None:
+        # Standard OSM map endpoint returns the original node/way records
+        # for a tiny bbox, independently of Overpass availability.
+        try:
+            raw=get('https://api.openstreetmap.org/api/0.6/map.json',{'bbox':f'{w},{s},{e},{north}'})
+            nodes={v['id']:{'lat':v['lat'],'lon':v['lon']} for v in raw['elements'] if v.get('type')=='node'}
+            ways=[]
+            for way in raw['elements']:
+                if way.get('type')!='way' or not way.get('tags',{}).get('highway'):continue
+                if not all(n in nodes for n in way.get('nodes',[])):continue
+                ways.append(way|{'geometry':[nodes[n] for n in way['nodes']]})
+            response={'elements':ways}
+        except Exception:response=None
     nearby=[]
     for way in (response or {}).get('elements',[]):
         coords=[(v['lon'],v['lat']) for v in way.get('geometry',[])]
