@@ -48,6 +48,15 @@ try{
    await dismissOnboarding(page);
    await page.waitForFunction(()=>window.__qaMap?.getStyle()?.sources?.openmaptiles,{},{timeout:90000});
 
+ if(process.env.CHECK_ADMIN_RAIL==='true'){
+  await page.evaluate(()=>window.__qaMap.jumpTo({center:[126.953,37.504],zoom:11.4,pitch:0}));
+  await page.waitForFunction(()=>{const m=window.__qaMap;return m.getLayer('neighbor-district-names')&&m.queryRenderedFeatures({layers:['neighbor-district-names']}).length>=2;},{},{timeout:90000});
+  const names=await page.evaluate(()=>window.__qaMap.queryRenderedFeatures({layers:['neighbor-district-names']}).map(f=>f.properties.name));assert.ok(names.every(n=>/[구시]$/.test(n)&&n!=='동작구'));
+  await page.screenshot({path:out+'/admin-names-overview.png'});
+  await page.evaluate(()=>window.__qaMap.jumpTo({center:[126.982,37.512],zoom:14,pitch:0}));
+  await page.waitForFunction(()=>{const m=window.__qaMap;if(!m.getLayer('transport-schematic-subway'))return false;const p=m.project([126.9822,37.512]);return m.queryRenderedFeatures([[p.x-30,p.y-30],[p.x+30,p.y+30]],{layers:['transport-schematic-subway']}).some(f=>f.properties.line==='4호선'&&f.properties.schematic===false);},{},{timeout:90000});
+  await page.screenshot({path:out+'/line4-dongjak-bridge.png'});console.log('ADMIN_RAIL_RENDER_OK',JSON.stringify(names));
+ }
  for(const site of sites){
   await page.evaluate(({center})=>window.__qaMap.jumpTo({center,zoom:18.4,pitch:0}),site);
   await page.waitForFunction(()=>{const m=window.__qaMap;return m.isStyleLoaded()&&m.getStyle().layers.some(l=>l['source-layer']==='transportation'&&l.type==='line')&&m.getStyle().layers.some(l=>l.id.startsWith('dongjak-buildings-footprint-')&&m.isSourceLoaded(l.source));},{},{timeout:90000}).catch(async error=>{console.log('IDLE_MAP_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>{const m=window.__qaMap;return {styleLoaded:m.isStyleLoaded(),moving:m.isMoving(),layers:m.getStyle().layers.filter(l=>l.id.startsWith('dongjak-buildings-footprint-')).map(l=>({id:l.id,loaded:m.isSourceLoaded(l.source)})),boundary:document.querySelector('#app')?.dataset.djBoundaryReady};})));throw error;});

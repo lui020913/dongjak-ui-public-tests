@@ -60,3 +60,14 @@ test('약국/편의점 위치는 생활 편의 시설 필터로 분리',()=>{
   assert.equal(safetyFeatures(elements,()=>true,'essentials').features.length,2);
   assert.equal(safetyFeatures(elements,()=>true,'safety').features.length,1);
 });
+
+
+test('Dongjak-only cached polygon still produces real neighboring names without network',async()=>{
+ const {installNeighborDistrictLabels}=await import('../src/map-polish.js');
+ const {readFileSync}=await import('node:fs');
+ const local=JSON.parse(readFileSync(new URL('../public/data/dongjak_sig_reference.geojson',import.meta.url),'utf8'));
+ let data,layer;const map={addSource:(id,s)=>{data=s.data;},addLayer:l=>{layer=l;},getLayer:()=>true,setPaintProperty(){}};
+ const count=installNeighborDistrictLabels(map,local.features,[[126.92,37.48],[126.97,37.52]],()=>false);
+ assert.ok(count>=45);for(const name of ['용산구','관악구','서초구','영등포구','과천시','광명시'])assert.ok(data.features.some(f=>f.properties.name===name));
+ assert.ok(data.features.every(f=>/[구시]$/.test(f.properties.name)&&f.properties.name!=='동작구'));assert.equal(layer.minzoom,8);
+});
