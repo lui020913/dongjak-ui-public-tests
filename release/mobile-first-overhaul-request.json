@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.232",
+  "application_version": "9.2.233",
   "public_work_branch": "main",
-  "purpose": "PR #609: add 626 source-bound building display exclusions (722 total), source-backed planned occupancy labels, suppress stale community sheet during map location picker. App regression and build succeeded. Owner requested manual visual verification; do not wait for optional PR browser studies. Preserve normal protected release gates.",
-  "attempt": 468,
+  "purpose": "Deploy merged PRs #610 and #611: 992 existing display exclusions, 25 confirmed redevelopment areas and labels, separate rail transfer pills and legs, ordered bus direction cost and independent pedestrian network comparison. Required source CI and protected overlay passed. Field route validation continues separately and does not block this release. No further building survey or overlap corrections; preserve all protected Preview/Production/APK gates.",
+  "attempt": 469,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
