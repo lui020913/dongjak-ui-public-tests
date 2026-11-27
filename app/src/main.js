@@ -47,6 +47,7 @@ import {getActiveCloudClient} from './v824-favorites-cloud.js';
 import {readSharedCommunity,publishCommunityPost,deleteSharedCommunityPost,setSharedCommunityLike,addSharedCommunityComment,isCommunitySignedIn,readCommunityNotifications,markCommunityNoticeRead,appealCommunityNotice,setSharedCommunityBookmark,reportSharedCommunity,readCommunityModerationStatus} from './community-cloud.js';
 import {initPedestrianTools} from './pedestrian-tools.js';
 import {fetchDongjakPedestrianVariants} from './dongjak-local-routing.js';
+import {fetchDistrictOsmWalk} from './district-osm-walk-client.mjs';
 import {chooseShortestPedestrianNetwork,shouldCompareTransitPedestrianNetwork} from './pedestrian-network-comparison.mjs';
 import {routeWithinDistrict} from './route-district-guard.mjs';
 import {TRANSIT_SEARCH_BOUNDS,transitPointInScope,transitCoordinatesInScope,transitEndpointPolicy,exteriorMapActive,transitWalkStyle,transitContextBounds,transitFramingBounds,applyTransitBoundaryVisibility,applyDistrictOutlineVisibility} from './transit-exterior-scope.mjs';
@@ -3715,6 +3716,7 @@ async function fetchPedestrianRoute(from,to,profile='standard',externalSignal,{t
 }
 function routeDataNote(result){
   if(!result)return '';
+  if(result.source==='osm-pedestrian-graph')return 'OpenStreetMap 보행망 · 2026-11-26 · © OpenStreetMap contributors · 실제 통행 상태 및 경사 미검증';
   if(result.source==='seoul-pedestrian-graph'){
     const grade=Number.isFinite(result.slopeAscentM)?` · 추정 상승 ${Math.round(result.slopeAscentM)}m / 하강 ${Math.round(result.slopeDescentM)}m`:'';
     const unsure=result.slopeUncertainM>0?` · 고도 검증 부족 ${Math.round(result.slopeUncertainM)}m`:'';
@@ -3735,6 +3737,7 @@ async function fetchPreferredPedestrianPair(from,to,signal,{comparison='always'}
     return Promise.race([fetchPedestrianRoute(from,to,'standard',controller.signal).catch(()=>null),deadline]).finally(()=>{clearTimeout(timer);signal?.removeEventListener('abort',cancel);});
   };
   const externalPending=comparison==='always'?compareExternal():null;
+  const osmPending=fetchDistrictOsmWalk(from,to,{signal}).then(r=>routeWithinDistrict(r?.coords,boundaryGeometry,isDongjak)?r:null).catch(()=>null);
   try {
     const local=await fetchDongjakPedestrianVariants(from,to,{signal});
     const standard=routeWithinDistrict(local.standard?.coords,boundaryGeometry,isDongjak)?local.standard:null;
@@ -3742,7 +3745,9 @@ async function fetchPreferredPedestrianPair(from,to,signal,{comparison='always'}
     if(!standard&&!gentle)throw new Error('동작구 내 보행 경로를 찾지 못했습니다.');
     const alternative=await (externalPending||(comparison==='detour'&&shouldCompareTransitPedestrianNetwork(standard,from,to)?compareExternal():Promise.resolve(null)));
     if(signal?.aborted)throw new DOMException('요청이 취소됐습니다.','AbortError');
-    const shortest=chooseShortestPedestrianNetwork(standard,alternative,from,to);
+    const localShortest=chooseShortestPedestrianNetwork(standard,await osmPending,from,to);
+    if(signal?.aborted)throw new DOMException('요청이 취소됐습니다.','AbortError');
+    const shortest=chooseShortestPedestrianNetwork(localShortest,alternative,from,to);
     return {...local,standard:shortest,gentle,usingLocal:shortest?.source!=='valhalla-external'};
   }catch(error){
     if(error?.name==='AbortError')throw error;
@@ -3750,14 +3755,16 @@ async function fetchPreferredPedestrianPair(from,to,signal,{comparison='always'}
     const settled=await Promise.allSettled([
       externalPending?externalPending.then(result=>result||fetchPedestrianRoute(from,to,'standard',signal)):fetchPedestrianRoute(from,to,'standard',signal),fetchPedestrianRoute(from,to,'gentle',signal)
     ]);
-    const standard=settled[0].status==='fulfilled'?settled[0].value:null;
+    const externalStandard=settled[0].status==='fulfilled'?settled[0].value:null;
+    const standard=chooseShortestPedestrianNetwork(await osmPending,externalStandard,from,to);
+    if(signal?.aborted)throw new DOMException('요청이 취소됐습니다.','AbortError');
     const gentle=settled[1].status==='fulfilled'?settled[1].value:null;
     if(!standard&&!gentle)throw new Error(`서울시 도보 네트워크: ${error.message||error}; 외부 경로: ${settled[0].reason?.message||settled[1].reason?.message||'조회 실패'}`);
     return {standard,gentle,usingLocal:false};
   }
 }
 function currentPreferredModeResult(from,to,which,signal){
-  if(routeResult?.source==='seoul-pedestrian-graph'){
+  if(['seoul-pedestrian-graph','osm-pedestrian-graph'].includes(routeResult?.source)){
     return fetchPreferredPedestrianPair(from,to,signal).then(routes=>{
       const result=routes[which];
       if(!result?.coords?.length)throw new Error('선택한 보행 경로를 다시 찾지 못했습니다.');
