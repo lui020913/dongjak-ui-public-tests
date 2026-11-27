@@ -1377,7 +1377,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const streamApp=document.getElementById('app');
   const cityScope=()=>streamApp?.dataset.djTransitExterior==='true'&&Boolean(getSeoulBoundary());
   const scopeContains=(lng,lat)=>cityScope()?inSeoul(lng,lat):isDongjak(lng,lat)===true;
-  let streamedRows=[],activeStreamKeys=new Set(),streamPending=0;
+  let streamedRows=[],activeStreamKeys=new Set(),streamPending=0,streamReady=false;
   const inActiveCell=p=>activeStreamKeys.has((p.kind==='bus'?'bus':'rail')+'_'+cellKey(p.lng,p.lat));
   let stops=new Map();
   let selected=null;
@@ -1887,7 +1887,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const eligible=p=>inActiveCell(p)&&scopeContains(p.lng,p.lat);
     const official=streamedRows.filter(eligible);
     const officialBus=official.filter(p=>p.kind==='bus');
-    const fallbackBus=streamPending?osmTransport.filter(p=>p.kind==='bus'&&eligible(p)):[];
+    const officialIds=new Set(officialBus.map(p=>String(p.arsId)));
+    const fallbackBus=streamPending?osmTransport.filter(p=>p.kind==='bus'&&eligible(p)&&!officialIds.has(String(p.arsId))):[];
     const buses=deduplicateBusStops([...officialBus,...fallbackBus]);
     const stations=new Map();
     for(const p of [...osmTransport.filter(p=>p.kind==='subway'),...official.filter(p=>p.kind==='subway'),...officialMetro]){
@@ -1905,7 +1906,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(!map.getLayer?.('dj-basemap-bus-pictogram')||!map.setFilter)return;
     const center=map.getCenter?.();
     const filter=busFilterInsideDistrict(
-      streamPending===0?['==',1,0]:busTileFallbackFilter(currentVisibleBusStops,center),getDistrictGeometry());
+      streamReady&&streamPending===0?['==',1,0]:busTileFallbackFilter(currentVisibleBusStops,center),getDistrictGeometry());
     const signature=JSON.stringify(filter);
     if(lastTileFallbackFilter===signature)return;
     try{map.setFilter('dj-basemap-bus-pictogram',filter);lastTileFallbackFilter=signature;}
@@ -1942,12 +1943,12 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       return response.json();
     },
     onChange:(rows,{pending})=>{
-      streamedRows=rows;streamPending=pending;officialStaticStopCount=rows.filter(p=>p.kind==='bus').length;
+      streamReady=true;streamedRows=rows;streamPending=pending;officialStaticStopCount=rows.filter(p=>p.kind==='bus').length;
       refreshStops();
     }
   });
   function refreshTransitViewport(){
-    const b=map.getBounds?.();if(!b)return;
+    const b=map.getBounds?.();if(!b||typeof b.getWest!=='function'||typeof map.getZoom!=='function')return;
     const keys=viewportKeys({west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()},map.getZoom(),{bus:streamApp?.dataset.baseBus!=='off',rail:streamApp?.dataset.baseMetro!=='off'});
     activeStreamKeys=new Set(keys);cellStream.update(keys);refreshStops();
   }
@@ -1956,8 +1957,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   map.on('zoomend',()=>streamViewportWork.request());
   map.on('resize',()=>streamViewportWork.request());
   map.on('dongjak:boundary-updated',()=>streamViewportWork.request());
-  window.addEventListener('dongjak:transit-stream-scope',()=>{lastStopDataSignature='';streamViewportWork.request();});
-  document.addEventListener('dongjak-base-layer-change',()=>streamViewportWork.request());
+  globalThis.window?.addEventListener?.('dongjak:transit-stream-scope',()=>{lastStopDataSignature='';streamViewportWork.request();});
+  document.addEventListener?.('dongjak-base-layer-change',()=>streamViewportWork.request());
   refreshTransitViewport();
   // 별도 Overpass 호출 없이 배경지도 벡터 POI에서 정류소/역을 보충합니다.
   // 확실히 식별되는 철도 class와 이름만 사용하고, 임의로 좌표를 만들지 않습니다.
@@ -3055,7 +3056,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     );
     const candidates=nearby.map(f=>baseMapTransitPlace(f,event.lngLat)).filter(Boolean)
       .filter(p=>(p.kind==='bus'
-        ? streamPending>0 && !busRouteOverlay.hasVisibleRouteStops() && (map.getZoom?.()??16)>=15 && isDongjak(p.lng,p.lat)===true
+        ? (!streamReady||streamPending>0) && !busRouteOverlay.hasVisibleRouteStops() && (map.getZoom?.()??16)>=15 && isDongjak(p.lng,p.lat)===true
         : isDongjak(p.lng,p.lat)===true||isNearBoundary(p.lng,p.lat)));
     if(!candidates.length)return false;
     // 지도 클릭 지점과 실제 아이콘 좌표 사이의 거리로 가까운 정류소를 선택합니다.
