@@ -23,3 +23,21 @@ export async function matchOfficialBusRoad(coords,{fetcher=fetch,signal,apiBase=
   return validateMatchedRoad(coords,matched)?matched:null;
  }catch{return null;}finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel);}
 }
+
+const matchedPlans=new WeakMap();
+export async function prepareTransitRoadPlan(plan,options={}){
+ const legs=plan.legs||[plan];
+ await Promise.all(legs.filter(l=>l.kind==='bus').map(async leg=>{
+  if(matchedPlans.has(leg)){await matchedPlans.get(leg);return;}
+  const task=(async()=>{const coords=await matchOfficialBusRoad(leg.coords,options);if(!options.signal?.aborted&&coords){leg.coords=coords;leg.roadMatch='matched';}else if(!options.signal?.aborted){leg.roadMatch='official';}})();
+  matchedPlans.set(leg,task);await task;if(options.signal?.aborted)matchedPlans.delete(leg);
+ }));
+ return plan;
+}
+export function isTransitAccessWalkValid(route,from,to,maxGap=25){
+ if(!route?.coords?.length)return false;
+ for(const [p,q] of [[from,route.coords[0]],[to,route.coords.at(-1)]]){
+  if(p?.vehicleAccess&&metres([p.lng,p.lat],q)>maxGap)return false;
+ }
+ return true;
+}
