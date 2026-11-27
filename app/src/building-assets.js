@@ -5,7 +5,7 @@ import {collectGreenReviewCandidates} from './green-building-filter.js';
  * 파일별 실패를 분리해 한 소스의 실패가 전체 도엽을 숨기지 않도록 합니다.
  * 이 모듈에는 API 키나 기기 권한이 필요하지 않습니다.
  */
-export async function loadBuildingTileFeatures(sheet, fetchFn = globalThis.fetch, trimPack = undefined) {
+export async function loadBuildingTileFeatures(sheet, fetchFn = globalThis.fetch, trimPack = undefined, {beforeWork=()=>{}} = {}) {
   if (!sheet || typeof sheet.file !== 'string' || !sheet.file) {
     throw new Error('건물 도엽 파일 정보가 올바르지 않습니다.');
   }
@@ -17,7 +17,12 @@ export async function loadBuildingTileFeatures(sheet, fetchFn = globalThis.fetch
   const results = await Promise.allSettled(sources.map(async (source) => {
     const response = await fetchFn(source.url);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
+    // Fetch and decoding are distinct. Buffer the network response first,
+    // then parse its geometry only after the camera settles.
+    let data;
+    if(typeof response.text==='function'){
+      const raw=await response.text();await beforeWork();data=JSON.parse(raw);
+    }else{await beforeWork();data=await response.json();}
     if (data?.type !== 'FeatureCollection' || !Array.isArray(data.features)) {
       throw new Error('GeoJSON FeatureCollection 구조가 아닙니다.');
     }
@@ -25,6 +30,7 @@ export async function loadBuildingTileFeatures(sheet, fetchFn = globalThis.fetch
   }));
   // Keep test/custom loaders isolated; only the real static app loads the pack.
   const pack=trimPack===undefined&&fetchFn===globalThis.fetch?await loadBuildingDisplayTrimPack():trimPack;
+  await beforeWork();
   const displayGeometries=new Map();
   const features=[];
   const errors=[];

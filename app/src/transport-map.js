@@ -2008,7 +2008,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   let osmBusViewportBusy=false;
   async function fillHighZoomOSMBusStops(){
     const zoom=Number(map.getZoom?.()||0);
-    if(zoom<16.8||osmBusViewportBusy||typeof map.getBounds!=='function')return;
+    if(officialStaticStopCount>0||zoom<16.8||osmBusViewportBusy||typeof map.getBounds!=='function')return;
     const center=map.getCenter?.();
     if(!center||!Number.isFinite(center.lng)||!Number.isFinite(center.lat))return;
     if(isDongjak(center.lng,center.lat)!==true)return;

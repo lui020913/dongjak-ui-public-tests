@@ -1,3 +1,4 @@
+import {createDistrictBuildingScope} from './district-building-scope.mjs';
 import {installReviewedBaseRoads} from './reviewed-base-road-layer.mjs';
 import {installCommunityActivity} from './community-activity.js';
 import {splitCommunityReportBody} from './community-report-presentation.js';
@@ -251,6 +252,8 @@ let lastBuildingCount = 0;
 let baseLayerControls=null;
 let baseBuildingsVisible=true;
 let buildingCoverage=null;
+let districtBuildingScope=null;
+let buildingLastMotionEnd=0;
 
 let overviewSheetState = 'expanded';
 let overviewDrag = null;
@@ -839,7 +842,7 @@ function getVisibleBBox(){
   return [minX-dx,minY-dy,maxX+dx,maxY+dy];
 }
 function scheduleBuildingLoad(){
-  if (!visibleBuilding2D() || map.getZoom()<BUILDING_ZOOM_MIN || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
+  if (!districtBuildingsReady || !visibleBuilding2D() || map.getZoom()<BUILDING_ZOOM_MIN || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
   clearTimeout(buildingLoadTimer);
   buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},djPhone?600:230);
 }
@@ -859,15 +862,21 @@ export function shouldRender3DBuilding(geometry){
 }
 // v17.12: 기존 국가기본도와 GIS건물 보완 GeoJSON을 모두 로딩합니다.
 
+async function waitForBuildingQuiet(){
+  if(djPhone)while(map.isMoving?.()||performance.now()-buildingLastMotionEnd<750){
+    if(map.isMoving?.())await new Promise(resolve=>map.once('moveend',resolve));
+    else await new Promise(resolve=>setTimeout(resolve,Math.max(16,750-(performance.now()-buildingLastMotionEnd))));
+  }
+}
 async function loadOneBuildingSheet(sheet){
   const existing=loadedBuildingTiles.get(sheet.sheet);
   if(existing?.complete||buildingLoading.has(sheet.sheet)||(buildingRetryAfter.get(sheet.sheet)||0)>Date.now())return;
   buildingLoading.add(sheet.sheet);
   try {
-    const {features, reviewCandidates, displayGeometries, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet);
+    const {features, reviewCandidates, displayGeometries, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet,globalThis.fetch,undefined,{beforeWork:waitForBuildingQuiet});
     for(const problem of errors) console.warn(`[동작하는 안전지도] ${sheet.sheet}번 ${problem.label} 로딩 실패:`,problem.error);
     // Defer geometry filtering and indexing until the phone camera is settled.
-    while(djPhone&&map.isMoving?.())await new Promise(resolve=>map.once('moveend',resolve));
+    await waitForBuildingQuiet();
     if(!boundaryGeometry)return;
     // Tile-native buildings are incomplete in parts of Sangdo 1-dong. The
     // supplied base+supplement GIS footprints must also be available overhead.
@@ -906,6 +915,7 @@ async function loadOneBuildingSheet(sheet){
         'fill-extrusion-height':['interpolate',['linear'],['zoom'],BUILDING_ZOOM_FADE_START,0,BUILDING_ZOOM_FADE_END,['get','h']],
         'fill-extrusion-base':0}
     },firstSymbol);
+    districtBuildingScope?.apply();
     loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources,complete:successfulSources===totalSources,footprint3DMode:visibleBuilding3D()});
     buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,successfulSources===totalSources?visible:[]);
     if(successfulSources<totalSources)buildingRetryAfter.set(sheet.sheet,Date.now()+15000);else buildingRetryAfter.delete(sheet.sheet);
@@ -958,6 +968,7 @@ function djTrimOffscreenBuildings(sheets){
     if(map.getStyle().layers.some(l=>l.source===sourceId&&!owned.includes(l.id)))continue;
     try{for(const layerId of owned)if(map.getLayer(layerId))map.removeLayer(layerId);
       if(map.getSource(sourceId))map.removeSource(sourceId);
+      districtBuildingScope?.forget(owned);
       loadedBuildingTiles.delete(id);buildingCoverage?.removeSheet(id);
     }catch(error){console.debug('[건물 캐시 정리]',error?.message);}
   }
@@ -969,10 +980,12 @@ async function loadVisibleBuildingSheets(){
   let interrupted=false;
   try{
     const manifest=await ensureBuildingManifest();
-    if(!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN)return;
+    if(!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN||(djPhone&&map.isMoving?.())){interrupted=true;return;}
     const bbox=getVisibleBBox();
     const nearby=manifest.sheets.filter(s=>intersects(s.bbox,bbox));
     const center=map.getCenter();const sheets=nearestBuildingSheets({sheets:nearby},[center.lng,center.lat],nearby.length);
+    // No new GIS work when the camera has moved wholly outside Dongjak.
+    if(!sheets.length)return;
     djTrimOffscreenBuildings(sheets);
     for(const sheet of sheets){
       if(!visibleBuilding2D()||(djPhone&&map.isMoving?.())){interrupted=true;break;}
@@ -981,7 +994,7 @@ async function loadVisibleBuildingSheets(){
       }
       await loadOneBuildingSheet(sheet);
       if(djPhone&&getVisibleBBox().some((v,i)=>Math.abs(v-bbox[i])>0.000001)){interrupted=true;break;}
-      if(djRenderBudget.isEconomy())await new Promise(r=>setTimeout(r,0));
+      if(djPhone)await new Promise(r=>setTimeout(r,0));
     }
   }finally{djBuildingBatchBusy=false;if(interrupted)scheduleBuildingLoad();
     clearTimeout(buildingRetryTimer);
@@ -989,7 +1002,7 @@ async function loadVisibleBuildingSheets(){
   }
 }
 map.on('movestart',()=>{if(djPhone)clearTimeout(buildingLoadTimer);});
-map.on('moveend',scheduleBuildingLoad);
+map.on('moveend',()=>{buildingLastMotionEnd=performance.now();scheduleBuildingLoad();});
 map.on('zoomend',()=>{syncTiltWithBuildings();});
 // Preserve the loaded building representation during pan, rotation and pitch.
 // The phone render budget may adapt resolution and defer new tile work, but it
@@ -1169,14 +1182,9 @@ async function loadDongjakBoundary(){
     if(app.dataset.djTransitExterior!=='true')map.setMaxBounds(bufferedDistrictBounds(boundaryGeometry));
     // 동작구 밖 원본 시설명은 가리되, 추가 자치구 라벨은 별도 심벌로 표시합니다.
     clipBasemapLabelsToDistrict(map,boundaryGeometry);
-    // Retain the original native building filters and reviewed GIS coverage.
-    // Transit must never change the shared basemap geometry or layer owners.
-    districtBuildingsReady=true;
+    districtBuildingScope?.setBoundary(boundaryGeometry);
+    // Shared building scope is independent of transit or walking mode.
     syncTiltWithBuildings();
-    scheduleBuildingLoad();
-    // Warm nearby building layers on idle even when the initial camera is flat
-    // or too far out to meet the normal on-demand building visibility gate.
-    scheduleInitialBuildingWarmup();
 
     // v17: 동작구 외부를 회색 65% 마스크로 시각적으로 구분합니다. 실제 지도 및 도로 데이터는 유지합니다.
     // 밝은 영역은 지도 데이터 삭제나 화면 자르기가 아니라 선택적 시각적 강조입니다.
@@ -1194,11 +1202,16 @@ async function loadDongjakBoundary(){
       paint:{'line-color':'#0f7f73','line-width':3.35,'line-opacity':0.96}});
     baseLayerControls?.apply();
     syncTransitExterior(true);
+    let boundaryPitchFrame=0;
     map.on('pitch',()=>{
+      if(boundaryPitchFrame)return;
+      boundaryPitchFrame=requestAnimationFrame(()=>{
+      boundaryPitchFrame=0;
       const pitch=map.getPitch();
       // 측면에서 지표면 경계선이 가늘어지는 현상을 보완합니다(수직 벽 모델은 아님).
       if(map.getLayer('district-border'))map.setPaintProperty('district-border','line-width',2.6+pitch/28);
       if(map.getLayer('district-border-halo'))map.setPaintProperty('district-border-halo','line-width',10.5+pitch/18);
+      });
     });
     installNeighborDistrictLabels(map,features,boundaryBounds,isDongjak);
     status('동작구 경계 적용 · 지도를 기울이면 건물과 지형이 나타납니다');
@@ -1715,6 +1728,8 @@ map.on('load',()=>{
   installMapOrientationControls(map,maplibregl);
   installGrassTexture({map,app});
   installForestShade({map,app});
+  districtBuildingScope=createDistrictBuildingScope(map);
+  districtBuildingScope.apply(); // fail closed until district boundary is available
   const nativeBuildingLayers=installBaseBuildingPalette({map,app});
   buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers);
   buildingCoverage.setExtruding(visibleBuilding3D());
@@ -1834,6 +1849,7 @@ map.on('load',()=>{
     onDistrictBoundary:(feature)=>{
       if(!feature.geometry)return;
       boundaryGeometry=feature.geometry;
+      districtBuildingScope?.setBoundary(boundaryGeometry);
       boundaryBounds=computeBounds(boundaryGeometry);
       if(gpsLastPosition)outsideDistrictAlert.check(...gpsLastPosition,boundaryGeometry,gpsLastAccuracy);
       map.getSource('district-outline')?.setData({type:'FeatureCollection',features:[feature]});
@@ -1848,7 +1864,10 @@ map.on('load',()=>{
   installDongjakOfficialDataLayers({map,maplibregl,getBoundary:()=>boundaryGeometry,
     canOpen:()=>!navMode&&!addMode&&!routePickMode&&!communityPickMode});
   const boundaryReady = loadDongjakBoundary();
-  boundaryReady.then(adminInit).catch(error=>console.warn('행정동 설치 실패:',error));
+  boundaryReady.then(adminInit).catch(error=>console.warn('행정동 설치 실패:',error)).finally(()=>{
+    if(!boundaryGeometry)return;
+    districtBuildingsReady=true;scheduleBuildingLoad();scheduleInitialBuildingWarmup();
+  });
   boundaryReady.then(()=>startupLoader.boundaryReady()).catch(()=>startupLoader.error());
   boundaryReady.then(()=>{if(map.getLayer('dj-nearby-place-names'))map.moveLayer('dj-nearby-place-names');requestAnimationFrame(()=>visualTheme.refresh());}).catch(()=>{});
   // 안전시설/횡단보도는 사용자가 버튼을 눌렀을 때 공개 OSM 자료를 조회합니다.
