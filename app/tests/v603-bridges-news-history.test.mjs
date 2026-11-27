@@ -88,3 +88,16 @@ test('administrative label clipping hides external bridge and other non-administ
   clipBasemapLabelsToDistrict(map,{type:'Polygon',coordinates:[[[126.9,37.49],[127,37.49],[127,37.52],[126.9,37.49]]]});
   assert.deepEqual(filtered.map(([id])=>id),['dj-hangang-bridge-osm-labels','dj-hangang-bridge-geometry-labels','base-city-label','dongjak-custom-label']);
 });
+
+
+test('bus label owner and district scope agree without recurring filter writes',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const transport=readFileSync(new URL('../src/transport-map.js',import.meta.url),'utf8');
+ assert.match(transport,/syncNearbyBusStopNameFilters\(map,getDistrictGeometry\(\)\)/);
+ assert.match(transport,/const next=district\?\['all',base,\['within'/);
+ const {clipBasemapLabelsToDistrict,restoreBasemapLabelsOutsideDistrict}=await import('../src/ui-environment.js');
+ const geometry={type:'Polygon',coordinates:[[[0,0],[2,0],[2,2],[0,0]]]};
+ const within=['within',geometry],filters=new Map([['transport-bus-names',['all',['!=',['get','label'],''],within]]]);
+ const handlers={},writes=[];const map={getStyle:()=>({layers:[{id:'transport-bus-names',type:'symbol'}]}),getFilter:id=>filters.get(id),setFilter:(id,v)=>{writes.push(id);filters.set(id,v);},on:(e,fn)=>handlers[e]=fn,off(){}};
+ clipBasemapLabelsToDistrict(map,geometry);handlers.styledata();assert.equal(writes.length,0);restoreBasemapLabelsOutsideDistrict(map);
+});

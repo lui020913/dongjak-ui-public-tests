@@ -429,16 +429,20 @@ export function clipBasemapLabelsToDistrict(map,geometry){
  };
  const previous=districtLabelOwners.get(map);
  if(previous){previous.dispose();}
- let timer=null;
+ let timer=null,signature='';
+ const layerSignature=()=>map.getStyle()?.layers?.filter(districtScopedSymbol).map(l=>l.id).sort().join('|')||'';
+ const reconcile=()=>{signature=layerSignature();apply();};
  const schedule=()=>{
   if(timer!==null||map.isMoving?.())return;
-  timer=setTimeout(()=>{timer=null;if(!map.isMoving?.())apply();},120);
+  timer=setTimeout(()=>{timer=null;if(!map.isMoving?.())reconcile();},120);
  };
- // Late-added symbols and other label owners can replace filters. Reapply
- // only if missing, after movement; never add filters each render frame.
- map.on?.('styledata',schedule);map.on?.('moveend',schedule);
- districtLabelOwners.set(map,{dispose:()=>{clearTimeout(timer);map.off?.('styledata',schedule);map.off?.('moveend',schedule);}});
- apply();
+ // New symbol layers need a one-time scope application. Existing layers
+ // already have dedicated filter owners; do not respond to every paint,
+ // filter or ordering event with a second mutation.
+ const newLayers=()=>{if(layerSignature()!==signature)schedule();};
+ map.on?.('styledata',newLayers);map.on?.('moveend',schedule);
+ districtLabelOwners.set(map,{dispose:()=>{clearTimeout(timer);map.off?.('styledata',newLayers);map.off?.('moveend',schedule);}});
+ reconcile();
 }
 
 /** Restore only the base symbols previously clipped by the district policy. */

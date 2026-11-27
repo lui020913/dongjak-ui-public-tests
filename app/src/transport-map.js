@@ -1217,13 +1217,13 @@ function circlePolygonAround(lng,lat,radiusMeters,points=20){
   }
   return {type:'Polygon',coordinates:[ring]};
 }
-function syncNearbyBusStopNameFilters(map){
+function syncNearbyBusStopNameFilters(map,district){
   if(!map?.getCenter||!map?.setFilter)return;
   // Label eligibility must not depend on distance from the screen center.
   // The source is already district-scoped; no radial clipping at high zoom.
   for(const [layerId,base] of Object.entries(BUS_NAME_FILTERS)){
     if(!map.getLayer?.(layerId))continue;
-    const next=base;
+    const next=district?['all',base,['within',{type:district.type,coordinates:district.coordinates}]]:base;
     try{if(JSON.stringify(map.getFilter?.(layerId))!==JSON.stringify(next))map.setFilter(layerId,next);}catch(error){console.debug('[버스정류장명] 근접 필터 조정 실패',layerId,error?.message);}
   }
 }
@@ -1703,7 +1703,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     }
   }
   bringRailToForeground();
-  const refreshNearbyBusStopNames=()=>syncNearbyBusStopNameFilters(map);
+  const refreshNearbyBusStopNames=()=>syncNearbyBusStopNameFilters(map,getDistrictGeometry());
   refreshNearbyBusStopNames();
   const viewportLabels=coalesceViewportWork(full=>{refreshNearbyBusStopNames();if(full)updateTileBusFallbackFilter();},{delay:100,isMoving:()=>map.isMoving?.()===true});
   map.on('moveend',()=>viewportLabels.request(true));
