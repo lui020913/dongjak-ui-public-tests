@@ -1,5 +1,4 @@
 import {installSiteLanduse} from './site-landuse-palette.mjs';
-import {installRedevelopment} from './redevelopment-map.mjs';
 import {loadSeoulBoundary,getSeoulBoundary} from './seoul-transit-boundary.mjs';
 import {sameBusTransfer,transitFollowFix} from './transit-transfer-guidance.mjs';
 import {installReviewedBaseRoads} from './reviewed-base-road-layer.mjs';
@@ -84,7 +83,7 @@ import {installRoadWidthLayer} from './road-width-layer.js';
 import {installAdminDongLayer} from './admin-dong-layer.js';
 import {installBaseLayerControls} from './base-layer-controls.js';
 import {loadBuildingTileFeatures} from './building-assets.js';
-import {createBuildingCoverage,buildingModeVisibility,nextBuildingPitchMode} from './building-coverage.js';
+import {createBuildingCoverage,uniqueHighRiseFootprints,buildingModeVisibility,nextBuildingPitchMode} from './building-coverage.js';
 import {isDisplayBuilding,partitionDisplayBuildings} from './building-display-detail.js';
 import {greenBuildingFilterEnabled,partitionGreenReview} from './green-building-filter.js';
 import {nearestBuildingSheets} from './building-prewarm.js';
@@ -897,7 +896,8 @@ async function loadOneBuildingSheet(sheet){
     const districtBuildings=features.filter(f=>Number.isFinite(f.properties?.x)&&Number.isFinite(f.properties?.y)&&
       isDongjak(f.properties.x,f.properties.y)===true&&['Polygon','MultiPolygon'].includes(f.geometry?.type));
     const {visible:eligible,excluded}=partitionDisplayBuildings(districtBuildings.filter(f=>!confirmedDevelopmentDisplay?.contains(f.properties.x,f.properties.y)));
-    const {visible,reviewExcluded}=partitionGreenReview(eligible,reviewCandidates,greenBuildingFilterEnabled(globalThis.location?.search));
+    const {visible:reviewedVisible,reviewExcluded}=partitionGreenReview(eligible,reviewCandidates,greenBuildingFilterEnabled(globalThis.location?.search));
+    const visible=uniqueHighRiseFootprints(reviewedVisible);
     const within=visible.map(f=>({...f,geometry:displayGeometries.get(f)||f.geometry,properties:{...f.properties,_render3d:true}}));
     const sourceId=`dongjak-buildings-data-${sheet.sheet}`;
     const layerId=`dongjak-buildings-3d-${sheet.sheet}`;
@@ -1748,7 +1748,6 @@ map.on('load',()=>{
   }});
   installMapOrientationControls(map,maplibregl);
   try{installSiteLanduse({map,app});}catch(error){console.warn('[부지 유형 색상]',error?.message);}
-  try{installRedevelopment({map,app});}catch(error){console.warn('[정비사업 구역]',error?.message);}
   installGrassTexture({map,app});
   installForestShade({map,app});
   const nativeBuildingLayers=installBaseBuildingPalette({map,app});

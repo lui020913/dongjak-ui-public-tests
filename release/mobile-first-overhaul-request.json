@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.251",
+  "application_version": "9.2.252",
   "public_work_branch": "main",
-  "purpose": "Owner requested lighter redevelopment polygons and earlier visibility, with immediate deployment in parallel with automated QA. Existing district official 25 project polygons, fill #EBEAE5 at zoom 13.2, label at zoom 14.0, preserve base ground #EEEEEC and other palettes. No new GIS acquisition. Opt in to direct visual release, keep build, exact artifact provenance, protected environment, post-deploy API checks and rollback; browser QA remains independent and reports failures. User additionally requests removal of visible jagged map edges. Enable multisampling for all profiles, native 3x cap on recent iPhones, bounded economy DPR, antialiased construction fills and softly rounded outlines. No geometry reshaping; exact boundary and safety layers preserved. Route entry and walking recommendation now share Pretendard; normalize PRI note text; explicit confirmed exterior walking search opens existing district warning; preserve coordinate guards and transit scope. Fix 3 stale antialias/DPR regression expectations from failed previous build; no test suppression. Place typography rules before the existing pinned-footer CSS contract; no changes to the footer, no skipped tests. Start direct visual production immediately after the exact build and Preview.",
-  "attempt": 492,
+  "purpose": "Owner requested removal of all redevelopment plan drawings and apartment duplicate rendering. Consolidate two redevelopment display owners into existing official site mask + names only, no building mass inside confirmed planned polygons; retain pale fill #EBEAE5 and lower zoom. Improve true occupied polygon matching for concave apartment footprints and eliminate equivalent high-rise GIS duplicates, preserve named facility symbols, adjacent structures and raw GIS. Retain all v9.2.251 walking font, district warning and map antialias changes. Direct visual production with parallel QA.",
+  "attempt": 493,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

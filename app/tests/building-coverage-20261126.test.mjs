@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildingFootprintFilter,createCoverageIndex,createBuildingCoverage} from '../src/building-coverage.js';
+import {buildingFootprintFilter,createCoverageIndex,createBuildingCoverage,uniqueHighRiseFootprints} from '../src/building-coverage.js';
 const polygon=(x,y,w=.0001)=>({type:'Polygon',coordinates:[[[x,y],[x+w,y],[x+w,y+w],[x,y+w],[x,y]]]});
 test('3D replaces matching GIS footprints only',()=>{
  assert.equal(buildingFootprintFilter(false),null);
@@ -42,3 +42,5 @@ test('verified legacy apartment exclusions also hide exact unnamed native matche
  assert.deepEqual([...states.keys()],[1]);
  coverage.removeSheet(2);assert.equal(states.size,0);
 });
+
+test('concave high-rise duplicates match their occupied footprint without hiding adjacent towers',()=>{const x=126.95,y=37.5,a=.0001;const geom={type:'Polygon',coordinates:[[[x,y],[x+3*a,y],[x+3*a,y+a],[x+a,y+a],[x+a,y+3*a],[x,y+3*a],[x,y]]]};const shifted={type:'Polygon',coordinates:geom.coordinates.map(r=>r.map(([u,v])=>[u+.000002,v+.000002]))};const f={geometry:geom,properties:{h:45}},g={geometry:shifted,properties:{h:45}},adjacent={geometry:polygon(x+.0004,y,.0001),properties:{h:45}};assert.equal(createCoverageIndex([f],{strict:true,equivalent:true}).matches(shifted),true);assert.deepEqual(uniqueHighRiseFootprints([f,g,adjacent]),[f,adjacent]);});

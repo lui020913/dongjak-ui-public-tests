@@ -1,4 +1,5 @@
 import {containsDistrictPoint,isNativeBuildingGeometry} from './district-building-scope.mjs';
+import {REDEVELOPMENT_STYLE as STYLE} from './redevelopment-map.mjs';
 const PATH='/data/redevelopment/confirmed-projects-202609.geojson';
 const SOURCE='dj-confirmed-development-areas',FILL='dj-confirmed-development-fill',LINE='dj-confirmed-development-line',LABEL='dj-confirmed-development-label';
 export function isConfirmedPlanLabel(p){
@@ -57,8 +58,8 @@ export function installConfirmedDevelopmentDisplay({map,app,plans}){
  // Keep native buildings and the existing 2D/3D renderer everywhere else.
  // A single ground-plan polygon masks only the selected sites, below roads;
  // GIS building footprints/extrusions are excluded using the same polygons.
- const colors=()=>app.dataset.theme==='dark'?{fill:'#37453f',line:'#758a7e',text:'#dce6df',halo:'#273a32'}:{fill:'#e8e7e0',line:'#b2b9ae',text:'#52665b',halo:'#f7f8f4'};
- const visible=()=>app.dataset.tab==='map'&&!app.dataset.djTransitPreview&&app.dataset.transitComparison!=='true'&&app.dataset.djRouteActive!=='true'&&!['route-picking','route-preview','route-guiding'].some(c=>app.classList.contains(c));
+ const colors=()=>app.dataset.theme==='dark'?{fill:'#37453f',line:'#758a7e',text:'#dce6df',halo:'#273a32'}:{fill:STYLE.fill,line:STYLE.outline,text:'#52665b',halo:'#f7f8f4'};
+ const visible=()=>app.dataset.sangdoNight!=='on'&&app.dataset.tab==='map'&&!app.dataset.djTransitPreview&&app.dataset.transitComparison!=='true'&&app.dataset.djRouteActive!=='true'&&!['route-picking','route-preview','route-guiding'].some(c=>app.classList.contains(c));
  const syncVisibility=()=>{const mode=visible()?'visible':'none';for(const id of [FILL,LINE,LABEL,OVERVIEW])if(map.getLayer(id)&&map.getLayoutProperty(id,'visibility')!==mode)map.setLayoutProperty(id,'visibility',mode);};
  const applyTheme=()=>{const c=colors();for(const [id,key,v] of [[FILL,'fill-color',c.fill],[LINE,'line-color',c.line],[LABEL,'text-color',c.text],[LABEL,'text-halo-color',c.halo],[OVERVIEW,'text-color',c.text],[OVERVIEW,'text-halo-color',c.halo]])if(map.getLayer(id))map.setPaintProperty(id,key,v);};
  const install=()=>{
@@ -69,12 +70,12 @@ export function installConfirmedDevelopmentDisplay({map,app,plans}){
   const next=layers.slice(last+1).find(l=>l['source-layer']==='transportation'||l.type==='line');
   const c=colors();
   if(!map.getSource(LABEL_POINTS))map.addSource(LABEL_POINTS,{type:'geojson',data:developmentLabelPoints(plans)});
-  if(!map.getLayer(OVERVIEW))map.addLayer({id:OVERVIEW,type:'symbol',source:LABEL_POINTS,minzoom:16,maxzoom:17,layout:developmentLabelLayout(false),paint:{'text-color':c.text,'text-halo-color':c.halo,'text-halo-width':1.2}});
-  if(!map.getLayer(LABEL))map.addLayer({id:LABEL,type:'symbol',source:LABEL_POINTS,minzoom:17,layout:developmentLabelLayout(true),paint:{'text-color':c.text,'text-halo-color':c.halo,'text-halo-width':1.4}});
+  if(!map.getLayer(OVERVIEW))map.addLayer({id:OVERVIEW,type:'symbol',source:LABEL_POINTS,minzoom:STYLE.labelMinZoom,maxzoom:STYLE.detailMinZoom,layout:developmentLabelLayout(false),paint:{'text-color':c.text,'text-halo-color':c.halo,'text-halo-width':1.2}});
+  if(!map.getLayer(LABEL))map.addLayer({id:LABEL,type:'symbol',source:LABEL_POINTS,minzoom:STYLE.detailMinZoom,layout:developmentLabelLayout(true),paint:{'text-color':c.text,'text-halo-color':c.halo,'text-halo-width':1.4}});
   if(last<0||!next)return;
   if(!map.getSource(SOURCE))map.addSource(SOURCE,{type:'geojson',data:plans,attribution:'서울특별시 서울플랜+ 2026-09 · 예정 부지(현황과 다를 수 있음)'});
-  if(!map.getLayer(FILL))map.addLayer({id:FILL,type:'fill',source:SOURCE,minzoom:16,paint:{'fill-color':c.fill,'fill-opacity':1,'fill-antialias':false}},next.id);
-  if(!map.getLayer(LINE))map.addLayer({id:LINE,type:'line',source:SOURCE,minzoom:16,paint:{'line-color':c.line,'line-width':1,'line-opacity':.75}},next.id);
+  if(!map.getLayer(FILL))map.addLayer({id:FILL,type:'fill',source:SOURCE,minzoom:STYLE.fillMinZoom,paint:{'fill-color':c.fill,'fill-opacity':1,'fill-antialias':true}},next.id);
+  if(!map.getLayer(LINE))map.addLayer({id:LINE,type:'line',source:SOURCE,minzoom:STYLE.fillMinZoom,layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':c.line,'line-width':1,'line-opacity':.75,'line-blur':.25}},next.id);
   if(map.getStyle().layers.at(-2)?.id!==OVERVIEW||map.getStyle().layers.at(-1)?.id!==LABEL){map.moveLayer(OVERVIEW);map.moveLayer(LABEL);}
   applyTheme();syncVisibility();
  };
@@ -83,6 +84,6 @@ export function installConfirmedDevelopmentDisplay({map,app,plans}){
  const recover=()=>{if(!map.getLayer(FILL)||!map.getLayer(LABEL)||!map.getLayer(OVERVIEW))install();};
  map.on('idle',recover);
  // Recolor only on a real theme mutation, not on map camera events.
- const observer=new MutationObserver(records=>{if(records.some(r=>r.attributeName==='data-theme'))applyTheme();syncVisibility();});observer.observe(app,{attributes:true,attributeFilter:['data-theme','data-tab','data-dj-transit-preview','data-transit-comparison','data-dj-route-active','class']});
+ const observer=new MutationObserver(records=>{if(records.some(r=>r.attributeName==='data-theme'))applyTheme();syncVisibility();});observer.observe(app,{attributes:true,attributeFilter:['data-theme','data-tab','data-dj-transit-preview','data-transit-comparison','data-dj-route-active','data-sangdo-night','class']});
  return {contains,dispose(){observer.disconnect();map.off('style.load',install);map.off('idle',recover);}};
 }
