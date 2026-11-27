@@ -1,3 +1,4 @@
+import {visibleBusRoadIndex} from './bus-roadside-placement.mjs';
 import {createTransitCellStream,viewportKeys,cellKey} from './transit-stream-grid.mjs';
 import {getSeoulBoundary,inSeoul} from './seoul-transit-boundary.mjs';
 import {installCityTransitRail} from './city-transit-rail.mjs';
@@ -739,7 +740,7 @@ function groupRefs(value){
   return [...new Set(String(value||'').split(/[;,/\s]+/).map(x=>x.trim()).filter(Boolean))];
 }
 function featureCollection(items){return {type:'FeatureCollection',features:items.map(x=>({
-  type:'Feature', geometry:{type:'Point',coordinates:[x.lng,x.lat]}, properties:{
+  type:'Feature', geometry:{type:'Point',coordinates:x.kind==='bus'&&x.displayCoords?x.displayCoords:[x.lng,x.lat]}, properties:{
     osmId:x.id,
     name:x.name,
     label: x.kind==='bus' ? (x.name && !['이름 미등록','정류장명 미등록'].includes(x.name) ? busStopDisplayName(x) : (x.arsId ? `정류장 · ${x.arsId}` : '정류장명 미등록')) : x.name,
@@ -1718,7 +1719,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   }
   bringRailToForeground();
   const cityRail=installCityTransitRail({map,app:streamApp,colors:SUBWAY_LINE_COLORS,getBoundary:getSeoulBoundary,isInside:inSeoul,getLocalCollection:()=>displayedLocalRail});
-  const refreshNearbyBusStopNames=()=>syncNearbyBusStopNameFilters(map,getDistrictGeometry());
+  const refreshNearbyBusStopNames=()=>syncNearbyBusStopNameFilters(map,cityScope()?getSeoulBoundary():getDistrictGeometry());
   refreshNearbyBusStopNames();
   const viewportLabels=coalesceViewportWork(full=>{refreshNearbyBusStopNames();if(full)updateTileBusFallbackFilter();},{delay:100,isMoving:()=>map.isMoving?.()===true});
   map.on('moveend',()=>viewportLabels.request(true));
@@ -1925,9 +1926,16 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     catch(error){console.debug('[정류장 예비 레이어 중복 필터]',error?.message||error);}
   }
   let lastStopDataSignature='',lastBusSourceSignature='',lastRailSourceSignature='',lastMetroInputSignature='';
+  let busRoadIndex=null,busRoadViewKey='';
+  function roadsideBusPlaces(items){
+    if(!items.some(p=>p.kind==='bus'))return items;
+    const b=map.getBounds?.();const key=b?[b.getWest(),b.getSouth(),b.getEast(),b.getNorth()].map(v=>v.toFixed(4)).join('|')+':'+Math.floor(map.getZoom?.()||0):'';
+    if(!busRoadIndex||key!==busRoadViewKey||!busRoadIndex.size){busRoadIndex=visibleBusRoadIndex(map);busRoadViewKey=key;}
+    return items.map(p=>p.kind==='bus'?{...p,displayCoords:busRoadIndex.place(p)}:p);
+  }
   function showStops(items){
     if(map.isMoving?.()){stopPublish.request();return;}
-    const filtered=items.filter(x=>placeInDisplayScope(x)&&inActiveCell(x)).sort((a,b)=>String(a.id).localeCompare(String(b.id)));
+    const filtered=roadsideBusPlaces(items.filter(x=>placeInDisplayScope(x)&&inActiveCell(x)).sort((a,b)=>String(a.id).localeCompare(String(b.id))));
     const signature=JSON.stringify(filtered);
     if(signature===lastStopDataSignature){updateTileBusFallbackFilter();return;}
     lastStopDataSignature=signature;
@@ -2234,7 +2242,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(scan&&fallbackScans<20){fallbackScans++;augmentWithBasemapStations();}
     enrichNearbyBusStops();enrichMedianStops();enrichViewportBusStops();void fillHighZoomOSMBusStops();
   },{delay:200,isMoving:()=>map.isMoving?.()===true});
-  map.on('idle',()=>viewportEnrichment.request(fallbackScans<8));
+  map.on('idle',()=>{viewportEnrichment.request(fallbackScans<8);if(busRoadIndex&&!busRoadIndex.size&&map.getZoom?.()>=16.4)stopPublish.request();});
   map.on('moveend',()=>viewportEnrichment.request(fallbackScans<20));
   map.on('zoomend',()=>viewportEnrichment.request());
   function fetchAndShow(){
@@ -2847,7 +2855,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     panel.classList.toggle('dj874-line-switching',sameStationLineChange);
     document.getElementById('app')?.classList?.add?.('transport-sheet-open');
     // One selected coordinate pin. Reuse on line changes and remove on close.
-    if(!sameStationLineChange)selectionMarker=createSelectedTransportPin({map,maplibregl,place,previous:selectionMarker});
+    if(!sameStationLineChange)selectionMarker=createSelectedTransportPin({map,maplibregl,place:place.kind==='bus'&&place.displayCoords?{...place,lng:place.displayCoords[0],lat:place.displayCoords[1]}:place,previous:selectionMarker});
     if(panel.dataset)panel.dataset.stationFocus='default';
     // One geographic focus for both buses and metro.  A negative MapLibre
     // offset locates the selected stop just ABOVE the viewport midpoint, so

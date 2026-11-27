@@ -36,14 +36,13 @@ export function installCityTransitRail({map,app,colors,getBoundary,isInside,getL
     const layers=map.getStyle().layers;
     const before=layers.find(l=>l.id.startsWith('dj-transit-comparison-route')||l.id.startsWith('dj-transit-rail-')||l.id.startsWith('dj815-transit-')||l.id.startsWith('dj-transit-multi-'))?.id||layers.find(l=>l.type==='symbol')?.id;
     const layout={'line-cap':'round','line-join':'round'};
-    map.addLayer({id:ID+'-casing',type:'line',source:ID,minzoom:8,layout,paint:{'line-color':'#fff','line-width':['interpolate',['linear'],['zoom'],8,2,10.2,4.4,13,6.2,17,5.2],'line-opacity':['*',['get','opacity'],.68],'line-blur':['interpolate',['linear'],['get','opacity'],0,1.1,.18,.7,.45,.42,1,.35]}},before);
     map.addLayer({id:ID,type:'line',source:ID,minzoom:8,layout,paint:{'line-color':['get','color'],'line-width':['interpolate',['linear'],['zoom'],8,1,10.2,2.9,13,4.3,17,3.8],'line-opacity':['get','opacity'],'line-blur':['interpolate',['linear'],['get','opacity'],0,.95,.18,.62,.45,.38,1,.30]}},before);
    }else map.getSource(ID).setData(data);
    appliedBoundary=boundary;appliedLocal=local;ready=true;
   }
-  if(ready){for(const id of LOCAL)setVisible(id,'none');for(const id of [ID,ID+'-casing'])setVisible(id,'visible');}
+  if(ready){for(const id of LOCAL)setVisible(id,'none');setVisible(ID+'-casing','none');setVisible(ID,'visible');}
   else if(!pending&&typeof fetchFn==='function'){
-   pending=fetchFn('/data/transport/seoul-rail-network.geojson',{cache:'force-cache'}).then(r=>{if(!r.ok)throw Error('rail network '+r.status);return r.json();}).then(data=>{raw=data;if(active)sync();}).catch(error=>console.warn('[서울 철도 배경 선형]',error.message)).finally(()=>{pending=null;});
+   pending=fetchFn('/data/transport/seoul-rail-network-single-fa75e12.geojson',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('rail network '+r.status);return r.json();}).then(data=>{raw=data;if(active)sync();}).catch(error=>console.warn('[서울 철도 배경 선형]',error.message)).finally(()=>{pending=null;});
   }
  }
  return {sync};
