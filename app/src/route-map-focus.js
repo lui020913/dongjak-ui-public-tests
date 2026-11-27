@@ -32,3 +32,19 @@ export function strictRoutePreviewPadding({mapTop,viewportHeight,toolbarBottom,s
  const bottom=Math.max(0,mapTop+viewportHeight-sheetTop)+inset;
  return top+bottom<=viewportHeight-36?{top:Math.ceil(top),bottom:Math.ceil(bottom),left:side,right:side}:null;
 }
+
+/** Check the actual projected route against the visible rectangle after the
+ * camera settles. A bounded correction accounts for retained camera constraints
+ * or different mobile viewport geometry without shrinking the occlusion margin. */
+export function routeProjectionCorrection(points,width,height,padding){
+ if(!points?.length||![width,height,padding?.left,padding?.right,padding?.top,padding?.bottom].every(Number.isFinite))return null;
+ const w=width-padding.left-padding.right,h=height-padding.top-padding.bottom;
+ if(w<=0||h<=0)return null;
+ const xs=points.map(p=>p.x),ys=points.map(p=>p.y);
+ if(![...xs,...ys].every(Number.isFinite))return null;
+ const l=Math.min(...xs),r=Math.max(...xs),t=Math.min(...ys),b=Math.max(...ys);
+ if(l>=padding.left-2&&r<=width-padding.right+2&&t>=padding.top-2&&b<=height-padding.bottom+2)return null;
+ const scale=Math.max(0.01,Math.min(1,w/Math.max(1,r-l),h/Math.max(1,b-t))*.96);
+ const vx=(padding.left+width-padding.right)/2,vy=(padding.top+height-padding.bottom)/2;
+ return {x:(l+r)/2+(width/2-vx)/scale,y:(t+b)/2+(height/2-vy)/scale,zoomOut:-Math.log2(scale)};
+}

@@ -38,7 +38,7 @@ test('custom subset excludes missing and modeled observations; invalid empty sel
 
 test('route markers and dialogs have explicit lifecycle guards',()=>{
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
- assert.ok(main.includes('drawRouteMarkers(picking||preview||guiding)'));
+ assert.ok(main.includes("drawRouteMarkers(picking||preview||guiding||app.dataset.transitComparison==='true')"));
  assert.ok(main.includes('routeEndpointMarkerKeys[key]===next'));
  assert.ok(main.includes('routeCandidateMarker?.remove()'));
  assert.ok(main.includes("window.addEventListener('pagehide'"));

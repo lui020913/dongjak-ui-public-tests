@@ -1,5 +1,5 @@
 const SHEETS=[
-  {id:'route-panel',handle:'.page-heading',close:'[data-close-page="route"]'},
+  // Route editor and comparison own explicit back/close actions; no legacy swipe-dismiss.
   {id:'participation-panel',handle:'.page-heading',close:'[data-close-page="participate"]'},
   {id:'news-panel',handle:'.page-heading',close:'#news-close-to-map'},
   {id:'mine-panel',handle:'.page-heading',close:'[data-close-page="mine"]'},

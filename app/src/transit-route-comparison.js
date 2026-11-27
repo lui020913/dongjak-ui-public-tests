@@ -26,7 +26,11 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  const safeTop=()=>Math.ceil(q('.header').getBoundingClientRect().bottom+8);
  const syncBounds=()=>{host.style.setProperty('--tr-sheet-top',safeTop()+'px');host.style.setProperty('--tr-font',win.getComputedStyle(app).fontFamily);};
  const gesture=bindTransitSheetHeader({doc,win,panel,header:panel.querySelector('.tr-header'),safeTop,onDismiss:()=>close({animate:true})});
- const resize=()=>{if(!panel.hidden)syncBounds();};win.addEventListener('resize',resize);win.visualViewport?.addEventListener('resize',resize);
+ let focusTimer=0;
+ const focus=()=>{win.clearTimeout(focusTimer);focusTimer=win.setTimeout(()=>{if(panel.hidden||app.dataset.tab!=='route'||panel.classList.contains('dj871-sheet-expanded'))return;win.dispatchEvent(new CustomEvent('dongjak:transit-comparison-focus',{detail:{sheetTop:panel.getBoundingClientRect().top,toolbarBottom:q('.header').getBoundingClientRect().bottom,plan:options?(groupsOf()[filter]||groupsOf().all)[0]:null,summary:options?reviewed.get((groupsOf()[filter]||groupsOf().all)[0]):null}}));},260);};
+ const resize=()=>{if(!panel.hidden){syncBounds();focus();}};
+ const panelResize=typeof ResizeObserver==='function'?new ResizeObserver(focus):null;panelResize?.observe(panel);
+ panel.addEventListener('transitionend',focus);win.addEventListener('resize',resize);win.visualViewport?.addEventListener('resize',resize);
  let mode='walk',controller=null,previewController=null,generation=0,options=null,filter='all',disposed=false,pointKey='',cached=null,busy=false,preferPri=true,reviewed=new Map(),reviewController=null,reviewLabels=new Map();
  const status=panel.querySelector('.tr-note'),list=panel.querySelector('.tr-list'),filters=panel.querySelector('.tr-filter'),endpoints=panel.querySelector('.tr-endpoints');
  const preference=panel.querySelector('.tr-pri-preference');
@@ -38,10 +42,10 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  const key=ps=>ps.map(p=>p.lng+','+p.lat).join('/');
  const setBusy=value=>{busy=value;preference.disabled=value;panel.setAttribute('aria-busy',String(value));for(const b of [...filters.children,...list.querySelectorAll('button')])b.disabled=value;};
  const close=({animate=false,keepCache=false}={})=>{
-  const seq=++generation;controller?.abort();controller=null;previewController?.abort();previewController=null;stopReview();setBusy(false);
+  const seq=++generation;win.clearTimeout(focusTimer);controller?.abort();controller=null;previewController?.abort();previewController=null;stopReview();setBusy(false);
   if(!keepCache){cached=null;resetReview();}
   gesture.reset();
-  const finish=()=>{if(seq!==generation)return;panel.hidden=true;delete view.dataset.transitResults;win.dispatchEvent(new CustomEvent('dongjak:transit-comparison-dismiss'));list.replaceChildren();options=null;reviewLabels.clear();};
+  const finish=()=>{if(seq!==generation)return;panel.hidden=true;delete view.dataset.transitResults;win.dispatchEvent(new CustomEvent('dongjak:transit-comparison-dismiss',{detail:{keepPreview:keepCache&&app.dataset.tab==='map'}}));list.replaceChildren();options=null;reviewLabels.clear();};
   cancelSurfaceMotion(panel);
   if(animate&&!panel.hidden){panel.style.pointerEvents='none';exitSurface(panel,()=>{panel.style.removeProperty('pointer-events');finish();});}else{panel.style.removeProperty('pointer-events');finish();}
  };
@@ -60,7 +64,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   const b=doc.createElement('button');b.type='button';b.dataset.filter=id;b.innerHTML=(id==='all'||id==='mixed'?'':icon(id))+label;b.addEventListener('click',()=>{if(busy)return;filter=id;render(true);});filters.append(b);
  }
  function note(text,retry=false){status.hidden=false;status.textContent=text;list.replaceChildren();if(retry){const b=doc.createElement('button');b.type='button';b.className='tr-retry';b.textContent='다시 조회';b.addEventListener('click',search);list.append(b);}}
- function show(ps){gesture.reset();syncBounds();panel.querySelector('.tr-scroll').scrollTop=0;cancelSurfaceMotion(panel);panel.style.removeProperty('pointer-events');endpoints.textContent=ps.map(nameOf).join(' → ');panel.hidden=false;view.dataset.transitResults='true';revealSurface(panel);win.requestAnimationFrame(()=>{if(panel.hidden||app.dataset.tab!=='route'||ps.length!==2)return;win.dispatchEvent(new CustomEvent('dongjak:transit-comparison-focus',{detail:{sheetTop:panel.getBoundingClientRect().top,toolbarBottom:q('.header').getBoundingClientRect().bottom}}));});}
+ function show(ps){gesture.reset();syncBounds();panel.querySelector('.tr-scroll').scrollTop=0;cancelSurfaceMotion(panel);panel.style.removeProperty('pointer-events');endpoints.textContent=ps.map(nameOf).join(' → ');panel.hidden=false;view.dataset.transitResults='true';revealSurface(panel);if(ps.length===2)focus();}
  function render(animate=false){
   if(!options)return;
   list.replaceChildren();reviewLabels.clear();
@@ -91,7 +95,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
     catch(e){if(seq===generation){cached=null;status.hidden=false;status.textContent=e.message||'경로를 표시하지 못했습니다.';setBusy(false);void reviewCandidates();}}
    });list.append(card);
   }
-  if(animate)revealSurface(list);
+  if(animate)revealSurface(list);focus();
  }
  async function reviewCandidates(){
   if(!options||disposed||panel.hidden||busy||reviewController)return;
@@ -100,7 +104,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   try{
    await reviewAllTransitCandidates(plans,{signal:request.signal,concurrency:2,review:plan=>new Promise((resolve,reject)=>win.dispatchEvent(new CustomEvent('dongjak:transit-candidate-review',{detail:{plan,signal:request.signal,preferPri:policy,walkCache,resolve,reject}}))),onResult:(plan,summary)=>{
     if(seq!==generation||request.signal.aborted||reviewController!==request)return;
-    reviewed.set(plan,summary);const label=reviewLabels.get(plan);if(label){label.summary.textContent=formatTransitReview(summary,true);label.summary.hidden=false;label.metric.textContent=routeMetric(plan,summary,true);}
+    reviewed.set(plan,summary);const label=reviewLabels.get(plan);if(label){label.summary.textContent=formatTransitReview(summary,true);label.summary.hidden=false;label.metric.textContent=routeMetric(plan,summary,true);}if(plan===(groupsOf()[filter]||groupsOf().all)[0])focus();
    }});
   }finally{if(reviewController===request)reviewController=null;}
  }
@@ -129,5 +133,5 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  win.addEventListener('dongjak:route-editor-reset',editorReset);
  win.addEventListener('dongjak:transit-return-comparison',returnComparison);
  host.dataset.transitTheme=app.dataset.theme||'light';syncMode();
- return {active:()=>mode==='transit',search,close,dispose:()=>{disposed=true;close();observer.disconnect();modeButtons.forEach(b=>b.removeEventListener('click',choose));for(const name of ['dongjak:route-endpoint-registered','dongjak:route-swap'])win.removeEventListener(name,endpointChanged);win.removeEventListener('dongjak:route-editor-reset',editorReset);win.removeEventListener('dongjak:transit-return-comparison',returnComparison);q('[data-v3="back"]').removeEventListener('click',back,true);win.removeEventListener('keydown',escape,true);win.removeEventListener('resize',resize);win.visualViewport?.removeEventListener('resize',resize);gesture.dispose();panel.remove();style.remove();}};
+ return {active:()=>mode==='transit',search,close,dispose:()=>{disposed=true;close();observer.disconnect();modeButtons.forEach(b=>b.removeEventListener('click',choose));for(const name of ['dongjak:route-endpoint-registered','dongjak:route-swap'])win.removeEventListener(name,endpointChanged);win.removeEventListener('dongjak:route-editor-reset',editorReset);win.removeEventListener('dongjak:transit-return-comparison',returnComparison);q('[data-v3="back"]').removeEventListener('click',back,true);win.removeEventListener('keydown',escape,true);win.removeEventListener('resize',resize);win.visualViewport?.removeEventListener('resize',resize);panelResize?.disconnect();panel.removeEventListener('transitionend',focus);win.clearTimeout(focusTimer);gesture.dispose();panel.remove();style.remove();}};
 }

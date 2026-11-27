@@ -48,7 +48,7 @@ import {readSharedCommunity,publishCommunityPost,deleteSharedCommunityPost,setSh
 import {initPedestrianTools} from './pedestrian-tools.js';
 import {fetchDongjakPedestrianVariants} from './dongjak-local-routing.js';
 import {routeWithinDistrict} from './route-district-guard.mjs';
-import {TRANSIT_SEARCH_BOUNDS,transitPointInScope,transitCoordinatesInScope,transitEndpointPolicy,exteriorMapActive,transitWalkStyle,transitContextBounds,applyTransitBoundaryVisibility} from './transit-exterior-scope.mjs';
+import {TRANSIT_SEARCH_BOUNDS,transitPointInScope,transitCoordinatesInScope,transitEndpointPolicy,exteriorMapActive,transitWalkStyle,transitContextBounds,transitFramingBounds,applyTransitBoundaryVisibility} from './transit-exterior-scope.mjs';
 import {installDongjakOfficialDataLayers} from './dongjak-verified-data-layers.js';
 import {installDongjakLiveTransit} from './features/liveTransit/integrate.js';
 import './features/liveTransit/live-transit.css';
@@ -60,7 +60,7 @@ import {initStationAccessibility} from './station-accessibility.js';
 import {searchPlaces,searchLocalPlaces} from './route-search.js';
 import {cachedOfficialSearchPlaces,queryOfficialPlaces} from './seoul-official-facilities.js';
 import {routeStationMatches,mergeRouteSearchResults,routeResultSubtitle} from './route-search-results.js';
-import {walkingRouteViewportPadding,strictRoutePreviewPadding} from './route-map-focus.js';
+import {walkingRouteViewportPadding,strictRoutePreviewPadding,routeProjectionCorrection} from './route-map-focus.js';
 import {installDistrictBuildingScope} from './district-building-scope.mjs';
 import {initMapQuickSearch} from './map-quick-search.js';
 import './map-search-refinement.css';
@@ -97,6 +97,7 @@ import {installDistantHaze} from './distant-haze.js';
 import {installNightVisibility,promoteNightAnalysisLayers} from './night-visibility-map.js';
 import {installPriMap} from './pri-map.js';
 import {installSolidMapLines} from './solid-map-lines.js';
+import {installQuietBasemap} from './quiet-basemap.mjs';
 import {evaluateCompositePriRouteCandidates} from './pri-route-client.js';
 import {chooseTransitWalk} from './transit-walk-priority.mjs';
 import {summarizeTransitWalks,transitReviewPairs} from './transit-candidate-review.mjs';
@@ -645,6 +646,7 @@ const map = new maplibregl.Map({
 // The extra compact (i) control duplicated the attribution link in Map Options.
 // Keep source credits in '지도 옵션 > 지도 데이터 출처'; do not overlay the map.
 
+installQuietBasemap(map);
 installSolidMapLines(map);
 // Keep the original ground-road style during both movement and idle.
 // The reviewed polygon fill was activated after moveend and could paint wide
@@ -2038,10 +2040,12 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   if(tab!=='map'&&communityPickMode)clearCommunityLocationPick();
   if((tab!=='map'||suppressOverview)&&routePickMode){routePickMode=null;closeTransitRouteConfirmation();}
   if(previousTab==='route'&&tab!=='route'){
+    clearComparisonRoute();
     closeRouteSearch();routeRequestGeneration++;routeRequestPending=false;updateRouteCalcAvailability();
   }
   if(previousTab!==tab)closePriPreferences();
   if((tab!=='map'||suppressOverview)&&transitPreview)clearTransitPreview();
+  if(previousTab==='map'&&(tab!=='map'||suppressOverview)&&routeResult&&!navMode)invalidateRoute();
   if(tab!=='map')closeCommunityLocation();
   const communityPanel=document.getElementById('participation-panel');
   const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
@@ -2852,7 +2856,7 @@ function syncRoutePresentation() {
   const preview = Boolean(routeResult||transitPreview) && onMap && !picking && !communityPickMode && !addMode && !navMode && app.dataset.djWalkArrived!=='1';
   const guiding = Boolean(routeResult) && Boolean(navMode) && onMap;
   if(!picking&&routeCandidateMarker)closeTransitRouteConfirmation();
-  drawRouteMarkers(picking||preview||guiding);
+  drawRouteMarkers(picking||preview||guiding||app.dataset.transitComparison==='true');
   app.classList.toggle('route-picking',picking);
   app.classList.toggle('route-preview',preview || guiding);
   app.classList.toggle('route-guiding',guiding);
@@ -2922,17 +2926,21 @@ function drawRouteMarkers(visible=(app.dataset.tab==='map'||app.dataset.transitC
     marker?.remove();routeEndpointMarkerKeys[key]=next;
     return next?makeRouteMarker(point,color):null;
   };
-  routeStartMarker=update(routeStartMarker,app.dataset.transitComparison==='true'?null:routeStart,'start','#2563eb');
+  routeStartMarker=update(routeStartMarker,routeStart,'start','#2563eb');
   routeEndMarker=update(routeEndMarker,routeEnd,'end','#0ba876');
 }
 // Shared district map; transit owns only the camera extent and selected route.
 var transitHomeCamera;
 var transitRouteContext=[];
 var transitContextSignature='';
+var comparisonRouteGeneration=0,comparisonRoutePlan=null,comparisonRouteSummary=null,comparisonRouteFeatures=[],comparisonRouteFitKey='',comparisonRoutePadding=null,routeCameraFitToken=0;
+const COMPARISON_ROUTE_SOURCE='dj-transit-comparison-route';
 function syncTransitContextBounds(active){
- const bounds=active?transitContextBounds(bufferedDistrictBounds(boundaryGeometry,0),[routeStart,routeEnd],transitRouteContext):bufferedDistrictBounds(boundaryGeometry);
- const signature=JSON.stringify(bounds);
- if(signature!==transitContextSignature){transitContextSignature=signature;map.setMaxBounds(bounds);}
+ const framing=active&&Boolean(transitPreview||app.dataset.transitComparison==='true');
+ const bounds=framing?transitFramingBounds():active?transitContextBounds(bufferedDistrictBounds(boundaryGeometry,0),[routeStart,routeEnd],transitRouteContext):bufferedDistrictBounds(boundaryGeometry);
+ const minZoom=framing?8:10;
+ const signature=JSON.stringify([bounds,minZoom]);
+ if(signature!==transitContextSignature){transitContextSignature=signature;if(map.getMinZoom()!==minZoom)map.setMinZoom(minZoom);map.setMaxBounds(bounds);}
 }
 function syncTransitExterior(force=false){
  const active=exteriorMapActive({mode:app.dataset.djTransitMode,tab:app.dataset.tab,pick:routePickMode,preview:transitPreview});
@@ -2955,6 +2963,7 @@ function syncTransitExterior(force=false){
  }
 }
 function clearTransitPreview(){
+  routeCameraFitToken++;
   transitRouteContext=[];
   const wasPreview=Boolean(transitPreview);
   transitPreview=null;transitGeneration++;delete app.dataset.djTransitPreview;
@@ -3023,6 +3032,7 @@ function paintRouteProgress(progressMeters){
   if(finished)finished.setData(lineFeature(parts.traveled));
 }
 function invalidateRoute() {
+  routeCameraFitToken++;
   routeRequestGeneration++;routeRequestPending=false;
   routePriVisuals=null;
   clearTransitPreview();
@@ -3418,6 +3428,7 @@ function pickRouteLocation(lngLat,point) {
   });
 }
 function resetRoute() {
+  clearComparisonRoute();
   routeRequestGeneration++;routeRequestPending=false;
   closePriPreferences();
   routePriVisuals=null;
@@ -3478,14 +3489,90 @@ function transitVisiblePadding(sheetTop,toolbarBottom){
  const top=Math.max(0,toolbarBottom-rect.top)+18,bottom=Math.max(0,rect.bottom-sheetTop)+18;
  return top+bottom<rect.height-48?{top,bottom,left:28,right:28}:null;
 }
+function clearComparisonRoute(){
+ comparisonRouteGeneration++;comparisonRoutePlan=null;comparisonRouteSummary=null;comparisonRouteFeatures=[];comparisonRouteFitKey='';comparisonRoutePadding=null;routeCameraFitToken++;
+ delete app.dataset.transitComparison;
+ try{for(const suffix of ['-line','-casing'])if(map.getLayer(COMPARISON_ROUTE_SOURCE+suffix))map.removeLayer(COMPARISON_ROUTE_SOURCE+suffix);if(map.getSource(COMPARISON_ROUTE_SOURCE))map.removeSource(COMPARISON_ROUTE_SOURCE);}catch(error){console.debug('[추천 경로 정리]',error?.message);}
+}
+function fitExposedRoute(coords,padding,{maxZoom=16,duration=350}={}){
+ if(!coords?.length||!padding)return;
+ const valid=coords.filter(p=>Array.isArray(p)&&p.length>=2&&p.slice(0,2).every(Number.isFinite));
+ if(!valid.length)return;
+ const bounds=valid.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(valid[0],valid[0]));
+ const zero={top:0,bottom:0,left:0,right:0};
+ // cameraForBounds computes the offset center from the measured unobscured
+ // rectangle. Do not retain previous global map padding on the camera.
+ map.stop();if(Object.values(map.getPadding()).some(Boolean))map.setPadding(zero);
+ const camera=map.cameraForBounds(bounds,{padding,maxZoom,bearing:0});
+ if(!camera)return;
+ const token=++routeCameraFitToken;
+ const cancelByUser=event=>{if(event.originalEvent&&routeCameraFitToken===token)routeCameraFitToken++;};
+ map.once('dragstart',cancelByUser);map.once('zoomstart',cancelByUser);map.once('rotatestart',cancelByUser);
+ const correct=event=>{
+  map.off('dragstart',cancelByUser);map.off('zoomstart',cancelByUser);map.off('rotatestart',cancelByUser);
+  if(event.djRouteFitToken!==token||token!==routeCameraFitToken||!(app.dataset.tab==='map'||app.dataset.transitComparison==='true'))return;
+  const rect=map.getContainer().getBoundingClientRect();
+  const correction=routeProjectionCorrection(valid.map(p=>map.project(p)),rect.width,rect.height,padding);
+  if(!correction)return;
+  const center=map.unproject([correction.x,correction.y]);
+  map.easeTo({center,zoom:Math.max(map.getMinZoom(),map.getZoom()-correction.zoomOut),padding:zero,pitch:0,bearing:0,duration:220});
+ };
+ map.once('moveend',correct);
+ map.easeTo({...camera,padding:zero,pitch:0,bearing:0,duration},{djRouteFitToken:token});
+}
+function paintComparisonRoute(features){
+ const data={type:'FeatureCollection',features},id=COMPARISON_ROUTE_SOURCE;
+ if(map.getSource(id))map.getSource(id).setData(data);
+ else{
+  map.addSource(id,{type:'geojson',data});
+  const before=map.getStyle()?.layers?.find(l=>l.type==='symbol')?.id;
+  map.addLayer({id:id+'-casing',type:'line',source:id,layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#fff','line-width':8}},before);
+  map.addLayer({id:id+'-line',type:'line',source:id,layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':['get','color'],'line-width':5}},before);
+ }
+}
 window.addEventListener('dongjak:transit-comparison-focus',event=>{
- if(app.dataset.tab!=='route'||!routeEnd)return;
- const {sheetTop,toolbarBottom}=event.detail||{};
+ if(app.dataset.tab!=='route'||!routeEnd||!routeStart)return;
+ const {sheetTop,toolbarBottom,plan,summary}=event.detail||{};
  const padding=transitVisiblePadding(sheetTop,toolbarBottom);if(!padding)return;
- app.dataset.transitComparison='true';drawRouteMarkers(true);
- map.easeTo({center:[routeEnd.lng,routeEnd.lat],offset:[0,(padding.top-padding.bottom)/2],padding:{top:0,bottom:0,left:0,right:0},pitch:0,duration:350});
+ comparisonRoutePadding=padding;
+ const from=routeStart,to=routeEnd;
+ const endpoints=[[from.lng,from.lat],[to.lng,to.lat]];
+ app.dataset.transitComparison='true';drawRouteMarkers(true);syncTransitExterior();
+ const fit=()=>{
+  const all=[...endpoints,...comparisonRouteFeatures.flatMap(f=>f.geometry.coordinates)];
+  const currentPadding=comparisonRoutePadding;if(!currentPadding)return;
+  const key=JSON.stringify([currentPadding,all]);if(key===comparisonRouteFitKey)return;
+  comparisonRouteFitKey=key;fitExposedRoute(all,currentPadding);
+ };
+ if(plan===comparisonRoutePlan&&summary===comparisonRouteSummary){fit();return;}
+ comparisonRoutePlan=plan;comparisonRouteSummary=summary;
+ const generation=++comparisonRouteGeneration;
+ comparisonRouteFeatures=[];
+ if(map.getSource(COMPARISON_ROUTE_SOURCE))paintComparisonRoute([]);
+ fit();
+ if(!plan||!Array.isArray(summary?.walkSegments))return;
+ void (async()=>{
+  const legs=plan.legs||[plan];
+  const feature=(coordinates,color)=>({type:'Feature',properties:{color},geometry:{type:'LineString',coordinates}});
+  const walks=summary.walkSegments;
+  if(walks.some(w=>!transitCoordinatesInScope(w.coords)))return;
+  const parts=await Promise.all(legs.map(async leg=>{
+   if(leg.kind==='bus')return transitCoordinatesInScope(leg.coords)?[feature(leg.coords,busRouteColor(leg.routeType))]:null;
+   if(leg.kind!=='rail')return null;
+   const rail=await sharedTransitRailSegments(leg.stops,leg.lines);
+   return rail.length&&rail.every(s=>transitCoordinatesInScope(s.coordinates))?rail.map(s=>feature(s.coordinates,subwayLineColor(s.line==='신림'?'신림선':s.line+'호선'))):null;
+  }));
+  if(parts.some(v=>!v)||generation!==comparisonRouteGeneration||app.dataset.tab!=='route'||app.dataset.transitComparison!=='true'||routeStart!==from||routeEnd!==to)return;
+  comparisonRouteFeatures=[...walks.map(w=>feature(w.coords,w.color)),...parts.flat()];
+  paintComparisonRoute(comparisonRouteFeatures);fit();
+ })().catch(error=>console.debug('[추천 경로 형상]',error?.message));
 });
-window.addEventListener('dongjak:transit-comparison-dismiss',()=>{delete app.dataset.transitComparison;drawRouteMarkers();});
+window.addEventListener('dongjak:transit-comparison-dismiss',event=>{
+ const wasComparison=app.dataset.transitComparison==='true';
+ clearComparisonRoute();
+ if(wasComparison&&!event.detail?.keepPreview&&app.dataset.tab==='route'&&(transitPreview||routeResult))invalidateRoute();
+ syncTransitExterior();drawRouteMarkers();
+});
 let routePreviewFitTimer=null,routePreviewFitObserver=null,routePreviewFitKey='',routePreviewFitWatching=false;
 function scheduleVisibleRouteFit(){
  clearTimeout(routePreviewFitTimer);
@@ -3502,7 +3589,7 @@ function scheduleVisibleRouteFit(){
   const bounds=all.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(all[0],all[0]));
   const key=JSON.stringify([padding,bounds.toArray()]);if(key===routePreviewFitKey)return;
   routePreviewFitKey=key;
-  map.stop();map.fitBounds(bounds,{padding,maxZoom:16,duration:480,pitch:0,bearing:0});
+  fitExposedRoute(all,padding,{maxZoom:16,duration:480});
  },260);
 }
 function watchVisibleRouteFit(){
@@ -3513,6 +3600,7 @@ function watchVisibleRouteFit(){
  if(typeof ResizeObserver==='function'){routePreviewFitObserver=new ResizeObserver(scheduleVisibleRouteFit);routePreviewFitObserver.observe(card);routePreviewFitObserver.observe(head);}
  window.addEventListener('resize',scheduleVisibleRouteFit);
  window.visualViewport?.addEventListener('resize',scheduleVisibleRouteFit);
+ card.addEventListener('transitionend',scheduleVisibleRouteFit);
  new MutationObserver(()=>{if(card.hidden){routePreviewFitKey='';clearTimeout(routePreviewFitTimer);}else scheduleVisibleRouteFit();}).observe(card,{attributes:true,attributeFilter:['hidden']});
 }
 function fitWalkingRoute(coords) {
@@ -3831,7 +3919,7 @@ document.getElementById('route-return-map').addEventListener('click',()=>{
   if(!routeResult)return;
   navigate('map');fitWalkingRoute(routeResult.coords);syncRoutePresentation();
 });
-document.getElementById('route-map-edit').addEventListener('click',()=>{const returning=Boolean(transitPreview);navigate('route');if(returning)window.dispatchEvent(new CustomEvent('dongjak:transit-return-comparison'));});
+document.getElementById('route-map-edit').addEventListener('click',()=>{const returning=Boolean(transitPreview);invalidateRoute();navigate('route');if(returning)window.dispatchEvent(new CustomEvent('dongjak:transit-return-comparison'));});
 document.getElementById('route-map-close').addEventListener('click',resetRoute);
 updateRouteLabels();
 syncRoutePresentation();
@@ -4074,7 +4162,8 @@ window.addEventListener('dongjak:transit-candidate-review',event=>{
    if(!current()||!walk)throw new Error('도보 연결 확인 불가');
    walks.push(walk);
   }
-  return summarizeTransitWalks(walks);
+  const summary=summarizeTransitWalks(walks);
+  return summary?{...summary,walkSegments:walks.filter(w=>Array.isArray(w.coords)&&w.coords.length>=2).map(w=>({coords:w.coords,color:transitWalkStyle(w)}))}:null;
  })().then(resolve,reject);
 });
 window.addEventListener('dongjak:transit-route-preview',event=>{

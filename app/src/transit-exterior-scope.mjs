@@ -40,6 +40,10 @@ export function transitContextBounds(districtBounds,endpoints=[],routeCoords=[])
  return [[Math.max(TRANSIT_SEARCH_BOUNDS[0][0],x-lngPad),Math.max(TRANSIT_SEARCH_BOUNDS[0][1],y-latPad)],
  [Math.min(TRANSIT_SEARCH_BOUNDS[1][0],X+lngPad),Math.min(TRANSIT_SEARCH_BOUNDS[1][1],Y+latPad)]];
 }
+// A full viewport must be able to extend beyond the route endpoints when the
+// usable map is only the small strip above a sheet. Service-area checks still
+// govern actual routing; the larger camera envelope is not a routing region.
+export function transitFramingBounds(){return [[126.60,37.22],[127.38,37.88]];}
 // The original safety map is authoritative. No geometry, filter, source,
 // visibility or terrain changes are made when entering transit.
 export function applyTransitBoundaryVisibility(map,active,phone=false,exteriorOpacity=.65){

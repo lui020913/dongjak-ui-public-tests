@@ -86,9 +86,11 @@ test('transit framing uses actual visible map area and complete endpoint bounds'
  const main=read('main.js'),comparison=read('transit-route-comparison.js');
  assert.match(comparison,/sheetTop:panel.getBoundingClientRect\(\).top/);
  assert.match(main,/dongjak:transit-comparison-focus/);
- assert.match(main,/center:\[routeEnd.lng,routeEnd.lat\]/);
+ assert.match(main,/const endpoints=\[\[from.lng,from.lat\],\[to.lng,to.lat\]\]/);
+ assert.match(main,/comparisonRouteFeatures.flatMap\(f=>f.geometry.coordinates\)/);
  assert.match(main,/strictRoutePreviewPadding\(\{mapTop:rect.top,viewportHeight:rect.height,toolbarBottom:head.getBoundingClientRect\(\).bottom,sheetTop:card.getBoundingClientRect\(\).top\}\)/);
  assert.match(main,/routePreviewFitObserver=new ResizeObserver\(scheduleVisibleRouteFit\)/);
  assert.match(main,/const all=\[\.\.\.coords,\.\.\.\[routeStart,routeEnd\]/);
- assert.match(main,/map.fitBounds\(bounds,\{padding,maxZoom:16,duration:480/);
+ assert.match(main,/fitExposedRoute\(all,padding,\{maxZoom:16,duration:480\}\)/);
+ assert.match(main,/cameraForBounds\(bounds,\{padding,maxZoom,bearing:0\}\)/);
 });

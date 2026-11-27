@@ -22,6 +22,14 @@ jobs:
           node-version: '22'
       - run: npm ci --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
+      - name: Expose the real map only in the temporary browser QA checkout
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/main.js');s=p.read_text();marker='installSolidMapLines(map);'
+          assert s.count(marker)==1
+          p.write_text(s.replace(marker,'globalThis.__qaMap=map;\n'+marker))
+          PY
       - run: npm run build
       - run: |
           cat > playwright.external-route.config.mjs <<'EOF'
