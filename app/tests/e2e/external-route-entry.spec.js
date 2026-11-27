@@ -106,6 +106,12 @@ test('real transit detail buttons navigate to the visible route editor, includin
    expect(expanded.height).toBeGreaterThan(compact.height+35);expect(expanded.y).toBeGreaterThanOrEqual(top.y+top.height+5);expect(expanded.y+expanded.height).toBeLessThanOrEqual(dock.y-6);
    await drag(100);
    await expect(results).not.toHaveClass(/dj871-sheet-expanded|dj889-sheet-transitioning/);
+   const beforeDown=await results.boundingBox();
+   await drag(160);
+   await expect(results).toBeVisible();
+   await expect(results).not.toHaveClass(/dj871-sheet-expanded|dj889-sheet-transitioning/);
+   const afterDown=await results.boundingBox();
+   expect(Math.abs(afterDown.y-beforeDown.y)).toBeLessThan(3);
    await results.locator('[data-filter="bus"]').click();
    await expect(results.locator('[data-filter="bus"]')).toHaveAttribute('aria-pressed','true');
    await expect(results.locator('.tr-card').first()).not.toContainText(/운임|전체 시간/);
@@ -115,12 +121,27 @@ test('real transit detail buttons navigate to the visible route editor, includin
    await expect(card.locator('.tr-fare-compact')).toHaveCount(0);
    await expect(card.locator('.tr-route-names')).toBeVisible();
    await expect(card).not.toContainText('일반 교통카드 (참고 요금)');
+   // The selected list filter's actual bus geometry and both endpoints must
+   // be within the unobscured map, not hidden behind the lower card.
+   if(await page.evaluate(()=>Boolean(window.__qaMap))){
+    await expect.poll(async()=>page.evaluate(()=>Boolean(window.__qaMap.getSource('dj-transit-comparison-route'))),{timeout:30000}).toBe(true);
+    await expect.poll(async()=>{
+     const sheet=await results.boundingBox(),header=await route.locator('.header').boundingBox();
+     return page.evaluate(({sheet,header,coords})=>{
+      const m=window.__qaMap,rect=m.getContainer().getBoundingClientRect();
+      if(m.isMoving())return false;
+      return coords.every(p=>{const a=m.project(p);return a.x+rect.left>=10&&a.x+rect.left<=rect.right-10&&a.y+rect.top>=header.y+header.height+5&&a.y+rect.top<=sheet.y-5;});
+     },{sheet,header,coords:stops.map(p=>[p.lng,p.lat])});
+    },{timeout:20000}).toBe(true);
+   }
 
    await results.locator('.tr-pri-preference').click();
    await expect(results.locator('.tr-pri-preference')).toHaveAttribute('aria-pressed','false');
    await route.locator('[data-v3="back"]').click();
    await expect(results).toBeHidden();
    await expect(app).toHaveAttribute('data-tab','route');
+   await expect(page.locator('.dj-route-endpoint-marker')).toHaveCount(0);
+   if(await page.evaluate(()=>Boolean(window.__qaMap)))await expect.poll(()=>page.evaluate(()=>Boolean(window.__qaMap.getSource('dj-transit-comparison-route')))).toBe(false);
    await route.locator('[data-transit-mode="walk"]').click();
    await expect(route.locator('[data-v3="calculate"]')).toContainText('경로 찾기');
    await page.unroute('**/data/transport/seoul-bus-stops.json');

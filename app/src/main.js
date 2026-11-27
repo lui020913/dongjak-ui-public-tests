@@ -60,7 +60,7 @@ import {initStationAccessibility} from './station-accessibility.js';
 import {searchPlaces,searchLocalPlaces} from './route-search.js';
 import {cachedOfficialSearchPlaces,queryOfficialPlaces} from './seoul-official-facilities.js';
 import {routeStationMatches,mergeRouteSearchResults,routeResultSubtitle} from './route-search-results.js';
-import {walkingRouteViewportPadding,strictRoutePreviewPadding} from './route-map-focus.js';
+import {walkingRouteViewportPadding,strictRoutePreviewPadding,routeProjectionCorrection} from './route-map-focus.js';
 import {installDistrictBuildingScope} from './district-building-scope.mjs';
 import {initMapQuickSearch} from './map-quick-search.js';
 import './map-search-refinement.css';
@@ -2933,7 +2933,7 @@ function drawRouteMarkers(visible=(app.dataset.tab==='map'||app.dataset.transitC
 var transitHomeCamera;
 var transitRouteContext=[];
 var transitContextSignature='';
-var comparisonRouteGeneration=0,comparisonRoutePlan=null,comparisonRouteSummary=null,comparisonRouteFeatures=[],comparisonRouteFitKey='';
+var comparisonRouteGeneration=0,comparisonRoutePlan=null,comparisonRouteSummary=null,comparisonRouteFeatures=[],comparisonRouteFitKey='',comparisonRoutePadding=null,routeCameraFitToken=0;
 const COMPARISON_ROUTE_SOURCE='dj-transit-comparison-route';
 function syncTransitContextBounds(active){
  const framing=active&&Boolean(transitPreview||app.dataset.transitComparison==='true');
@@ -2963,6 +2963,7 @@ function syncTransitExterior(force=false){
  }
 }
 function clearTransitPreview(){
+  routeCameraFitToken++;
   transitRouteContext=[];
   const wasPreview=Boolean(transitPreview);
   transitPreview=null;transitGeneration++;delete app.dataset.djTransitPreview;
@@ -3031,6 +3032,7 @@ function paintRouteProgress(progressMeters){
   if(finished)finished.setData(lineFeature(parts.traveled));
 }
 function invalidateRoute() {
+  routeCameraFitToken++;
   routeRequestGeneration++;routeRequestPending=false;
   routePriVisuals=null;
   clearTransitPreview();
@@ -3426,6 +3428,7 @@ function pickRouteLocation(lngLat,point) {
   });
 }
 function resetRoute() {
+  clearComparisonRoute();
   routeRequestGeneration++;routeRequestPending=false;
   closePriPreferences();
   routePriVisuals=null;
@@ -3487,7 +3490,7 @@ function transitVisiblePadding(sheetTop,toolbarBottom){
  return top+bottom<rect.height-48?{top,bottom,left:28,right:28}:null;
 }
 function clearComparisonRoute(){
- comparisonRouteGeneration++;comparisonRoutePlan=null;comparisonRouteSummary=null;comparisonRouteFeatures=[];comparisonRouteFitKey='';
+ comparisonRouteGeneration++;comparisonRoutePlan=null;comparisonRouteSummary=null;comparisonRouteFeatures=[];comparisonRouteFitKey='';comparisonRoutePadding=null;routeCameraFitToken++;
  delete app.dataset.transitComparison;
  try{for(const suffix of ['-line','-casing'])if(map.getLayer(COMPARISON_ROUTE_SOURCE+suffix))map.removeLayer(COMPARISON_ROUTE_SOURCE+suffix);if(map.getSource(COMPARISON_ROUTE_SOURCE))map.removeSource(COMPARISON_ROUTE_SOURCE);}catch(error){console.debug('[추천 경로 정리]',error?.message);}
 }
@@ -3501,7 +3504,18 @@ function fitExposedRoute(coords,padding,{maxZoom=16,duration=350}={}){
  // rectangle. Do not retain previous global map padding on the camera.
  map.stop();if(Object.values(map.getPadding()).some(Boolean))map.setPadding(zero);
  const camera=map.cameraForBounds(bounds,{padding,maxZoom,bearing:0});
- if(camera)map.easeTo({...camera,padding:zero,pitch:0,bearing:0,duration});
+ if(!camera)return;
+ const token=++routeCameraFitToken;
+ const correct=event=>{
+  if(event.djRouteFitToken!==token||token!==routeCameraFitToken||!(app.dataset.tab==='map'||app.dataset.transitComparison==='true'))return;
+  const rect=map.getContainer().getBoundingClientRect();
+  const correction=routeProjectionCorrection(valid.map(p=>map.project(p)),rect.width,rect.height,padding);
+  if(!correction)return;
+  const center=map.unproject([correction.x,correction.y]);
+  map.easeTo({center,zoom:Math.max(map.getMinZoom(),map.getZoom()-correction.zoomOut),padding:zero,pitch:0,bearing:0,duration:220});
+ };
+ map.once('moveend',correct);
+ map.easeTo({...camera,padding:zero,pitch:0,bearing:0,duration},{djRouteFitToken:token});
 }
 function paintComparisonRoute(features){
  const data={type:'FeatureCollection',features},id=COMPARISON_ROUTE_SOURCE;
@@ -3517,13 +3531,15 @@ window.addEventListener('dongjak:transit-comparison-focus',event=>{
  if(app.dataset.tab!=='route'||!routeEnd||!routeStart)return;
  const {sheetTop,toolbarBottom,plan,summary}=event.detail||{};
  const padding=transitVisiblePadding(sheetTop,toolbarBottom);if(!padding)return;
+ comparisonRoutePadding=padding;
  const from=routeStart,to=routeEnd;
  const endpoints=[[from.lng,from.lat],[to.lng,to.lat]];
  app.dataset.transitComparison='true';drawRouteMarkers(true);syncTransitExterior();
  const fit=()=>{
   const all=[...endpoints,...comparisonRouteFeatures.flatMap(f=>f.geometry.coordinates)];
-  const key=JSON.stringify([padding,all]);if(key===comparisonRouteFitKey)return;
-  comparisonRouteFitKey=key;fitExposedRoute(all,padding);
+  const currentPadding=comparisonRoutePadding;if(!currentPadding)return;
+  const key=JSON.stringify([currentPadding,all]);if(key===comparisonRouteFitKey)return;
+  comparisonRouteFitKey=key;fitExposedRoute(all,currentPadding);
  };
  if(plan===comparisonRoutePlan&&summary===comparisonRouteSummary){fit();return;}
  comparisonRoutePlan=plan;comparisonRouteSummary=summary;

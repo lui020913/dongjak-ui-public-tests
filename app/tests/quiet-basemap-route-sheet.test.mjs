@@ -27,3 +27,5 @@ test('comparison geometry is isolated and stale asynchronous paths cannot reopen
  assert.match(main,/framing\?transitFramingBounds\(\)/);
  assert.match(main,/walkSegments:walks.filter/);
 });
+
+test('legacy route swipe dismissal is not registered',()=>{const s=readFileSync(new URL('../src/v830-sheet-swipe-close.js',import.meta.url),'utf8');assert.doesNotMatch(s,/id:'route-panel'/);});
