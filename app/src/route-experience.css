@@ -700,6 +700,11 @@
  }
 }
 
+/* Match route recommendations and PRI explanatory copy to the entry screen. */
+html body #app#app#app#app#app #route-map-card,
+html body #app#app#app#app#app #route-map-card :not(svg):not(path):not(canvas){font-family:var(--dj-ui-font, "Pretendard Variable", Pretendard, system-ui, sans-serif)!important;}
+html body #app#app#app#app#app #route-map-card :is(#dj-pri-route-advice,#pri-map-note){font-size:13px!important;font-weight:500!important;line-height:1.5!important;letter-spacing:-.015em!important;}
+
 /* Walking comparison: shrink to content, with a full-width pinned action. */
 @layer request-completion{
  @media(max-width:699px){
@@ -711,7 +716,3 @@
  }
 }
 
-/* Match route recommendations and PRI explanatory copy to the entry screen. */
-html body #app#app#app#app#app #route-map-card,
-html body #app#app#app#app#app #route-map-card :not(svg):not(path):not(canvas){font-family:var(--dj-ui-font, "Pretendard Variable", Pretendard, system-ui, sans-serif)!important;}
-html body #app#app#app#app#app #route-map-card :is(#dj-pri-route-advice,#pri-map-note){font-size:13px!important;font-weight:500!important;line-height:1.5!important;letter-spacing:-.015em!important;}
