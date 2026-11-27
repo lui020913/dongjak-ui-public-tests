@@ -48,3 +48,10 @@ test('manifest의 기존 8개와 보완 8개 건물 파일이 실제 존재한�
     assert.equal(add.features.length,sheet.supplement_count);
   }
 });
+
+test('network completion does not decode or install geometry until the quiet gate opens',async()=>{
+ let release;const gate=new Promise(r=>release=r);let requested=0,entered=0,finished=false;
+ const work=loadBuildingTileFeatures({sheet:'qa',file:'/base'},async()=>({ok:true,text:async()=>{requested++;return JSON.stringify({type:'FeatureCollection',features:[]});}}),null,{beforeWork:()=>{entered++;return gate;}}).then(v=>{finished=true;return v;});
+ await new Promise(r=>setTimeout(r,0));assert.equal(requested,1);assert.equal(entered,1);assert.equal(finished,false);
+ release();const value=await work;assert.equal(value.successfulSources,1);assert.equal(entered,2);
+});

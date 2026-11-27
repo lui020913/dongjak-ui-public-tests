@@ -862,20 +862,21 @@ export function shouldRender3DBuilding(geometry){
 }
 // v17.12: 기존 국가기본도와 GIS건물 보완 GeoJSON을 모두 로딩합니다.
 
+async function waitForBuildingQuiet(){
+  if(djPhone)while(map.isMoving?.()||performance.now()-buildingLastMotionEnd<750){
+    if(map.isMoving?.())await new Promise(resolve=>map.once('moveend',resolve));
+    else await new Promise(resolve=>setTimeout(resolve,Math.max(16,750-(performance.now()-buildingLastMotionEnd))));
+  }
+}
 async function loadOneBuildingSheet(sheet){
   const existing=loadedBuildingTiles.get(sheet.sheet);
   if(existing?.complete||buildingLoading.has(sheet.sheet)||(buildingRetryAfter.get(sheet.sheet)||0)>Date.now())return;
   buildingLoading.add(sheet.sheet);
   try {
-    const {features, reviewCandidates, displayGeometries, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet);
+    const {features, reviewCandidates, displayGeometries, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet,globalThis.fetch,undefined,{beforeWork:waitForBuildingQuiet});
     for(const problem of errors) console.warn(`[동작하는 안전지도] ${sheet.sheet}번 ${problem.label} 로딩 실패:`,problem.error);
     // Defer geometry filtering and indexing until the phone camera is settled.
-    // Network completion is not permission to install heavy geometry during
-    // a second pinch/pan. Require a quiet interval before parsing/indexing.
-    if(djPhone)while(map.isMoving?.()||performance.now()-buildingLastMotionEnd<750){
-      if(map.isMoving?.())await new Promise(resolve=>map.once('moveend',resolve));
-      else await new Promise(resolve=>setTimeout(resolve,Math.max(16,750-(performance.now()-buildingLastMotionEnd))));
-    }
+    await waitForBuildingQuiet();
     if(!boundaryGeometry)return;
     // Tile-native buildings are incomplete in parts of Sangdo 1-dong. The
     // supplied base+supplement GIS footprints must also be available overhead.
