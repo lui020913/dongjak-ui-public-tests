@@ -61,6 +61,7 @@ import {initTransportMap,closeTransportPanel,baseMapTransitPlace,subwayLineColor
 import {initStationAccessibility} from './station-accessibility.js';
 import {searchPlaces,searchLocalPlaces} from './route-search.js';
 import {cachedOfficialSearchPlaces,queryOfficialPlaces} from './seoul-official-facilities.js';
+import {enhanceBusDirection} from './bus-search-directions.mjs';
 import {routeStationMatches,mergeRouteSearchResults,routeResultSubtitle} from './route-search-results.js';
 import {walkingRouteViewportPadding,strictRoutePreviewPadding,routeProjectionCorrection} from './route-map-focus.js';
 import {installDistrictBuildingScope} from './district-building-scope.mjs';
@@ -3341,6 +3342,7 @@ function paintRouteSearchResults(matches,message){
     button.append(head,hint);
     button.addEventListener('click',()=>chooseSearchResult(place));
     results.append(button);
+    if(place.arsId)enhanceBusDirection(place,p=>{if(button.isConnected)hint.textContent=routeResultSubtitle(p);},{apiBase:Capacitor.isNativePlatform()?'https://dongjak-walk-safety-preview.pages.dev/api/transport':'/api/transport'});
   }
 }
 document.getElementById('route-search-query').addEventListener('input',()=>{
