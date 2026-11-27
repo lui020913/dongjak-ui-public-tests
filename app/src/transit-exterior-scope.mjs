@@ -52,9 +52,9 @@ export function districtScopedNativeLayer(layer){
 export function installSharedDistrictScope(map,geometry){
  const boundary={type:geometry.type,coordinates:geometry.coordinates};
  const clause=['<=',['distance',boundary],0.1];
- const applied=new Map();
+ const applied=new Map();let waiting=false;
  const sync=()=>{
-  if(map.isMoving?.())return;
+  if(map.isMoving?.()){if(!waiting){waiting=true;map.once('moveend',()=>{waiting=false;sync();});}return;}
   for(const layer of map.getStyle()?.layers||[]){
    if(!districtScopedNativeLayer(layer))continue;
    const current=map.getFilter(layer.id)||null;

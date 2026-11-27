@@ -41,6 +41,11 @@ async function sample(url,variant,round){
     const state=await page.evaluate(()=>{const m=window.__qaMap,app=document.getElementById('app');return {tab:app?.dataset?.tab,transit:app?.dataset?.djTransitExterior,center:m.getCenter(),zoom:m.getZoom(),style:m.isStyleLoaded(),tiles:m.areTilesLoaded?.(),layers:m.getStyle().layers.filter(l=>l.type==='symbol').map(l=>[l.id,m.getLayoutProperty(l.id,'visibility')||'visible'])};});
     console.log('MAP_GESTURE_READINESS_FAILURE',JSON.stringify({variant,round,site:site.name,...state}));throw error;
    }
+   if(variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'){
+    const district=await page.evaluate(()=>{const m=window.__qaMap;const layers=m.getStyle().layers.filter(l=>l['source-layer']==='building'&&['fill','fill-extrusion','line'].includes(l.type));return {ids:layers.map(l=>l.id),scoped:layers.every(l=>JSON.stringify(m.getFilter(l.id)).includes('\"distance\"')),rendered:m.queryRenderedFeatures({layers:layers.filter(l=>l.type==='fill').map(l=>l.id)}).length};});
+    console.log('DISTRICT_BUILDING_SCOPE',JSON.stringify(district));
+    if(district.ids.length){assert.ok(district.scoped,'candidate native buildings must use district geographic scope');assert.ok(district.rendered>0,'district buildings must remain visible');}
+   }
    const data=await page.evaluate(async({center})=>{
     const m=window.__qaMap,frames=[],writes={},restores=[],sweeps=[];
     // Match quality between revisions, including any adaptive DPR changes.
