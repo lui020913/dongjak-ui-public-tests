@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.245",
+  "application_version": "9.2.246",
   "public_work_branch": "main",
-  "purpose": "Deploy merged PR #626: prevent responsive zoom/moveend/resize from resurrecting local safety-map rail while the Seoul extended single-alignment network is active; restore curated adjacent metro stations using identity and line scope and viewport cells. Source tests 2417 passed, 13 skipped, real route endpoint and picker regression and protected overlay compatibility passed. Remaining PR phone tests run separately; preserve all protected Preview/mobile QA/Production/APK gates.",
-  "attempt": 481,
+  "purpose": "Deploy merged PR #627: versioned Seoul single-alignment rail dataset and one colored rail layer without casing, roadside display-only bus stop alignment preserving original official coordinates and side, mode-specific bus label clipping. Full source CI 2420 passed, 13 skipped, all 36 phone cases and picker/facility and protected overlay regression passed. Preserve Preview/mobile QA/Production/APK gates.",
+  "attempt": 482,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
