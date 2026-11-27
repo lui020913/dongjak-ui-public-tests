@@ -86,3 +86,8 @@
 #app #dj-transit-detail .dj-tr-gps{flex-wrap:wrap;gap:6px}
 #app #dj-transit-detail .dj-tr-gps-status{flex:1 0 100%;min-width:0;overflow-wrap:anywhere}
 #app #dj-transit-detail .dj-tr-gps-retry:not([hidden]){flex:1 1 auto;min-width:0;padding-inline:9px;white-space:normal}
+
+#app #dj-transit-map-follow[hidden]{display:none!important}
+#app #dj-transit-map-follow:not([hidden]){position:fixed!important;top:140px;right:16px!important;z-index:8500!important;width:48px!important;height:48px!important;border:0!important;border-radius:16px!important;display:grid!important;place-items:center!important;background:#fff;color:#1f5142;box-shadow:0 3px 12px #173d2d22!important;padding:0!important}
+#app #dj-transit-map-follow[aria-pressed="true"]{background:#e5f1eb;color:#137e65}
+#app #dj-transit-map-follow svg{width:24px;height:24px}
