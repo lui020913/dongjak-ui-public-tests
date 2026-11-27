@@ -2965,6 +2965,7 @@ function syncTransitExterior(force=false){
  if(active&&!city&&!seoulBoundaryLoading){seoulBoundaryLoading=true;void loadSeoulBoundary().then(()=>syncTransitExterior(true)).catch(error=>{console.warn('[서울시 경계]',error.message);toast('서울시 경계정보를 불러오지 못했습니다. 다시 시도해 주세요.');}).finally(()=>{seoulBoundaryLoading=false;});}
  const geometry=active&&city?city:boundaryGeometry;
  if(displayedTransitBoundary!==geometry&&map.getSource('district-exterior')&&map.getSource('district-outline')){map.getSource('district-exterior').setData(maskOutside(geometry));map.getSource('district-outline').setData(asFeature(geometry));displayedTransitBoundary=geometry;}
+ app.dataset.djTransitBoundary=active&&city?'seoul':'dongjak';
  if(force||active!==previous)window.dispatchEvent(new CustomEvent('dongjak:transit-stream-scope'));
  if(!force&&active===previous){if(active)syncTransitContextBounds(true);return;}
  if(active&&!previous&&!transitHomeCamera){
@@ -2991,6 +2992,7 @@ function clearTransitPreview(){
   syncTransitExterior();
   if(wasPreview)scheduleBuildingLoad();
   window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:null}));
+  window.dispatchEvent(new CustomEvent('dongjak:transit-route-stops',{detail:[]}));
   // Remove preview-owned layers before their sources; ordinary transport layers stay intact.
   for(const id of ['dj815-transit-walk','dj815-transit-rail','dj-transit-rail-verified','dj-transit-rail-schematic','dj815-transit-bus','dj-transit-multi-walk','dj-transit-multi-bus','dj-transit-multi-rail','dj-transit-multi-stops']){
     try{if(!map.getSource(id))continue;
@@ -4063,6 +4065,7 @@ function focusTransitRoute(coords){
  routePreviewFitKey='';watchVisibleRouteFit();scheduleVisibleRouteFit();
 }
 function setTransitPreviewStops(features){
+ window.dispatchEvent(new CustomEvent('dongjak:transit-route-stops',{detail:features.map(f=>f.geometry.coordinates)}));
  const id='dj-transit-multi-stops',data={type:'FeatureCollection',features};
  if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
  if(!map.getLayer(id+'-circle'))map.addLayer({id:id+'-circle',type:'circle',source:id,paint:{'circle-radius':['case',['==',['get','transfer'],true],7,6],'circle-color':'#fff','circle-stroke-color':['get','color'],'circle-stroke-width':2.5}});
