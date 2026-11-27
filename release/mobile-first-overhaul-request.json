@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.242",
+  "application_version": "9.2.243",
   "public_work_branch": "main",
-  "purpose": "Deploy merged PR #623: Dongjak and Seoul shared viewport transit spatial streaming, sparse cell assets, directional prefetch, independent bus/rail updates, city boundary and exterior shade, outside-city endpoint rejection, and route marker precedence. User explicitly requested deployment first for actual device inspection; protected Preview, phone QA, Production and Android gates remain enabled. Latest source build passed; additional PR mobile and performance measurements may finish separately.",
-  "attempt": 478,
+  "purpose": "Deploy merged PR #624: complete transit route and endpoint pin visibility in comparison and detail, permanently fixed GPS follow/next/end guidance footer, and lazily loaded Seoul rail context with mapped color-coded geometry for 17 lines, preserving safety-map settings. Full source CI, 36 FIX phone checks, route endpoint and picker regressions, protected overlay compatibility passed. Preserve Preview/mobile QA/Production/APK gates.",
+  "attempt": 479,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
