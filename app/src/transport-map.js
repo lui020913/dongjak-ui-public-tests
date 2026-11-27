@@ -1845,7 +1845,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   // Hide metro lines and badges at the actual widest camera zoom on *both* PC and mobile.
   installResponsiveMetroVisibility({map,app:document.getElementById('app')});
   let stationLookups=new Map();
-  const stationAccess=installMetroStationAccess({map,app:streamApp,colors:SUBWAY_LINE_COLORS,getStations:()=>[...new Map([...officialMetro,...streamedRows.filter(p=>p.kind==='subway')].filter(placeInDisplayScope).map(p=>[normalizeStationQueryName(p.name),p])).values()],getRailPaths:()=>cityScope()&&cityRail.getCollection()?indexRenderedMetroRail(cityRail.getCollection()):renderedRailPaths,allow:(lng,lat)=>cityScope()?inSeoul(lng,lat):isDongjak(lng,lat)===true||isNearBoundary(lng,lat)===true});
+  const stationAccess=installMetroStationAccess({map,app:streamApp,colors:SUBWAY_LINE_COLORS,getStations:()=>[...new Map([...officialMetro,...streamedRows.filter(p=>p.kind==='subway')].filter(placeInDisplayScope).map(p=>[normalizeStationQueryName(p.name),p])).values()],getRailPaths:()=>cityScope()&&cityRail.getCollection()?indexRenderedMetroRail(cityRail.getCollection()):renderedRailPaths,allow:(lng,lat)=>isDongjak(lng,lat)===true});
   let lastMetroGeoSignature='';
   function renderMetroMarkers(items){
     lastMetroMarkerItems=items;

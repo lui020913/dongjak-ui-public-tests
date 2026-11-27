@@ -1,5 +1,5 @@
 // Cartographic access context only, never a routing graph. Approximation is explicitly dashed.
-export const STATION_ACCESS_SNAPSHOT='/data/transport/seoul-station-access-v1.json';
+export const STATION_ACCESS_SNAPSHOT='/data/transport/dongjak-station-access-v1.json';
 let sharedSnapshot=null;
 export function fetchStationAccessSnapshot(fetcher=globalThis.fetch){
  if(fetcher!==globalThis.fetch)return loadStationAccessFile(fetcher);
