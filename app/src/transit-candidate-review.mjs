@@ -44,7 +44,7 @@ export function formatTransitReview(result,done=false){
  if(!done)return '도보 조회 중';
  if(!result)return '도보 연결 확인 불가';
  const distance=result.walkM>=1000?(result.walkM/1000).toFixed(2).replace(/0$/,'').replace(/\.$/,'')+'km':result.walkM+'m';
- return '도보 '+distance+' · '+(result.comparable?'PRI '+result.risk.toFixed(1)+'점 (관측 '+Math.round(result.coverage*100)+'%)':(result.coverage>0?'보행안전 데이터 부족':'보행안전 데이터 미확보'));
+ return '도보 '+distance+' · '+(result.comparable?'PRI '+result.risk.toFixed(1)+'점 (관측 '+Math.round(result.coverage*100)+'%)':(result.coverage>0?'보행안전 데이터 보완 예정':'보행안전 데이터 업데이트 예정'));
 }
 
 // Align walk request endpoints with the actual vehicle geometry, retaining stop identity.
