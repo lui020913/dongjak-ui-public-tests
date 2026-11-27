@@ -1,0 +1,25 @@
+name: CAU and 5511 independent route field-data check
+on:
+  push:
+    branches: [research/cau-5511-pedestrian-field-check-20261127]
+    paths:
+      - 'scripts/research/verify_cau_routes.mjs'
+      - '.github/workflows/cau-5511-pedestrian-field-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify real ordered stops and compare pedestrian networks
+        run: |
+          node --check scripts/research/verify_cau_routes.mjs
+          node scripts/research/verify_cau_routes.mjs
