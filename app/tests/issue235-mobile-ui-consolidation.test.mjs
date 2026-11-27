@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
-import {TAB_TRANSITION,adjacentTabIndex} from '../src/bottom-tab-navigation.js';
+import {TAB_TRANSITION} from '../src/bottom-tab-navigation.js';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 function frontend(name){
  const built=new URL('../src/'+name,import.meta.url);
@@ -35,7 +35,8 @@ test('mobile bottom tabs never fade the WebGL/root or expose a white intermediat
  const source=read('src/bottom-tab-navigation.js');
  const css=frontend('mobile-next.css');
  assert.deepEqual(TAB_TRANSITION,{contentReveal:260,mapReturn:220});
- assert.equal(adjacentTabIndex(2,5,-70,0),3);
+ for(const retired of ['adjacentTabIndex','switchAdjacent','swipeGuard'])assert.equal(source.includes(retired),false,'Retired swipe navigation: '+retired);
+ assert.match(source,/win\.addEventListener\('click',select,true\)/);
  assert.match(source,/clearEntrance\(\)/);
  assert.match(source,/if\(!replay\(button\)\)\{[^}]*return;/);
  assert.match(source,/panel\.classList\.add\('dj-tab-content-enter'\)/);
