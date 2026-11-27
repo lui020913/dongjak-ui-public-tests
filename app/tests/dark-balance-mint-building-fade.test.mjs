@@ -38,6 +38,12 @@ test('Building geometry fades smoothly over two zoom levels, with near-opaque da
   assert.match(main,/BUILDING_ZOOM_MIN = BUILDING_ZOOM_FADE_START/);
   assert.match(main,/BUILDING_ZOOM_FADE_END,\['get','h'\]/);
   assert.doesNotMatch(main,/fill-extrusion-opacity':buildingStyle.opacity/);
+  // A complete loaded sheet, not theme paint opacity, owns visibility in both modes.
+  assert.ok(main.includes("const desired=info.owned&&fillVisible?modeVisibility.plan:'none';"));
+  assert.ok(main.includes("const desired=info.owned?modeVisibility.extrusion:'none';"));
+  assert.ok(main.includes("layout:{visibility:'none'},paint:footprintStyle"));
+  assert.ok(main.includes("layout:{visibility:'none'},\n      paint:{'fill-extrusion-color':buildingStyle.color".replace('\\n','\n')));
+  assert.ok(read('src/ui-environment.js').includes("map.setPaintProperty(layer.id,'fill-extrusion-opacity',buildingZoomOpacityExpression(appearance.opacity));"));
 });
 
 test('Native 3D buildings fade on zoom without overriding light styling or unrelated overlays',()=>{
