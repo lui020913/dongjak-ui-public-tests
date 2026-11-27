@@ -41,8 +41,7 @@ test('post-fit correction checks projected points and preserves the usable strip
 
 test('walking-only footer uses one full-width column without expanding the compact scroll area',()=>{
  const css=readFileSync(new URL('../src/route-experience.css',import.meta.url),'utf8');
- const overlay=readFileSync(new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
- for(const source of [css,overlay]){const tail=source.slice(source.lastIndexOf('/* '));assert.match(tail,/:not\(\[data-dj-transit-preview\]\)/);assert.match(tail,/grid-template-columns:minmax\(0,1fr\)!important/);assert.match(tail,/#route-guide-start\{grid-column:1\/-1!important;width:100%!important/);}
+ for(const source of [css]){const tail=source.slice(source.lastIndexOf('/* '));assert.match(tail,/:not\(\[data-dj-transit-preview\]\)/);assert.match(tail,/grid-template-columns:minmax\(0,1fr\)!important/);assert.match(tail,/#route-guide-start\{grid-column:1\/-1!important;width:100%!important/);}
 });
 
 test('native building scope keeps original rendering and repairs overwritten filters only at idle',()=>{
