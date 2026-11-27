@@ -177,9 +177,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       panel.style.setProperty('--dj-sheet-drag-y',`${offset}px`);
       panel.style.setProperty('translate',`0 ${offset}px`,'important');
       panel.style.setProperty('transition','none','important');
-      // Downward motion is clipped at the dock instead of sliding across it.
-      if(expandable&&offset>0)panel.style.setProperty('clip-path',`inset(0 0 ${offset}px 0 round 24px)`,'important');
-      else panel.style.removeProperty('clip-path');
+      panel.style.removeProperty('clip-path');
       panel.style.setProperty('--dj-sheet-drag-opacity','1');
       if(event.cancelable)event.preventDefault();
     };

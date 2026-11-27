@@ -134,9 +134,9 @@ function animateGeometry(panel,{fromRect,compactRect,expandedRect,fromOpacity,co
     if(started||finished||panel.dataset.dj889MotionToken!==String(token))return;
     started=true;
     if(rafTimer!==null){win.clearTimeout(rafTimer);rafTimer=null;}
-    panel.style.setProperty('transition',`translate ${DURATION}ms ${EASING}, clip-path ${DURATION}ms ${EASING}`,'important');
+    panel.style.setProperty('transition',`translate ${DURATION}ms ${EASING}`,'important');
     panel.style.setProperty('translate',`${endDelta.x}px ${endDelta.y}px`,'important');
-    panel.style.setProperty('clip-path',`inset(0 0 ${endClip}px 0 round 24px)`,'important');
+    panel.style.removeProperty('clip-path');
     panel.style.setProperty('opacity','1','important');
     timer=win.setTimeout(finish,DURATION+180);
   };
@@ -145,7 +145,7 @@ function animateGeometry(panel,{fromRect,compactRect,expandedRect,fromOpacity,co
   panel.style.setProperty('will-change','translate,clip-path','important');
   panel.style.setProperty('transition','none','important');
   panel.style.setProperty('translate',`${startDelta.x}px ${startDelta.y}px`,'important');
-  panel.style.setProperty('clip-path',`inset(0 0 ${startClip}px 0 round 24px)`,'important');
+  panel.style.removeProperty('clip-path');
   panel.style.setProperty('opacity',String(startOpacity),'important');
   void panel.offsetHeight;
   panel.addEventListener('transitionend',onEnd);
