@@ -102,7 +102,7 @@ test('performance promotion requires improvement without material severe-stall r
 test('sealed route overlay anchors preserve the district guard for local and final balanced variants',()=>{
  const script=read('scripts/apply-mobile-next.mjs');
  let main=read('app/src/main.js');
- const operations=script.split('\n').filter(line=>line.startsWith('replace(main,"    const gentle=routeWithinDistrict(')||line.startsWith('replace(main,"    return {...local,standard,gentle,usingLocal:true};"'));
+ const operations=script.split('\n').filter(line=>line.startsWith('replace(main,"    const gentle=routeWithinDistrict(')||line.startsWith('replace(main,"    return {...local,standard:shortest,gentle,usingLocal:'));
  assert.equal(operations.length,3);
  for(const line of operations){
   const [from,to]=JSON.parse('['+line.slice('replace(main,'.length,-2)+']');
@@ -111,7 +111,7 @@ test('sealed route overlay anchors preserve the district guard for local and fin
  }
  assert.ok(main.includes('routeWithinDistrict(local.balanced?.coords,boundaryGeometry,isDongjak)'));
  assert.ok(main.includes('routeWithinDistrict(result.balanced?.coords,boundaryGeometry,isDongjak)'));
- assert.ok(main.includes('return {...local,standard,gentle,balanced,usingLocal:true};'));
+ assert.ok(main.includes("return {...local,standard:shortest,gentle,balanced,usingLocal:shortest?.source!=='valhalla-external'};"));
  assert.ok(main.includes('return fetchPreferredPedestrianPair(from,to,signal).then(routes=>{'));
  assert.ok(!script.includes("const {standard,gentle,usingLocal}=routeWaypoints.length"));
  assert.ok(!script.includes("which==='balanced'?fetchDongjakPedestrianVariants"));

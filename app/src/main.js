@@ -47,6 +47,7 @@ import {getActiveCloudClient} from './v824-favorites-cloud.js';
 import {readSharedCommunity,publishCommunityPost,deleteSharedCommunityPost,setSharedCommunityLike,addSharedCommunityComment,isCommunitySignedIn,readCommunityNotifications,markCommunityNoticeRead,appealCommunityNotice,setSharedCommunityBookmark,reportSharedCommunity,readCommunityModerationStatus} from './community-cloud.js';
 import {initPedestrianTools} from './pedestrian-tools.js';
 import {fetchDongjakPedestrianVariants} from './dongjak-local-routing.js';
+import {chooseShortestPedestrianNetwork,shouldCompareTransitPedestrianNetwork} from './pedestrian-network-comparison.mjs';
 import {routeWithinDistrict} from './route-district-guard.mjs';
 import {TRANSIT_SEARCH_BOUNDS,transitPointInScope,transitCoordinatesInScope,transitEndpointPolicy,exteriorMapActive,transitWalkStyle,transitContextBounds,transitFramingBounds,applyTransitBoundaryVisibility,applyDistrictOutlineVisibility} from './transit-exterior-scope.mjs';
 import {installDongjakOfficialDataLayers} from './dongjak-verified-data-layers.js';
@@ -3718,19 +3719,32 @@ function routeDataNote(result){
   }
   return result.segmentCount?`경유 ${result.segmentCount}구간의 실제 보행경로 합산 · 이용 데이터가 구간별로 다를 수 있음 · 통행 상태 미검증`:'외부 시험용 도보 경로 서버 결과 · 동작구 도보 네트워크 적용 실패 또는 범위 밖 · 실제 통행 가능 여부 미검증';
 }
-async function fetchPreferredPedestrianPair(from,to,signal){
+async function fetchPreferredPedestrianPair(from,to,signal,{comparison='always'}={}){
   if([from,to].some(p=>routeLocationInside(p)!==true))throw new Error('동작구 내 출발지와 도착지만 지원합니다.');
+  // The optional second-network check has its own short deadline. It must
+  // not turn a valid local result into a routing failure or block the UI.
+  const compareExternal=()=>{
+    const controller=new AbortController(),cancel=()=>controller.abort();
+    if(signal?.aborted)cancel();else signal?.addEventListener('abort',cancel,{once:true});
+    let timer;
+    const deadline=new Promise(resolve=>{timer=setTimeout(()=>{cancel();resolve(null);},6500);});
+    return Promise.race([fetchPedestrianRoute(from,to,'standard',controller.signal).catch(()=>null),deadline]).finally(()=>{clearTimeout(timer);signal?.removeEventListener('abort',cancel);});
+  };
+  const externalPending=comparison==='always'?compareExternal():null;
   try {
     const local=await fetchDongjakPedestrianVariants(from,to,{signal});
     const standard=routeWithinDistrict(local.standard?.coords,boundaryGeometry,isDongjak)?local.standard:null;
     const gentle=routeWithinDistrict(local.gentle?.coords,boundaryGeometry,isDongjak)?local.gentle:null;
     if(!standard&&!gentle)throw new Error('동작구 내 보행 경로를 찾지 못했습니다.');
-    return {...local,standard,gentle,usingLocal:true};
+    const alternative=await (externalPending||(comparison==='detour'&&shouldCompareTransitPedestrianNetwork(standard,from,to)?compareExternal():Promise.resolve(null)));
+    if(signal?.aborted)throw new DOMException('요청이 취소됐습니다.','AbortError');
+    const shortest=chooseShortestPedestrianNetwork(standard,alternative,from,to);
+    return {...local,standard:shortest,gentle,usingLocal:shortest?.source!=='valhalla-external'};
   }catch(error){
     if(error?.name==='AbortError')throw error;
     console.warn('[서울시 보행 네트워크 경로 전환 실패, 외부 경로 시도]',error);
     const settled=await Promise.allSettled([
-      fetchPedestrianRoute(from,to,'standard',signal),fetchPedestrianRoute(from,to,'gentle',signal)
+      externalPending?externalPending.then(result=>result||fetchPedestrianRoute(from,to,'standard',signal)):fetchPedestrianRoute(from,to,'standard',signal),fetchPedestrianRoute(from,to,'gentle',signal)
     ]);
     const standard=settled[0].status==='fulfilled'?settled[0].value:null;
     const gentle=settled[1].status==='fulfilled'?settled[1].value:null;
@@ -4052,7 +4066,7 @@ function transitRailQuality(segments){
 // Assess each pair of alternatives independently, never compare disjoint legs.
 async function fetchTransitPedestrianPair(from,to,signal){
  if(!transitPointInScope(from)||!transitPointInScope(to))throw new Error('보행 연결 지점이 지원 범위 밖입니다.');
- if(routeLocationInside(from)===true&&routeLocationInside(to)===true){try{return await fetchPreferredPedestrianPair(from,to,signal);}catch(e){if(signal?.aborted||e?.name==='AbortError')throw e;}}
+ if(routeLocationInside(from)===true&&routeLocationInside(to)===true){try{return await fetchPreferredPedestrianPair(from,to,signal,{comparison:'detour'});}catch(e){if(signal?.aborted||e?.name==='AbortError')throw e;}}
  // External legs use the existing bounded pedestrian proxy only. No duplicate
  // gentle request or fabricated PRI for areas without evaluation coverage.
  const standard=await fetchPedestrianRoute(from,to,'standard',signal,{transitExterior:true});

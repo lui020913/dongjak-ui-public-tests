@@ -5,6 +5,7 @@ import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fa
 import './transit-route-detail.css';
 import {advanceTransitGps} from './transit-guide-proximity.mjs';
 import {transitRailArrival} from './transit-rail-arrival.mjs';
+import {splitRailDetail} from './transit-rail-detail.mjs';
 const labels={walk:'도보',bus:'버스',rail:'지하철'};
 const paths={
  walk:WALK_ICON_PATH,
@@ -80,7 +81,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
  doc.addEventListener('visibilitychange',pauseGps);win.addEventListener('pagehide',pagehide);
 
  function updatePri(){
-  if(current.legs){for(const n of root.querySelectorAll('[data-pri-index]')){const i=Number(n.dataset.priIndex);n.textContent=current.walks[i].meters===0?'동일 위치 연결':current.walks[i].exterior?'동작구 외부 포함 · 보행안전 미평가':current.priLegs===null?'평가 자료 확인 중':transitPriText(current.priLegs?.[i])+(current.walks[i].priChoice==='observed-comparison'?' · 관측 저위험 후보 선택':'');}return;}
+  if(current.legs){for(const n of root.querySelectorAll('[data-pri-index]')){const i=Number(n.dataset.priIndex);n.textContent=current.walks[i].stationTransfer?'역내 환승 거리 미산정':current.walks[i].meters===0?'동일 위치 연결':current.walks[i].exterior?'동작구 외부 포함 · 보행안전 미평가':current.priLegs===null?'평가 자료 확인 중':transitPriText(current.priLegs?.[i])+(current.walks[i].priChoice==='observed-comparison'?' · 관측 저위험 후보 선택':'');}return;}
   for(const key of ['first','last']){const n=root.querySelector('[data-pri-leg="'+key+'"]');if(n)n.textContent=current[key]?.exterior?'동작구 외부 포함 · 보행안전 미평가':current.pri===null?'평가 자료 확인 중':transitPriText(current.pri?.[key])+(current[key]?.priChoice==='observed-comparison'?' · 관측 저위험 후보 선택':'');}
  }
  function updateStep(){
@@ -137,6 +138,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   root.append(fixed,body,footer);
  }
  function render(detail){
+  detail=splitRailDetail(detail);
   if(!detail){restoreNativeActions();stopGps();arrivalRequest?.abort();arrivalRequest=null;current=null;step=null;cancelSurfaceMotion(root);const finish=()=>{if(current)return;root.hidden=true;root.replaceChildren();root.style.removeProperty('pointer-events');};if(!root.hidden){root.style.setProperty('pointer-events','none');exitSurface(root,finish);}else finish();return;}
   if(same(current,detail)){current=detail;updatePri();return;}
   cancelSurfaceMotion(root);root.style.removeProperty('pointer-events');hideNativeActions();
@@ -204,7 +206,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
    const body=el('div','dj-tr-leg-body');body.append(el('strong','',title),el('small','',sub));li.append(marker,body);timeline.append(li);return body;
   }
   const walkRow=(i,title)=>{
-   const w=detail.walks[i];const body=row('walk',title,w.meters===0?'동일 위치에서 연결':'도보 '+w.meters+'m · 약 '+w.minutes+'분');
+   const w=detail.walks[i];const body=row('walk',title,w.stationTransfer?'다음 노선으로 환승':w.meters===0?'동일 위치에서 연결':'도보 '+w.meters+'m · 약 '+w.minutes+'분');
    const pri=el('span','dj-tr-pri');pri.dataset.priIndex=String(i);body.append(pri);
   };
   walkRow(0,detail.from);
