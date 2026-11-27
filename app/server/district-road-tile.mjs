@@ -44,7 +44,7 @@ export function reduceExteriorRoadTile(input,z,x,y,boundary=districtTileBoundary
 export function parseRoadTilePath(path){const m=path.match(/^\/api\/basemap\/tile\/(planet|backup_planet)\/([A-Za-z0-9_\-]{1,50})\/(\d{1,2})\/(\d{1,8})\/(\d{1,8})\.pbf$/);if(!m)return null;const z=Number(m[3]),x=Number(m[4]),y=Number(m[5]);if(z<0||z>16||x>=2**z||y>=2**z)return null;return {z,x,y,url:'https://tiles.openfreemap.org/'+m.slice(1).join('/').replace(/$/,'')+'.pbf'};}
 export async function serveDistrictRoadTile(request,{fetcher=fetch,cache}={}){
  const parsed=parseRoadTilePath(new URL(request.url).pathname);
- const headers={'Access-Control-Allow-Origin':'*','Cache-Control':'public, max-age=86400','Content-Type':'application/vnd.mapbox-vector-tile'};
+ const headers={'Access-Control-Allow-Origin':'*','Access-Control-Expose-Headers':'X-Dongjak-Removed-Road-Features, Cache-Control','Cache-Control':'public, max-age=86400','Content-Type':'application/vnd.mapbox-vector-tile'};
  if(!parsed)return new Response('Invalid tile',{status:400});
  const key=new Request(request.url);
  // Cache availability is optional; a cache API exception must never prevent
