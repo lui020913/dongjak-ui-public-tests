@@ -243,8 +243,8 @@ export function initTheme({map,app}){
         continue;
       }
       if(themeState.value==='light'){
-        if(entry.type==='background')set('background-color',entry.landRole==='ground'?'#e7e7e5':entry.background);
-        if(entry.type==='fill')set('fill-color',entry.pavedArea?nativePavedAreaPaint(entry.roadRole?(entry.roadRole==='edge'?'#d0d8d3':'#ffffff'):entry.fill):entry.roadRole ? (entry.roadRole==='edge'?'#d0d8d3':'#ffffff') : entry.landRole==='vegetation'?'#a5ca92':entry.landRole==='ground'?'#e7e7e5':entry.fill);
+        if(entry.type==='background')set('background-color',entry.landRole==='ground'?'#eeeeec':entry.background);
+        if(entry.type==='fill')set('fill-color',entry.pavedArea?nativePavedAreaPaint(entry.roadRole?(entry.roadRole==='edge'?'#d0d8d3':'#ffffff'):entry.fill):entry.roadRole ? (entry.roadRole==='edge'?'#d0d8d3':'#ffffff') : entry.landRole==='vegetation'?'#a5ca92':entry.landRole==='ground'?'#eeeeec':entry.fill);
         if(entry.type==='line')set('line-color',entry.roadRole ? (entry.roadRole==='edge'?'#cbd4d0':'#ffffff') : entry.line);
         if(entry.type==='symbol') {set('text-color',entry.text);set('text-halo-color',entry.halo);set('text-halo-width',entry.haloWidth);}
       }else{
