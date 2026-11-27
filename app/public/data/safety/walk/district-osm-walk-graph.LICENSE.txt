@@ -1,0 +1,8 @@
+District pedestrian graph, derived from OpenStreetMap data, snapshot 2026-11-26.
+© OpenStreetMap contributors. Licensed under Open Database License 1.0 (ODbL).
+https://www.openstreetmap.org/copyright
+https://opendatacommons.org/licenses/odbl/1-0/
+Source: OpenStreetMap contributors via Geofabrik. Derived graph preserves original way/node topology.
+Separate from Seoul City pedestrian network and measured PRI data.
+SHA256: 27c94a46e9b0e99be60078aa787d37e235c0fe13cd6667e723a5d5c2ea27198f
+Builder: https://github.com/lui020913/dongjak-ui-public-tests/tree/428dd58bbebfa82d1f558f7045f32d7693091cea/scripts/research
