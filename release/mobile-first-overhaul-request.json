@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.247",
+  "application_version": "9.2.248",
   "public_work_branch": "main",
-  "purpose": "Deploy merged PR #628: shared bus route colors including ended services, district boundary bus stop coverage, removal of decorative park trees, mapped subway exits and passages with explicit schematic fallback, and six distinct mapped site landuse colors including healthcare and civic facilities in light and dark modes. Preserve facility zoom thresholds and protected Preview/mobile QA/Production/APK gates. Source CI, picker/facility, endpoint navigation and overlay compatibility checks passed; visual and performance verification still pending.",
-  "attempt": 483,
+  "purpose": "Deploy merged PR #631: finalized light basemap ground #F7F7F7, building faces #FAFAFA and outlines #E2E2E2, apartment sites #E6DED4 and distinct facility site palettes, removal of obsolete dark site palette while preserving night safety analysis, static 77 official numbered subway exits strictly inside Dongjak district boundary, independent marker display and explicitly schematic passage connections. Full source CI including 36 phone shards, picker and facility geometry and mobile overlay compatibility passed. Preserve protected Preview/Production and APK gates.",
+  "attempt": 484,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
