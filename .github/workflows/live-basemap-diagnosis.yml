@@ -1,0 +1,32 @@
+name: Live production basemap connection diagnosis
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/live-basemap-diagnosis.yml'
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Compare live production vector tile response with upstream
+        run: |
+          node --input-type=module <<'JS'
+          const base='https://dongjak-walk-safety-preview.pages.dev';
+          const get=async(url)=>{try{const t=Date.now(),r=await fetch(url,{signal:AbortSignal.timeout(18000)});const b=new Uint8Array(await r.arrayBuffer());return {url,status:r.status,mime:r.headers.get('content-type'),size:b.length,removed:r.headers.get('x-dongjak-removed-road-features'),ms:Date.now()-t,head:[...b.slice(0,12)],body:r.ok&&r.headers.get('content-type')?.includes('json')?new TextDecoder().decode(b):!r.ok||r.headers.get('content-type')?.includes('text/html')?new TextDecoder().decode(b.slice(0,200)):null};}catch(e){return {url,error:e.message,cause:e.cause?.message};}};
+          const s=await get('https://tiles.openfreemap.org/styles/bright');if(!s.body)throw Error(JSON.stringify(s));const style=JSON.parse(s.body),source=style.sources.openmaptiles;
+          const tilejson=source.tiles?source:JSON.parse((await get(source.url)).body);
+          const tpl=tilejson.tiles[0];console.log('TILEJSON',JSON.stringify({tpl,maxzoom:tilejson.maxzoom}));
+          const cases=[];
+          for(const z of [10,12,14,15,16])for(const [lon,lat] of [[126.946,37.499],[126.925,37.555],[127.03,37.49]]){
+            const n=2**z,x=Math.floor((lon+180)/360*n),y=Math.floor((1-Math.asinh(Math.tan(lat*Math.PI/180))/Math.PI)/2*n);
+            const url=tpl.replace('{z}',z).replace('{x}',x).replace('{y}',y);
+            cases.push([url,base+'/api/basemap/tile'+new URL(url).pathname]);
+          }
+          for(let i=0;i<cases.length;i+=3){const results=await Promise.all(cases.slice(i,i+3).map(async([up,prod])=>({up:await get(up),prod:await get(prod)})));for(const r of results)console.log('LIVE_PROD_TILE',JSON.stringify(r));}
+          JS
