@@ -187,6 +187,9 @@ export function setMobileSheetExpanded(panel,expanded,doc=document,win=window){
     syncPedestrianExpandedBounds(panel,doc,win);
     syncExpandedRoot(doc,app);
     expandedRect=panel.getBoundingClientRect();
+    panel.classList.remove(EXPANDED);
+    clearPedestrianExpandedBounds(panel);
+    syncExpandedRoot(doc,app);
   }
 
   if(!rectHasArea(compactRect)||!rectHasArea(expandedRect)){
