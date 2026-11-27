@@ -5,6 +5,11 @@ on:
     paths:
       - 'scripts/research/verify_cau_routes.mjs'
       - '.github/workflows/cau-5511-pedestrian-field-check.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/research/verify_cau_routes.mjs'
+      - '.github/workflows/cau-5511-pedestrian-field-check.yml'
   workflow_dispatch:
 permissions:
   contents: read
