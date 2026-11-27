@@ -128,14 +128,59 @@ for i,site in enumerate(sites):
     site_ids[i]=selected
     site_match_methods[i]={'exact_parcel':len(parcel),'exact_name_in_dong':len(named)}
     for j in selected:site_by_current[j].add(i)
+# Cross-check whole completed complexes using mapped OSM residential polygons.
+# Keep only closed named ways with a unique K-apt identity. Never use a hull
+# or buffer as a substitute for a site boundary, or infer closure of roads.
+site_boundaries={};osm_state='unavailable'
+query='[out:json][timeout:90];(way["landuse"="residential"]["name"](37.47,126.89,37.54,127.01);way["place"="neighbourhood"]["name"](37.47,126.89,37.54,127.01);way["building"="apartments"]["name"](37.47,126.89,37.54,127.01););out geom;'
+for endpoint in ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter']:
+    try:
+        req=urllib.request.Request(endpoint,data=urllib.parse.urlencode({'data':query}).encode(),headers={'User-Agent':'Dongjak safety map read-only apartment review'})
+        with urllib.request.urlopen(req,timeout=115) as response:osm=json.load(response)
+        if not isinstance(osm.get('elements'),list) or osm.get('remark'):raise ValueError('Incomplete OSM response')
+        osm_state='retrieved';break
+    except Exception as e:print('OSM_SITE_SOURCE_ERROR '+type(e).__name__,flush=True)
+def complex_name(n):
+    n=norm(n)
+    for suffix in ('아파트','공동주택'):
+        if n.endswith(suffix):n=n[:-len(suffix)]
+    return n
+if osm_state=='retrieved':
+    names=collections.defaultdict(list)
+    for i,site in enumerate(sites):names[complex_name(site['name'])].append(i)
+    for el in osm['elements']:
+        tags=el.get('tags',{})
+        if tags.get('landuse')!='residential' and tags.get('place')!='neighbourhood':continue
+        key=complex_name(tags.get('name:ko') or tags.get('name'))
+        ids=names.get(key,[])
+        if len(ids)!=1 or len(key)<4:continue
+        i=ids[0];coords=[(p['lon'],p['lat']) for p in el.get('geometry',[])]
+        if len(coords)<4 or coords[0]!=coords[-1]:continue
+        g=make_valid(transform(project,Polygon(coords)))
+        if g.is_empty or not district.covers(g) or g.area<150 or g.area>250000:continue
+        # Require location corroboration if parcel/name match exists. Otherwise
+        # spatial matches remain tentative and do not authorize a display edit.
+        exact=site_ids[i]
+        inside={int(j) for j in tree.query(g,predicate='intersects') if g.covers(cur[int(j)].representative_point())}
+        if exact and not (inside&exact):continue
+        if i in site_boundaries:continue
+        site_boundaries[i]=(g,el['id'],bool(exact&inside))
+        for j in inside:
+            site_ids[i].add(j);site_by_current[j].add(i)
+        site_match_methods[i]['osm_site_footprints']=len(inside)
+        print('OSM_APARTMENT_SITE '+json.dumps({'name':sites[i]['name'],'osm_way':el['id'],'area_m2':round(g.area),'official_location_corroborated':bool(exact&inside),'current_footprints':len(inside)},ensure_ascii=False),flush=True)
+print('OSM_SITE_BOUNDARY_STATUS '+json.dumps({'status':osm_state,'matched_sites':len(site_boundaries)}),flush=True)
 plans=json.loads((ROOT/'app/public/data/redevelopment/confirmed-projects-202609.geojson').read_text())
 planned=unary_union([metric(f) for f in plans['features']])
 manifest=json.loads((ROOT/'app/public/buildings/manifest.json').read_text())
-counts=collections.Counter();changes=[];site_conflicts=[];legacy_by_current=collections.defaultdict(list);conflicts_by_site=collections.defaultdict(set)
+counts=collections.Counter();changes=[];site_conflicts=[];legacy_by_current=collections.defaultdict(list);conflicts_by_site=collections.defaultdict(set);legacy_rows=[];site_gap_rows=[];source_counts={};source_hashes={}
 for sheet in manifest['sheets']:
     for k in ['file','supplement']:
         if not sheet.get(k):continue
-        raw=json.loads((ROOT/'app/public'/sheet[k].lstrip('/')).read_text())
+        source_bytes=(ROOT/'app/public'/sheet[k].lstrip('/')).read_bytes()
+        raw=json.loads(source_bytes)
+        source_key=(sheet['sheet'],k)
+        source_counts[source_key]=len(raw['features']);source_hashes[source_key]=hashlib.sha256(source_bytes).hexdigest()
         for index,f in enumerate(raw['features']):
             p=f.get('properties') or {}
             if not isinstance(p.get('x'),(int,float)) or not isinstance(p.get('y'),(int,float)) or not boundary.covers(Point(p['x'],p['y'])):continue
@@ -143,6 +188,7 @@ for sheet in manifest['sheets']:
             except Exception:continue
             if g.is_empty or g.area<20:continue
             counts['legacy_display_candidates']+=1
+            legacy_rows.append((sheet['sheet'],k,index,f,g))
             in_plan=planned.covers(g.representative_point())
             if in_plan:counts['planned_area_legacy']+=1
             matches=[]
@@ -154,6 +200,9 @@ for sheet in manifest['sheets']:
             matched=unary_union([cur[j] for a,j in matches]) if matches else None
             coverage=g.intersection(matched).area/g.area if matched is not None else 0
             if coverage<.25 and not in_plan:
+                for i,(site_g,osm_id,confirmed) in site_boundaries.items():
+                    if site_g.covers(g) and sites[i]['approved']>='2020-01-01':
+                        site_gap_rows.append({'type':'Feature','geometry':f['geometry'],'properties':{'sheet':sheet['sheet'],'kind':k,'row':index,'site':sites[i]['name'],'approved':sites[i]['approved'],'coverage':round(coverage,4),'osm_way':osm_id,'official_location_corroborated':confirmed,'decision':'review_only'}})
                 counts['low_current_coverage']+=1
                 changes.append({'type':'Feature','geometry':f['geometry'],'properties':{'sheet':sheet['sheet'],'kind':k,'row':index,'x':p['x'],'y':p['y'],'coverage':round(coverage,4),'area_m2':round(g.area,2),'decision':'review_only'}})
             for a,j in matches:
@@ -168,6 +217,45 @@ for sheet in manifest['sheets']:
                 if a/g.area>=.6 and cur[j].area/g.area>=2:
                     counts['large_current_over_legacy']+=1
                     changes.append({'type':'Feature','geometry':f['geometry'],'properties':{'sheet':sheet['sheet'],'kind':k,'row':index,'coverage':round(a/g.area,4),'area_m2':round(g.area,2),'current_area_m2':round(cur[j].area,2),'decision':'review_only'}})
+# Generate conservative actual display edits only when an existing tall
+# footprint is independently confirmed by the current reference, and a small
+# low-rise footprint is entirely inside it. Keep adjacent/partial structures.
+legacy_geoms=[row[4] for row in legacy_rows];legacy_tree=STRtree(legacy_geoms)
+edits={};decisions=[]
+for j,indices in site_by_current.items():
+    if len(indices)!=1:continue
+    i=next(iter(indices));site=sites[i]
+    if not (site_match_methods[i]['exact_parcel'] or site_match_methods[i]['exact_name_in_dong']):continue
+    if planned.covers(cur[j].representative_point()):continue
+    try:floors=int(props[j].get('gro_flo_co') or 0)
+    except (TypeError,ValueError):continue
+    if floors<5 or cur[j].area<100:continue
+    current_g=cur[j]
+    nearby=[int(n) for n in legacy_tree.query(current_g,predicate='intersects')]
+    retained=[]
+    for n in nearby:
+        row=legacy_rows[n];g=row[4];h=float(row[3]['properties'].get('h') or 0)
+        overlap=g.intersection(current_g).area
+        if h>=15 and overlap/g.area>=.85 and overlap/current_g.area>=.85:
+            retained.append(n)
+    if len(retained)!=1:continue
+    owner=retained[0];owner_g=legacy_geoms[owner]
+    for n in nearby:
+        if n==owner:continue
+        sheet,kind,row,f,g=legacy_rows[n];h=float(f['properties'].get('h') or 0)
+        if not (0<h<=9 and g.area>=20 and current_g.area/g.area>=3):continue
+        if g.intersection(current_g).area/g.area<.98 or g.intersection(owner_g).area/g.area<.98:continue
+        if any(int(k)!=j and g.intersection(cur[int(k)]).area/g.area>=.25 for k in tree.query(g,predicate='intersects')):continue
+        key=(sheet,kind,row)
+        if key in edits:continue
+        owner_row=legacy_rows[owner]
+        edit={'sheet':sheet,'kind':'base' if kind=='file' else 'supplement','row':row,'original':f['geometry'],'original_height':h,'source_count':source_counts[(sheet,kind)],'source_sha256':source_hashes[(sheet,kind)],'site':site['name'],'approved':site['approved'],'reason':'contained obsolete low-rise display footprint with corroborated retained high-rise footprint','retained':{'sheet':owner_row[0],'kind':'base' if owner_row[1]=='file' else 'supplement','row':owner_row[2]}}
+        edits[key]=edit
+        decisions.append({'type':'Feature','geometry':f['geometry'],'properties':{k:v for k,v in edit.items() if k!='original'}})
+        print('VERIFIED_DISPLAY_EDIT '+json.dumps(edit,ensure_ascii=False,separators=(',',':')),flush=True)
+(OUT/'verified-apartment-display-edits.json').write_text(json.dumps({'schema':1,'edits':list(edits.values())},ensure_ascii=False,separators=(',',':')))
+(OUT/'apartment-site-gap-review.geojson').write_text(json.dumps({'type':'FeatureCollection','features':site_gap_rows},ensure_ascii=False,separators=(',',':')))
+counts['verified_display_edits']=len(edits);counts['completed_site_gap_candidates']=len(site_gap_rows)
 # Only derived comparisons, official registry metadata and existing app
 # geometry are output; do not export the reference building polygons.
 reports=[]
