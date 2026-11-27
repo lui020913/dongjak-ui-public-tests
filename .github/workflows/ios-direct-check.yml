@@ -1,0 +1,62 @@
+name: Direct iPhone Safari check — no Appium
+on:
+  push:
+    branches: ['tools/app-film-recorder']
+    paths: ['.github/workflows/ios-direct-check.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: isolated-ios-direct-check
+  cancel-in-progress: true
+jobs:
+  direct:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/tools/app-film-recorder'
+    runs-on: macos-26
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: ['26-4', '26-5']
+    env:
+      RUNTIME: ${{ matrix.runtime }}
+      URL: https://dongjak-walk-safety-preview.pages.dev/
+    steps:
+      - name: Open production site in native Safari without WebDriver
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          runtime="com.apple.CoreSimulator.SimRuntime.iOS-$RUNTIME"
+          xcrun simctl list runtimes available
+          xcrun simctl list devices available -j > "$RUNNER_TEMP/devices.json"
+          udid="$(jq -r --arg rt "$runtime" '.devices[$rt][]? | select(.isAvailable and .name=="iPhone 15 Pro") | .udid' "$RUNNER_TEMP/devices.json" | head -n 1)"
+          if [ -z "$udid" ]; then
+            udid="$(xcrun simctl create 'Dongjak direct check' com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro "$runtime")"
+          fi
+          echo "SIM_UDID=$udid" >> "$GITHUB_ENV"
+          echo "Device: $udid | $runtime"
+          curl -fsSL --max-time 15 -o /dev/null -w 'HTTP response: %{http_code}\n' "$URL"
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
+          xcrun simctl status_bar "$udid" clear
+          xcrun simctl openurl "$udid" "$URL"
+          sleep 5
+          xcrun simctl io "$udid" screenshot --mask=black evidence/05s.png
+          sleep 12
+          xcrun simctl io "$udid" screenshot --mask=black evidence/17s.png
+          sleep 15
+          xcrun simctl io "$udid" screenshot --mask=black evidence/32s.png
+          xcrun simctl spawn "$udid" log show --last 2m --style compact --predicate 'process == "MobileSafari" OR process == "com.apple.WebKit.WebContent" OR process == "com.apple.WebKit.GPU"' > evidence/webkit.log 2>&1 || true
+          printf 'runtime=%s\ndevice=%s\nurl=%s\n' "$runtime" "$udid" "$URL" > evidence/environment.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: direct-safari-${{ matrix.runtime }}
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Shut down simulator
+        if: always()
+        run: |
+          if [ -n "${SIM_UDID:-}" ]; then xcrun simctl shutdown "$SIM_UDID" || true; fi
