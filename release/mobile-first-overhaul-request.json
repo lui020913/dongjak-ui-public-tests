@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.226",
+  "application_version": "9.2.227",
   "public_work_branch": "main",
-  "purpose": "PR #602: hide ferry lines, animate district outline/halo/exterior tint with 250 ms native opacity transitions, retain continuous schematic rail when official geometry is incomplete, restrict exterior basemap labels to administrative districts/cities, and reconcile bus label filters without repeated style mutations. All five executed CI/browser checks passed. Require protected Preview/mobile QA before Production; physical-device and specific Line 4 visual confirmation remain open.",
-  "attempt": 461,
+  "purpose": "PR #603: restore offline Seoul district and Gyeonggi city labels from compact verified geographic anchors; preserve actual OSM Line 4 geometry across Dongjak railway bridge and use it as reference/fallback for incomplete remote railway data. All four executed CI/browser workflows passed. Require protected Preview and mobile QA before Production; physical-device verification remains open.",
+  "attempt": 462,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
