@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.243",
+  "application_version": "9.2.244",
   "public_work_branch": "main",
-  "purpose": "Deploy merged PR #624: complete transit route and endpoint pin visibility in comparison and detail, permanently fixed GPS follow/next/end guidance footer, and lazily loaded Seoul rail context with mapped color-coded geometry for 17 lines, preserving safety-map settings. Full source CI, 36 FIX phone checks, route endpoint and picker regressions, protected overlay compatibility passed. Preserve Preview/mobile QA/Production/APK gates.",
-  "attempt": 479,
+  "purpose": "Deploy merged PR #625: preserve existing Dongjak mapped rail alignment and visual preferences, remove parallel same-line tracks, extend uncovered rail portions across Seoul and fade within 1400m outside Seoul, enforce exclusive background rail visibility. Full source CI (2415 passed, 13 skipped), 36 phone regressions, picker/facility regression and protected overlay compatibility passed; retain protected Preview, phone QA, Production and APK gates.",
+  "attempt": 480,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
