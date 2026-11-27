@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.240",
+  "application_version": "9.2.241",
   "public_work_branch": "main",
-  "purpose": "Deploy merged PR #621: authoritative mobile editing layout owner with inline keyboard dock suppression, complete comment controls kept above visual viewport, scroll-owned bottom clearance, keyboard close/reopen restoration and removal of duplicate comment keyboard handler. Preserve earlier fixes and protected Preview/mobile QA/Production/APK gates. Source CI and targeted regressions passed.",
-  "attempt": 476,
+  "purpose": "Deploy merged PR #622: foreground live transit GPS marker and automatic camera following, explicit recenter, no route overview refit while guiding, automatic transfer progression with verified same-ARS bus transfer, transfer arrow and 제자리 환승 labels. Preserve v9.2.240 mobile keyboard fixes and protected Preview/mobile QA/Production/APK gates. All required PR checks passed.",
+  "attempt": 477,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
