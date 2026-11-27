@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.231",
+  "application_version": "9.2.232",
   "public_work_branch": "main",
-  "purpose": "PR #608 integrated Dongjak map display update: 96 verified legacy footprint exclusions across 26 apartment complexes; 22 planned redevelopment areas; stable 2D/3D pitch transitions; unavailable police facility suppression; exclusive realtime bus/metro selection. Source CI passed. Preserve six unresolved road links. Normal protected Preview, phone QA, Production and APK; optional PR render and gesture benchmarks continue independently.",
-  "attempt": 467,
+  "purpose": "PR #609: add 626 source-bound building display exclusions (722 total), source-backed planned occupancy labels, suppress stale community sheet during map location picker. App regression and build succeeded. Owner requested manual visual verification; do not wait for optional PR browser studies. Preserve normal protected release gates.",
+  "attempt": 468,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
