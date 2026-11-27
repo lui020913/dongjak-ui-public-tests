@@ -1,3 +1,4 @@
+import {createMobileEditingLayout} from './mobile-editing-layout.mjs';
 /** v6.1.0 - One viewport geometry and mutually exclusive mobile map panels. */
 export function mobileChromeMetrics({headerBottom=0,navHeight=0,viewportHeight=0}={}){
   return {header:Math.max(46,Math.ceil(Number(headerBottom)||0)),
@@ -31,16 +32,10 @@ export function installMobileLayoutCoordinator({app,map}={}){
   const nav=app.querySelector('#bottom-nav');
   let raf=0;
   const doc=app.ownerDocument||globalThis.document;
-  let layoutHeight=Math.max(window.innerHeight,doc?.documentElement?.clientHeight||0);
+  const editingLayout=createMobileEditingLayout({app,doc,win:window,nav});
   const sync=()=>{
     raf=0;
-    // Shared layout metrics are synchronized for phones, tablets and desktop.
-    let focused=doc?.activeElement;while(focused?.shadowRoot?.activeElement)focused=focused.shadowRoot.activeElement;
-    const editing=Boolean(focused?.matches?.('textarea,input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=button]):not([type=submit]),[contenteditable=true]'));
-    const vv=window.visualViewport;
-    if(!editing)layoutHeight=Math.max(window.innerHeight,doc?.documentElement?.clientHeight||0);
-    const keyboard=window.matchMedia?.('(max-width:699px)')?.matches===true&&editing&&Boolean(vv)&&layoutHeight-(vv.height+vv.offsetTop)>80;
-    if(keyboard){app.dataset.djEditingKeyboard='true';app.style.setProperty('--dj-editing-top',Math.max(0,vv.offsetTop)+'px');app.style.setProperty('--dj-editing-height',Math.round(vv.height)+'px');}else{delete app.dataset.djEditingKeyboard;app.style.removeProperty('--dj-editing-top');app.style.removeProperty('--dj-editing-height');}
+    editingLayout.sync();
     const hb=header?.getBoundingClientRect?.().bottom||0;
     const nh=nav?.getBoundingClientRect?.().height||0;
     const size=mobileChromeMetrics({headerBottom:hb,navHeight:nh,
@@ -62,12 +57,13 @@ export function installMobileLayoutCoordinator({app,map}={}){
   window.addEventListener('orientationchange',request,{passive:true});
   window.visualViewport?.addEventListener?.('resize',request,{passive:true});
   window.visualViewport?.addEventListener?.('scroll',request,{passive:true});
-  doc?.addEventListener?.('focusin',request);doc?.addEventListener?.('focusout',request);
+  const focusChange=()=>{editingLayout.sync();request();};
+  doc?.addEventListener?.('focusin',focusChange);doc?.addEventListener?.('focusout',request);
   map?.on?.('resize',request);
   request();
-  const cleanup=()=>{if(raf)window.cancelAnimationFrame(raf);observer?.disconnect();mutation.disconnect();
+  const cleanup=()=>{editingLayout.dispose();if(raf)window.cancelAnimationFrame(raf);observer?.disconnect();mutation.disconnect();
     window.removeEventListener('resize',request);window.removeEventListener('orientationchange',request);
-    window.visualViewport?.removeEventListener?.('resize',request);window.visualViewport?.removeEventListener?.('scroll',request);doc?.removeEventListener?.('focusin',request);doc?.removeEventListener?.('focusout',request);map?.off?.('resize',request);};
+    window.visualViewport?.removeEventListener?.('resize',request);window.visualViewport?.removeEventListener?.('scroll',request);doc?.removeEventListener?.('focusin',focusChange);doc?.removeEventListener?.('focusout',request);map?.off?.('resize',request);};
   const record={refs:0,cleanup};
   byMap.set(key,record);
   return releaseLease(record);

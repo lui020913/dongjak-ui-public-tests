@@ -43,11 +43,13 @@ test('review keyboard editor is separate from map and disposed on popup close',(
  assert.match(css,/data-dj-review-editor="open"\] #bottom-nav\{display:none!important/);
 });
 test('comment actions share a shape and dock stays hidden during comment keyboard input',()=>{
- const main=read('src/main.js'),css=read('src/community-composer-portal.css');
- assert.match(main,/community-comment-form input\[type=text\]/);
+ const main=read('src/main.js'),css=read('src/community-composer-portal.css'),owner=read('src/mobile-editing-layout.mjs'),coordinator=read('src/mobile-ui-coordinator.js');
+ assert.match(owner,/focus\.closest\('\.community-comment-form'\)/);
+ assert.match(coordinator,/editingLayout\.sync\(\)/);
  assert.match(main,/community-comment-submit/);
- assert.match(main,/dj-community-comment-keyboard/);
+ assert.doesNotMatch(main,/const syncCommentKeyboard=/);
  assert.match(css,/:is\(\.community-comment-submit,\.community-comment-photo\)/);
  assert.match(css,/input\[type=text\]:focus\{\s*outline:none!important;box-shadow:none!important/);
- assert.match(css,/dj-community-comment-keyboard #bottom-nav\{display:none!important/);
+ assert.match(owner,/write\(nav,'display','none'\)/);
+ assert.match(owner,/write\(sc,'padding-bottom',keyboard\?'20px'/);
 });

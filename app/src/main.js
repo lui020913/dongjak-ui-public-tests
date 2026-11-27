@@ -2294,24 +2294,7 @@ for (const chip of document.querySelectorAll('.community-filter[data-community-f
 }
 document.getElementById('community-sort').addEventListener('change',()=>{setCommunityNoticeView(false);communityDetail=null;renderCommunity();});
 document.getElementById('community-dong-filter').addEventListener('change',()=>{setCommunityNoticeView(false);communityDetail=null;renderCommunity();});
-// Hide the dock while the comment field owns the mobile keyboard.
-const syncCommentKeyboard=()=>{
-  const focused=document.activeElement?.matches?.('.community-comment-form input[type=text]');
-  const phone=window.matchMedia('(max-width:699px)').matches;
-  const active=phone&&focused&&app.dataset.tab==='participate';
-  const vv=window.visualViewport;
-  app.classList.toggle('dj-community-comment-keyboard',Boolean(active));
-  if(active){
-    const room=Math.max(0,(vv?.offsetTop||0)+(vv?.height||window.innerHeight));
-    const panel=document.getElementById('participation-panel');
-    const panelTop=Math.max(0,panel?.getBoundingClientRect().top||0);
-    app.style.setProperty('--dj-comment-visible-bottom',Math.max(160,room-panelTop)+'px');
-    const sc=panel?.querySelector(':scope>.dj836-sheet-body');
-    const box=document.activeElement.getBoundingClientRect();
-    if(sc&&box.bottom>room-16)sc.scrollTop+=box.bottom-room+16;
-  }else app.style.removeProperty('--dj-comment-visible-bottom');
-};
-for(const [target,type] of [[document,'focusin'],[document,'focusout'],[window.visualViewport,'resize'],[window.visualViewport,'scroll']])target?.addEventListener(type,()=>requestAnimationFrame(syncCommentKeyboard),{passive:true});
+// The shared mobile layout coordinator owns comment and search keyboard geometry.
 document.getElementById('community-refresh').addEventListener('click',()=>void refreshSharedCommunity());
 // Each route point has one location picker. Search/map/GPS remain separate
 // native actions but are no longer three persistent buttons per point.
@@ -2761,7 +2744,7 @@ function renderCommunity() {
       if(comment.photo){const img=document.createElement('img');img.className='community-post-image';img.src=comment.photo;img.alt='댓글 첨부 사진';img.loading='lazy';row.append(img);}if(post.shared){if(!comment.parentId)row.append(communityButton('답글','community-reply-button',()=>{communityReplyTo=comment;commentForm.communityParentId=comment.id;replyLabel.hidden=false;replyLabel.firstChild.textContent=(comment.nickname||'익명 주민')+'님에게 답글';input.placeholder='답글을 입력하세요';input.focus();}));row.append(communityButton('신고','community-report',()=>showCommunityReport(post.id,comment.id,row)));}commentsArea.append(row);
     }
     const commentForm=makeCEl('form','community-comment-form');
-    const input=document.createElement('input');input.type='text';input.required=true;input.maxLength=300;input.placeholder='댓글을 입력하세요';input.setAttribute('aria-label','댓글 입력');
+    const input=document.createElement('input');input.type='text';input.required=true;input.maxLength=300;input.placeholder='댓글을 입력하세요';input.autocomplete='off';input.setAttribute('aria-label','댓글 입력');
     const send=makeCEl('button','community-comment-submit', '등록');send.type='submit';
     const commentActionShape=button=>{for(const [key,value] of Object.entries({'border-radius':'14px','height':'44px','min-height':'44px','min-width':'48px','padding':'0 12px','white-space':'nowrap','word-break':'keep-all','overflow-wrap':'normal','flex-shrink':'0','width':'max-content','box-sizing':'border-box','box-shadow':'none'}))button.style.setProperty(key,value,'important');return button;};commentActionShape(send);
     const replyLabel=makeCEl('div','community-reply-label');replyLabel.append(makeCEl('span','',communityReplyTo?(communityReplyTo.nickname||'익명 주민')+'님에게 답글':''),communityButton('취소','community-reply-button',()=>{communityReplyTo=null;commentForm.communityParentId=null;replyLabel.hidden=true;input.placeholder='댓글을 입력하세요';}));replyLabel.hidden=!communityReplyTo;commentForm.communityParentId=communityReplyTo?.id||null;commentsArea.append(replyLabel);
