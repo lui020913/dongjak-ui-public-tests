@@ -1,5 +1,6 @@
 import {createTransitCellStream,viewportKeys,cellKey} from './transit-stream-grid.mjs';
 import {getSeoulBoundary,inSeoul} from './seoul-transit-boundary.mjs';
+import {installCityTransitRail} from './city-transit-rail.mjs';
 import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 import {createBusRouteDetail} from './bus-route-detail.js';
 import {openMetroLiveDetail,closeMetroLiveDetail,updateMetroLiveArrivals} from './metro-live-detail.js';
@@ -1711,6 +1712,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     }
   }
   bringRailToForeground();
+  const cityRail=installCityTransitRail({map,app:streamApp,colors:SUBWAY_LINE_COLORS,getBoundary:getSeoulBoundary,isInside:inSeoul});
   const refreshNearbyBusStopNames=()=>syncNearbyBusStopNameFilters(map,getDistrictGeometry());
   refreshNearbyBusStopNames();
   const viewportLabels=coalesceViewportWork(full=>{refreshNearbyBusStopNames();if(full)updateTileBusFallbackFilter();},{delay:100,isMoving:()=>map.isMoving?.()===true});
@@ -1978,9 +1980,10 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   map.on('zoomend',()=>streamViewportWork.request());
   map.on('resize',()=>streamViewportWork.request());
   map.on('dongjak:boundary-updated',()=>{lastStopDataSignature='';lastMetroInputSignature='';streamViewportWork.request();});
-  globalThis.window?.addEventListener?.('dongjak:transit-stream-scope',()=>{lastStopDataSignature='';lastMetroInputSignature='';streamViewportWork.request();});
+  globalThis.window?.addEventListener?.('dongjak:transit-stream-scope',()=>{cityRail.sync();lastStopDataSignature='';lastMetroInputSignature='';streamViewportWork.request();});
   globalThis.window?.addEventListener?.('dongjak:transit-route-stops',event=>{routeStopCoordinates=Array.isArray(event.detail)?event.detail:[];lastStopDataSignature='';refreshStops();});
-  document.addEventListener?.('dongjak-base-layer-change',()=>streamViewportWork.request());
+  document.addEventListener?.('dongjak-base-layer-change',()=>{cityRail.sync();streamViewportWork.request();});
+  cityRail.sync();
   refreshTransitViewport();
   // 별도 Overpass 호출 없이 배경지도 벡터 POI에서 정류소/역을 보충합니다.
   // 확실히 식별되는 철도 class와 이름만 사용하고, 임의로 좌표를 만들지 않습니다.
