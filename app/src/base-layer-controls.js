@@ -30,7 +30,7 @@ export function applyBaseLayerVisibility(map,settings,{manageBoundary=true,trans
   const normalized=normalizeBaseLayerSettings(settings);
   for(const key of manageBoundary?['metro','bus','boundary']:['metro','bus']){
     for(const id of BASE_LAYER_IDS[key]){
-      const desired=key==='metro'&&LOCAL_RAIL_LINE_IDS.includes(id)&&transitActive?(cityRailOwnsBackground(map,true)?'none':'visible'):(normalized[key]?'visible':'none');
+      const desired=key==='metro'&&transitActive?(LOCAL_RAIL_LINE_IDS.includes(id)&&cityRailOwnsBackground(map,true)?'none':'visible'):(normalized[key]?'visible':'none');
       try{
         if(!map.getLayer(id))continue;
         const current=map.getLayoutProperty(id,'visibility')||'visible';

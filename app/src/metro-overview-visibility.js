@@ -1,3 +1,4 @@
+import {LOCAL_RAIL_LINE_IDS,cityRailOwnsBackground} from './city-transit-rail.mjs';
 /**
  * Responsive metro overview visibility.
  *
@@ -73,10 +74,12 @@ export function installResponsiveMetroVisibility({map,app}={}){
     const container=map.getContainer();
     const width=container?.clientWidth||container?.getBoundingClientRect?.().width||0;
     const height=container?.clientHeight||container?.getBoundingClientRect?.().height||0;
-    const enabled=app?.dataset?.baseMetro!=='off';
+    const transitActive=app?.dataset?.djTransitExterior==='true';
+    const cityOwns=cityRailOwnsBackground(map,transitActive);
+    const enabled=transitActive||app?.dataset?.baseMetro!=='off';
     const visible=metroVisibleAtZoom({zoom:map.getZoom(),bounds:map.getMaxBounds?.(),width,height,enabled});
-    const desired=visible?'visible':'none';
     for(const id of METRO_OVERVIEW_LAYERS){
+      const desired=cityOwns&&LOCAL_RAIL_LINE_IDS.includes(id)?'none':visible?'visible':'none';
       if(!map.getLayer?.(id))continue;
       try{
         const current=map.getLayoutProperty?.(id,'visibility')||'visible';
@@ -89,11 +92,13 @@ export function installResponsiveMetroVisibility({map,app}={}){
   map.on?.('resize',sync);
   map.on?.('moveend',sync);
   if(typeof document!=='undefined')document.addEventListener('dongjak-base-layer-change',syncAfterPreferences);
+  if(typeof window!=='undefined')window.addEventListener('dongjak:transit-stream-scope',syncAfterPreferences);
   sync();
   if(typeof requestAnimationFrame==='function')requestAnimationFrame(sync);
   return ()=>{
     disposed=true;
     map.off?.('zoom',sync);map.off?.('resize',sync);map.off?.('moveend',sync);
     if(typeof document!=='undefined')document.removeEventListener('dongjak-base-layer-change',syncAfterPreferences);
+    if(typeof window!=='undefined')window.removeEventListener('dongjak:transit-stream-scope',syncAfterPreferences);
   };
 }

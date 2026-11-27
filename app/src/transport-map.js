@@ -1378,6 +1378,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const streamApp=document.getElementById('app');
   const cityScope=()=>streamApp?.dataset.djTransitExterior==='true'&&Boolean(getSeoulBoundary());
   const scopeContains=(lng,lat)=>cityScope()?inSeoul(lng,lat):isDongjak(lng,lat)===true;
+  const adjacentMetroScope=makeMetroDisplayScope(officialMetro,{normalizeName:normalizeStationQueryName,normalizeLine:normalizeLineName,isDistrict:isDongjak});
+  const stationScope=(name,line,lng,lat)=>cityScope()?inSeoul(lng,lat):adjacentMetroScope(name,line,lng,lat);
+  const placeInDisplayScope=p=>p.kind==='subway'?(p.lines||[]).some(line=>stationScope(p.name,normalizeLineName(line),p.lng,p.lat)):scopeContains(p.lng,p.lat);
   let streamedRows=[],activeStreamKeys=new Set(),streamPending=0,streamFailed=0,streamReady=false,routeStopCoordinates=[];
   const overlapsRouteStop=(lng,lat,kind)=>routeStopCoordinates.some(([x,y])=>meterDistance([lng,lat],[x,y])<=(kind==='bus'?22:40));
   const inActiveCell=p=>activeStreamKeys.has((p.kind==='bus'?'bus':'rail')+'_'+cellKey(p.lng,p.lat));
@@ -1839,14 +1842,14 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   function renderMetroMarkers(items){
     lastMetroMarkerItems=items;
     const geo=metroMarkerGeojson(items,{
-      canonicalStations:officialMetro.filter(p=>inActiveCell(p)&&scopeContains(p.lng,p.lat)),
+      canonicalStations:officialMetro.filter(p=>inActiveCell(p)&&placeInDisplayScope(p)),
       normalizeName:normalizeStationQueryName,normalizeLine:normalizeLineName,
       placements:(name,lines,lng,lat)=>officialMetro.some(p=>normalizeStationQueryName(p.name)===normalizeStationQueryName(name))?metroLineMarkerPlacements(name,lines,lng,lat,renderedRailPaths):lines.map(line=>({line,lng,lat})),
       colors:SUBWAY_LINE_COLORS,
-      radiusPredicate:scopeContains,
+      radiusPredicate:(lng,lat)=>cityScope()?inSeoul(lng,lat):withinMetroRadius(lng,lat),
       isDistrict:scopeContains,
-      nearby:()=>false,
-      stationScope:(name,line,lng,lat)=>scopeContains(lng,lat)
+      nearby:(lng,lat)=>!cityScope()&&isNearBoundary(lng,lat)===true,
+      stationScope
     });
     stationLookups=new Map(items.filter(x=>x.kind==='subway').map(x=>[normalizeStationQueryName(x.name),x]));
     for(const p of geo.features){
@@ -1854,7 +1857,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     }
     // Scope by station identity before track snapping; keep both badges at a
     // boundary transfer station, but exclude unrelated external stations.
-    geo.features=geo.features.filter(f=>scopeContains(...f.geometry.coordinates)&&!overlapsRouteStop(...f.geometry.coordinates,'subway'));
+    geo.features=geo.features.filter(f=>{const p=stationLookups.get(f.properties.stationKey)||officialMetro.find(p=>normalizeStationQueryName(p.name)===f.properties.stationKey);return p&&stationScope(p.name,f.properties.line,p.lng,p.lat)&&(!cityScope()||inSeoul(...f.geometry.coordinates))&&!overlapsRouteStop(...f.geometry.coordinates,'subway');});
     const signature=JSON.stringify(geo);
     if(signature!==lastMetroGeoSignature){map.getSource(stationSource)?.setData(geo);lastMetroGeoSignature=signature;}
   }
@@ -1891,7 +1894,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   // 실제 철도 OSM 요청은 제거했습니다. 선형은 고정 GeoJSON만 사용합니다.
   let officialStaticStopCount=0;
   function combineStations(){
-    const eligible=p=>inActiveCell(p)&&scopeContains(p.lng,p.lat);
+    const eligible=p=>inActiveCell(p)&&placeInDisplayScope(p);
     const official=streamedRows.filter(eligible);
     const officialBus=official.filter(p=>p.kind==='bus');
     const officialIds=new Set(officialBus.map(p=>String(p.arsId)));
@@ -1924,7 +1927,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   let lastStopDataSignature='',lastBusSourceSignature='',lastRailSourceSignature='',lastMetroInputSignature='';
   function showStops(items){
     if(map.isMoving?.()){stopPublish.request();return;}
-    const filtered=items.filter(x=>scopeContains(x.lng,x.lat)&&inActiveCell(x)).sort((a,b)=>String(a.id).localeCompare(String(b.id)));
+    const filtered=items.filter(x=>placeInDisplayScope(x)&&inActiveCell(x)).sort((a,b)=>String(a.id).localeCompare(String(b.id)));
     const signature=JSON.stringify(filtered);
     if(signature===lastStopDataSignature){updateTileBusFallbackFilter();return;}
     lastStopDataSignature=signature;
@@ -1974,7 +1977,10 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const bounds={west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()};
     const geometry=cityScope()?getSeoulBoundary():getDistrictGeometry();
     if(geometry){const polygons=geometry.type==='Polygon'?[geometry.coordinates]:geometry.coordinates;let w=Infinity,e=-Infinity,s=Infinity,n=-Infinity;for(const polygon of polygons)for(const [x,y] of polygon[0]){w=Math.min(w,x);e=Math.max(e,x);s=Math.min(s,y);n=Math.max(n,y);}bounds.west=Math.max(bounds.west,w);bounds.east=Math.min(bounds.east,e);bounds.south=Math.max(bounds.south,s);bounds.north=Math.min(bounds.north,n);}
-    const keys=bounds.west<=bounds.east&&bounds.south<=bounds.north?viewportKeys(bounds,map.getZoom(),{bus:streamApp?.dataset.baseBus!=='off',rail:streamApp?.dataset.baseMetro!=='off'},streamDirection):[];
+    const zoom=map.getZoom(),city=cityScope();
+    const keys=bounds.west<=bounds.east&&bounds.south<=bounds.north?viewportKeys(bounds,zoom,{bus:streamApp?.dataset.baseBus!=='off',rail:city},streamDirection):[];
+    // Adjacent safety-map stations have their own curated scope. Do not clip their cells at the district border.
+    if(!city&&streamApp?.dataset.baseMetro!=='off')keys.push(...viewportKeys({west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()},zoom,{bus:false,rail:true},streamDirection).filter(k=>officialMetro.some(p=>placeInDisplayScope(p)&&k==='rail_'+cellKey(p.lng,p.lat))));
     activeStreamKeys=new Set(keys);cellStream.update(keys);refreshStops();
   }
   const streamViewportWork=coalesceViewportWork(refreshTransitViewport,{delay:110,isMoving:()=>map.isMoving?.()===true});
