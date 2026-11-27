@@ -90,6 +90,7 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
 
 import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,nativeBuildingFootprintPaint,nativeBuildingFootprint,repaintVegetation} from './map-appearance.js';
 import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
+import {setDistrictOpacity} from './transit-exterior-scope.mjs';
 import {createThemeState} from './theme-state-core.mjs';
 import {scaleMapLabelSize} from './map-label-text-scale.mjs';
 import {LABEL_HALO_MAX_PX} from './map-label-halo.js';
@@ -266,7 +267,7 @@ export function initTheme({map,app}){
       const maskPaint=districtExteriorThemePaint(themeState.value);
       if(app.dataset.djTransitExterior==='true')maskPaint['fill-opacity']=0;
       for(const [key,value] of Object.entries(maskPaint)){
-        try{map.setPaintProperty('district-exterior-fade',key,value);}catch(error){console.warn('[외부지역 마스크] 테마 전환 실패:',error);}
+        try{if(key==='fill-opacity')setDistrictOpacity(map,'district-exterior-fade',key,value);else if(map.getPaintProperty('district-exterior-fade',key)!==value)map.setPaintProperty('district-exterior-fade',key,value);}catch(error){console.warn('[외부지역 마스크] 테마 전환 실패:',error);}
       }
     }
     // Added overlays are not part of the original style baseline and must be
@@ -399,27 +400,53 @@ export function filterCommercialPOI(map){
 // 지도 전체를 없애지 않고 경계 내부의 라벨만 남기기 위한 filter expression.
 // 지도 타일 라벨 중 폴리곤·선형 피처는 경계와 교차할 때 일부 누락될 수 있습니다.
 const districtLabelOriginals=new WeakMap();
-export function clipBasemapLabelsToDistrict(map, geometry){
-  if(!geometry)return;
-  const within=['within',{type:geometry.type,coordinates:geometry.coordinates}];
-  let done=0;
-  let originals=districtLabelOriginals.get(map);if(!originals){originals=new Map();districtLabelOriginals.set(map,originals);}
-  for(const layer of map.getStyle().layers){
-    if(layer.type!=='symbol'||layer.id.startsWith('transport-'))continue;
-    // Hangang bridge labels are deliberately north of the district boundary.
-    // Do not clip these five named crossings with the Dongjak-only POI filter.
-    if(layer.id.startsWith('dongjak-')||layer.id.startsWith('dj-hangang-bridge-'))continue;
-    try{
-      if(!originals.has(layer.id))originals.set(layer.id,map.getFilter(layer.id)||null);
-      const original=originals.get(layer.id);
-      map.setFilter(layer.id,['all',...(original?[original]:[]),within]);
-      done++;
-    }catch(error){console.warn('[경계 라벨] 필터 적용 생략',layer.id,error);}
+const districtLabelOwners=new WeakMap();
+// Only the explicitly curated district/city layer may label outside Dongjak.
+// Selected route labels, safety reports and live navigation are not basemap POIs.
+export function districtScopedSymbol(layer={}){
+ const id=String(layer.id||'');
+ return layer.type==='symbol'&&id!=='neighbor-district-names'&&
+ !/^(?:dj-transit-(?:multi|comparison|rail)|dj815-transit-|walking-route|registered-points|route-|dj-route-|dj-pri-|dongjak-pri-|nav-)/.test(id);
+}
+function containsWithin(filter,within){
+ if(JSON.stringify(filter)===JSON.stringify(within))return true;
+ return Array.isArray(filter)&&filter[0]==='all'&&filter.slice(1).some(f=>containsWithin(f,within));
+}
+export function clipBasemapLabelsToDistrict(map,geometry){
+ if(!geometry)return;
+ const within=['within',{type:geometry.type,coordinates:geometry.coordinates}];
+ let originals=districtLabelOriginals.get(map);if(!originals){originals=new Map();districtLabelOriginals.set(map,originals);}
+ const apply=()=>{
+  for(const layer of map.getStyle()?.layers||[]){
+   if(!districtScopedSymbol(layer))continue;
+   try{
+    const current=map.getFilter(layer.id)||null;
+    if(containsWithin(current,within))continue;
+    originals.set(layer.id,current);
+    map.setFilter(layer.id,['all',...(current?[current]:[]),within]);
+   }catch(error){console.debug('[경계 라벨] 필터 적용 생략',layer.id,error?.message);}
   }
-  console.info(`[v17.7] 동작구 경계 내부 라벨만 ${done}개 레이어에 적용`);
+ };
+ const previous=districtLabelOwners.get(map);
+ if(previous){previous.dispose();}
+ let timer=null,signature='';
+ const layerSignature=()=>map.getStyle()?.layers?.filter(districtScopedSymbol).map(l=>l.id).sort().join('|')||'';
+ const reconcile=()=>{signature=layerSignature();apply();};
+ const schedule=()=>{
+  if(timer!==null||map.isMoving?.())return;
+  timer=setTimeout(()=>{timer=null;if(!map.isMoving?.())reconcile();},120);
+ };
+ // New symbol layers need a one-time scope application. Existing layers
+ // already have dedicated filter owners; do not respond to every paint,
+ // filter or ordering event with a second mutation.
+ const newLayers=()=>{if(layerSignature()!==signature)schedule();};
+ map.on?.('styledata',newLayers);map.on?.('moveend',schedule);
+ districtLabelOwners.set(map,{dispose:()=>{clearTimeout(timer);map.off?.('styledata',newLayers);map.off?.('moveend',schedule);}});
+ reconcile();
 }
 
 /** Restore only the base symbols previously clipped by the district policy. */
 export function restoreBasemapLabelsOutsideDistrict(map){
+ districtLabelOwners.get(map)?.dispose();districtLabelOwners.delete(map);
  for(const [id,filter] of districtLabelOriginals.get(map)||[]){if(map.getLayer(id))try{map.setFilter(id,filter);}catch{}}
 }

@@ -46,12 +46,21 @@ export function transitContextBounds(districtBounds,endpoints=[],routeCoords=[])
 export function transitFramingBounds(){return [[126.60,37.22],[127.38,37.88]];}
 // The original safety map is authoritative. No geometry, filter, source,
 // visibility or terrain changes are made when entering transit.
-export function applyTransitBoundaryVisibility(map,active,phone=false,exteriorOpacity=.65){
- const opacity=active?0:exteriorOpacity;
- if(map.getLayer('district-exterior-fade')&&map.getPaintProperty('district-exterior-fade','fill-opacity')!==opacity)
-  map.setPaintProperty('district-exterior-fade','fill-opacity',opacity);
+export const DISTRICT_FADE_MS=250;
+export function setDistrictOpacity(map,id,property,value){
+ if(!map.getLayer(id)||map.getPaintProperty(id,property)===value)return;
+ const duration=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?0:DISTRICT_FADE_MS;
+ const transition={duration,delay:0},key=property+'-transition';
+ if(JSON.stringify(map.getPaintProperty(id,key))!==JSON.stringify(transition))map.setPaintProperty(id,key,transition);
+ map.setPaintProperty(id,property,value);
+}
+export function applyDistrictOutlineVisibility(map,active,phone=false,enabled=true){
  for(const [id,opacity] of [['district-border',.96],['district-border-halo',phone?.42:.92]]){
-  if(map.getLayer(id)&&map.getPaintProperty(id,'line-opacity')!==(active?0:opacity))
-   map.setPaintProperty(id,'line-opacity',active?0:opacity);
+  setDistrictOpacity(map,id,'line-opacity',active||!enabled?0:opacity);
  }
+}
+export function applyTransitBoundaryVisibility(map,active,phone=false,exteriorOpacity=.65,outlineEnabled=true){
+ const opacity=active?0:exteriorOpacity;
+ setDistrictOpacity(map,'district-exterior-fade','fill-opacity',opacity);
+ applyDistrictOutlineVisibility(map,active,phone,outlineEnabled);
 }

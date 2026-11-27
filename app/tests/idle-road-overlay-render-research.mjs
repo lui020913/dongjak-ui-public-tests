@@ -50,7 +50,7 @@ try{
 
  for(const site of sites){
   await page.evaluate(({center})=>window.__qaMap.jumpTo({center,zoom:18.4,pitch:0}),site);
-  await page.waitForFunction(()=>{const m=window.__qaMap;return m.isStyleLoaded()&&m.getStyle().layers.some(l=>l['source-layer']==='transportation'&&l.type==='line')&&m.getStyle().layers.some(l=>l.id.startsWith('dongjak-buildings-footprint-')&&m.isSourceLoaded(l.source));},{},{timeout:90000});
+  await page.waitForFunction(()=>{const m=window.__qaMap;return m.isStyleLoaded()&&m.getStyle().layers.some(l=>l['source-layer']==='transportation'&&l.type==='line')&&m.getStyle().layers.some(l=>l.id.startsWith('dongjak-buildings-footprint-')&&m.isSourceLoaded(l.source));},{},{timeout:90000}).catch(async error=>{console.log('IDLE_MAP_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>{const m=window.__qaMap;return {styleLoaded:m.isStyleLoaded(),moving:m.isMoving(),layers:m.getStyle().layers.filter(l=>l.id.startsWith('dongjak-buildings-footprint-')).map(l=>({id:l.id,loaded:m.isSourceLoaded(l.source)})),boundary:document.querySelector('#app')?.dataset.djBoundaryReady};})));throw error;});
   const read=()=>page.evaluate(()=>{const m=window.__qaMap,s=m.getStyle();return {overlay:!!m.getLayer('dj-reviewed-base-road-fill'),source:!!m.getSource('dj-reviewed-base-road-surfaces'),flag:document.querySelector('#app')?.dataset.djReviewedBaseRoads||null,nativeRoads:s.layers.filter(l=>l.type==='line'&&l['source-layer']==='transportation').map(l=>({id:l.id,filter:m.getFilter(l.id),visibility:m.getLayoutProperty(l.id,'visibility')})),center:m.getCenter().toArray(),zoom:m.getZoom()};});
   await page.evaluate(()=>{const m=window.__qaMap;const p=m.project(m.getCenter());m.panBy([18,0],{duration:250});});
   await page.waitForFunction(()=>!window.__qaMap.isMoving(),{},{timeout:10000});
@@ -65,6 +65,7 @@ try{
     const nativeAreas=info.layers.filter(nativeVehicleArea),nativeQuiet=info.layers.filter(quietNativeLine);
     assert.ok(nativeAreas.length>0,'actual native road polygon layer must exist');
     assert.ok(nativeQuiet.some(l=>l['source-layer']==='boundary'),'actual native boundary line must exist');
+    if(process.env.CHECK_FERRY_FADE==='true')assert.ok(nativeQuiet.some(l=>l.id==='ferry'||/ferry/.test(l.id)),'actual ferry line must exist and be hidden');
     assert.ok(nativeAreas.every(l=>JSON.stringify(l.filter).includes('pedestrian')),'native vehicle area must exclude road fills');
     assert.ok(nativeQuiet.every(l=>l.visibility==='none'),'decorative lines must remain hidden');
     assert.ok(info.district>0,'owned Dongjak district boundary must remain visible in safety mode');

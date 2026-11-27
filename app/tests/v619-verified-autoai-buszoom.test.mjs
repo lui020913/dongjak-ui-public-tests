@@ -59,6 +59,8 @@ test('at max zoom native fallback pictogram stays visible and OSM viewport reple
   const fallback=map.slice(map.indexOf('export function installBasemapBusStopFallback'),map.indexOf('const BUS_NAME_FILTERS'));
   assert.match(fallback,/'text-allow-overlap':true,'text-ignore-placement':true,'text-optional':true/);
   const filters=map.slice(map.indexOf('function syncNearbyBusStopNameFilters'),map.indexOf('function labelVisibility'));
-  assert.doesNotMatch(filters,/circlePolygonAround|radius|\['within'/);
-  assert.match(filters,/const next=base;/);
+  // The fixed district polygon is intentional; camera-centred radius clipping remains prohibited.
+  assert.doesNotMatch(filters,/circlePolygonAround|radius|getCenter\s*\(/);
+  assert.match(filters,/const next=district\?\['all',base,\['within',\{type:district.type,coordinates:district.coordinates\}\]\]:base;/);
+  assert.match(map,/syncNearbyBusStopNameFilters\(map,getDistrictGeometry\(\)\)/);
 });

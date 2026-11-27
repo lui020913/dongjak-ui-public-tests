@@ -1217,13 +1217,13 @@ function circlePolygonAround(lng,lat,radiusMeters,points=20){
   }
   return {type:'Polygon',coordinates:[ring]};
 }
-function syncNearbyBusStopNameFilters(map){
+function syncNearbyBusStopNameFilters(map,district){
   if(!map?.getCenter||!map?.setFilter)return;
   // Label eligibility must not depend on distance from the screen center.
   // The source is already district-scoped; no radial clipping at high zoom.
   for(const [layerId,base] of Object.entries(BUS_NAME_FILTERS)){
     if(!map.getLayer?.(layerId))continue;
-    const next=base;
+    const next=district?['all',base,['within',{type:district.type,coordinates:district.coordinates}]]:base;
     try{if(JSON.stringify(map.getFilter?.(layerId))!==JSON.stringify(next))map.setFilter(layerId,next);}catch(error){console.debug('[버스정류장명] 근접 필터 조정 실패',layerId,error?.message);}
   }
 }
@@ -1703,7 +1703,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     }
   }
   bringRailToForeground();
-  const refreshNearbyBusStopNames=()=>syncNearbyBusStopNameFilters(map);
+  const refreshNearbyBusStopNames=()=>syncNearbyBusStopNameFilters(map,getDistrictGeometry());
   refreshNearbyBusStopNames();
   const viewportLabels=coalesceViewportWork(full=>{refreshNearbyBusStopNames();if(full)updateTileBusFallbackFilter();},{delay:100,isMoving:()=>map.isMoving?.()===true});
   map.on('moveend',()=>viewportLabels.request(true));
@@ -1715,6 +1715,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(!map.getLayer('poi_transit'))return;
     const rules=[];
     if(originalTransitFilter)rules.push(originalTransitFilter);
+    const district=getDistrictGeometry();if(district)rules.push(['within',{type:district.type,coordinates:district.coordinates}]);
     if((map.getZoom?.()??16)<14.25 || document.getElementById('app')?.dataset?.baseBus==='off')rules.push(['all',
       ['!=',['get','class'],'bus'],['!=',['get','subclass'],'bus_stop'],['!=',['get','subclass'],'bus_station']]);
     if(suppressNativeRail || (map.getZoom?.()??16)<12.45 || document.getElementById('app')?.dataset?.baseMetro==='off')rules.push(['!=',['get','class'],'rail']);
@@ -1837,6 +1838,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     for(const p of geo.features){
       registerStationIcon(p.properties.iconId,p.properties.iconLines||[p.properties.line]);
     }
+    // External stations remain searchable and usable for actual route endpoints,
+    // but do not display their labels or badges on the ordinary base map.
+    geo.features=geo.features.filter(f=>isDongjak(...f.geometry.coordinates)===true);
     map.getSource(stationSource)?.setData(geo);
   }
   function updateMetroMarkerPresentation(){

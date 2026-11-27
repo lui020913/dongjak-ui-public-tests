@@ -135,6 +135,31 @@ export function selectRepresentativeRailPaths(paths,reference){
   return chosen.sort((a,b)=>a.index-b.index).map(c=>c.path);
 }
 
+// Require continuous coverage along the reference between the first and last
+// displayed stations, rather than accepting a line merely because enough
+// individual stations are near surveyed fragments. A missing river crossing
+// must never replace the continuous offline schematic.
+export function hasContinuousRailCoverage(features,ref,maxGap=130){
+ const intervals=[];
+ for(const f of features){
+  const coords=f.geometry?.coordinates||[];
+  for(let i=1;i<coords.length;i++){
+   const a=ref.nearest(coords[i-1]),b=ref.nearest(coords[i]);
+   if(a.distance>450||b.distance>450)continue;
+   intervals.push([Math.min(a.along,b.along),Math.max(a.along,b.along)]);
+  }
+ }
+ intervals.sort((a,b)=>a[0]-b[0]);
+ let covered=Math.min(ref.firstAt,ref.lastAt);
+ const end=Math.max(ref.firstAt,ref.lastAt);
+ for(const [a,b] of intervals){
+  if(b<covered)continue;
+  if(a>covered+maxGap)return false;
+  covered=Math.max(covered,b);
+  if(covered>=end-maxGap)return true;
+ }
+ return covered>=end-maxGap;
+}
 /** Return official line features, retaining the schematic fallback for uncovered routes. */
 export function mergeOfficialRail(schematicCollection,rawPaths){
   const grouped=new Map();
@@ -187,7 +212,7 @@ export function mergeOfficialRail(schematicCollection,rawPaths){
       flush();
     }
     // A truncated/malformed API response must not erase an entire locally displayed line.
-    if(length>=1300 && stationNear.size>=Math.max(2,Math.ceil(ref.stations.length*0.75)) && features.length>=2){
+    if(length>=1300 && stationNear.size>=Math.max(2,Math.ceil(ref.stations.length*0.75)) && features.length>=2 && hasContinuousRailCoverage(features,ref)){
       replacements.set(line,features);
     }
   }

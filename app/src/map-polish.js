@@ -75,7 +75,7 @@ export function installNeighborDistrictLabels(map,features,dongjakBounds,isDongj
   // If the chosen interior point happens to be inside Dongjak due to imprecise source geometry, omit it.
   data.features=data.features.filter(f=>isDongjak(...f.geometry.coordinates)!==true);
   map.addSource('neighbor-district-names',{type:'geojson',data});
-  map.addLayer({id:'neighbor-district-names',type:'symbol',source:'neighbor-district-names',minzoom:10,maxzoom:15.4,
+  map.addLayer({id:'neighbor-district-names',type:'symbol',source:'neighbor-district-names',minzoom:10,maxzoom:20,
     layout:{'text-field':['get','name'],'text-size':['interpolate',['linear'],['zoom'],10,10.5,13,15],
       'text-font':['Noto Sans Bold','Open Sans Semibold','Open Sans Regular'],
       'text-allow-overlap':false,'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport','text-max-width':8},

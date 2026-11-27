@@ -30,7 +30,8 @@ test('테마 전환 시 외부 음영 레이어를 갱신하며 경계 로딩 �
   ]);
   assert.match(theme,/getLayer\('district-exterior-fade'\)/);
   assert.match(theme,/districtExteriorThemePaint\(themeState\.value\)/);
-  assert.match(main,/paint:districtExteriorThemePaint\(visualTheme\.currentTheme\(\)\)/);
+  assert.match(main,/paint:\{\.\.\.districtExteriorThemePaint\(visualTheme\.currentTheme\(\)\)/);
+  assert.match(main,/djTransitExterior==='true'\?\{'fill-opacity':0\}/);
   assert.match(main,/visualTheme\.refresh\(\)/);
 });
 
