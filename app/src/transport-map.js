@@ -1936,8 +1936,14 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(!lastStopDataSignature&&!map.isMoving?.())showStops(combineStations());
     else stopPublish.request();
   }
+  let streamIndexPromise=null,previousStreamCenter=null,streamDirection={x:0,y:0};
+  function streamIndex(){
+    if(!streamIndexPromise)streamIndexPromise=fetch('/data/transit-stream/v1/index.json',{cache:'force-cache'}).then(r=>{if(!r.ok)throw Error('transit index '+r.status);return r.json();}).then(keys=>{if(!Array.isArray(keys))throw Error('invalid transit index');return new Set(keys);}).catch(e=>{streamIndexPromise=null;throw e;});
+    return streamIndexPromise;
+  }
   const cellStream=createTransitCellStream({
     load:async(key,signal)=>{
+      const index=await streamIndex();if(signal.aborted)throw new DOMException('aborted','AbortError');if(!index.has(key))return [];
       const response=await fetch('/data/transit-stream/v1/'+key+'.json',{signal,cache:'force-cache'});
       if(!response.ok)throw Error('transit cell '+response.status);
       return response.json();
@@ -1949,7 +1955,10 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   });
   function refreshTransitViewport(){
     const b=map.getBounds?.();if(!b||typeof b.getWest!=='function'||typeof map.getZoom!=='function')return;
-    const keys=viewportKeys({west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()},map.getZoom(),{bus:streamApp?.dataset.baseBus!=='off',rail:streamApp?.dataset.baseMetro!=='off'});
+    const center=map.getCenter?.();
+    if(center&&previousStreamCenter){const dx=center.lng-previousStreamCenter.lng,dy=center.lat-previousStreamCenter.lat;if(Math.hypot(dx,dy)>.0001)streamDirection={x:Math.sign(dx),y:Math.sign(dy)};}
+    if(center)previousStreamCenter={lng:center.lng,lat:center.lat};
+    const keys=viewportKeys({west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()},map.getZoom(),{bus:streamApp?.dataset.baseBus!=='off',rail:streamApp?.dataset.baseMetro!=='off'},streamDirection);
     activeStreamKeys=new Set(keys);cellStream.update(keys);refreshStops();
   }
   const streamViewportWork=coalesceViewportWork(refreshTransitViewport,{delay:110,isMoving:()=>map.isMoving?.()===true});
