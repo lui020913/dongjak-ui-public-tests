@@ -62,6 +62,7 @@ import {cachedOfficialSearchPlaces,queryOfficialPlaces} from './seoul-official-f
 import {routeStationMatches,mergeRouteSearchResults,routeResultSubtitle} from './route-search-results.js';
 import {walkingRouteViewportPadding,strictRoutePreviewPadding,routeProjectionCorrection} from './route-map-focus.js';
 import {installDistrictBuildingScope} from './district-building-scope.mjs';
+import {loadConfirmedDevelopments,installConfirmedDevelopmentDisplay} from './confirmed-development-display.mjs';
 import {initMapQuickSearch} from './map-quick-search.js';
 import './map-search-refinement.css';
 import {installMapProduct} from './v815-map-product.js';
@@ -254,6 +255,7 @@ let baseLayerControls=null;
 let baseBuildingsVisible=true;
 let buildingCoverage=null;
 let districtBuildingScope=null;
+let confirmedDevelopmentDisplay=null;
 
 
 let overviewSheetState = 'expanded';
@@ -869,7 +871,7 @@ async function loadOneBuildingSheet(sheet){
   if(existing?.complete||buildingLoading.has(sheet.sheet)||(buildingRetryAfter.get(sheet.sheet)||0)>Date.now())return;
   buildingLoading.add(sheet.sheet);
   try {
-    const {features, reviewCandidates, displayGeometries, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet);
+    const {features, reviewCandidates, apartmentExcluded=[], displayGeometries, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet);
     for(const problem of errors) console.warn(`[동작하는 안전지도] ${sheet.sheet}번 ${problem.label} 로딩 실패:`,problem.error);
     // Defer geometry filtering and indexing until the phone camera is settled.
     while(djPhone&&map.isMoving?.())await new Promise(resolve=>map.once('moveend',resolve));
@@ -879,7 +881,7 @@ async function loadOneBuildingSheet(sheet){
     // supplied base+supplement GIS footprints must also be available overhead.
     const districtBuildings=features.filter(f=>Number.isFinite(f.properties?.x)&&Number.isFinite(f.properties?.y)&&
       isDongjak(f.properties.x,f.properties.y)===true&&['Polygon','MultiPolygon'].includes(f.geometry?.type));
-    const {visible:eligible,excluded}=partitionDisplayBuildings(districtBuildings);
+    const {visible:eligible,excluded}=partitionDisplayBuildings(districtBuildings.filter(f=>!confirmedDevelopmentDisplay?.contains(f.properties.x,f.properties.y)));
     const {visible,reviewExcluded}=partitionGreenReview(eligible,reviewCandidates,greenBuildingFilterEnabled(globalThis.location?.search));
     const within=visible.map(f=>({...f,geometry:displayGeometries.get(f)||f.geometry,properties:{...f.properties,_render3d:true}}));
     const sourceId=`dongjak-buildings-data-${sheet.sheet}`;
@@ -889,7 +891,7 @@ async function loadOneBuildingSheet(sheet){
     const collection={type:'FeatureCollection',features:within};
     if(existing){
       if(successfulSources===totalSources&&map.getSource(sourceId)){
-        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,visible);buildingRetryAfter.delete(sheet.sheet);
+        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,visible,apartmentExcluded);buildingRetryAfter.delete(sheet.sheet);
       }else buildingRetryAfter.set(sheet.sheet,Date.now()+15000);
       return;
     }
@@ -913,7 +915,7 @@ async function loadOneBuildingSheet(sheet){
         'fill-extrusion-base':0}
     },firstSymbol);
     loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources,complete:successfulSources===totalSources,footprint3DMode:visibleBuilding3D()});
-    buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,successfulSources===totalSources?visible:[]);
+    buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,successfulSources===totalSources?visible:[],apartmentExcluded);
     if(successfulSources<totalSources)buildingRetryAfter.set(sheet.sheet,Date.now()+15000);else buildingRetryAfter.delete(sheet.sheet);
     lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
     building3DLastOpacity=-1;
@@ -1006,6 +1008,13 @@ map.dragRotate.enable();
 map.touchPitch.enable();
 let buildingPitchFrame=0;
 map.on('pitch',()=>{if(buildingPitchFrame)return;buildingPitchFrame=requestAnimationFrame(()=>{buildingPitchFrame=0;syncTiltWithBuildings();});});
+// Commit the final camera mode synchronously on pitchend. A coalesced
+// animation frame may not run before a programmatic jump or gesture ends.
+// Do not wait for the next gesture to restore the flat footprint layers.
+map.on('pitchend',()=>{
+  if(buildingPitchFrame){cancelAnimationFrame(buildingPitchFrame);buildingPitchFrame=0;}
+  syncTiltWithBuildings();
+});
 // Repaint the added GIS 2D footprint/outline sources when theme changes.
 document.getElementById('theme-toggle')?.addEventListener('click',()=>requestAnimationFrame(syncTiltWithBuildings));
 function gotoDongjak(){
@@ -1178,6 +1187,9 @@ async function loadDongjakBoundary(){
     clipBasemapLabelsToDistrict(map,boundaryGeometry);
     // Apply district-only building geometry in every map mode.
     districtBuildingScope?.update(boundaryGeometry);
+    // A future-plan display is independent of the current pedestrian graph.
+    // Install before GIS sheet loading to avoid a transient old-building flash.
+    try{const plans=await loadConfirmedDevelopments();confirmedDevelopmentDisplay=installConfirmedDevelopmentDisplay({map,app,plans});}catch(error){console.warn('[정비사업 예정 부지]',error.message);}
     districtBuildingsReady=true;
     syncTiltWithBuildings();
     scheduleBuildingLoad();

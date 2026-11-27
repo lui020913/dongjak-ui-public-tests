@@ -54,7 +54,7 @@ export function buildingModeVisibility(extruding){
 }
 export function createBuildingCoverage(map,layers){
  let extruding=false,dirty=true;
- const original=new Map(),excludedBySheet=new Map(),reviewBySheet=new Map(),retainedBySheet=new Map(),hidden=new Map();
+ const original=new Map(),excludedBySheet=new Map(),reviewBySheet=new Map(),apartmentBySheet=new Map(),retainedBySheet=new Map(),hidden=new Map();
  const clearHidden=()=>{for(const target of hidden.values())try{map.removeFeatureState(target,'djGisCovered');}catch{}hidden.clear();};
  const sync=()=>{
   for(const id of layers){
@@ -86,7 +86,8 @@ export function createBuildingCoverage(map,layers){
      const source='dongjak-buildings-data-'+id,layer='dongjak-buildings-footprint-'+id;
      return map.getSource?.(source)&&map.isSourceLoaded?.(source)&&map.getLayer(layer)&&map.getLayoutProperty(layer,'visibility')!=='none'&&idx.matches(f.geometry);
    });
-   const hide=!hasNamedBuilding(f)&&(explicitlySmall||matchedSmall||matchedReview||matchedRetained);
+   const matchedApartment=[...apartmentBySheet.values()].some(idx=>idx.matches(f.geometry));
+   const hide=!hasNamedBuilding(f)&&(explicitlySmall||matchedSmall||matchedReview||matchedRetained||matchedApartment);
    const old=seen.get(key);seen.set(key,{target,hide:hide&&(old?.hide??true)});
   }
   for(const [key,target] of hidden)if(!seen.get(key)?.hide){try{map.removeFeatureState(target,'djGisCovered');}catch{}hidden.delete(key);}
@@ -95,5 +96,5 @@ export function createBuildingCoverage(map,layers){
  };
  map.on('style.load',()=>{clearHidden();original.clear();dirty=true;sync();});
  map.on('moveend',()=>{dirty=true;});map.on('idle',reconcile);
- return {setExtruding(value){const next=Boolean(value);if(extruding!==next){extruding=next;dirty=true;if(next)clearHidden();}sync();},setSheet(id,excluded=[],reviewExcluded=[],retained=[]){excludedBySheet.set(id,createCoverageIndex(excluded));reviewBySheet.set(id,createCoverageIndex(reviewExcluded));retainedBySheet.set(id,createCoverageIndex(retained,{strict:true}));dirty=true;sync();},removeSheet(id){excludedBySheet.delete(id);reviewBySheet.delete(id);retainedBySheet.delete(id);clearHidden();dirty=true;sync();}};
+ return {setExtruding(value){const next=Boolean(value);if(extruding!==next){extruding=next;dirty=true;if(next)clearHidden();}sync();},setSheet(id,excluded=[],reviewExcluded=[],retained=[],apartmentExcluded=[]){excludedBySheet.set(id,createCoverageIndex(excluded));reviewBySheet.set(id,createCoverageIndex(reviewExcluded));if(apartmentExcluded.length)apartmentBySheet.set(id,createCoverageIndex(apartmentExcluded,{strict:true}));else apartmentBySheet.delete(id);retainedBySheet.set(id,createCoverageIndex(retained,{strict:true}));dirty=true;sync();},removeSheet(id){excludedBySheet.delete(id);reviewBySheet.delete(id);apartmentBySheet.delete(id);retainedBySheet.delete(id);clearHidden();dirty=true;sync();}};
 }

@@ -149,3 +149,27 @@ test('delayed atlas never hides train layer; stationary train recovers and new a
 
  test('only official 429 daily quota is a managed provider limit',async()=>{const {isMetroDailyQuota,metroQuotaRetryMs,isMixedMetroQuota}=await import('../src/features/liveTransit/quota-state.js');const body={ok:false,code:'ERROR-337',retryAfterSeconds:3600};assert(isMetroDailyQuota(429,body));assert(!isMetroDailyQuota(502,body));assert(!isMetroDailyQuota(429,{ok:false,code:'OTHER'}));assert(!isMetroDailyQuota(429,{ok:true,code:'ERROR-337'}));assert.equal(metroQuotaRetryMs(body),3600000);assert(isMixedMetroQuota({warnings:['METRO_DAILY_QUOTA'],metroQuota:{code:'ERROR-337'}}));assert(!isMixedMetroQuota({warnings:['METRO_DAILY_QUOTA']}));});
  test('official quota stops repeated metro calls but leaves bus polling enabled',async()=>{const map=mockMap(),statuses=[],calls=[];const original=globalThis.fetch;globalThis.fetch=async url=>{calls.push(String(url));return String(url).includes('modes=metro')?new Response(JSON.stringify({ok:false,code:'ERROR-337',retryAfterSeconds:3600}),{status:429}):new Response(JSON.stringify({ok:true,metro:[],bus:[],availability:{bus:true,busRoutes:1}}));};const o=attachLiveTransitOverlay(map,{stationLines:routes,onStatus:s=>statuses.push(s)});try{o.setVisible('bus',false);o.start();await waitUntil(()=>statuses.some(s=>s.status==='quota'));await o.refresh();assert.equal(calls.length,1);assert(o.getStatus().metroQuotaUntil>Date.now());o.setVisible('bus',true);await o.refresh();assert.equal(calls.length,2);assert(calls[1].endsWith('modes=bus'));assert.equal(statuses.at(-1).status,'ok');assert(statuses.at(-1).quotaUntil>Date.now());}finally{o.destroy();globalThis.fetch=original;}});
+
+
+test('live vehicle buttons select only one mode, including legacy dual-enabled settings',async()=>{
+ const {normalizeLiveVehicleSelection,toggleLiveVehicleSelection}=await import('../src/features/liveTransit/integrate.js');
+ assert.deepEqual(normalizeLiveVehicleSelection(null),{metro:true,bus:false});
+ assert.deepEqual(normalizeLiveVehicleSelection({metro:true,bus:true}),{metro:false,bus:true});
+ assert.deepEqual(toggleLiveVehicleSelection({metro:true,bus:false},'bus'),{metro:false,bus:true});
+ assert.deepEqual(toggleLiveVehicleSelection({metro:false,bus:true},'metro'),{metro:true,bus:false});
+ assert.deepEqual(toggleLiveVehicleSelection({metro:false,bus:true},'bus'),{metro:false,bus:false});
+});
+test('switching from metro to bus aborts the stale request and renders only buses even from a mixed provider response',async()=>{
+ const map=mockMap(),requests=[];setDisplayedRailPaths(map,rendered);
+ const overlay=attachLiveTransitOverlay(map,{stationLines:routes,getVehicles:({signal,modes})=>new Promise(resolve=>requests.push({signal,modes,resolve}))});
+ try{
+  overlay.setModes({metro:true,bus:false});overlay.start();assert.deepEqual(requests[0].modes,['metro']);
+  overlay.setModes({metro:false,bus:true});assert.equal(requests[0].signal.aborted,true);
+  const pending=overlay.refresh();assert.deepEqual(requests[1].modes,['bus']);
+  const observedAt=new Date().toISOString();const mixed={metro:[metro({observedAt})],bus:[{id:'b',routeName:'500',longitude:A[0],latitude:A[1],observedAt}]};
+  requests[1].resolve(mixed);await pending;
+  requests[0].resolve(mixed);await wait();
+  assert.deepEqual(map.getSource(LIVE_SOURCE).data.features.map(f=>f.properties.mode),['bus']);
+  overlay.setModes({metro:false,bus:false});assert.equal(map.getSource(LIVE_SOURCE).data.features.length,0);
+ }finally{overlay.destroy()}
+});

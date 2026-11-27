@@ -3,6 +3,7 @@ import {readFileSync,writeFileSync,mkdirSync,statSync} from 'node:fs';
 import {createServer} from 'node:http';
 import {resolve,extname} from 'node:path';
 import assert from 'node:assert/strict';
+import {completedApartmentDisplayEdits} from '../src/completed-apartment-display-edits.mjs';
 import {dismissOnboarding,clickRealPointer} from './e2e/helpers.js';
 const root=resolve('app/dist'),out=resolve('audit-render-output');
 mkdirSync(out,{recursive:true});
@@ -44,6 +45,33 @@ try{
    await startup.waitFor({state:'hidden',timeout:45000});
    await dismissOnboarding(page);
    await page.waitForFunction(()=>window.__qaMap?.getStyle()?.sources?.openmaptiles,{},{timeout:90000});
+   if(enabled&&completedApartmentDisplayEdits.edits.length){
+    const sitesByName=new Map();
+    for(const e of completedApartmentDisplayEdits.edits)if(!sitesByName.has(e.site))sitesByName.set(e.site,e);
+    for(const [name,edit] of sitesByName){
+     const ring=edit.original.type==='Polygon'?edit.original.coordinates[0]:edit.original.coordinates[0][0];
+     const center=[ring.reduce((n,p)=>n+p[0],0)/ring.length,ring.reduce((n,p)=>n+p[1],0)/ring.length];
+     const source='dongjak-buildings-data-'+edit.sheet,plan='dongjak-buildings-footprint-'+edit.sheet,extrusion='dongjak-buildings-3d-'+edit.sheet;
+     const originals=completedApartmentDisplayEdits.edits.filter(e=>e.sheet===edit.sheet).map(e=>e.original);
+     await page.evaluate(center=>window.__qaMap.jumpTo({center,zoom:17.6,pitch:0}),center);
+     await page.waitForFunction(({source,plan})=>{const m=window.__qaMap;return m.getSource(source)&&m.isSourceLoaded(source)&&m.getLayer(plan)&&m.getLayoutProperty(plan,'visibility')==='visible'&&m.queryRenderedFeatures({layers:[plan]}).length>0;},{source,plan},{timeout:90000});
+     const inspect=()=>page.evaluate(async({source,originals,plan,extrusion})=>{const m=window.__qaMap,s=m.getSource(source),data=typeof s.getData==='function'?await s.getData():s._data;const keys=new Set(data?.features?.map(f=>JSON.stringify(f.geometry)));return {count:data?.features?.length,removedStillPresent:originals.filter(g=>keys.has(JSON.stringify(g))).length,plan:m.getLayoutProperty(plan,'visibility'),extrusion:m.getLayoutProperty(extrusion,'visibility')};},{source,originals,plan,extrusion});
+     const two=await inspect();assert.ok(two.count>0);assert.equal(two.removedStillPresent,0,name+' removed GIS footprints in 2D');
+     await page.evaluate(()=>window.__qaMap.jumpTo({pitch:45}));
+     await page.waitForFunction(id=>window.__qaMap.getLayoutProperty(id,'visibility')==='visible',extrusion,{timeout:90000});
+     const three=await inspect();assert.equal(three.removedStillPresent,0,name+' removed GIS footprints in 3D');assert.equal(three.count,two.count);
+     console.log('COMPLETED_APARTMENT_ACTUAL_APP '+JSON.stringify({name,two,three}));
+    }
+    const planData=JSON.parse(readFileSync(resolve('app/public/data/redevelopment/confirmed-projects-202609.geojson'),'utf8'));
+    const feature=planData.features.find(f=>f.properties.name==='디에이치 켄트로나인')||planData.features[0];
+    const ring=feature.geometry.type==='Polygon'?feature.geometry.coordinates[0]:feature.geometry.coordinates[0][0];
+    const center=[ring.reduce((n,p)=>n+p[0],0)/ring.length,ring.reduce((n,p)=>n+p[1],0)/ring.length];
+    await page.evaluate(center=>window.__qaMap.jumpTo({center,zoom:17.6,pitch:0}),center);
+    await page.waitForFunction(()=>{const m=window.__qaMap;return m.getSource('dj-confirmed-development-areas')&&m.isSourceLoaded('dj-confirmed-development-areas')&&m.queryRenderedFeatures({layers:['dj-confirmed-development-fill']}).length>0;},{},{timeout:90000});
+    const ordering=await page.evaluate(()=>{const l=window.__qaMap.getStyle().layers;const fill=l.findIndex(x=>x.id==='dj-confirmed-development-fill');return {fill,road:l.findIndex((x,i)=>i>fill&&x['source-layer']==='transportation'),label:l.some(x=>x.id==='dj-confirmed-development-label')};});
+    assert.ok(ordering.fill>=0&&ordering.road>ordering.fill&&ordering.label,'planned fill must remain below transport');
+    console.log('CONFIRMED_PLAN_ACTUAL_APP '+JSON.stringify(ordering));
+   }
    for(const site of sites){
     const layer='dongjak-buildings-footprint-'+site.sheet,extrusion='dongjak-buildings-3d-'+site.sheet,source='dongjak-buildings-data-'+site.sheet;
     await page.evaluate(({center})=>window.__qaMap.jumpTo({center,zoom:17.6,pitch:0}),site);

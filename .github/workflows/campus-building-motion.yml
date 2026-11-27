@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   render:
-    if: github.event.pull_request.head.repo.full_name == github.repository && (github.event.pull_request.head.ref == 'fix/campus-white-and-stable-3d-20261126' || github.event.pull_request.head.ref == 'integrate/transit-campus-3d-20261126')
+    if: github.event.pull_request.head.repo.full_name == github.repository && (github.event.pull_request.head.ref == 'fix/campus-white-and-stable-3d-20261126' || github.event.pull_request.head.ref == 'integrate/transit-campus-3d-20261126' || github.event.pull_request.head.ref == 'audit/redevelopment-building-overlap-20261127')
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:

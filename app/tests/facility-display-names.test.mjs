@@ -102,3 +102,18 @@ test('officially repurposed youth school is not an active police result',async()
  assert.deepEqual(normalizeNamedOsm(data,'경찰서'),[]);
  assert.equal(normalizeNamedOsm(data,'상도2치안센터')[0].name,'동작청소년경찰학교');
 });
+
+
+test('one availability gate blocks stale raw and cached police identities, not verified schools or nearby shops',async()=>{
+ const {isUnavailableFacility}=await import('../src/facility-display-names.js');
+ for(const row of ['상도3치안센터','상도3 경찰 관련 시설 (운영 미확인)','상도5치안센터',{name:'저장한 장소',registeredName:'상도3치안센터'},{name:'이름 없음',category:'운영 미확인 시설'}])assert.equal(isUnavailableFacility(row),true);
+ for(const row of ['상도지구대','상도2치안센터','동작청소년경찰학교','상도3치안센터 앞 카페'])assert.equal(isUnavailableFacility(row),false);
+ const {openPlaceDetails}=await import('../src/place-details.js');
+ // No document or map calls should be needed to reject either stale record.
+ for(const name of ['상도3치안센터','상도3 경찰 관련 시설 (운영 미확인)','상도5치안센터'])assert.equal(openPlaceDetails({map:{},maplibregl:{Popup:class{}},place:{name,lng:126.95,lat:37.5}}),null);
+ const {normalizePlaceSearchResults}=await import('../src/route-search.js');
+ const {normalizeNamedOsm}=await import('../src/v875-osm-name-search.js');
+ const names=['상도3치안센터','상도5치안센터','상도지구대'];
+ assert.deepEqual(normalizePlaceSearchResults({features:names.map(name=>({geometry:{type:'Point',coordinates:[126.95,37.5]},properties:{name,osm_key:'amenity',osm_value:'police'}}))}).map(p=>p.name),['상도지구대']);
+ assert.deepEqual(normalizeNamedOsm({elements:[{type:'node',id:1,lon:126.95,lat:37.5,tags:{name:'상도5치안센터',amenity:'police'}}]},'상도5치안센터'),[]);
+});

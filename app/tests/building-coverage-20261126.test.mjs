@@ -31,3 +31,14 @@ test('matched native fills are hidden only after the retained GIS sheet is compl
  visible='visible';events.get('moveend')();events.get('idle')();assert.deepEqual([...states.keys()],[1]);
  coverage.removeSheet(2);assert.equal(states.size,0);
 });
+
+test('verified legacy apartment exclusions also hide exact unnamed native matches but preserve adjacent and named structures',()=>{
+ const events=new Map(),states=new Map();
+ const geom=polygon(126.95,37.5,.0001);
+ const native={id:1,source:'openmaptiles',sourceLayer:'building',geometry:geom,properties:{}};
+ const map={on:(n,f)=>events.set(n,f),getLayer:()=>true,getLayoutProperty:()=> 'visible',setLayoutProperty:()=>{},getZoom:()=>17,isMoving:()=>false,queryRenderedFeatures:()=>[native,{...native,id:2,geometry:polygon(126.95008,37.5)},{...native,id:3,properties:{name:'보존 대상'}}],setFeatureState:(t,s)=>states.set(t.id,s),removeFeatureState:t=>states.delete(t.id)};
+ const coverage=createBuildingCoverage(map,['native-building']);
+ coverage.setSheet(2,[],[],[],[{geometry:geom}]);events.get('idle')();
+ assert.deepEqual([...states.keys()],[1]);
+ coverage.removeSheet(2);assert.equal(states.size,0);
+});

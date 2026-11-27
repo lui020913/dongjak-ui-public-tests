@@ -1,3 +1,4 @@
+import {apartmentDisplayExclusions} from './completed-apartment-display.mjs';
 import {applyBuildingDisplayTrims,loadBuildingDisplayTrimPack} from './building-display-road-trims.js';
 import {collectGreenReviewCandidates} from './green-building-filter.js';
 /**
@@ -29,11 +30,14 @@ export async function loadBuildingTileFeatures(sheet, fetchFn = globalThis.fetch
   const features=[];
   const errors=[];
   const reviewCandidates=[];
+  const apartmentExcluded=[];
   let successfulSources=0;
   for(let i=0;i<results.length;i++) {
     const result=results[i];
     if(result.status === 'fulfilled') {
-      features.push(...result.value);
+      const excluded=apartmentDisplayExclusions(sheet.sheet,i===0?'base':'supplement',result.value);
+      apartmentExcluded.push(...excluded);
+      features.push(...result.value.filter(f=>!excluded.has(f)));
       reviewCandidates.push(...collectGreenReviewCandidates(sheet.sheet,i===0?'base':'supplement',result.value));
       for(const [feature,geometry] of applyBuildingDisplayTrims(sheet.sheet,i===0?'base':'supplement',sources[i].url,result.value,pack))displayGeometries.set(feature,geometry);
       successfulSources++;
@@ -42,5 +46,5 @@ export async function loadBuildingTileFeatures(sheet, fetchFn = globalThis.fetch
     }
   }
   if(successfulSources === 0) throw new Error('기본 건물과 보완 건물 데이터를 모두 불러오지 못했습니다.');
-  return {features, reviewCandidates, displayGeometries, successfulSources, totalSources:sources.length, errors};
+  return {features, reviewCandidates, apartmentExcluded, displayGeometries, successfulSources, totalSources:sources.length, errors};
 }

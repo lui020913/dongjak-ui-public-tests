@@ -52,13 +52,24 @@ try{
    const hits=ids.length?m.queryRenderedFeatures({layers:ids}):[];
    const features=hits.map(f=>({id:f.id,layer:f.layer.id,class:f.properties?.class,subclass:f.properties?.subclass,geometry:f.geometry?.type,paint:m.getPaintProperty(f.layer.id,'fill-color')}));
    const remaining=m.queryRenderedFeatures().filter(f=>f.layer?.type==='fill'&&f.geometry&&['Polygon','MultiPolygon'].includes(f.geometry.type)).map(f=>({id:f.layer.id,sourceLayer:f.sourceLayer,class:f.properties?.class,color:m.getPaintProperty(f.layer.id,'fill-color')}));
-   return {fills:fills.map(l=>({id:l.id,color:m.getPaintProperty(l.id,'fill-color'),filter:l.filter})),features,remaining:[...new Map(remaining.map(x=>[x.id+':'+x.class,x])).values()],overlay:!!m.getLayer('dj-reviewed-base-road-fill')};
+   const bridgeLines=style.layers.filter(l=>l.type==='line'&&l['source-layer']==='transportation'&&/bridge/i.test(l.id)&&m.getLayoutProperty(l.id,'visibility')!=='none').map(l=>l.id);
+   const bridgeHits=bridgeLines.length?m.queryRenderedFeatures({layers:bridgeLines}).length:0;
+   const rawBridge=m.querySourceFeatures('openmaptiles',{sourceLayer:'transportation'}).filter(f=>f.properties?.class==='bridge'||f.properties?.brunnel==='bridge').length;
+   return {bridgeLines,bridgeHits,rawBridge,fills:fills.map(l=>({id:l.id,color:m.getPaintProperty(l.id,'fill-color'),filter:l.filter})),features,remaining:[...new Map(remaining.map(x=>[x.id+':'+x.class,x])).values()],overlay:!!m.getLayer('dj-reviewed-base-road-fill')};
   });
   console.log('CAMPUS_FILL_EVIDENCE',site.key,JSON.stringify(paint));
   assert.equal(paint.overlay,false);
   assert.ok(paint.fills.length,'native transportation polygon layers must be present');
-  const expectedPaint=['case',['all',['==',['get','class'],'path'],['in',['get','subclass'],['literal',['pedestrian','footway','path']]]],'#e5e8e1','#ffffff'];
-  for(const fill of paint.fills)assert.deepEqual(fill.color,expectedPaint,'pedestrian polygons alone receive pavement tone; bridges and vehicle areas retain original white');
+  // The quiet basemap deliberately excludes vehicle area polygons (native
+  // road centerlines remain). Check the current palette AND the rendered
+  // class restriction rather than asserting an obsolete white vehicle fill.
+  const pedestrianClasses=['path','pedestrian','footway','cycleway','steps'];
+  const expectedPaint=['match',['coalesce',['get','class'],''],pedestrianClasses,'#e7e9e2','#ffffff'];
+  for(const fill of paint.fills){
+   assert.deepEqual(fill.color,expectedPaint,'pedestrian pavement palette');
+   assert.ok(JSON.stringify(fill.filter).includes(JSON.stringify(pedestrianClasses)),'vehicle polygon exclusion must remain active');
+  }
+  assert.ok(paint.features.every(f=>pedestrianClasses.includes(f.class)),'non-pedestrian vehicle polygons must not render');
   await page.screenshot({path:out+'/'+site.key+'-plan.png'});
   await page.evaluate(()=>window.__qaMap.jumpTo({pitch:30}));
   await page.waitForFunction(()=>{const m=window.__qaMap;return m.getStyle().layers.some(l=>l.id.startsWith('dongjak-buildings-3d-')&&m.getLayoutProperty(l.id,'visibility')==='visible'&&m.isSourceLoaded(l.source));},{},{timeout:90000});
@@ -74,7 +85,10 @@ try{
     await done;read();
     m.fire('movestart');for(let i=0;i<10;i++){await new Promise(r=>setTimeout(r,65));m.fire('render');}m.fire('moveend');read();
     for(const pitch of [30,12,10.2,9.7,10.1,8,7.2,6,8,10.2,30]){
-     m.jumpTo({pitch});read();
+     m.jumpTo({pitch});
+     // Exercise rendered camera states, not a series of jumps in a single
+     // JS task that prevents coalesced requestAnimationFrame callbacks.
+     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));read();
     }
     return {ids,samples};
    }finally{m.off('render',read);}
@@ -91,7 +105,8 @@ try{
   results.push({site:site.key,paint,motion});
  }
  assert.ok(results[0].paint.features.some(f=>f.class==='path'&&f.subclass==='pedestrian'),'actual central university pedestrian pavement required');
- assert.ok(results[1].paint.features.some(f=>f.class==='bridge'),'actual bridge geometry must be present for preservation check');
+ assert.ok(results[1].paint.rawBridge>0,'actual bridge geometry must exist in source');
+ assert.ok(results[1].paint.bridgeHits>0,'bridge line must remain rendered after vehicle polygon suppression');
  assert.equal(reviewRequests.length,0);assert.deepEqual(errors,[]);
  console.log('CAMPUS_AND_BUILDING_MOTION_REGRESSION_OK',JSON.stringify(results.map(r=>({site:r.site,pavement:r.paint.features.length,frames:r.motion.samples.length}))));
 }finally{writeFileSync(out+'/results.json',JSON.stringify({results,errors,reviewRequests},null,2));await ctx.close();await browser.close();server.close();}
