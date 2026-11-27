@@ -1,3 +1,4 @@
+import {sameBusTransfer,transitFollowFix} from './transit-transfer-guidance.mjs';
 import {installReviewedBaseRoads} from './reviewed-base-road-layer.mjs';
 import {installCommunityActivity} from './community-activity.js';
 import {splitCommunityReportBody} from './community-report-presentation.js';
@@ -314,6 +315,7 @@ let routeEndMarker = null;
 let routeRequestPending = false;
 let routeRequestGeneration=0;
 let transitPreview=null,transitGeneration=0;
+let transitGuideActive=false,transitGuideFollow=true,transitGuideMarker=null,transitGuideLast=null;
 let routeEndpointMarkerKeys={start:null,end:null};
 let routeWaypoints = [];
 let routeProductTools = null;
@@ -2976,6 +2978,7 @@ function syncTransitExterior(force=false){
 function clearTransitPreview(){
   routeCameraFitToken++;
   transitRouteContext=[];
+  clearTransitGuideCamera();
   const wasPreview=Boolean(transitPreview);
   transitPreview=null;transitGeneration++;delete app.dataset.djTransitPreview;
   syncTransitExterior();
@@ -3591,7 +3594,7 @@ function scheduleVisibleRouteFit(){
  clearTimeout(routePreviewFitTimer);
  routePreviewFitTimer=setTimeout(()=>{
   const card=document.getElementById('route-map-card'),head=document.getElementById('dj-walk-map-head');
-  if(app.dataset.tab!=='map'||!card||card.hidden||!head?.getClientRects().length)return;
+  if(transitGuideActive||app.dataset.tab!=='map'||!card||card.hidden||!head?.getClientRects().length)return;
   const coords=transitPreview?transitRouteContext:routeResult?.coords;
   if(!coords?.length)return;
   const all=[...coords,...[routeStart,routeEnd].filter(Boolean).map(p=>[p.lng,p.lat])];
@@ -4052,7 +4055,7 @@ function setTransitPreviewStops(features){
  const id='dj-transit-multi-stops',data={type:'FeatureCollection',features};
  if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
  if(!map.getLayer(id+'-circle'))map.addLayer({id:id+'-circle',type:'circle',source:id,paint:{'circle-radius':['case',['==',['get','transfer'],true],7,6],'circle-color':'#fff','circle-stroke-color':['get','color'],'circle-stroke-width':2.5}});
- if(!map.getLayer(id+'-transfer-label'))map.addLayer({id:id+'-transfer-label',type:'symbol',source:id,filter:['==',['get','transfer'],true],layout:{'text-field':'환승','text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'],'text-size':11.7,'text-variable-anchor':['bottom','top','left','right'],'text-radial-offset':2.4,'text-allow-overlap':false,'text-ignore-placement':false,'text-padding':5,'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},paint:{'text-color':'#21483c','text-halo-color':'#fff','text-halo-width':1.1}});
+ if(!map.getLayer(id+'-transfer-label'))map.addLayer({id:id+'-transfer-label',type:'symbol',source:id,filter:['==',['get','transfer'],true],layout:{'text-field':['case',['==',['get','sameStop'],true],'↓ 제자리 환승','↓ 환승'],'text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'],'text-size':11.7,'text-anchor':'bottom','text-offset':[0,-1.1],'text-allow-overlap':false,'text-ignore-placement':false,'text-padding':5,'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},paint:{'text-color':'#21483c','text-halo-color':'#fff','text-halo-width':1.1}});
 }
 function transitRailData(segments){
  const color=line=>subwayLineColor(line==='신림'?'신림선':line+'호선');
@@ -4089,7 +4092,7 @@ function publishTransitDetail(plan,from,to,first,last){
   const walk=r=>({meters:Math.round(r.kilometers*1000),minutes:Math.max(0,Math.ceil(r.seconds/60)),priChoice:r.transitPriChoice,exterior:Boolean(r.transitExterior)});
   const detail={kind:plan.kind,railQuality:plan.railQuality,route:plan.route,routeType:plan.routeType,routeId:plan.routeId,lines:plan.lines||[],changes:plan.changes||0,
     from:label(from),to:label(to),board:label(plan.origin),alight:label(plan.destination),arsId:plan.origin?.arsId,firstTime:plan.origin?.firstTime,lastTime:plan.origin?.lastTime,
-    stops:plan.kind==='bus'?plan.stops.map(s=>s.name):plan.stops,targets:[plan.origin,plan.destination,to,to].map(p=>({lat:p.lat,lng:p.lng})),first:walk(first),last:walk(last),minutes:preview.minutes,time:preview.time,pri:{first:first.transitPri||null,last:last.transitPri||null}};
+    stops:plan.kind==='bus'?plan.stops.map(s=>s.name):plan.stops,targets:[transitAccessPoint(plan,true),transitAccessPoint(plan,false),to,to].map(p=>({lat:p.lat,lng:p.lng})),first:walk(first),last:walk(last),minutes:preview.minutes,time:preview.time,pri:{first:first.transitPri||null,last:last.transitPri||null}};
   const emit=()=>{if(transitPreview===preview)window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:{...detail}}));};
   emit();
 
@@ -4105,7 +4108,8 @@ async function previewMultiTransit(plan,signal,preferPri=true){
  const walks=[];
  for(const [a,b] of pairs){
    if(!current())throw new Error('경로 조건이 변경됐습니다.');
-   const sameStop=a.arsId&&a.arsId===b.arsId&&a.lng===b.lng&&a.lat===b.lat;
+   const index=walks.length;
+   const sameStop=index>0&&index<legs.length&&sameBusTransfer(legs[index-1],legs[index]);
    if(sameStop||(a.lng===b.lng&&a.lat===b.lat)){walks.push({coords:[],seconds:0,kilometers:0});continue;}
    const result=await fetchTransitPedestrianPair(a,b,signal);
    const selected=await selectTransitWalk(result,preferPri,signal);
@@ -4129,19 +4133,49 @@ async function previewMultiTransit(plan,signal,preferPri=true){
   if(!map.getSource(id))map.addSource(id,{type:'geojson',data:collection});else map.getSource(id).setData(collection);
   if(!map.getLayer(id+'-line'))map.addLayer({id:id+'-line',type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':['get','color'],'line-width':5,'line-opacity':.9,...(dash?{'line-dasharray':[2,2]}:{})}});
  }
- const stopFeatures=legs.flatMap((leg,i)=>[transitAccessPoint(leg,true),transitAccessPoint(leg,false)].map((p,j)=>({type:'Feature',properties:{color:color(leg),transfer:j===0&&i>0},geometry:{type:'Point',coordinates:[p.lng,p.lat]}})));
+ const stopFeatures=legs.flatMap((leg,i)=>[transitAccessPoint(leg,true),transitAccessPoint(leg,false)].map((p,j)=>({type:'Feature',properties:{color:color(leg),transfer:j===0&&i>0,sameStop:j===0&&i>0&&sameBusTransfer(legs[i-1],leg)},geometry:{type:'Point',coordinates:[p.lng,p.lat]}})));
  setTransitPreviewStops(stopFeatures);
  app.dataset.djTransitPreview=plan.kind;
  window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
  const preview=transitPreview={kind:plan.kind,changes:legs.length-1,time:estimateTransitTime(plan,walks.reduce((sum,w)=>sum+w.seconds,0)),minutes:estimateTransitTime(plan,walks.reduce((sum,w)=>sum+w.seconds,0))?.totalMinutes??null,walkM:walks.reduce((sum,w)=>sum+w.kilometers*1000,0)};
  const label=p=>p?.name||p?.label||'선택한 장소';
- const detail={kind:plan.kind,time:preview.time,minutes:preview.minutes,railQuality:railSegments.length?transitRailQuality(railSegments):null,from:label(from),to:label(to),legs:legs.map(leg=>({...leg,origin:label(leg.origin),destination:label(leg.destination),arsId:leg.origin?.arsId,firstTime:leg.origin?.firstTime,lastTime:leg.origin?.lastTime,stops:leg.kind==='bus'?leg.stops.map(s=>s.name):leg.stops})),walks:walks.map(w=>({meters:Math.round(w.kilometers*1000),minutes:Math.ceil(w.seconds/60),priChoice:w.transitPriChoice,exterior:Boolean(w.transitExterior)})),targets:[...legs.flatMap(leg=>[leg.origin,leg.destination]),to,to].map(p=>({lat:p.lat,lng:p.lng})),priLegs:walks.map(w=>w.transitPri||null)};
+ const detail={kind:plan.kind,time:preview.time,minutes:preview.minutes,railQuality:railSegments.length?transitRailQuality(railSegments):null,from:label(from),to:label(to),legs:legs.map(leg=>({...leg,origin:label(leg.origin),destination:label(leg.destination),arsId:leg.origin?.arsId,firstTime:leg.origin?.firstTime,lastTime:leg.origin?.lastTime,stops:leg.kind==='bus'?leg.stops.map(s=>s.name):leg.stops})),walks:walks.map((w,i)=>({meters:Math.round(w.kilometers*1000),minutes:Math.ceil(w.seconds/60),sameStop:i>0&&i<legs.length&&sameBusTransfer(legs[i-1],legs[i]),priChoice:w.transitPriChoice,exterior:Boolean(w.transitExterior)})),targets:[...legs.flatMap(leg=>[transitAccessPoint(leg,true),transitAccessPoint(leg,false)]),to,to].map(p=>({lat:p.lat,lng:p.lng})),priLegs:walks.map(w=>w.transitPri||null)};
  const emit=()=>{if(transitPreview===preview)window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:{...detail}}));};
  navigate('map');syncRoutePresentation();emit();
  focusTransitRoute([...walks.flatMap(w=>w.coords),...legs.filter(l=>l.kind==='bus').flatMap(leg=>leg.coords),...railSegments.flatMap(s=>s.coordinates)]);
 
 }
 
+// GPS guidance owns the camera only while the user is actively following.
+function clearTransitGuideCamera(){
+ transitGuideActive=false;transitGuideFollow=true;transitGuideLast=null;
+ transitGuideMarker?.remove();transitGuideMarker=null;
+}
+function paintTransitGuideFix(position){
+ const fix=transitFollowFix(position);
+ if(!fix||!transitGuideActive||!transitPreview||app.dataset.tab!=='map'||(transitGuideLast&&fix.timestamp<=transitGuideLast.timestamp))return;
+ transitGuideLast=fix;
+ if(!transitGuideMarker){
+  const el=document.createElement('div');el.className='nav-position-dot';el.setAttribute('aria-label','내 현재 GPS 위치');
+  transitGuideMarker=new maplibregl.Marker({element:el,anchor:'center'}).setLngLat(fix.coords).addTo(map);
+ }else transitGuideMarker.setLngLat(fix.coords);
+ if(transitGuideFollow)followTransitGuideCamera(fix.coords);
+}
+function followTransitGuideCamera(coords){
+ const rect=map.getContainer().getBoundingClientRect(),card=document.getElementById('route-map-card'),head=document.getElementById('dj-walk-map-head');
+ const padding=strictRoutePreviewPadding({mapTop:rect.top,viewportHeight:rect.height,toolbarBottom:head?.getBoundingClientRect().bottom||rect.top+80,sheetTop:card?.getBoundingClientRect().top||rect.bottom-140})||{top:60,bottom:120,left:20,right:20};
+ const point=map.project(coords),x=(rect.width+padding.left-padding.right)/2,y=(rect.height+padding.top-padding.bottom)/2;
+ if(Math.hypot(point.x-x,point.y-y)>35||map.getZoom()<16)map.easeTo({center:coords,zoom:Math.max(16,map.getZoom()),padding,duration:420,essential:true});
+}
+window.addEventListener('dongjak:transit-guide-state',e=>{
+ if(!e.detail?.active){clearTransitGuideCamera();return;}
+ if(!transitPreview)return;
+ transitGuideActive=true;transitGuideFollow=true;routeCameraFitToken++;clearTimeout(routePreviewFitTimer);
+});
+window.addEventListener('dongjak:transit-guide-follow',()=>{
+ if(!transitGuideActive)return;transitGuideFollow=true;if(transitGuideLast)followTransitGuideCamera(transitGuideLast.coords);
+});
+map.on('dragstart',e=>{if(transitGuideActive&&e.originalEvent)transitGuideFollow=false;});
 // Transit comparison reuses the same endpoint state and walking graph.
 // Explicit foreground-only position checks reuse the native device API.
 window.addEventListener('dongjak:transit-gps-start',event=>{
@@ -4159,8 +4193,8 @@ window.addEventListener('dongjak:transit-gps-start',event=>{
      const options={enableHighAccuracy:true,timeout:12000,maximumAge:0};
      const first=await getDevicePosition(options);
      if(!current())return;
-     onPosition(first);
-     const watch=await startDeviceWatch(position=>{if(current())onPosition(position);},fail,options);
+     paintTransitGuideFix(first);onPosition(first);
+     const watch=await startDeviceWatch(position=>{if(current()){paintTransitGuideFix(position);onPosition(position);}},fail,options);
      if(!current())stopDeviceWatch(watch);else id=watch;
    }catch{fail();}
  })();
@@ -4186,7 +4220,8 @@ window.addEventListener('dongjak:transit-candidate-review',event=>{
   if(!pairs.length)throw new Error('경로 연결 정보 부족');
   for(const [a,b] of pairs){
    if(!current())throw new Error('경로 조건이 변경됐습니다.');
-   if(a.lng===b.lng&&a.lat===b.lat){walks.push({kilometers:0,seconds:0});continue;}
+   const index=walks.length;
+   if((index>0&&index<legs.length&&sameBusTransfer(legs[index-1],legs[index]))||(a.lng===b.lng&&a.lat===b.lat)){walks.push({kilometers:0,seconds:0});continue;}
    const cacheKey=[a.lng,a.lat,b.lng,b.lat,Boolean(preferPri)].join(',');
    let pending=walkCache?.get(cacheKey);
    if(!pending){
