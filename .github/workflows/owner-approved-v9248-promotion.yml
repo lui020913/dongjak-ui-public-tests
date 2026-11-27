@@ -1,0 +1,151 @@
+name: One-time owner-approved v9.2.248 Production promotion
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/owner-approved-v9248-promotion.yml']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: mobile-only-release
+  cancel-in-progress: false
+jobs:
+  production:
+    if: github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
+    name: '4. Production 배포 및 확인'
+    runs-on: ubuntu-24.04
+    environment: public-cloudflare-production
+    timeout-minutes: 35
+    outputs:
+      previous_public_sha: ${{ steps.promote.outputs.previous_public_sha }}
+    env:
+      SOURCE_SHA: 97b0ed6d662c1aad3a2c6915a65327d8a970aa82
+      PUBLIC_SHA: 97b0ed6d662c1aad3a2c6915a65327d8a970aa82
+      CSS_SHA: 3dae7dad73c6c07baa0130a5fba18a50270addfefdca3f797d855730c7051d85
+      APP_VERSION: 9.2.248
+      BUILD_RUN: '46058901389'
+      PAGES_PROJECT: dongjak-walk-safety-preview
+      PRODUCTION_URL: https://dongjak-walk-safety-preview.pages.dev
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: '97b0ed6d662c1aad3a2c6915a65327d8a970aa82'
+          persist-credentials: false
+      - name: Verify exact owner-approved exception and preserved functional checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/main --jq .object.sha)" = "$GITHUB_SHA"
+          gh api repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA | jq -e --arg sha "$SOURCE_SHA" '.parents[0].sha==$sha and ([.files[].filename]|unique)==[".github/workflows/owner-approved-v9248-promotion.yml"]' >/dev/null
+          gh api repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN | jq -e --arg sha "$SOURCE_SHA" '.head_sha==$sha and .head_branch=="main" and .actor.login=="lui020913" and .run_attempt==2 and .status=="completed" and .conclusion=="failure"' >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN/attempts/2/jobs?per_page=100" | jq -e '([.jobs[]|select(.conclusion=="failure")]|length)==1 and any(.jobs[];.id==140710746429 and .conclusion=="failure") and any(.jobs[];.name=="1. 빌드 및 기본 테스트" and .conclusion=="success") and any(.jobs[];.name=="2. Preview 배포" and .conclusion=="success") and any(.jobs[];.name=="PC·태블릿 이용 방식 선택 검증" and .conclusion=="success") and ([.jobs[]|select(.name|startswith("3. 모바일 검증"))|select(.conclusion=="success")]|length)==11' >/dev/null
+          curl -fsSL --max-time 30 'https://7acecc6d.dongjak-walk-safety-preview.pages.dev/release-source.json' | jq -e --arg sha "$SOURCE_SHA" --arg run "$BUILD_RUN" --arg css "$CSS_SHA" '.source_commit==$sha and .public_ui_source_commit==$sha and .public_ui_overlay_sha256==$css and .application_version=="9.2.248" and (.build_run|tostring)==$run and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null
+          echo 'Owner explicitly requested immediate promotion; visual cross-dissolve QA failed and is not reported as passed. Other verified checks and guarded Production rollback remain required.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/download-artifact@v4
+        with:
+          name: mobile-first-overhaul-sealed-97b0ed6d662c1aad3a2c6915a65327d8a970aa82
+          path: ${{ runner.temp }}/encrypted
+          run-id: 46058901389
+          github-token: ${{ github.token }}
+      - name: Restore public Wrangler package downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/dongjak/wrangler-npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-wrangler-v4-npm-v1
+      - name: Decrypt exact Preview artifact with recorded visual QA exception
+        run: |
+          set -euo pipefail
+          umask 077
+          node scripts/seal-private-release.mjs open "$RUNNER_TEMP/encrypted/mobile-overhaul.sealed" "$RUNNER_TEMP/mobile-overhaul.tar.gz" "$SOURCE_SHA"
+          mkdir -m 700 "$RUNNER_TEMP/release"
+          tar -xzf "$RUNNER_TEMP/mobile-overhaul.tar.gz" -C "$RUNNER_TEMP/release"
+          rm -f "$RUNNER_TEMP/mobile-overhaul.tar.gz"
+          jq -e --arg source "$SOURCE_SHA" --arg public "$PUBLIC_SHA" --arg css "$CSS_SHA" --arg version "$APP_VERSION" --arg build "$BUILD_RUN" \
+            '.source_commit==$source and .public_ui_source_commit==$public and .public_ui_overlay_sha256==$css and .application_version==$version and (.build_run|tostring)==$build and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' \
+            "$RUNNER_TEMP/release/dist/release-source.json" >/dev/null
+      - name: Reconfirm exact public source commit
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$SOURCE_SHA" = "$PUBLIC_SHA"
+          test "$(jq -er '.source' release/mobile-first-overhaul-request.json)" = "public-app"
+      - name: Deploy exact owner-approved artifact with guarded rollback
+        id: promote
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID"
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PAGES_PROJECT"
+          cf(){ curl -fsS --max-time 45 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$@"; }
+          cf "$api" > "$RUNNER_TEMP/project-before.json"
+          jq -e '.success==true and .result.production_branch=="main" and (.result.deployment_configs.production.d1_databases.SEOUL_FACILITIES_DB.id|type=="string") and (.result.deployment_configs.production.ai_bindings.AI!=null)' "$RUNNER_TEMP/project-before.json" >/dev/null
+          jq -S -c '.result.deployment_configs.production|{d1_databases,ai_bindings,env_vars:(.env_vars|with_entries(.value={type:.value.type}))}' "$RUNNER_TEMP/project-before.json" > "$RUNNER_TEMP/bindings-before"
+          previous="$(cf "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?before=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/production-before-marker.json"
+          jq -e '.release_status=="DEPLOYED_PRODUCTION" and (.source_commit|test("^[a-f0-9]{40}$"))' "$RUNNER_TEMP/production-before-marker.json" >/dev/null
+          # Fail closed before touching Cloudflare: never silently roll back to an older app.
+          node scripts/verify-release-monotonic.mjs "$RUNNER_TEMP/production-before-marker.json" "$APP_VERSION" "$SOURCE_SHA"
+          prior_public="$(jq -r '.public_ui_source_commit // ""' "$RUNNER_TEMP/production-before-marker.json")"
+          if [[ "$prior_public" =~ ^[a-f0-9]{40}$ ]]; then echo "previous_public_sha=$prior_public" >> "$GITHUB_OUTPUT"; fi
+          cd "$RUNNER_TEMP/release"
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          const path='wrangler.toml';
+          const source=readFileSync(path,'utf8');
+          const header='[env.production.placement]';
+          if(source.split(header).length!==2) throw new Error('Expected exactly one env.production.placement section');
+          const start=source.indexOf(header)+header.length;
+          const next=source.indexOf('\n[',start);
+          const section=source.slice(start,next<0?source.length:next);
+          if(!/^\s*mode\s*=/m.test(section)){
+            writeFileSync(path,source.replace(header,header+'\nmode = "off"'));
+          }
+          const verified=readFileSync(path,'utf8');
+          const at=verified.indexOf(header)+header.length;
+          const end=verified.indexOf('\n[',at);
+          const block=verified.slice(at,end<0?verified.length:end);
+          if(!/^\s*mode\s*=\s*"off"\s*$/m.test(block)) throw new Error('Production placement mode is not explicitly off');
+          NODE
+          jq '.release_status="DEPLOYED_PRODUCTION" | .release_channel="production"' dist/release-source.json > "$RUNNER_TEMP/release-marker.json"
+          cp "$RUNNER_TEMP/release-marker.json" dist/release-source.json
+          message="Mobile-only $APP_VERSION source=$SOURCE_SHA public=$PUBLIC_SHA run=$GITHUB_RUN_ID"
+          rollback(){
+            code=$?
+            if [ "$code" -ne 0 ]; then
+              current_message="$(cf "$api/deployments?env=production&per_page=1" | jq -r '.result[0].deployment_trigger.metadata.commit_message//""' || true)"
+              if [ "$current_message" = "$message" ]; then
+                cf -X POST "$api/deployments/$previous/rollback" | jq -e '.success==true' >/dev/null || echo '::error::Guarded rollback failed; manual Cloudflare inspection is required.'
+              fi
+            fi
+            exit "$code"
+          }
+          trap rollback EXIT
+          NPM_CONFIG_CACHE="$HOME/.cache/dongjak/wrangler-npm" npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --branch=main --commit-hash="$SOURCE_SHA" --commit-message="$message" > "$RUNNER_TEMP/production-deploy.log" 2>&1
+          verified=0
+          for n in $(seq 1 15); do
+            if curl -fsSL --max-time 25 "$PRODUCTION_URL/release-source.json?after=$GITHUB_RUN_ID-$n" |
+              jq -e --arg source "$SOURCE_SHA" --arg public "$PUBLIC_SHA" --arg css "$CSS_SHA" --arg version "$APP_VERSION" --arg build "$BUILD_RUN" \
+                '.source_commit==$source and .public_ui_source_commit==$public and .public_ui_overlay_sha256==$css and .application_version==$version and (.build_run|tostring)==$build and .release_status=="DEPLOYED_PRODUCTION"' >/dev/null; then
+              verified=1
+              break
+            fi
+            sleep 5
+          done
+          test "$verified" = 1
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/version.json" | jq -e --arg version "$APP_VERSION" '.version==$version' >/dev/null
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/api/transport/status" | jq -e '.bus==true and .subway==true' >/dev/null
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/api/seoul-facilities?limit=1" | jq -e '.ok==true and .configured==true and (.places|length)>0' >/dev/null
+          cf "$api" | jq -S -c '.result.deployment_configs.production|{d1_databases,ai_bindings,env_vars:(.env_vars|with_entries(.value={type:.value.type}))}' > "$RUNNER_TEMP/bindings-after"
+          cmp -s "$RUNNER_TEMP/bindings-before" "$RUNNER_TEMP/bindings-after"
+          trap - EXIT
+          echo "Mobile-only Production promotion verified for $SOURCE_SHA." >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove decrypted release and private diagnostics
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/encrypted" "$RUNNER_TEMP/release" "$RUNNER_TEMP/mobile-overhaul.tar.gz" "$RUNNER_TEMP/release-marker.json" "$RUNNER_TEMP/project-before.json" "$RUNNER_TEMP/bindings-before" "$RUNNER_TEMP/bindings-after" "$RUNNER_TEMP/production-deploy.log" "$RUNNER_TEMP/production-before-marker.json"
+
