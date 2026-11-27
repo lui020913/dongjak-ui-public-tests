@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.248",
   "public_work_branch": "main",
-  "purpose": "Deploy merged PR #631: finalized light basemap ground #F7F7F7, building faces #FAFAFA and outlines #E2E2E2, apartment sites #E6DED4 and distinct facility site palettes, removal of obsolete dark site palette while preserving night safety analysis, static 77 official numbered subway exits strictly inside Dongjak district boundary, independent marker display and explicitly schematic passage connections. Full source CI including 36 phone shards, picker and facility geometry and mobile overlay compatibility passed. Preserve protected Preview/Production and APK gates. User requested tap-only bottom dock: remove swipe navigation and global gesture listeners, retain normal tap crossfade and existing map/sheet gestures, bound outgoing tab cleanup. Replace obsolete swipe-navigation test with no-drag-navigation and direct tap regression. Separate PR CI continues in parallel; release build and protected Production QA remain required.",
-  "attempt": 485,
+  "purpose": "Deploy v9.2.248 including prior PR #631/#633 and merged PR #634: light ground #E7E7E5, building faces #FAFAFA and outlines #E2E2E2, apartment site #E6DED4, other facility palettes, 77 static official Dongjak-only entrances, tap-only bottom dock and bounded outgoing cleanup. Align release smoke selector with renamed tap-only regression. User requested direct deployment without waiting for separate PR CI; protected release build, Preview and Production checks remain intact.",
+  "attempt": 486,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
-  "gemini_repair_count": 1
+  "gemini_repair_count": 2
 }
