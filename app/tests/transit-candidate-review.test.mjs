@@ -40,10 +40,12 @@ test('cancellation prevents stale review results and further requests',async()=>
 test('pending, unavailable and unobserved walking evidence stay distinct',()=>{
  assert.match(formatTransitReview(undefined,false),/조회 중/);
  assert.equal(formatTransitReview(null,true),'도보 연결 확인 불가');
- assert.match(formatTransitReview({walkM:366,walkMinutes:5,coverage:0,comparable:false},true),/안전 미평가/);
+ assert.match(formatTransitReview({walkM:366,walkMinutes:5,coverage:0,comparable:false},true),/보행안전 데이터 미확보/);
 });
 
 test('compact card review hides redundant zero coverage but never invents a safety score',()=>{
- assert.equal(formatTransitReview({walkM:1190,walkMinutes:15,coverage:0,comparable:false},true),'도보 1.19km · 안전 미평가');
+ assert.equal(formatTransitReview({walkM:1190,walkMinutes:15,coverage:0,comparable:false},true),'도보 1.19km · 보행안전 데이터 미확보');
  assert.match(formatTransitReview({walkM:200,walkMinutes:3,coverage:.8,comparable:true,risk:32},true),/PRI 32.0점 \(관측 80%\)/);
 });
+
+test('partial coverage is distinguished from no acquired walking safety data',()=>{assert.match(formatTransitReview({walkM:200,walkMinutes:3,coverage:.3,comparable:false},true),/보행안전 데이터 부족/);});
