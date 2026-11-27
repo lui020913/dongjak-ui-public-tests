@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.229",
+  "application_version": "9.2.230",
   "public_work_branch": "main",
-  "purpose": "PR #605: restore only five curated Han River bridge names by exempting dedicated bridge label layers from district clipping. Preserve existing bridge anchors, styling, rail geometry, metro eligibility, administrative names and other exterior filtering. User requested immediate deployment without separate pre-merge verification; existing protected release checks remain.",
-  "attempt": 464,
+  "purpose": "PR #606: preserve existing native and GIS building rendering, strengthen exterior building geometry filter, and repair overwritten filters at idle only. Compact walking recommendation footer and full-width start guidance button. Source CI, protected mobile overlay and actual-map rendering passed, including 15 exterior zoom scans and retained interior native buildings. Require protected release checks; physical device verification remains open.",
+  "attempt": 465,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
