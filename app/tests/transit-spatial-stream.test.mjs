@@ -42,3 +42,12 @@ test('normal loading is distinct from failed cells and arrivals are batched',asy
  const states=[];const stream=createTransitCellStream({load:async key=>{if(key==='bad')throw Error('offline');return [key];},onChange:(rows,state)=>states.push({rows,...state})});
  stream.update(['a','b','bad']);assert.equal(states[0].pending,3);assert.equal(states[0].failed,0);await wait();assert.equal(states.at(-1).pending,0);assert.equal(states.at(-1).failed,1);assert.deepEqual(states.at(-1).rows,['a','b']);assert.equal(states.length,2);stream.dispose();
 });
+
+test('bus-only cell changes do not republish unchanged subway sources',()=>{
+ const code=readFileSync(new URL('../src/transport-map.js',import.meta.url),'utf8');
+ assert.match(code,/if\(busSignature!==lastBusSourceSignature\)/);
+ assert.match(code,/if\(railSignature!==lastRailSourceSignature\)/);
+ assert.match(code,/if\(metroSignature!==lastMetroInputSignature\)/);
+ assert.match(code,/if\(signature!==lastMetroGeoSignature\)/);
+ assert.match(code,/fallbackBus\.length\?deduplicateBusStops/);
+});

@@ -1831,6 +1831,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   // Hide metro lines and badges at the actual widest camera zoom on *both* PC and mobile.
   installResponsiveMetroVisibility({map,app:document.getElementById('app')});
   let stationLookups=new Map();
+  let lastMetroGeoSignature='';
   function renderMetroMarkers(items){
     lastMetroMarkerItems=items;
     const geo=metroMarkerGeojson(items,{
@@ -1850,7 +1851,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     // Scope by station identity before track snapping; keep both badges at a
     // boundary transfer station, but exclude unrelated external stations.
     geo.features=geo.features.filter(f=>scopeContains(...f.geometry.coordinates)&&!overlapsRouteStop(...f.geometry.coordinates,'subway'));
-    map.getSource(stationSource)?.setData(geo);
+    const signature=JSON.stringify(geo);
+    if(signature!==lastMetroGeoSignature){map.getSource(stationSource)?.setData(geo);lastMetroGeoSignature=signature;}
   }
   function updateMetroMarkerPresentation(){
     // MapLibre reprojects markers itself on every frame; nothing here changes
@@ -1890,7 +1892,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const officialBus=official.filter(p=>p.kind==='bus');
     const officialIds=new Set(officialBus.map(p=>String(p.arsId)));
     const fallbackBus=streamFailed?osmTransport.filter(p=>p.kind==='bus'&&eligible(p)&&!officialIds.has(String(p.arsId))):[];
-    const buses=deduplicateBusStops([...officialBus,...fallbackBus]);
+    // The packaged source validates and uniquely indexes each five-digit ARS ID before tiling.
+    // Only the mixed, failed-cell fallback requires proximity/name deduplication.
+    const buses=fallbackBus.length?deduplicateBusStops([...officialBus,...fallbackBus]):officialBus;
     const stations=new Map();
     for(const p of [...osmTransport.filter(p=>p.kind==='subway'),...official.filter(p=>p.kind==='subway'),...officialMetro]){
       if(!eligible(p))continue;
@@ -1913,19 +1917,23 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     try{map.setFilter('dj-basemap-bus-pictogram',filter);lastTileFallbackFilter=signature;}
     catch(error){console.debug('[정류장 예비 레이어 중복 필터]',error?.message||error);}
   }
-  let lastStopDataSignature='';
+  let lastStopDataSignature='',lastBusSourceSignature='',lastRailSourceSignature='',lastMetroInputSignature='';
   function showStops(items){
     if(map.isMoving?.()){stopPublish.request();return;}
-    const filtered=items.filter(x=>scopeContains(x.lng,x.lat)&&inActiveCell(x));
+    const filtered=items.filter(x=>scopeContains(x.lng,x.lat)&&inActiveCell(x)).sort((a,b)=>String(a.id).localeCompare(String(b.id)));
     const signature=JSON.stringify(filtered);
-    if(signature===lastStopDataSignature)return;
+    if(signature===lastStopDataSignature){updateTileBusFallbackFilter();return;}
     lastStopDataSignature=signature;
     stops=new Map(filtered.map(x=>[x.id,x]));
     cachedTransportPlaces=filtered;
-    map.getSource('transport-bus').setData(featureCollection(filtered.filter(x=>x.kind==='bus'&&!overlapsRouteStop(x.lng,x.lat,'bus'))));
-    map.getSource('transport-subway').setData(featureCollection(filtered.filter(x=>x.kind==='subway')));
-    renderMetroMarkers(filtered);
-    currentVisibleBusStops=filtered.filter(x=>x.kind==='bus');
+    const bus=filtered.filter(x=>x.kind==='bus'&&!overlapsRouteStop(x.lng,x.lat,'bus'));
+    const rail=filtered.filter(x=>x.kind==='subway');
+    const busSignature=JSON.stringify(bus),railSignature=JSON.stringify(rail);
+    if(busSignature!==lastBusSourceSignature){map.getSource('transport-bus').setData(featureCollection(bus));lastBusSourceSignature=busSignature;}
+    if(railSignature!==lastRailSourceSignature){map.getSource('transport-subway').setData(featureCollection(rail));lastRailSourceSignature=railSignature;}
+    const metroSignature=JSON.stringify([railSignature,cityScope(),routeStopCoordinates]);
+    if(metroSignature!==lastMetroInputSignature){renderMetroMarkers(rail);lastMetroInputSignature=metroSignature;}
+    currentVisibleBusStops=bus;
     updateTileBusFallbackFilter();
     const busCount=currentVisibleBusStops.length;
     sourceStatus.textContent=`버스 ${busCount}곳${officialStaticStopCount ? ' (서울시 공식 정류소 정적자료)' : ' (OSM 보완자료)'} · 철도역 ${filtered.length-busCount}곳 · 지도에서 선택`;
@@ -1969,8 +1977,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   map.on('moveend',()=>streamViewportWork.request());
   map.on('zoomend',()=>streamViewportWork.request());
   map.on('resize',()=>streamViewportWork.request());
-  map.on('dongjak:boundary-updated',()=>streamViewportWork.request());
-  globalThis.window?.addEventListener?.('dongjak:transit-stream-scope',()=>{lastStopDataSignature='';streamViewportWork.request();});
+  map.on('dongjak:boundary-updated',()=>{lastStopDataSignature='';lastMetroInputSignature='';streamViewportWork.request();});
+  globalThis.window?.addEventListener?.('dongjak:transit-stream-scope',()=>{lastStopDataSignature='';lastMetroInputSignature='';streamViewportWork.request();});
   globalThis.window?.addEventListener?.('dongjak:transit-route-stops',event=>{routeStopCoordinates=Array.isArray(event.detail)?event.detail:[];lastStopDataSignature='';refreshStops();});
   document.addEventListener?.('dongjak-base-layer-change',()=>streamViewportWork.request());
   refreshTransitViewport();
