@@ -309,7 +309,7 @@ for j,indices in site_by_current.items():
     for n in nearby:
         if n==owner:continue
         sheet,kind,row,f,g=legacy_rows[n];h=float(f['properties'].get('h') or 0)
-        if not (0<h<=9 and g.area>=20 and current_g.area/g.area>=3):continue
+        if kind!='file' or not (0<h<=9 and g.area>=20 and current_g.area/g.area>=3):continue
         if g.intersection(current_g).area/g.area<.98 or g.intersection(owner_g).area/g.area<.98:continue
         if any(int(k)!=j and g.intersection(cur[int(k)]).area/g.area>=.25 for k in tree.query(g,predicate='intersects')):continue
         key=(sheet,kind,row)
@@ -327,11 +327,13 @@ for j,indices in site_by_current.items():
 gap_decisions=collections.Counter()
 for i,(site_g,ref,confirmed) in site_boundaries.items():
     site=sites[i]
-    if not confirmed or site['approved']<'2020-01-01':continue
-    if planned.intersects(site_g):continue
+    if not confirmed:continue
+    # A neighboring future-plan boundary must not exclude an entire completed
+    # complex. Exclude only the individual footprints that intersect it.
     inside={int(j) for j in tree.query(site_g,predicate='intersects') if site_g.covers(cur[int(j)].representative_point())}
-    towers=[j for j in inside if int(props[j].get('gro_flo_co') or 0)>=5 and cur[j].area>=100]
+    towers=[j for j in inside if int(props[j].get('gro_flo_co') or 0)>=5 and cur[j].area>=100 and not planned.covers(cur[j].representative_point())]
     expected=int(str(site['expected_dongs']).replace(',',''))
+    print('COMPLETED_SITE_GATE '+json.dumps({'site':site['name'],'boundary':ref,'site_area_m2':round(site_g.area),'planned_overlap_m2':round(site_g.intersection(planned).area),'expected':expected,'current_towers':len(towers),'current_floor_distribution':dict(collections.Counter(str(props[j].get('gro_flo_co')) for j in inside))},ensure_ascii=False),flush=True)
     if len(towers)<max(1,expected*.7):continue
     retained_towers=0
     for j in towers:
