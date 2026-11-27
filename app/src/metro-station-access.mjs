@@ -1,5 +1,5 @@
 // Cartographic access context only, never a routing graph. Approximation is explicitly dashed.
-import {queryOverpass} from './safety-layers.js';
+export const STATION_ACCESS_SNAPSHOT='/data/transport/seoul-station-access-v1.json';
 export const STATION_ACCESS_ZOOM=16.2;
 export const STATION_PASSAGE_ZOOM=16.65;
 const SOURCE='dj-metro-station-access',X=88300,Y=111320;
@@ -32,7 +32,7 @@ export function buildStationAccess(elements,stations,colors,railPaths=new Map(),
   const p=pointOf(e);if(!valid(p)||!allow(...p))continue;
   const station=stationAt(p,stations,t.station||t['station:name']||'')||stationAt(p,stations);if(!station)continue;
   const n=number(t),key=normalized(station.name)+'|'+(n||e.id);if(seen.has(key))continue;seen.add(key);
-  const props={kind:'exit',station:station.name,number:n,label:n||'출입구',color:lineColor(station,colors),quality:'mapped',source:'OpenStreetMap'};
+  const props={kind:'exit',station:station.name,number:n,label:n||'출입구',color:lineColor(station,colors),quality:'mapped',source:t.source||'OpenStreetMap'};
   result.push(feature('Point',p,props));exits.push({p,station,props});
  }
  for(const e of elements||[]){if(e.type!=='way')continue;const t=e.tags||{},p=coordinates(e);if(p.length<2||!p.every(q=>allow(...q)))continue;
@@ -63,9 +63,13 @@ export function stationAccessQuery(b,kind='all'){
  const passages='way["railway"="platform"]('+box+');way["public_transport"="platform"]["subway"="yes"]('+box+');way["highway"="footway"]["tunnel"="yes"]('+box+');way["highway"="footway"]["location"="underground"]('+box+');way["indoor"="corridor"]('+box+');way["highway"="steps"]["level"]('+box+');';
  return '[out:json][timeout:10];('+(kind==='exits'?exits:kind==='passages'?passages:exits+passages)+');out body geom;';
 }
-export function installMetroStationAccess({map,app,getStations,getRailPaths,colors,allow,fetcher=queryOverpass}){
+export function installMetroStationAccess({map,app,getStations,getRailPaths,colors,allow,fetcher=globalThis.fetch}){
  if(!map?.getBounds||!map?.getZoom||!map?.addSource)return {request(){}};
- const cache=new Map(),failed=new Map();let pending=null,timer=0,retryTimer=0,last='',desired=null,initialized=false;
+ let snapshot=null,pending=null,timer=0,last='',initialized=false,failedAt=0;
+ function loadSnapshot(){
+  if(snapshot||pending||Date.now()-failedAt<30000)return;
+  pending=Promise.resolve().then(()=>fetcher(STATION_ACCESS_SNAPSHOT)).then(r=>{if(!r.ok)throw Error('snapshot '+r.status);return r.json();}).then(data=>{if(data.schema!==1||!Array.isArray(data.elements)||!data.elements.length)throw Error('invalid station snapshot');snapshot=data.elements;request();}).catch(error=>{failedAt=Date.now();console.warn('[지하철 정적 출입구]',error?.message);}).finally(()=>{pending=null;});
+ }
  const enabled=()=>app?.dataset?.djTransitExterior==='true'||app?.dataset?.baseMetro!=='off';
  function setup(){
   if(map.getSource(SOURCE))return;
@@ -84,31 +88,20 @@ export function installMetroStationAccess({map,app,getStations,getRailPaths,colo
  function refresh(){
   if(map.isMoving?.())return;
   if(!map.isStyleLoaded?.()&&typeof map.isStyleLoaded==='function'){map.once?.('idle',request);return;}
-  if(!enabled()||map.getZoom()<STATION_ACCESS_ZOOM){desired=null;if(initialized&&last)publish(empty());return;}
+  if(!enabled()||map.getZoom()<STATION_ACCESS_ZOOM){if(initialized&&last)publish(empty());return;}
   const b=map.getBounds();if(!b?.getWest)return;
-  const w=b.getWest(),s=b.getSouth(),e=b.getEast(),n=b.getNorth(),pad=.003;
+  const w=b.getWest(),s=b.getSouth(),e=b.getEast(),n=b.getNorth(),pad=.004,eBound=e;
   const center=map.getCenter?.()||{lng:(w+e)/2,lat:(s+n)/2};
   const stations=(getStations()||[]).filter(p=>p.lng>=w-pad&&p.lng<=e+pad&&p.lat>=s-pad&&p.lat<=n+pad).sort((a,b)=>distance([a.lng,a.lat],[center.lng,center.lat])-distance([b.lng,b.lat],[center.lng,center.lat])).slice(0,8);
-  if(!stations.length){desired=null;if(initialized&&last)publish(empty());return;}
-  const keys=new Map();
-  for(const p of stations){const x=Math.floor(p.lng/.006),y=Math.floor(p.lat/.006),key=x+':'+y;if(!keys.has(key))keys.set(key,[y*.006-.003,x*.006-.003,(y+1)*.006+.003,(x+1)*.006+.003]);}
-  desired=keys;
-  const rows=new Map();for(const key of keys.keys())for(const kind of ['exits','passages'])for(const p of cache.get(key+'|'+kind)||[])rows.set(p.type+':'+p.id,p);
-  if(rows.size||initialized){let rail=new Map();try{rail=getRailPaths()||rail;}catch{}publish(buildStationAccess([...rows.values()],stations,colors,rail,allow));}
-  if(pending)return;
-  // Prioritize the inexpensive exit query across all visible cells. A slow passage query must never suppress exit markers.
-  for(const kind of ['exits','passages']){
-   if(kind==='passages'&&map.getZoom()<STATION_PASSAGE_ZOOM)continue;
-   for(const [key,box] of keys){
-    const id=key+'|'+kind;if(cache.has(id)||Date.now()-(failed.get(id)||0)<30000)continue;
-    pending=id;
-    Promise.resolve().then(()=>fetcher(stationAccessQuery(box,kind),12000)).then(data=>{
-     if(!Array.isArray(data))throw Error('station access data');
-     cache.set(id,data);failed.delete(id);while(cache.size>128)cache.delete(cache.keys().next().value);
-    }).catch(error=>{failed.set(id,Date.now());console.warn('[지하철 출입구/통로]',kind,error?.message);if(!retryTimer)retryTimer=setTimeout(()=>{retryTimer=0;request();},31000);}).finally(()=>{pending=null;if(desired&&enabled())request();});
-    return;
-   }
-  }
+  if(!stations.length){if(initialized&&last)publish(empty());return;}
+  if(!snapshot){loadSnapshot();return;}
+  const rows=snapshot.filter(e=>{
+   if(e.type==='node'){const [x,y]=pointOf(e);return x>=w-pad&&x<=eBound+pad&&y>=s-pad&&y<=n+pad;}
+   if(map.getZoom()<STATION_PASSAGE_ZOOM)return false;
+   return (e.geometry||[]).some(q=>q.lon>=w-pad&&q.lon<=eBound+pad&&q.lat>=s-pad&&q.lat<=n+pad);
+  });
+  let rail=new Map();try{rail=getRailPaths()||rail;}catch{}
+  publish(buildStationAccess(rows,stations,colors,rail,allow));
  }
  function request(){clearTimeout(timer);timer=setTimeout(refresh,220);}
  map.on?.('moveend',request);map.on?.('zoomend',request);
