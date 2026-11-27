@@ -25,9 +25,9 @@ export function normalizeBaseLayerSettings(raw){
     [key,typeof raw[key]==='boolean'?raw[key]:defaultValue]));
 }
 
-export function applyBaseLayerVisibility(map,settings){
+export function applyBaseLayerVisibility(map,settings,{manageBoundary=true}={}){
   const normalized=normalizeBaseLayerSettings(settings);
-  for(const key of ['metro','bus','boundary']){
+  for(const key of manageBoundary?['metro','bus','boundary']:['metro','bus']){
     const desired=normalized[key]?'visible':'none';
     for(const id of BASE_LAYER_IDS[key]){
       try{
@@ -40,12 +40,13 @@ export function applyBaseLayerVisibility(map,settings){
   return normalized;
 }
 
-export function installBaseLayerControls({map,app,onBuildingsChange=()=>{}}){
+export function installBaseLayerControls({map,app,onBuildingsChange=()=>{},onBoundaryChange}){
   const wrapper=document.getElementById('base-layer-controls');
   const buttons=[...wrapper?.querySelectorAll('[data-base-layer]')||[]];
   let stored=null;
   try{stored=JSON.parse(localStorage.getItem(BASE_LAYER_STORAGE_KEY)||'null');}catch{}
   const state=normalizeBaseLayerSettings(stored);
+  const applyDisplay=()=>{const result=applyBaseLayerVisibility(map,state,{manageBoundary:!onBoundaryChange});onBoundaryChange?.(state.boundary);return result;};
   const sync=()=>{
     app.dataset.baseMetro=state.metro?'on':'off';
     app.dataset.baseBus=state.bus?'on':'off';
@@ -56,7 +57,7 @@ export function installBaseLayerControls({map,app,onBuildingsChange=()=>{}}){
       btn.setAttribute('aria-pressed',String(state[key]));
       btn.title=`${btn.textContent.trim()} ${state[key]?'숨기기':'표시하기'}`;
     }
-    applyBaseLayerVisibility(map,state);
+    applyDisplay();
     onBuildingsChange(state.buildings);
     // Basemap POI transit filter is managed independently from the native rail/stop layer.
     document.dispatchEvent(new Event('dongjak-base-layer-change'));
@@ -99,5 +100,5 @@ export function installBaseLayerControls({map,app,onBuildingsChange=()=>{}}){
     // Keep boundaryTask observed; it runs once and never modifies existing layers.
     void boundaryTask;
   }
-  return {sync,apply:()=>applyBaseLayerVisibility(map,state),settings:()=>({...state})};
+  return {sync,apply:applyDisplay,settings:()=>({...state})};
 }

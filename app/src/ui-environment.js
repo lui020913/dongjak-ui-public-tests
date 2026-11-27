@@ -90,6 +90,7 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
 
 import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,nativeBuildingFootprintPaint,nativeBuildingFootprint,repaintVegetation} from './map-appearance.js';
 import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
+import {setDistrictOpacity} from './transit-exterior-scope.mjs';
 import {createThemeState} from './theme-state-core.mjs';
 import {scaleMapLabelSize} from './map-label-text-scale.mjs';
 import {LABEL_HALO_MAX_PX} from './map-label-halo.js';
@@ -266,7 +267,7 @@ export function initTheme({map,app}){
       const maskPaint=districtExteriorThemePaint(themeState.value);
       if(app.dataset.djTransitExterior==='true')maskPaint['fill-opacity']=0;
       for(const [key,value] of Object.entries(maskPaint)){
-        try{map.setPaintProperty('district-exterior-fade',key,value);}catch(error){console.warn('[외부지역 마스크] 테마 전환 실패:',error);}
+        try{if(key==='fill-opacity')setDistrictOpacity(map,'district-exterior-fade',key,value);else if(map.getPaintProperty('district-exterior-fade',key)!==value)map.setPaintProperty('district-exterior-fade',key,value);}catch(error){console.warn('[외부지역 마스크] 테마 전환 실패:',error);}
       }
     }
     // Added overlays are not part of the original style baseline and must be

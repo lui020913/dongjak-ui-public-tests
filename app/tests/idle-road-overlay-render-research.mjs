@@ -65,6 +65,7 @@ try{
     const nativeAreas=info.layers.filter(nativeVehicleArea),nativeQuiet=info.layers.filter(quietNativeLine);
     assert.ok(nativeAreas.length>0,'actual native road polygon layer must exist');
     assert.ok(nativeQuiet.some(l=>l['source-layer']==='boundary'),'actual native boundary line must exist');
+    if(process.env.CHECK_FERRY_FADE==='true')assert.ok(nativeQuiet.some(l=>l.id==='ferry'||/ferry/.test(l.id)),'actual ferry line must exist and be hidden');
     assert.ok(nativeAreas.every(l=>JSON.stringify(l.filter).includes('pedestrian')),'native vehicle area must exclude road fills');
     assert.ok(nativeQuiet.every(l=>l.visibility==='none'),'decorative lines must remain hidden');
     assert.ok(info.district>0,'owned Dongjak district boundary must remain visible in safety mode');

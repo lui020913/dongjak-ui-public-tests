@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {transitEndpointPolicy,transitCoordinatesInScope,transitPointInScope,exteriorMapActive,transitWalkStyle,transitContextBounds,applyTransitBoundaryVisibility} from '../src/transit-exterior-scope.mjs';
+import {transitEndpointPolicy,transitCoordinatesInScope,transitPointInScope,exteriorMapActive,transitWalkStyle,transitContextBounds,applyTransitBoundaryVisibility,applyDistrictOutlineVisibility,DISTRICT_FADE_MS} from '../src/transit-exterior-scope.mjs';
 const a={lng:126.95,lat:37.50},b={lng:127.01,lat:37.55},c={lng:127.1,lat:37.6};
 const inside=(lng,lat)=>lng===a.lng&&lat===a.lat;
 test('one endpoint must be in Dongjak; neither endpoint may exceed pilot search rectangle',()=>{
@@ -47,10 +47,15 @@ test('transit hides district outline and exterior tint; both restore without cha
  const paint=new Map([['district-border',.96],['district-border-halo',.42],['district-exterior-fade',.65]]),writes=[];
  const map={getLayer:id=>paint.has(id),getPaintProperty:id=>paint.get(id),setPaintProperty:(id,key,value)=>{paint.set(id,value);writes.push([id,key,value]);}};
  applyTransitBoundaryVisibility(map,true,true);applyTransitBoundaryVisibility(map,true,true);
- assert.deepEqual(writes,[['district-exterior-fade','fill-opacity',0],['district-border','line-opacity',0],['district-border-halo','line-opacity',0]]);
+ assert.deepEqual(writes.filter(w=>!w[1].endsWith('-transition')),[['district-exterior-fade','fill-opacity',0],['district-border','line-opacity',0],['district-border-halo','line-opacity',0]]);
+ assert.equal(writes.filter(w=>w[1].endsWith('-transition')).length,3);
  applyTransitBoundaryVisibility(map,false,true,.48);
  assert.equal(paint.get('district-exterior-fade'),.48);
  assert.equal(paint.get('district-border'),.96);assert.equal(paint.get('district-border-halo'),.42);
+ applyTransitBoundaryVisibility(map,true,true,.48,false);applyTransitBoundaryVisibility(map,false,true,.48,false);
+ assert.equal(paint.get('district-border'),0);assert.equal(paint.get('district-border-halo'),0);
+ applyDistrictOutlineVisibility(map,false,true,true);assert.equal(paint.get('district-border'),.96);
+ assert.equal(DISTRICT_FADE_MS,250);
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  assert.doesNotMatch(main,/installSharedDistrictScope|createTransitContextLayers|map\.setTerrain\(null\)|import '\.\/transit-exterior-scope.css'/);
  const scope=main.split('function syncTransitExterior(force=false){')[1].split('function clearTransitPreview(){')[0];

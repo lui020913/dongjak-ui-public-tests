@@ -48,7 +48,7 @@ import {readSharedCommunity,publishCommunityPost,deleteSharedCommunityPost,setSh
 import {initPedestrianTools} from './pedestrian-tools.js';
 import {fetchDongjakPedestrianVariants} from './dongjak-local-routing.js';
 import {routeWithinDistrict} from './route-district-guard.mjs';
-import {TRANSIT_SEARCH_BOUNDS,transitPointInScope,transitCoordinatesInScope,transitEndpointPolicy,exteriorMapActive,transitWalkStyle,transitContextBounds,transitFramingBounds,applyTransitBoundaryVisibility} from './transit-exterior-scope.mjs';
+import {TRANSIT_SEARCH_BOUNDS,transitPointInScope,transitCoordinatesInScope,transitEndpointPolicy,exteriorMapActive,transitWalkStyle,transitContextBounds,transitFramingBounds,applyTransitBoundaryVisibility,applyDistrictOutlineVisibility} from './transit-exterior-scope.mjs';
 import {installDongjakOfficialDataLayers} from './dongjak-verified-data-layers.js';
 import {installDongjakLiveTransit} from './features/liveTransit/integrate.js';
 import './features/liveTransit/live-transit.css';
@@ -1190,15 +1190,15 @@ async function loadDongjakBoundary(){
     installParkNameLabels(map,boundaryGeometry);
     map.addSource('district-exterior',{type:'geojson',data:maskOutside(boundaryGeometry)});
     map.addLayer({id:'district-exterior-fade',type:'fill',source:'district-exterior',
-      paint:districtExteriorThemePaint(visualTheme.currentTheme())},'registered-points-halo');
+      paint:{...districtExteriorThemePaint(visualTheme.currentTheme()),...(app.dataset.djTransitExterior==='true'?{'fill-opacity':0}:{})}},'registered-points-halo');
     visualTheme.refresh();
     map.addSource('district-outline',{type:'geojson',data:feature});
     map.addLayer({id:'district-border-halo',type:'line',source:'district-outline',
       layout:{'line-cap':'round','line-join':'round'},
-      paint:{'line-color':'rgba(255,255,255,0.96)','line-width':12.5,'line-opacity':matchMedia('(max-width:699px)').matches?0.42:0.92,'line-blur':4.2}});
+      paint:{'line-color':'rgba(255,255,255,0.96)','line-width':12.5,'line-opacity':app.dataset.djTransitExterior==='true'||app.dataset.baseBoundary==='off'?0:(matchMedia('(max-width:699px)').matches?0.42:0.92),'line-blur':4.2}});
     map.addLayer({id:'district-border',type:'line',source:'district-outline',
       layout:{'line-cap':'round','line-join':'round'},
-      paint:{'line-color':'#0f7f73','line-width':3.35,'line-opacity':0.96}});
+      paint:{'line-color':'#0f7f73','line-width':3.35,'line-opacity':app.dataset.djTransitExterior==='true'||app.dataset.baseBoundary==='off'?0:0.96}});
     baseLayerControls?.apply();
     syncTransitExterior(true);
     map.on('pitch',()=>{
@@ -1715,7 +1715,7 @@ map.on('load',()=>{
   try {
     installDongjakMapPatch({map,maplibregl,busStops:[],buildings:[],noryangjinFix:false,useBaseBuildingSource:true});
   } catch(error) { console.warn('[고배율 건물명] 레이어 연결 실패:',error); }
-  baseLayerControls=installBaseLayerControls({map,app,onBuildingsChange:(enabled)=>{
+  baseLayerControls=installBaseLayerControls({map,app,onBoundaryChange:enabled=>applyDistrictOutlineVisibility(map,app.dataset.djTransitExterior==='true',matchMedia('(max-width:699px)').matches,enabled),onBuildingsChange:(enabled)=>{
     baseBuildingsVisible=enabled;
     syncTiltWithBuildings();
   }});
@@ -2953,7 +2953,7 @@ function syncTransitExterior(force=false){
  }
  // Transit suppresses the district outline and exterior tint only.
  // Shared building filters, geometry, terrain and data sources stay intact.
- applyTransitBoundaryVisibility(map,active,matchMedia('(max-width:699px)').matches,districtExteriorThemePaint(visualTheme.currentTheme())['fill-opacity']);
+ applyTransitBoundaryVisibility(map,active,matchMedia('(max-width:699px)').matches,districtExteriorThemePaint(visualTheme.currentTheme())['fill-opacity'],app.dataset.baseBoundary!=='off');
  syncTransitContextBounds(active);
  if(!active&&previous&&app.dataset.tab==='map'&&transitHomeCamera){
   const camera=transitHomeCamera;transitHomeCamera=null;

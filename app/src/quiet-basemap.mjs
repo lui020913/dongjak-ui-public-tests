@@ -4,7 +4,8 @@ export function quietNativeLine(layer={}){
  const src=String(layer['source-layer']||'').toLowerCase();
  const id=String(layer.id||'').toLowerCase();
  return layer.type==='line'&&Boolean(layer.source)&&(
-  src==='boundary'||src==='waterway'&&/river|waterway/.test(id)
+  src==='boundary'||src==='waterway'&&/river|waterway/.test(id)||
+  src==='transportation'&&/(^|[-_])ferry($|[-_])/.test(id)
  );
 }
 export function nativeVehicleArea(layer={}){
