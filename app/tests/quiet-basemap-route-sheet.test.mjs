@@ -17,3 +17,13 @@ test('compact route drag cannot dismiss, explicit back clears route without rese
  assert.match(read('main.js'),/returning=Boolean\(transitPreview\);invalidateRoute\(\);navigate\('route'\)/);
  assert.match(read('transit-route-comparison.js'),/keepPreview:keepCache&&app.dataset.tab==='map'/);
 });
+
+test('comparison geometry is isolated and stale asynchronous paths cannot reopen it',()=>{
+ const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
+ const main=read('main.js');
+ assert.match(main,/comparisonRouteGeneration\+\+;comparisonRoutePlan=null/);
+ assert.match(main,/generation!==comparisonRouteGeneration\|\|app.dataset.tab!=='route'/);
+ assert.match(main,/if\(previousTab==='route'&&tab!=='route'\)\{\s*clearComparisonRoute\(\)/);
+ assert.match(main,/framing\?transitFramingBounds\(\)/);
+ assert.match(main,/walkSegments:walks.filter/);
+});

@@ -27,7 +27,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  const syncBounds=()=>{host.style.setProperty('--tr-sheet-top',safeTop()+'px');host.style.setProperty('--tr-font',win.getComputedStyle(app).fontFamily);};
  const gesture=bindTransitSheetHeader({doc,win,panel,header:panel.querySelector('.tr-header'),safeTop,onDismiss:()=>close({animate:true})});
  let focusTimer=0;
- const focus=()=>{win.clearTimeout(focusTimer);focusTimer=win.setTimeout(()=>{if(panel.hidden||app.dataset.tab!=='route'||panel.classList.contains('dj871-sheet-expanded'))return;win.dispatchEvent(new CustomEvent('dongjak:transit-comparison-focus',{detail:{sheetTop:panel.getBoundingClientRect().top,toolbarBottom:q('.header').getBoundingClientRect().bottom}}));},260);};
+ const focus=()=>{win.clearTimeout(focusTimer);focusTimer=win.setTimeout(()=>{if(panel.hidden||app.dataset.tab!=='route'||panel.classList.contains('dj871-sheet-expanded'))return;win.dispatchEvent(new CustomEvent('dongjak:transit-comparison-focus',{detail:{sheetTop:panel.getBoundingClientRect().top,toolbarBottom:q('.header').getBoundingClientRect().bottom,plan:options?(groupsOf()[filter]||groupsOf().all)[0]:null,summary:options?reviewed.get((groupsOf()[filter]||groupsOf().all)[0]):null}}));},260);};
  const resize=()=>{if(!panel.hidden){syncBounds();focus();}};
  const panelResize=typeof ResizeObserver==='function'?new ResizeObserver(focus):null;panelResize?.observe(panel);
  panel.addEventListener('transitionend',focus);win.addEventListener('resize',resize);win.visualViewport?.addEventListener('resize',resize);
@@ -95,7 +95,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
     catch(e){if(seq===generation){cached=null;status.hidden=false;status.textContent=e.message||'경로를 표시하지 못했습니다.';setBusy(false);void reviewCandidates();}}
    });list.append(card);
   }
-  if(animate)revealSurface(list);
+  if(animate)revealSurface(list);focus();
  }
  async function reviewCandidates(){
   if(!options||disposed||panel.hidden||busy||reviewController)return;
@@ -104,7 +104,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   try{
    await reviewAllTransitCandidates(plans,{signal:request.signal,concurrency:2,review:plan=>new Promise((resolve,reject)=>win.dispatchEvent(new CustomEvent('dongjak:transit-candidate-review',{detail:{plan,signal:request.signal,preferPri:policy,walkCache,resolve,reject}}))),onResult:(plan,summary)=>{
     if(seq!==generation||request.signal.aborted||reviewController!==request)return;
-    reviewed.set(plan,summary);const label=reviewLabels.get(plan);if(label){label.summary.textContent=formatTransitReview(summary,true);label.summary.hidden=false;label.metric.textContent=routeMetric(plan,summary,true);}
+    reviewed.set(plan,summary);const label=reviewLabels.get(plan);if(label){label.summary.textContent=formatTransitReview(summary,true);label.summary.hidden=false;label.metric.textContent=routeMetric(plan,summary,true);}if(plan===(groupsOf()[filter]||groupsOf().all)[0])focus();
    }});
   }finally{if(reviewController===request)reviewController=null;}
  }
