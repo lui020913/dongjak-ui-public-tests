@@ -4052,7 +4052,7 @@ function focusTransitRoute(coords){
   if(!map.getLayer(casing))map.addLayer({id:casing,type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':'#fff','line-width':walking?7:10,'line-opacity':.95}},line);
   map.setPaintProperty(line,'line-width',walking?4:6);
   map.setPaintProperty(line,'line-opacity',1);
-  if(walking){map.setPaintProperty(line,'line-dasharray',[.35,1.55]);map.setLayoutProperty(line,'line-cap','round');}
+  if(walking)map.setPaintProperty(line,'line-dasharray',[.35,1.55]);
   const before=map.getStyle()?.layers?.find(l=>l.type==='symbol'&&l.id!=='dj-transit-multi-stops-transfer-label')?.id;
   map.moveLayer(casing,before);map.moveLayer(line,before);
  }
