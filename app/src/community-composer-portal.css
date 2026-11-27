@@ -233,3 +233,9 @@ html body #dj-activity-screen:not([hidden]){position:fixed;inset:0;z-index:21474
 }
 
 #dj-community-editor-portal[data-closing="true"]{pointer-events:none!important;}
+
+/* While choosing a draft location the old community sheet must never paint,
+   even if an asynchronous legacy transition tries to reopen it. */
+@media (max-width:699px){
+ html body #app#app#app#app#app#app[data-community-picking="true"] #participation-panel{display:none!important;visibility:hidden!important;pointer-events:none!important;opacity:0!important;animation:none!important;transition:none!important;}
+}

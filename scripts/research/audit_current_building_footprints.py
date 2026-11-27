@@ -377,6 +377,45 @@ for i,(site_g,ref,confirmed) in site_boundaries.items():
         edit={'sheet':sheet,'kind':'base','row':row,'original':f['geometry'],'original_height':h,'source_count':source_counts[(sheet,kind)],'source_sha256':source_hashes[(sheet,kind)],'site':site['name'],'approved':site['approved'],'reason':'completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified','boundary_reference':ref,'retained_towers':retained_towers,'expected_towers':expected}
         edits[key]=edit;gap_decisions[site['name']]+=1
         print('VERIFIED_DISPLAY_EDIT '+json.dumps(edit,ensure_ascii=False,separators=(',',':')),flush=True)
+# The previous cleanup only checked tiny low-rise remnants and strict tower
+# matches. Re-audit all legacy layers on the reported complexes. Report
+# exact conflicting rows, retained geometry and current coverage; do not
+# infer demolition from a missing record or remove a whole complex.
+reported_terms=['클라베뉴','흑석자이','흑석한강푸르지오','이수힐스테이트','동작금강','사당삼성','이수푸르지오','로이파크','이수교','이수스위첸','상도프레스티지','상도센트럴파크','마크힐스','리버하임','사당극동','사당롯데캐슬','사당우성3','동작삼성래미안','사당현대','사당대림','노량진우성','본동삼성','본동신동아']
+remaining=[]
+for i,site in enumerate(sites):
+    if not any(norm(t) in norm(site['name']) for t in reported_terms):continue
+    bound=site_boundaries.get(i)
+    indices=site_ids.get(i,set())
+    if not indices:continue
+    # Without a confirmed site polygon inspect only geometries actually
+    # intersecting the independently identified current footprint records.
+    scope=bound[0] if bound and bound[2] else unary_union([cur[j] for j in indices])
+    found=[]
+    for n0 in legacy_tree.query(scope,predicate='intersects'):
+        n=int(n0);sheet,kind,row,f,g=legacy_rows[n]
+        if (sheet,kind,row) in edits or g.area<20 or g.intersection(scope).area/g.area<.7:continue
+        h=float(f['properties'].get('h') or 0)
+        nearby=[int(j) for j in tree.query(g,predicate='intersects')]
+        overlaps=sorted([(round(g.intersection(cur[j]).area/g.area,4),round(g.intersection(cur[j]).area/cur[j].area,4),j) for j in nearby],reverse=True)
+        coverage=g.intersection(unary_union([cur[j] for j in nearby])).area/g.area if nearby else 0
+        # Strong geometrical owner or legacy remnant outside current footprint.
+        if any(a>=.85 and b>=.85 for a,b,j in overlaps):continue
+        owners=[]
+        for a,b,j in overlaps:
+            if a<.1:continue
+            for k0 in legacy_tree.query(cur[j],predicate='intersects'):
+                k=int(k0)
+                if k==n:continue
+                owner=legacy_geoms[k];intersection=owner.intersection(cur[j]).area
+                if intersection/owner.area>=.85 and intersection/cur[j].area>=.85:
+                    owner_row=legacy_rows[k];owners.append({'sheet':owner_row[0],'kind':owner_row[1],'row':owner_row[2],'height':owner_row[3]['properties'].get('h'),'current_index':j})
+        record={'site':site['name'],'sheet':sheet,'kind':kind,'row':row,'height':h,'area_m2':round(g.area,2),'current_coverage':round(coverage,4),'overlaps':overlaps[:8],'strong_owners':owners,'source_count':source_counts[(sheet,kind)],'source_sha256':source_hashes[(sheet,kind)],'original':f['geometry'],'site_boundary':bound[1] if bound and bound[2] else None}
+        found.append(record)
+    remaining.extend(found)
+    print('REPORTED_SITE_REMAINING '+json.dumps({'site':site['name'],'rows':len(found),'base':sum(x['kind']=='file' for x in found),'supplement':sum(x['kind']=='supplement' for x in found),'with_strong_owner':sum(bool(x['strong_owners']) for x in found)},ensure_ascii=False),flush=True)
+for record in remaining:print('REPORTED_SITE_ROW '+json.dumps(record,ensure_ascii=False,separators=(',',':')),flush=True)
+(OUT/'reported-site-remaining-overlaps.json').write_text(json.dumps(remaining,ensure_ascii=False,separators=(',',':')))
 print('COMPLETED_SITE_DISPLAY_CLEANUP '+json.dumps(dict(gap_decisions),ensure_ascii=False),flush=True)
 (OUT/'verified-apartment-display-edits.json').write_text(json.dumps({'schema':1,'edits':list(edits.values())},ensure_ascii=False,separators=(',',':')))
 (OUT/'apartment-site-gap-review.geojson').write_text(json.dumps({'type':'FeatureCollection','features':site_gap_rows},ensure_ascii=False,separators=(',',':')))

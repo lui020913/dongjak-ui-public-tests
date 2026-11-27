@@ -2412,9 +2412,13 @@ document.getElementById('community-map-pick').addEventListener('click',()=>{
   communityForm.hidden=true;
   closeCommunityLocation();
   communityPickMode=true;
-  navigate('map',{suppressOverview:true});
-  toastEl.classList.remove('show');
+  // Set the paint gate BEFORE the tab mutation, not after the old panel
+  // becomes eligible for legacy sheet-enter observers.
   app.dataset.communityPicking='true';
+  navigate('map',{suppressOverview:true});
+  const panel=document.getElementById('participation-panel');
+  if(panel){window.DongjakWindowMotion?.cancel(panel);panel.hidden=true;delete panel.dataset.djTabOutgoing;delete panel.dataset.djPrimaryTransition;for(const key of ['display','visibility','opacity','pointer-events','animation','transition','will-change','z-index'])panel.style.removeProperty(key);}
+  toastEl.classList.remove('show');
   syncCommunityPickerDock();
   document.getElementById('community-map-hint').hidden=false;
   window.dispatchEvent(new Event('dongjak:community-picker-visibility'));
