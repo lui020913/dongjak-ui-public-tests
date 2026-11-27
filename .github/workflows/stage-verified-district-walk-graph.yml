@@ -1,0 +1,34 @@
+name: Stage verified district pedestrian snapshot
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/stage-verified-district-walk-graph.yml'
+permissions:
+  actions: read
+  contents: write
+jobs:
+  stage:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'fix/district-osm-walking-runtime-20261127'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 45982192220
+          name: district-osm-walk-graph
+          path: verified-graph
+      - name: Verify immutable source and stage only the graph asset
+        run: |
+          set -euo pipefail
+          echo '27c94a46e9b0e99be60078aa787d37e235c0fe13cd6667e723a5d5c2ea27198f  verified-graph/district-osm-walk-graph.json' | sha256sum -c -
+          mkdir -p app/public/data/safety/walk
+          cp verified-graph/district-osm-walk-graph.json app/public/data/safety/walk/district-osm-walk-graph.json
+          git add app/public/data/safety/walk/district-osm-walk-graph.json
+          if git diff --cached --quiet; then exit 0; fi
+          git -c user.name=github-actions[bot] -c user.email=41898282+github-actions[bot]@users.noreply.github.com commit -m 'Add verified ODbL Dongjak pedestrian snapshot 2026-11-26'
+          git push origin HEAD:refs/heads/fix/district-osm-walking-runtime-20261127
