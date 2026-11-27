@@ -1,5 +1,5 @@
 import {hasTransportPoiHit} from './poi-click-identity.js';
-import {normalizeFacilityRecord,facilityNameMatches,facilityOsmCategory,sameFacility,isFormerPoliceFacility,isUnverifiedPoliceFacility} from './facility-display-names.js';
+import {normalizeFacilityRecord,facilityNameMatches,facilityOsmCategory,sameFacility,isUnavailableFacility,isFormerPoliceFacility,isUnverifiedPoliceFacility} from './facility-display-names.js';
 /** Official Seoul-license POIs complement the existing OSM/safety overlays. */
 import {openPlaceDetails} from './place-details.js';
 import {insideBoundary} from './dongjak-verified-data-layers.js';
@@ -15,7 +15,7 @@ export function officialFeatures(places,boundary){
    const place=normalizeFacilityRecord(rawPlace);
    const lon=Number(place.lng),lat=Number(place.lat);
    if(!Number.isFinite(lon)||!Number.isFinite(lat)||!boundary||!insideBoundary([lon,lat],boundary))continue;
-   const name=String(place.name||'').trim();if(!name||isFormerPoliceFacility(name)||isUnverifiedPoliceFacility(name))continue;
+   const name=String(place.name||'').trim();if(!name||isUnavailableFacility(rawPlace)||isUnavailableFacility(place))continue;
    const key=`${name.replace(/\s+/g,'').toLowerCase()}|${place.category||''}|${lon.toFixed(4)}|${lat.toFixed(4)}`;
    const identityKey=String(place.name||'').normalize('NFKC').toLowerCase().replace(/[\s\-‐‑–’']/g,'');
    const candidates=accepted.get(identityKey)||[];
@@ -102,7 +102,7 @@ export function buildLayers(map,data,groups=DEFAULT_POI_GROUPS,dark=false){
 export function officialSearchPlaces(query,places=[],limit=20){
  const q=String(query||'').trim().replace(/\s+/g,'').toLowerCase();
  if(q.length<2)return [];
- return places.filter(p=>facilityNameMatches(p,query))
+ return places.filter(p=>!isUnavailableFacility(p)&&facilityNameMatches(p,query))
    .slice(0,limit).map(p=>normalizeFacilityRecord({...p,category:p.category||'시설'}));
 }
 /** Explicit search only: do not query remote OSM on each keystroke.
@@ -123,7 +123,7 @@ export async function searchOsmGeneralFacilities(term,{signal,fetcher=fetch}={})
    category:facilityOsmCategory({amenity:item.type,class:item.class,name:item.name||item.display_name},GENERAL_OSM_CATEGORIES[item.type]||GENERAL_OSM_CATEGORIES[item.class]||'일반시설'),
    lng:Number(item.lon),lat:Number(item.lat),
    address:String(item.display_name||''),source:'© OpenStreetMap 기여자 · 검색 결과',
-   phone:'',website:''})).filter(p=>p.name&&Number.isFinite(p.lng)&&Number.isFinite(p.lat));
+   phone:'',website:''})).filter(p=>p.name&&!isUnavailableFacility(p)&&Number.isFinite(p.lng)&&Number.isFinite(p.lat));
 }
 export function officialSearchSnapshot(){return searchableGeneralPlaces.slice();}
 export function cachedOfficialSearchPlaces(query){return officialSearchPlaces(query,searchableGeneralPlaces,40);}
@@ -139,13 +139,14 @@ export async function queryOfficialPlaces(query,{signal,fetcher=fetch,remoteFall
  const seen=new Set(),results=[];
  for(const rawPlace of [...official,...cached]){
    const place=normalizeFacilityRecord(rawPlace);
+   if(isUnavailableFacility(rawPlace)||isUnavailableFacility(place))continue;
    const id=String(place.id||`${place.name}:${place.lng}:${place.lat}`);
    if(seen.has(id)||results.some(p=>sameFacility(p,place)))continue;seen.add(id);results.push(place);
  }
  // A remote fallback complements current-viewport cache, even when D1 is unavailable.
  if(remoteFallback&&results.length<7){try{
    const remote=await searchOsmGeneralFacilities(term,{signal,fetcher});
-   for(const rawPlace of remote){const place=normalizeFacilityRecord(rawPlace);if(!seen.has(place.id)&&!results.some(p=>sameFacility(p,place))){seen.add(place.id);results.push(place);}}
+   for(const rawPlace of remote){const place=normalizeFacilityRecord(rawPlace);if(isUnavailableFacility(rawPlace)||isUnavailableFacility(place))continue;if(!seen.has(place.id)&&!results.some(p=>sameFacility(p,place))){seen.add(place.id);results.push(place);}}
  }catch(error){if(error?.name==='AbortError')throw error;}}
  return results.slice(0,60);
 }
@@ -181,7 +182,7 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
    if(!active||map.isMoving?.()||!pendingPublish)return;
    const result=pendingPublish;pendingPublish=null;const boundary=getBoundary();if(!boundary)return;
    // GeoJSON normalization and boundary tests also wait until the gesture ends.
-   cache=officialFeatures(result.merged,boundary);searchableGeneralPlaces=result.merged.filter(p=>insideBoundary([Number(p.lng),Number(p.lat)],boundary));restore();
+   cache=officialFeatures(result.merged,boundary);searchableGeneralPlaces=result.merged.filter(p=>!isUnavailableFacility(p)&&insideBoundary([Number(p.lng),Number(p.lat)],boundary));restore();
    app?.dispatchEvent(new CustomEvent('dongjak:official-facilities-ready',{detail:cache.features.map(f=>({...f.properties,lng:f.geometry.coordinates[0],lat:f.geometry.coordinates[1]}))}));lastBox=result.bbox;latest=Date.now();status(`${result.source} ${cache.features.length.toLocaleString()}곳 · ${result.partial?'일부 자료 조회 제한 · ':''}표시 정보는 현장 확인 필요`);
  }
  function schedulePublish(){clearTimeout(publishTimer);if(!active||map.isMoving?.()||!pendingPublish)return;publishTimer=setTimeout(flushPending,350);}

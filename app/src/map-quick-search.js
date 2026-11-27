@@ -1,7 +1,7 @@
 import {samePhysicalBusStop} from './bus-stop-dedup.js';
 import {createSearchToolbarCrossfade} from './map-toolbar-crossfade.js';
 import {facilitySearchGlyph} from './v912-poi-presentation.js';
-import {normalizeFacilityRecord,facilityNameMatches,facilityCategorySearchTerms,facilityOsmCategory,sameFacility,isFormerPoliceFacility,isUnverifiedPoliceFacility,isRepurposedPoliceFacility} from './facility-display-names.js';
+import {normalizeFacilityRecord,facilityNameMatches,facilityCategorySearchTerms,facilityOsmCategory,sameFacility,isUnavailableFacility,isFormerPoliceFacility,isUnverifiedPoliceFacility,isRepurposedPoliceFacility} from './facility-display-names.js';
 /** Map-only search. Queries remote Photon only after explicit form submission. */
 import {searchPlaces,searchLocalPlaces} from './route-search.js';
 import {searchCachedTransportPlaces} from './transport-map.js';
@@ -31,7 +31,7 @@ export function mergeMapSearchResults(local=[],remote=[]){
   const ordered=[...local,...remote].sort((a,b)=>Number(Boolean(b?.arsId))-Number(Boolean(a?.arsId)));
   for(const rawItem of ordered){
     const item=normalizeFacilityRecord(rawItem);
-    if(isUnverifiedPoliceFacility(item.name))continue;
+    if(isUnavailableFacility(rawItem)||isUnavailableFacility(item))continue;
     const lng=Number(item?.lng),lat=Number(item?.lat);
     if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
     const key=searchResultKey({...item,lng,lat});
@@ -279,7 +279,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
       for(const f of features){
         const p=f.properties||{};const name=String(p['name:ko']||p.name||'').trim();
         const kind=facilityOsmCategory(p,String(p.subclass||p.class||'일반 시설').trim());
-        if(isUnverifiedPoliceFacility(name)||isFormerPoliceFacility(name)&&(nearby||facilityCategorySearchTerms(text).length))continue;
+        if(isUnavailableFacility(name))continue;
         if(!nearby&&isRepurposedPoliceFacility(name)&&facilityCategorySearchTerms(text).includes('경찰서'))continue;
         if(!name||(!nearby&&!facilityNameMatches({name,category:kind},text)&&Math.max(koreanSearchScore(text,name),koreanSearchScore(text,kind))<55))continue;
         if(f.geometry?.type!=='Point')continue;

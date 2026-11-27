@@ -25,6 +25,14 @@ export function isUnverifiedPoliceFacility(name){
  const raw=String(name??'').trim();
  return !isFormerPoliceFacility(raw)&&!verifiedPlaceRecord(raw)&&(/치안센터$/.test(raw.replace(/\s+/g,''))||/경찰 관련 시설 \(운영 미확인\)$/.test(raw));
 }
+// A shared presentation gate for stale police records, including records
+// that have already been normalized or restored from a cached source.
+// A verified repurposed building is still a legitimate non-police destination.
+export function isUnavailableFacility(place){
+ const names=typeof place==='string'?[place]:[place?.name,place?.registeredName];
+ if(names.some(n=>isFormerPoliceFacility(n)||isUnverifiedPoliceFacility(n)))return true;
+ return typeof place==='object'&&[place?.category,place?.type].some(v=>['운영 종료 시설','운영 미확인 시설'].includes(String(v||'').trim()));
+}
 export function facilityDisplayType(value,name=''){
  const category=normalizeFacilityCategory(value,name);
  const label=String(name??'').replace(/\s+/g,'');

@@ -1,4 +1,4 @@
-import {normalizeFacilityName,normalizeFacilityCategory,facilityDisplayType,isFormerPoliceFacility,isUnverifiedPoliceFacility,isRepurposedPoliceFacility} from './facility-display-names.js';
+import {normalizeFacilityName,normalizeFacilityCategory,facilityDisplayType,isUnavailableFacility,isFormerPoliceFacility,isUnverifiedPoliceFacility,isRepurposedPoliceFacility} from './facility-display-names.js';
 import {usableMapSelectionOffset} from './transport-selection-marker.js';
 import {markAiSurfaceDismissal} from './ai-surface-dismiss-guard.js';
 import {setMobileSheetExpanded,dismissMobileSheet,interruptMobileSheetMotion,settleMobileSheetDrag,clearMobileSheetDrag} from './v889-mobile-sheet-motion.js';
@@ -128,7 +128,7 @@ async function enrich(p,signal){
 }
 /** Call only after an explicit place click. */
 export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=false,onBack,layerContent=null}={}){
-  if(!map||!maplibregl?.Popup)return null;
+  if(!map||!maplibregl?.Popup||isUnavailableFacility(place))return null;
   // Facility overlays have their own click handlers; HTML markers may stop
   // propagation before MapLibre's generic click handler. Route-picking wins:
   // send a route candidate and never open the facility details popup or move

@@ -1,4 +1,4 @@
-import {normalizeFacilityName,normalizeFacilityCategory} from './facility-display-names.js';
+import {normalizeFacilityName,normalizeFacilityCategory,isUnavailableFacility} from './facility-display-names.js';
 import {normalizeKoreanSearch,koreanSearchScore} from './korean-search.js';
 import {IMPORTANT_PLACES} from './important-place-click.js';
 import {DONGJAK_UNIVERSITIES} from './education-layer.js';
@@ -28,7 +28,7 @@ export function normalizePlaceSearchResults(payload) {
     const types={convenience:'편의점',supermarket:'마트',cafe:'카페',restaurant:'음식점',fast_food:'패스트푸드',bakery:'제과점'};
     const rawName=String(p.name || p.street || p.district || p.city || '').trim();
     const name = normalizeFacilityName(rawName,types[String(p.osm_value||'').toLowerCase()]||'');
-    if (!name) continue;
+    if (!name||isUnavailableFacility(rawName)||isUnavailableFacility(name)) continue;
     const address = [...new Set([p.street, p.housenumber, p.district, p.city, p.county, p.state]
       .map(s => String(s || '').trim()).filter(Boolean))].join(' · ');
     const marker = `${name}:${lng.toFixed(5)}:${lat.toFixed(5)}`;

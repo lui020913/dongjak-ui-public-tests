@@ -77,3 +77,13 @@ test('GPS nearby search is independent from map viewport and ignores stale respo
  const gps=js.slice(js.indexOf('const openGpsNearby=async()=>'),js.indexOf("map.on?.('movestart'"));
  assert.match(gps,/await getPosition\(/);assert.match(gps,/nearbySearchResults\(origin,/);assert.match(gps,/if\(!isCurrent\(\)\)return/);assert.doesNotMatch(gps,/captureVisibleFacilityArea|getCenter\(/);
 });
+
+
+test('stale police facilities cannot enter nearby or map-area results through raw or cached records',()=>{
+ const origin={lng:126.95,lat:37.5};
+ const records=[{...origin,name:'상도3치안센터',category:'경찰서'},{...origin,name:'상도3 경찰 관련 시설 (운영 미확인)'},{...origin,name:'상도5치안센터'},{...origin,name:'상도지구대',category:'경찰서'},{...origin,name:'상도2치안센터',category:'경찰서'},{...origin,name:'치안센터 앞 카페',category:'카페'}];
+ const area={center:origin,polygon:[{lng:126.94,lat:37.49},{lng:126.96,lat:37.49},{lng:126.96,lat:37.51},{lng:126.94,lat:37.51}]};
+ const expected=['상도지구대','동작청소년경찰학교','치안센터 앞 카페'];
+ assert.deepEqual(nearbySearchResults(origin,records).map(p=>p.name).sort(),expected.slice().sort());
+ assert.deepEqual(visibleFacilityResults(area,records).items.map(p=>p.name).sort(),expected.slice().sort());
+});

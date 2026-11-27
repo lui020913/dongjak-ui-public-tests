@@ -1,5 +1,5 @@
 import {samePhysicalBusStop} from './bus-stop-dedup.js';
-import {normalizeFacilityCategory,normalizeFacilityRecord,sameFacility} from './facility-display-names.js';
+import {normalizeFacilityCategory,normalizeFacilityRecord,sameFacility,isUnavailableFacility} from './facility-display-names.js';
 const rawType=p=>[p?.kind,p?.type,p?.category].map(v=>String(v||'').trim().toLowerCase());
 export function searchPlaceKind(p){
  const values=rawType(p);
@@ -18,6 +18,7 @@ export function displayFacilityCategory(p){
 export function groupVisibleFacilities(items){
   const groups=new Map();
   for(const place of items){
+    if(isUnavailableFacility(place))continue;
     const kind=searchPlaceKind(place);
     const label=kind==='bus'?'버스정류장':kind==='subway'?'지하철·철도역':displayFacilityCategory(place);
     if(!groups.has(label))groups.set(label,[]);
@@ -66,7 +67,7 @@ export function formatFacilityDistance(meters){
 export function nearbySearchResults(origin,items,{radius=500,limit=30}={}){
   const seen=new Map(),found=[];
   for(const p of [...items].sort((a,b)=>Number(Boolean(b?.arsId))-Number(Boolean(a?.arsId)))){
-    if(!p?.name||p.lng==null||p.lat==null)continue;
+    if(!p?.name||p.lng==null||p.lat==null||isUnavailableFacility(p))continue;
     const lng=Number(p.lng),lat=Number(p.lat);if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
     const row=normalizeFacilityRecord({...p,lng,lat}),distance=distanceMeters(origin,row),key=searchResultKey(row);
     if(!Number.isFinite(distance)||distance>radius)continue;
@@ -123,7 +124,7 @@ export function visibleAreaContains(area,p){
 export function visibleFacilityResults(area,items,{limit=60}={}){
   const seen=new Map(),found=[];
   for(const p of items){
-    if(!p?.name||p.lng==null||p.lat==null)continue;
+    if(!p?.name||p.lng==null||p.lat==null||isUnavailableFacility(p))continue;
     const row=normalizeFacilityRecord({...p,lng:Number(p.lng),lat:Number(p.lat)});
     if(!visibleAreaContains(area,row))continue;
     const key=searchResultKey(row);
