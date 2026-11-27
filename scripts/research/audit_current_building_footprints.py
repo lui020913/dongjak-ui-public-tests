@@ -377,24 +377,36 @@ for i,(site_g,ref,confirmed) in site_boundaries.items():
         edit={'sheet':sheet,'kind':'base','row':row,'original':f['geometry'],'original_height':h,'source_count':source_counts[(sheet,kind)],'source_sha256':source_hashes[(sheet,kind)],'site':site['name'],'approved':site['approved'],'reason':'completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified','boundary_reference':ref,'retained_towers':retained_towers,'expected_towers':expected}
         edits[key]=edit;gap_decisions[site['name']]+=1
         print('VERIFIED_DISPLAY_EDIT '+json.dumps(edit,ensure_ascii=False,separators=(',',':')),flush=True)
-# The previous cleanup only checked tiny low-rise remnants and strict tower
-# matches. Re-audit all legacy layers on the reported complexes. Report
-# exact conflicting rows, retained geometry and current coverage; do not
-# infer demolition from a missing record or remove a whole complex.
-reported_terms=['클라베뉴','흑석자이','흑석한강푸르지오','이수힐스테이트','동작금강','사당삼성','이수푸르지오','로이파크','이수교','이수스위첸','상도프레스티지','상도센트럴파크','마크힐스','리버하임','사당극동','사당롯데캐슬','사당우성3','동작삼성래미안','사당현대','사당대림','노량진우성','본동삼성','본동신동아','흑석한강센트레빌','이수역리가','상도역롯데캐슬파크엘','상도2차두산위브트레지움','이수교신동아']
+# District-wide residual audit: no hand-selected apartment names.
+# Include previously committed display exclusions in the comparison, but
+# only when the underlying tile hash, row and geometry still match.
+active_edits={}
+active_text=(ROOT/'app/src/completed-apartment-display-edits.mjs').read_text()
+active_payload=json.loads(active_text[active_text.index('{'):active_text.rindex('}')+1])
+for edit in active_payload['edits']:
+    k='file' if edit['kind']=='base' else 'supplement'
+    source=(edit['sheet'],k)
+    if source_counts.get(source)!=edit['source_count'] or source_hashes.get(source)!=edit['source_sha256']:
+        continue
+    active_edits[(edit['sheet'],k,edit['row'])]=edit
 remaining=[]
+reviewed_sites=0
+unmatched_sites=[]
 for i,site in enumerate(sites):
-    if not any(norm(t) in norm(site['name']) for t in reported_terms):continue
+    reviewed_sites+=1
     bound=site_boundaries.get(i)
     indices=site_ids.get(i,set())
-    if not indices:continue
+    if not indices:
+        unmatched_sites.append(site['name'])
+        continue
     # Without a confirmed site polygon inspect only geometries actually
     # intersecting the independently identified current footprint records.
     scope=bound[0] if bound and bound[2] else unary_union([cur[j] for j in indices])
     found=[]
     for n0 in legacy_tree.query(scope,predicate='intersects'):
         n=int(n0);sheet,kind,row,f,g=legacy_rows[n]
-        if (sheet,kind,row) in edits or g.area<20 or g.intersection(scope).area/g.area<.7:continue
+        existing=active_edits.get((sheet,kind,row))
+        if (sheet,kind,row) in edits or (existing and existing['original']==f['geometry']) or g.area<20 or g.intersection(scope).area/g.area<.7:continue
         h=float(f['properties'].get('h') or 0)
         nearby=[int(j) for j in tree.query(g,predicate='intersects')]
         overlaps=sorted([(round(g.intersection(cur[j]).area/g.area,4),round(g.intersection(cur[j]).area/cur[j].area,4),j) for j in nearby],reverse=True)
@@ -414,6 +426,7 @@ for i,site in enumerate(sites):
         found.append(record)
     remaining.extend(found)
     print('REPORTED_SITE_REMAINING '+json.dumps({'site':site['name'],'rows':len(found),'base':sum(x['kind']=='file' for x in found),'supplement':sum(x['kind']=='supplement' for x in found),'with_strong_owner':sum(bool(x['strong_owners']) for x in found)},ensure_ascii=False),flush=True)
+print('DISTRICT_RESIDUAL_SCOPE '+json.dumps({'registered_sites':len(sites),'reviewed_sites':reviewed_sites,'unmatched_sites':unmatched_sites,'active_display_exclusions':len(active_edits),'remaining_rows':len(remaining)},ensure_ascii=False),flush=True)
 for record in remaining:print('REPORTED_SITE_ROW '+json.dumps(record,ensure_ascii=False,separators=(',',':')),flush=True)
 (OUT/'reported-site-remaining-overlaps.json').write_text(json.dumps(remaining,ensure_ascii=False,separators=(',',':')))
 print('COMPLETED_SITE_DISPLAY_CLEANUP '+json.dumps(dict(gap_decisions),ensure_ascii=False),flush=True)
