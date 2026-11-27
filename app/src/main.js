@@ -60,7 +60,8 @@ import {initStationAccessibility} from './station-accessibility.js';
 import {searchPlaces,searchLocalPlaces} from './route-search.js';
 import {cachedOfficialSearchPlaces,queryOfficialPlaces} from './seoul-official-facilities.js';
 import {routeStationMatches,mergeRouteSearchResults,routeResultSubtitle} from './route-search-results.js';
-import {walkingRouteViewportPadding} from './route-map-focus.js';
+import {strictRouteViewportPadding,waitForRouteViewport} from './route-map-focus.js';
+import {createDistrictBuildingScope} from './district-building-scope.mjs';
 import {initMapQuickSearch} from './map-quick-search.js';
 import './map-search-refinement.css';
 import {installMapProduct} from './v815-map-product.js';
@@ -241,6 +242,8 @@ let districtBuildingsReady = false;
 const BUILDING_ZOOM_MIN = BUILDING_ZOOM_FADE_START;
 const BUILDING_MANIFEST_URL = '/buildings/manifest.json';
 let buildingManifest = null;
+let buildingManifestPending=null;
+let lastBuildingMovement=0;
 const loadedBuildingTiles = new Map();
 const buildingLoading = new Set();
 let buildingLoadTimer = null;
@@ -251,6 +254,7 @@ let lastBuildingCount = 0;
 let baseLayerControls=null;
 let baseBuildingsVisible=true;
 let buildingCoverage=null;
+let districtBuildingScope=null;
 
 let overviewSheetState = 'expanded';
 let overviewDrag = null;
@@ -841,16 +845,18 @@ function getVisibleBBox(){
 function scheduleBuildingLoad(){
   if (!visibleBuilding2D() || map.getZoom()<BUILDING_ZOOM_MIN || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
   clearTimeout(buildingLoadTimer);
-  buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},djPhone?600:230);
+  buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},djPhone?850:230);
 }
 async function ensureBuildingManifest(){
   if(buildingManifest)return buildingManifest;
-  const resp=await fetch(BUILDING_MANIFEST_URL);
-  if(!resp.ok)throw new Error(`건물 목록 ${resp.status}`);
-  const data=await resp.json();
-  if (!Array.isArray(data.sheets))throw new Error('건물 타일 목록이 손상되었습니다.');
-  buildingManifest=data;
-  return data;
+  buildingManifestPending??=(async()=>{
+    const resp=await fetch(BUILDING_MANIFEST_URL);
+    if(!resp.ok)throw new Error(`건물 목록 ${resp.status}`);
+    const data=await resp.json();
+    if(!Array.isArray(data.sheets))throw new Error('건물 타일 목록이 손상되었습니다.');
+    buildingManifest=data;return data;
+  })().finally(()=>{buildingManifestPending=null;});
+  return buildingManifestPending;
 }
 // 좁고 비정상적으로 작은 건물 외곽은 시설물일 가능성이 있어 3D에 표시하지 않습니다.
 // 확정적 건물 판정은 아니며 건축물 전체를 제거하는 기준이 아닙니다.
@@ -867,7 +873,11 @@ async function loadOneBuildingSheet(sheet){
     const {features, reviewCandidates, displayGeometries, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet);
     for(const problem of errors) console.warn(`[동작하는 안전지도] ${sheet.sheet}번 ${problem.label} 로딩 실패:`,problem.error);
     // Defer geometry filtering and indexing until the phone camera is settled.
-    while(djPhone&&map.isMoving?.())await new Promise(resolve=>map.once('moveend',resolve));
+    // Do not resume CPU-heavy geometry/index installation between rapid gestures.
+    while(djPhone&&(map.isMoving?.()||performance.now()-lastBuildingMovement<850)){
+      if(map.isMoving?.())await new Promise(resolve=>map.once('moveend',resolve));
+      else await new Promise(resolve=>setTimeout(resolve,Math.max(20,850-(performance.now()-lastBuildingMovement))));
+    }
     if(!boundaryGeometry)return;
     // Tile-native buildings are incomplete in parts of Sangdo 1-dong. The
     // supplied base+supplement GIS footprints must also be available overhead.
@@ -971,7 +981,8 @@ async function loadVisibleBuildingSheets(){
     const manifest=await ensureBuildingManifest();
     if(!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN)return;
     const bbox=getVisibleBBox();
-    const nearby=manifest.sheets.filter(s=>intersects(s.bbox,bbox));
+    const district=boundaryBounds?.flat();
+    const nearby=manifest.sheets.filter(s=>intersects(s.bbox,bbox)&&(!district||intersects(s.bbox,district)));
     const center=map.getCenter();const sheets=nearestBuildingSheets({sheets:nearby},[center.lng,center.lat],nearby.length);
     djTrimOffscreenBuildings(sheets);
     for(const sheet of sheets){
@@ -988,8 +999,8 @@ async function loadVisibleBuildingSheets(){
     if(buildingRetryAfter.size&&visibleBuilding2D()&&map.getZoom()>=BUILDING_ZOOM_MIN){buildingRetryTimer=setTimeout(()=>scheduleBuildingLoad(),16000);}
   }
 }
-map.on('movestart',()=>{if(djPhone)clearTimeout(buildingLoadTimer);});
-map.on('moveend',scheduleBuildingLoad);
+map.on('movestart',()=>{if(djPhone){lastBuildingMovement=performance.now();clearTimeout(buildingLoadTimer);}});
+map.on('moveend',()=>{lastBuildingMovement=performance.now();scheduleBuildingLoad();});
 map.on('zoomend',()=>{syncTiltWithBuildings();});
 // Preserve the loaded building representation during pan, rotation and pitch.
 // The phone render budget may adapt resolution and defer new tile work, but it
@@ -1169,8 +1180,8 @@ async function loadDongjakBoundary(){
     if(app.dataset.djTransitExterior!=='true')map.setMaxBounds(bufferedDistrictBounds(boundaryGeometry));
     // 동작구 밖 원본 시설명은 가리되, 추가 자치구 라벨은 별도 심벌로 표시합니다.
     clipBasemapLabelsToDistrict(map,boundaryGeometry);
-    // Retain the original native building filters and reviewed GIS coverage.
-    // Transit must never change the shared basemap geometry or layer owners.
+    // Apply the same building-only geographic filter in every map mode.
+    districtBuildingScope?.setBoundary(boundaryGeometry);
     districtBuildingsReady=true;
     syncTiltWithBuildings();
     scheduleBuildingLoad();
@@ -1715,6 +1726,8 @@ map.on('load',()=>{
   installMapOrientationControls(map,maplibregl);
   installGrassTexture({map,app});
   installForestShade({map,app});
+  districtBuildingScope=createDistrictBuildingScope(map);
+  districtBuildingScope.setBoundary(boundaryGeometry);
   const nativeBuildingLayers=installBaseBuildingPalette({map,app});
   buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers);
   buildingCoverage.setExtruding(visibleBuilding3D());
@@ -1835,6 +1848,7 @@ map.on('load',()=>{
       if(!feature.geometry)return;
       boundaryGeometry=feature.geometry;
       boundaryBounds=computeBounds(boundaryGeometry);
+      districtBuildingScope?.setBoundary(boundaryGeometry);
       if(gpsLastPosition)outsideDistrictAlert.check(...gpsLastPosition,boundaryGeometry,gpsLastAccuracy);
       map.getSource('district-outline')?.setData({type:'FeatureCollection',features:[feature]});
       map.getSource('district-exterior')?.setData(maskOutside(boundaryGeometry));
@@ -3464,8 +3478,7 @@ function readRouteMetrics() {
 }
 function transitVisiblePadding(sheetTop,toolbarBottom){
  const rect=map.getContainer().getBoundingClientRect();
- const top=Math.max(0,toolbarBottom-rect.top)+18,bottom=Math.max(0,rect.bottom-sheetTop)+18;
- return top+bottom<rect.height-48?{top,bottom,left:28,right:28}:null;
+ return strictRouteViewportPadding({mapTop:rect.top,viewportHeight:rect.height,toolbarBottom,sheetTop});
 }
 window.addEventListener('dongjak:transit-comparison-focus',event=>{
  if(app.dataset.tab!=='route'||!routeEnd)return;
@@ -3475,32 +3488,29 @@ window.addEventListener('dongjak:transit-comparison-focus',event=>{
  map.easeTo({center:[routeEnd.lng,routeEnd.lat],offset:[0,(padding.top-padding.bottom)/2],padding:{top:0,bottom:0,left:0,right:0},pitch:0,duration:350});
 });
 window.addEventListener('dongjak:transit-comparison-dismiss',()=>{delete app.dataset.transitComparison;drawRouteMarkers();});
+let routeFitGeneration=0;
+function fitSettledRoute(coords,isCurrent){
+ if(!Array.isArray(coords)||coords.length<2)return;
+ const generation=++routeFitGeneration;
+ const all=[...coords,...[routeStart,routeEnd].filter(Boolean).map(p=>[p.lng,p.lat])];
+ const bounds=all.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(all[0],all[0]));
+ const current=()=>generation===routeFitGeneration&&app.dataset.tab==='map'&&isCurrent();
+ if(!matchMedia('(max-width:699px)').matches){if(current())map.fitBounds(bounds,{padding:{top:190,bottom:185,left:35,right:35},maxZoom:16,duration:480,pitch:0,bearing:0});return;}
+ let interrupted=false;
+ const stop=e=>{if(e.originalEvent)interrupted=true;};
+ map.on('movestart',stop);
+ const measure=()=>{
+  const card=document.getElementById('route-map-card'),head=document.getElementById('dj-walk-map-head');
+  if(!card||card.hidden||!head||!head.getClientRects().length||!card.getClientRects().length||app.dataset.djRouteStage!=='preview')return null;
+  return transitVisiblePadding(card.getBoundingClientRect().top,head.getBoundingClientRect().bottom);
+ };
+ void waitForRouteViewport(measure,()=>current()&&!interrupted).then(padding=>{
+  if(padding&&current()&&!interrupted)map.fitBounds(bounds,{padding,maxZoom:16,duration:480,pitch:0,bearing:0});
+ }).finally(()=>map.off('movestart',stop));
+}
 function fitWalkingRoute(coords) {
-  if(!Array.isArray(coords)||coords.length<2)return;
-  const bounds=coords.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(coords[0],coords[0]));
-  const mobile=window.matchMedia('(max-width:699px)').matches;
-  let padding={top:190,bottom:185,left:35,right:35};
-  if(mobile){
-    const root=map.getContainer?.(),rect=root?.getBoundingClientRect?.();
-    const visible=node=>{
-      if(!node||node.hidden)return false;
-      const box=node.getBoundingClientRect?.();
-      const style=window.getComputedStyle?.(node);
-      return box?.height>0&&style?.visibility!=='hidden'&&style?.display!=='none'&&style?.opacity!=='0';
-    };
-    const toolbarBottom=Math.max(110,...['.topbar','#djNext-toolbar','#dj-v794-toolbar','#dj831-scrollport']
-      .map(selector=>document.querySelector(selector)).filter(visible)
-      .map(node=>node.getBoundingClientRect().bottom));
-    const card=document.getElementById('route-map-card');
-    const nav=document.getElementById('bottom-nav');
-    padding=walkingRouteViewportPadding({
-      mapTop:rect?.top||0,viewportHeight:rect?.height||root?.clientHeight||window.innerHeight,
-      toolbarBottom,sheetTop:visible(card)?card.getBoundingClientRect().top:undefined,
-      navigationTop:visible(nav)?nav.getBoundingClientRect().top:undefined,
-      side:24,minVisible:135
-    });
-  }
-  map.fitBounds(bounds,{padding,maxZoom:16.0,duration:780,pitch:0,bearing:0});
+ const selected=routeResult;
+ fitSettledRoute(coords,()=>Boolean(selected)&&routeResult===selected&&!transitPreview&&!navMode);
 }
 window.addEventListener('dj-next:fit-route',()=>{
   if(app.dataset.tab==='map'&&routeResult?.coords?.length>=2)fitWalkingRoute(routeResult.coords);
@@ -3884,15 +3894,7 @@ function focusTransitRoute(coords){
  if(map.getLayer(circle))map.moveLayer(circle,before);
  const transferLabel='dj-transit-multi-stops-transfer-label';if(map.getLayer(transferLabel))map.moveLayer(transferLabel);
  const selected=transitPreview;
- requestAnimationFrame(()=>requestAnimationFrame(()=>{
-  if(transitPreview!==selected||!selected||app.dataset.tab!=='map')return;
-  const card=document.getElementById('route-map-card'),head=document.getElementById('dj-walk-map-head');
-  const padding=card&&head?transitVisiblePadding(card.getBoundingClientRect().top,head.getBoundingClientRect().bottom):null;
-  const all=[...coords,...[routeStart,routeEnd].filter(Boolean).map(p=>[p.lng,p.lat])];
-  if(!padding||all.length<2){fitWalkingRoute(all);return;}
-  const bounds=all.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(all[0],all[0]));
-  map.fitBounds(bounds,{padding,maxZoom:16,duration:480,pitch:0,bearing:0});
- }));
+ fitSettledRoute(coords,()=>Boolean(selected)&&transitPreview===selected);
 }
 function setTransitPreviewStops(features){
  const id='dj-transit-multi-stops',data={type:'FeatureCollection',features};

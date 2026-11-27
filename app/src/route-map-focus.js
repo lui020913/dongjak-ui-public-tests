@@ -23,3 +23,22 @@ export function walkingRouteViewportPadding({
   }
   return {top:Math.ceil(top),bottom:Math.ceil(bottom),left:side,right:side};
 }
+
+// Actual floating surfaces are hard occlusion boundaries, not soft padding hints.
+export function strictRouteViewportPadding({mapTop=0,viewportHeight,toolbarBottom,sheetTop,side=32}={}){
+ if(![mapTop,viewportHeight,toolbarBottom,sheetTop].every(Number.isFinite)||viewportHeight<=0)return null;
+ const top=Math.ceil(Math.max(0,toolbarBottom-mapTop)+48);
+ const bottom=Math.ceil(Math.max(0,mapTop+viewportHeight-sheetTop)+18);
+ if(top+bottom>=viewportHeight-32)return null;
+ return {top,bottom,left:side,right:side};
+}
+export async function waitForRouteViewport(measure,isCurrent,{now=()=>performance.now(),frame=()=>new Promise(resolve=>requestAnimationFrame(resolve)),settleMs=200,timeoutMs=1800}={}){
+ const start=now();let signature='',stableAt=start;
+ while(isCurrent()&&now()-start<timeoutMs){
+  const padding=measure();const next=padding?JSON.stringify(padding):'';
+  if(next!==signature){signature=next;stableAt=now();}
+  if(padding&&now()-stableAt>=settleMs)return padding;
+  await frame();
+ }
+ return isCurrent()?measure():null;
+}
