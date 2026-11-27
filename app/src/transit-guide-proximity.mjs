@@ -12,11 +12,14 @@ export function transitProximity(position,target,previousCount=0,radius=100){
 // Foreground GPS-only stage progression: two distinct fresh accurate fixes,
 // one transition per fix. The final destination row is a completion marker,
 // not another duplicate target that requires the user to wait again.
-export function advanceTransitGps({position,targets,step,rows,count=0,lastTimestamp=null,now=Date.now()}){
+export function advanceTransitGps({position,targets,step,rows,count=0,lastTimestamp=null,now=Date.now(),sameStopSteps=[]}){
  const timestamp=Number(position?.timestamp);
  if(!Number.isFinite(timestamp)||now-timestamp>15000||timestamp-now>5000||lastTimestamp!==null&&timestamp<=lastTimestamp)return {ignored:true};
  const final=step>=rows-2;
  const result=transitProximity(position,targets?.[step],count,final?45:70);
  if(result.state!=='near')return {...result,step,timestamp,arrived:false};
- return {...result,count:0,step:final?rows-1:step+1,timestamp,arrived:final};
+ // A verified same-platform transfer requires no second walking arrival.
+ const next=step+1;
+ const skip=!final&&sameStopSteps.includes(next)&&next<rows-2;
+ return {...result,count:0,step:final?rows-1:skip?next+1:next,timestamp,arrived:final,transfer:skip?'same-stop':null};
 }
