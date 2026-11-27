@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.228",
+  "application_version": "9.2.229",
   "public_work_branch": "main",
-  "purpose": "PR #604: restore Daebang (both Line 1 and Sillim) and limited curated neighboring subway stations, keep unrelated external stations/POIs hidden and retain existing track alignment. User requested immediate deployment without additional manual validation. PR merged before optional CI completion; existing protected Preview/mobile QA remain mandatory; no physical-device verification yet.",
-  "attempt": 463,
+  "purpose": "PR #605: restore only five curated Han River bridge names by exempting dedicated bridge label layers from district clipping. Preserve existing bridge anchors, styling, rail geometry, metro eligibility, administrative names and other exterior filtering. User requested immediate deployment without separate pre-merge verification; existing protected release checks remain.",
+  "attempt": 464,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
