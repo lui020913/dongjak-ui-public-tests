@@ -16,7 +16,7 @@ import {guardSubwayProxyArrival} from './transport-freshness.js';
 import {permitsSubwayBulkRecovery,seoulSubwayIdForLine} from './subway-source-recovery.js';
 import {applyBusStopLabelTheme,busStopLabelPalette} from './bus-stop-label-theme.js';
 import {fixedRailCollection,fixedMetroStations} from './fixed-rail-lines.js';
-import {metroMarkerGeojson, METRO_MARKER_MIN_ZOOM, METRO_PLATFORM_SPLIT_ZOOM as METRO_PLATFORM_SPLIT_ZOOM_DATA} from './metro-marker-geodata.js';
+import {metroMarkerGeojson, makeMetroDisplayScope, METRO_MARKER_MIN_ZOOM, METRO_PLATFORM_SPLIT_ZOOM as METRO_PLATFORM_SPLIT_ZOOM_DATA} from './metro-marker-geodata.js';
 import {installResponsiveMetroVisibility} from './metro-overview-visibility.js';
 import {railGeojson,stationsGeojson} from './fixed-rail-data.js';
 import {fetchOfficialRailPaths,mergeOfficialRail,withMappedLine4} from './rail-official-shapes.js';
@@ -1832,15 +1832,15 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       colors:SUBWAY_LINE_COLORS,
       radiusPredicate:withinMetroRadius,
       isDistrict:(lng,lat)=>isDongjak(lng,lat)===true,
-      nearby:(lng,lat)=>isNearBoundary(lng,lat)
+      nearby:(lng,lat)=>isNearBoundary(lng,lat),
+      stationScope:makeMetroDisplayScope(officialMetro,{normalizeName:normalizeStationQueryName,normalizeLine:normalizeLineName,isDistrict:isDongjak})
     });
     stationLookups=new Map(items.filter(x=>x.kind==='subway').map(x=>[normalizeStationQueryName(x.name),x]));
     for(const p of geo.features){
       registerStationIcon(p.properties.iconId,p.properties.iconLines||[p.properties.line]);
     }
-    // External stations remain searchable and usable for actual route endpoints,
-    // but do not display their labels or badges on the ordinary base map.
-    geo.features=geo.features.filter(f=>isDongjak(...f.geometry.coordinates)===true);
+    // Scope by station identity before track snapping; keep both badges at a
+    // boundary transfer station, but exclude unrelated external stations.
     map.getSource(stationSource)?.setData(geo);
   }
   function updateMetroMarkerPresentation(){

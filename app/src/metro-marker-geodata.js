@@ -16,7 +16,7 @@ export const METRO_PLATFORM_SPLIT_ZOOM=15.55;
 export function metroMarkerGeojson(items,{
   canonicalStations=[],normalizeName=x=>x,normalizeLine=x=>x,placements,
   colors={},radiusPredicate=()=>true,
-  nearby=()=>false,isDistrict=()=>false
+  nearby=()=>false,isDistrict=()=>false,stationScope=null
 }={}){
   const groups=new Map();
   // Verified station locations outrank basemap POIs, which may name station exits
@@ -35,7 +35,7 @@ export function metroMarkerGeojson(items,{
   }
   const features=[];
   for(const [key,g] of groups){
-    const lines=[...g.lines];
+    const lines=[...g.lines].filter(line=>!stationScope||stationScope(key,line,g.lng,g.lat));
     if(!lines.length)continue;
     const base=[g.lng,g.lat];
     if(!isCoordinate(base))continue;
@@ -93,3 +93,18 @@ export function visibleMetroLayerRole(zoom){
   if(zoom<METRO_MARKER_MIN_ZOOM)return 'hidden';
   return zoom<METRO_PLATFORM_SPLIT_ZOOM?'summary':'detail';
 }
+
+ // Curated existing fixed-rail stations: within roughly 1 km of the district
+ // or the next station along a corridor adjoining the district. This is not
+ // the 10 km search radius. Keep remote guide stations hidden.
+ export const ADJACENT_METRO_NAMES=new Set(['대방','신길','용산','대림','구로디지털단지','신림','서울대입구','낙성대','방배','이촌','남태령','신풍','보라매','내방','샛강','구반포','신반포','서울지방병무청','당곡']);
+ export function makeMetroDisplayScope(canonicalStations,{normalizeName=x=>x,normalizeLine=x=>x,isDistrict=()=>false}={}){
+  const allowed=new Map();
+  for(const station of canonicalStations||[]){
+   const name=normalizeName(station.name);
+   if(!ADJACENT_METRO_NAMES.has(name))continue;
+   if(!allowed.has(name))allowed.set(name,new Set());
+   for(const line of station.lines||[])allowed.get(name).add(normalizeLine(line));
+  }
+  return (name,line,lng,lat)=>isDistrict(lng,lat)===true||allowed.get(normalizeName(name))?.has(normalizeLine(line))===true;
+ }

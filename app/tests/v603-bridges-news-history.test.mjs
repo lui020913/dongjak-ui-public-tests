@@ -83,10 +83,13 @@ test('administrative label clipping hides external bridge and other non-administ
     {id:'base-city-label',type:'symbol'},
     {id:'dongjak-custom-label',type:'symbol'},
     {id:'neighbor-district-names',type:'symbol'},
+    {id:'dj-metro-summary-icon',type:'symbol',source:'transport-metro-geographic-markers'},
+    {id:'dj-metro-detail-name',type:'symbol',source:'transport-metro-geographic-markers'},
+    {id:'poi_transit',type:'symbol',source:'openmaptiles'},
     {id:'dj-transit-multi-stops-transfer-label',type:'symbol'}
   ]}),getFilter:()=>null,setFilter:(id,filter)=>filtered.push([id,filter])};
   clipBasemapLabelsToDistrict(map,{type:'Polygon',coordinates:[[[126.9,37.49],[127,37.49],[127,37.52],[126.9,37.49]]]});
-  assert.deepEqual(filtered.map(([id])=>id),['dj-hangang-bridge-osm-labels','dj-hangang-bridge-geometry-labels','base-city-label','dongjak-custom-label']);
+  assert.deepEqual(filtered.map(([id])=>id),['dj-hangang-bridge-osm-labels','dj-hangang-bridge-geometry-labels','base-city-label','dongjak-custom-label','poi_transit']);
 });
 
 
