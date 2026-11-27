@@ -62,6 +62,7 @@ import {cachedOfficialSearchPlaces,queryOfficialPlaces} from './seoul-official-f
 import {routeStationMatches,mergeRouteSearchResults,routeResultSubtitle} from './route-search-results.js';
 import {walkingRouteViewportPadding,strictRoutePreviewPadding,routeProjectionCorrection} from './route-map-focus.js';
 import {installDistrictBuildingScope} from './district-building-scope.mjs';
+import {loadConfirmedDevelopments,installConfirmedDevelopmentDisplay} from './confirmed-development-display.mjs';
 import {initMapQuickSearch} from './map-quick-search.js';
 import './map-search-refinement.css';
 import {installMapProduct} from './v815-map-product.js';
@@ -254,6 +255,7 @@ let baseLayerControls=null;
 let baseBuildingsVisible=true;
 let buildingCoverage=null;
 let districtBuildingScope=null;
+let confirmedDevelopmentDisplay=null;
 
 
 let overviewSheetState = 'expanded';
@@ -879,7 +881,7 @@ async function loadOneBuildingSheet(sheet){
     // supplied base+supplement GIS footprints must also be available overhead.
     const districtBuildings=features.filter(f=>Number.isFinite(f.properties?.x)&&Number.isFinite(f.properties?.y)&&
       isDongjak(f.properties.x,f.properties.y)===true&&['Polygon','MultiPolygon'].includes(f.geometry?.type));
-    const {visible:eligible,excluded}=partitionDisplayBuildings(districtBuildings);
+    const {visible:eligible,excluded}=partitionDisplayBuildings(districtBuildings.filter(f=>!confirmedDevelopmentDisplay?.contains(f.properties.x,f.properties.y)));
     const {visible,reviewExcluded}=partitionGreenReview(eligible,reviewCandidates,greenBuildingFilterEnabled(globalThis.location?.search));
     const within=visible.map(f=>({...f,geometry:displayGeometries.get(f)||f.geometry,properties:{...f.properties,_render3d:true}}));
     const sourceId=`dongjak-buildings-data-${sheet.sheet}`;
@@ -1178,6 +1180,9 @@ async function loadDongjakBoundary(){
     clipBasemapLabelsToDistrict(map,boundaryGeometry);
     // Apply district-only building geometry in every map mode.
     districtBuildingScope?.update(boundaryGeometry);
+    // A future-plan display is independent of the current pedestrian graph.
+    // Install before GIS sheet loading to avoid a transient old-building flash.
+    try{const plans=await loadConfirmedDevelopments();confirmedDevelopmentDisplay=installConfirmedDevelopmentDisplay({map,app,plans});}catch(error){console.warn('[정비사업 예정 부지]',error.message);}
     districtBuildingsReady=true;
     syncTiltWithBuildings();
     scheduleBuildingLoad();
