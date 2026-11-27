@@ -1,0 +1,51 @@
+name: Real reduced vector tile data check
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/server/district-road-tile.mjs'
+      - 'app/src/exterior-road-scope.mjs'
+      - '.github/workflows/real-reduced-vector-tile.yml'
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Read real OpenFreeMap style and compare original and reduced tile bytes
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {exteriorTileRequest} from './app/src/exterior-road-scope.mjs';
+          import {serveDistrictRoadTile,reduceExteriorRoadTile} from './app/server/district-road-tile.mjs';
+          const get=async url=>{const r=await fetch(url,{signal:AbortSignal.timeout(20000)});assert.ok(r.ok,url+' HTTP '+r.status);return r;};
+          const style=await (await get('https://tiles.openfreemap.org/styles/bright')).json();
+          const source=style.sources.openmaptiles;
+          assert.equal(source.type,'vector');
+          const json=source.tiles?source:await (await get(source.url)).json();
+          const template=json.tiles[0];console.log('LIVE_TILE_TEMPLATE',template);
+          const z=14,n=2**z;
+          const at=(lon,lat)=>[Math.floor((lon+180)/360*n),Math.floor((1-Math.asinh(Math.tan(lat*Math.PI/180))/Math.PI)/2*n)];
+          let removed=0;
+          for(const [label,lon,lat] of [['outside',126.925,37.555],['inside',126.946,37.499],['east outside',127.03,37.49]]){
+            const [x,y]=at(lon,lat);
+            const url=template.replace('{z}',z).replace('{x}',x).replace('{y}',y);
+            const requested=exteriorTileRequest(url,'Tile',false,'https://example.test').url;
+            assert.notEqual(requested,url,'normal mode must select reduced endpoint');
+            const original=new Uint8Array(await (await get(url)).arrayBuffer());
+            const result=reduceExteriorRoadTile(original,z,x,y);
+            const served=await serveDistrictRoadTile(new Request(requested),{fetcher:async u=>{assert.equal(u,url);return new Response(original);}});
+            assert.equal(served.status,200);assert.deepEqual(new Uint8Array(await served.arrayBuffer()),result.bytes);
+            console.log('REAL_TILE',JSON.stringify({label,z,x,y,original:original.length,reduced:result.bytes.length,removed:result.removed}));
+            if(label.includes('outside')){assert.ok(result.removed>0);assert.ok(result.bytes.length<original.length);removed+=result.removed;}
+            assert.equal(exteriorTileRequest(url,'Tile',true).url,url);
+          }
+          assert.ok(removed>0);
+          JS
