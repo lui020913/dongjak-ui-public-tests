@@ -63,6 +63,7 @@ import {cachedOfficialSearchPlaces,queryOfficialPlaces} from './seoul-official-f
 import {routeStationMatches,mergeRouteSearchResults,routeResultSubtitle} from './route-search-results.js';
 import {walkingRouteViewportPadding,strictRoutePreviewPadding,routeProjectionCorrection} from './route-map-focus.js';
 import {installDistrictBuildingScope} from './district-building-scope.mjs';
+import {installExteriorRoadScope} from './exterior-road-scope.mjs';
 import {loadConfirmedDevelopments,installConfirmedDevelopmentDisplay} from './confirmed-development-display.mjs';
 import {initMapQuickSearch} from './map-quick-search.js';
 import './map-search-refinement.css';
@@ -256,6 +257,7 @@ let baseLayerControls=null;
 let baseBuildingsVisible=true;
 let buildingCoverage=null;
 let districtBuildingScope=null;
+let exteriorRoadScope=null;
 let confirmedDevelopmentDisplay=null;
 
 
@@ -1737,6 +1739,7 @@ map.on('load',()=>{
   installForestShade({map,app});
   const nativeBuildingLayers=installBaseBuildingPalette({map,app});
   districtBuildingScope=installDistrictBuildingScope(map);
+  exteriorRoadScope=installExteriorRoadScope(map);
   buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers);
   buildingCoverage.setExtruding(visibleBuilding3D());
   status('지도 준비 완료 · 동작구 경계 불러오는 중');
@@ -2968,8 +2971,9 @@ function syncTransitExterior(force=false){
  if(active&&!previous&&!transitHomeCamera){
   transitHomeCamera={center:map.getCenter(),zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing()};
  }
- // Transit suppresses the district outline and exterior tint only.
+ // Restore detailed outside roads only while routing by public transit.
  // Shared building filters, geometry, terrain and data sources stay intact.
+ exteriorRoadScope?.update(boundaryGeometry,active);
  applyTransitBoundaryVisibility(map,active,matchMedia('(max-width:699px)').matches,districtExteriorThemePaint(visualTheme.currentTheme())['fill-opacity'],app.dataset.baseBoundary!=='off');
  syncTransitContextBounds(active);
  if(!active&&previous&&app.dataset.tab==='map'&&transitHomeCamera){
