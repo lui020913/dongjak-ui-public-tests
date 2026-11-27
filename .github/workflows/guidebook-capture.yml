@@ -1,0 +1,108 @@
+name: Guidebook screenshots (read only, NO DEPLOY)
+on:
+  push:
+    branches: ['diagnostic/guidebook-capture-20261125']
+    paths: ['.github/workflows/guidebook-capture.yml']
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated browser
+        run: |
+          npm init -y
+          npm install --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Capture real public screens
+        run: |
+          cat > capture.mjs <<'GUIDEBOOK_JS'
+          import {chromium,devices} from 'playwright';
+          import {mkdir,writeFile} from 'node:fs/promises';
+          const root='https://dongjak-walk-safety-preview.pages.dev/';
+          const out='guidebook-captures';
+          await mkdir(out,{recursive:true});
+          const release=async()=>{const r=await fetch(root+'release-source.json',{cache:'no-store',signal:AbortSignal.timeout(20000)});if(!r.ok)throw Error('release marker '+r.status);return await r.text()};
+          const before=await release();await writeFile(out+'/release-before.json',before);
+          const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+          const report=[];
+          const visible=async(l)=>{for(const x of await l.all())if(await x.isVisible().catch(()=>false))return x;return null};
+          const waitVisible=async(p,s,ms=20000)=>{const end=Date.now()+ms;while(Date.now()<end){const l=await visible(p.locator(s));if(l)return l;await p.waitForTimeout(250)}throw Error('not visible: '+s)};
+          const click=async(p,s)=>{const l=await waitVisible(p,s);await l.click({timeout:10000});return l};
+          const role=async(p,name)=>{const l=await visible(p.getByRole('button',{name}));if(!l)throw Error('button not visible: '+name);await l.click({timeout:10000})};
+          async function settle(p,s){
+            await waitVisible(p,s);
+            await p.waitForFunction(async(selector)=>{
+              function find(root){for(const el of root.querySelectorAll(selector)){if(el.getBoundingClientRect().width>0&&el.getBoundingClientRect().height>0&&getComputedStyle(el).visibility==='visible')return el}for(const h of root.querySelectorAll('*')){if(h.shadowRoot){const found=find(h.shadowRoot);if(found)return found}}return null}
+              const el=find(document);if(!el)return false;
+              const ready=()=>{let node=el;while(node){const st=getComputedStyle(node);if(Number(st.opacity)<.98||st.visibility==='hidden'||st.display==='none')return false;node=node.parentElement||node.getRootNode()?.host||null}return true};
+              if(!ready())return false;
+              await new Promise(r=>setTimeout(r,350));return ready();
+            },s,{timeout:18000});
+            await p.waitForTimeout(700);
+            await p.evaluate(()=>Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,12000))]));
+          }
+          async function shot(p,id,s,note=''){
+            await settle(p,s);
+            const evidence=await p.evaluate(()=>({viewport:[innerWidth,innerHeight],tab:document.querySelector('#app')?.dataset.tab,fonts:document.fonts.status,documentWidth:document.documentElement.scrollWidth}));
+            if(evidence.fonts!=='loaded')throw Error('fonts not ready');
+            await p.screenshot({path:out+'/'+id+'.png',fullPage:false,scale:'device',timeout:30000});
+            report.push({id,status:'captured',note,evidence});console.log('CAPTURE '+id);
+          }
+          async function ready(p){
+            const r=await p.goto(root,{waitUntil:'domcontentloaded',timeout:45000});if(!r?.ok())throw Error('navigation '+r?.status());
+            const menu=p.locator('dialog#dj-install-menu[open]');
+            for(let n=0;n<60;n++){
+              if(await menu.isVisible().catch(()=>false)){await menu.getByRole('button',{name:/웹에서 바로 이용하기/}).click({timeout:12000});break}
+              if(await p.locator('#map').isVisible().catch(()=>false)&&n>12)break;
+              await p.waitForTimeout(400)
+            }
+            await waitVisible(p,'#map',45000);
+            const overlay=p.locator('#map-startup-overlay');
+            for(let n=0;n<65&&await overlay.isVisible().catch(()=>false);n++){
+              const b=p.locator('#map-startup-continue');
+              if(await b.isVisible().catch(()=>false)){await b.click({timeout:10000});break}
+              await p.waitForTimeout(500)
+            }
+            await overlay.waitFor({state:'hidden',timeout:35000});
+            const tour=p.locator('#dj860-onboarding');
+            for(let n=0;n<3&&await tour.isVisible().catch(()=>false);n++){const b=tour.locator('[data-dj860-action="skip"]');if(await b.isVisible())await b.click({timeout:10000});await p.waitForTimeout(700)}
+            await settle(p,'#map');
+          }
+          async function tab(p,t){await click(p,'#bottom-nav .nav-tab[data-tab="'+t+'"]');await p.waitForFunction(t=>document.querySelector('#app')?.dataset.tab===t,t,{timeout:15000});await p.waitForTimeout(1200)}
+          async function query(p,term){const l=await waitVisible(p,'#map-quick-search-query');await l.click();await l.fill(term);await p.waitForTimeout(1200);await l.press('Enter').catch(()=>{});await p.waitForTimeout(1800)}
+          async function result(p,term){const l=await visible(p.locator('.map-quick-search-result').filter({hasText:term}));if(!l)throw Error('matching result missing: '+term);await l.click({timeout:12000});await p.waitForTimeout(1500)}
+          async function routeQuery(p,which,term){await click(p,'[data-v3="'+which+'"]');const l=await waitVisible(p,'#v3-query');await l.fill(term);await p.waitForTimeout(1400);await l.press('Enter').catch(()=>{});const sel=p.locator('#v3-results button').filter({hasText:term});const end=Date.now()+18000;while(Date.now()<end){const b=await visible(sel);if(b){await b.click({timeout:10000});await p.waitForTimeout(1000);return}await p.waitForTimeout(400)}throw Error('route result missing: '+term)}
+          const jobs=[
+           ['map',async p=>{await shot(p,'01-map','#map');await click(p,'#current-location');await shot(p,'02-gps','#map','public landmark test location, not personal location')}],
+           ['search',async p=>{await query(p,'상도');await shot(p,'03-search-results','.map-quick-search-result')}],
+           ['nearby',async p=>{await click(p,'#map-quick-search-query');await click(p,'#dj-search-gps-nearby');await shot(p,'04-nearby','.dj-visible-facility-list','public landmark test location');const b=await visible(p.locator('.dj-visible-facility-list button'));if(b){await b.click({timeout:10000});await p.waitForTimeout(1000);await shot(p,'05-facility-detail','#detail-panel:not([hidden]),#place-detail:not([hidden]),.dj864-facility-detail:not([hidden])')}}],
+           ['facility',async p=>{await query(p,'보라매병원');await result(p,'보라매병원');await shot(p,'06-facility-detail','#detail-panel:not([hidden]),#place-detail:not([hidden]),.dj864-facility-detail:not([hidden])');await role(p,/리뷰 작성|리뷰 남기기/);await shot(p,'07-review-form','textarea:visible'.replace(':visible',''),'작성 화면만, 제출하지 않음')}],
+           ['route',async p=>{await tab(p,'route');await shot(p,'08-route-editor','#dj-route-v3');await routeQuery(p,'start','상도역');await routeQuery(p,'end','숭실대입구역');await shot(p,'09-route-endpoints','#dj-route-v3');await click(p,'[data-v3="waypoint"]');await shot(p,'10-waypoint','#dj-route-v3');await click(p,'.waypoint-input');await shot(p,'11-route-search-history','#v3-query');}],
+           ['guidance',async p=>{await tab(p,'route');await routeQuery(p,'start','상도역');await routeQuery(p,'end','숭실대입구역');await click(p,'[data-v3="calculate"]');await shot(p,'12-route-compare','#route-map-card:not([hidden])');await click(p,'#route-guide-start');await shot(p,'13-guidance','#nav-map-controls:not([hidden])','public landmark test location')}],
+           ['bus',async p=>{await query(p,'노량진역');const l=await visible(p.locator('.map-quick-search-result').filter({hasText:/정류장|버스/}));if(!l)throw Error('no verified bus stop result');await l.click({timeout:12000});await shot(p,'14-bus-arrivals','#transport-arrivals:not([hidden])');const b=await visible(p.locator('#transport-arrivals button').filter({hasText:/\d{2,}/}));if(!b)throw Error('no bus route control');await b.click({timeout:12000});await shot(p,'15-bus-route','.dj-bus-detail-message,.dj-bus-route-detail,.dj-bus-detail')}],
+           ['metro',async p=>{await query(p,'상도역');await result(p,'상도역');await shot(p,'16-metro-arrivals','#transport-arrivals:not([hidden])');const b=await visible(p.getByRole('button',{name:/실시간 열차 위치|실시간 위치|열차 위치/}));if(!b)throw Error('no visible live train button');await b.click({timeout:12000});await shot(p,'17-metro-live','.dj-metro-live[open]')}],
+           ['report',async p=>{await role(p,/위험제보|위험 제보/);await shot(p,'18-risk-report','dialog[open],#participation-panel:not([hidden]),#ped-tools-panel:not([hidden])','no submission');const b=await visible(p.getByRole('button',{name:/글쓰기|작성하기/}));if(b){await b.click({timeout:10000});await shot(p,'19-risk-report-form','#community-title','no submission')}}],
+           ['community',async p=>{await tab(p,'participate');await shot(p,'20-community','#participation-panel:not([hidden])');await click(p,'#community-compose-toggle');await shot(p,'21-community-form','#community-title','no submission')}],
+           ['news',async p=>{await tab(p,'news');await shot(p,'22-news','#news-panel:not([hidden])')}],
+           ['ai',async p=>{await click(p,'#dj890-ai-orb,#dj-ai-search-entry');await shot(p,'23-ai','#dj-ai-search-modal[open]');const l=await waitVisible(p,'#dj-ai-query');await l.fill('상도1동 보행안전 정보를 알려주세요');await shot(p,'24-ai-query','#dj-ai-query','question only; no send or login')}],
+           ...[['records','25-favorites'],['map','26-map-settings'],['type','27-type-settings'],['history','28-history'],['profile','29-profile']].map(([key,id])=>[id,async p=>{await tab(p,'mine');await click(p,'[data-dj834-action="'+key+'"]');await shot(p,id,'.dj834-detail-content')}])
+          ];
+          async function run([name,fn]){const ctx=await browser.newContext({...devices['iPhone 15 Pro'],viewport:{width:402,height:874},deviceScaleFactor:3,colorScheme:'light',locale:'ko-KR',timezoneId:'Asia/Seoul',geolocation:{latitude:37.5028,longitude:126.9488},permissions:['geolocation']});const p=await ctx.newPage();try{await ready(p);await fn(p)}catch(e){report.push({id:name,status:'failed',reason:String(e).slice(0,450)});console.warn(name+': '+e.message)}finally{await ctx.close();await writeFile(out+'/progress-'+name+'.json',JSON.stringify(report.filter(x=>x.id===name||x.status==='captured'),null,2))}}
+          for(let i=0;i<jobs.length;i+=3)await Promise.all(jobs.slice(i,i+3).map(run));
+          await browser.close();
+          const after=await release();await writeFile(out+'/release-after.json',after);await writeFile(out+'/manifest.json',JSON.stringify({sameRelease:before===after,viewport:{width:402,height:874,scale:3},report},null,2));if(before!==after)throw Error('production changed during capture; do not combine as exact release');
+          
+          GUIDEBOOK_JS
+          node capture.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: guidebook-production-screens
+          path: guidebook-captures/
+          if-no-files-found: warn
+          retention-days: 7
