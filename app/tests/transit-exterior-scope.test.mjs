@@ -1,10 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {transitEndpointPolicy,transitCoordinatesInScope,transitPointInScope,exteriorMapActive,transitWalkStyle,transitContextBounds,applyTransitBoundaryVisibility,applyDistrictOutlineVisibility,DISTRICT_FADE_MS} from '../src/transit-exterior-scope.mjs';
+import {setTransitServiceGeometry,transitEndpointPolicy,transitCoordinatesInScope,transitPointInScope,exteriorMapActive,transitWalkStyle,transitContextBounds,applyTransitBoundaryVisibility,applyDistrictOutlineVisibility,DISTRICT_FADE_MS} from '../src/transit-exterior-scope.mjs';
+// Synthetic polygon fixture only; production loads the published Seoul boundary.
+setTransitServiceGeometry({type:'Polygon',coordinates:[[[126.78,37.40],[127.20,37.40],[127.20,37.70],[126.78,37.70],[126.78,37.40]]]});
 const a={lng:126.95,lat:37.50},b={lng:127.01,lat:37.55},c={lng:127.1,lat:37.6};
 const inside=(lng,lat)=>lng===a.lng&&lat===a.lat;
-test('one endpoint must be in Dongjak; neither endpoint may exceed pilot search rectangle',()=>{
+test('one endpoint must be in Dongjak; neither endpoint may exceed the configured administrative polygon',()=>{
  assert.equal(transitEndpointPolicy(a,b,inside),'allowed');
  assert.equal(transitEndpointPolicy(b,a,inside),'allowed');
  assert.equal(transitEndpointPolicy(a,a,inside),'allowed');
@@ -59,7 +61,8 @@ test('transit hides district outline and exterior tint; both restore without cha
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  assert.doesNotMatch(main,/installSharedDistrictScope|createTransitContextLayers|map\.setTerrain\(null\)|import '\.\/transit-exterior-scope.css'/);
  const scope=main.split('function syncTransitExterior(force=false){')[1].split('function clearTransitPreview(){')[0];
- assert.match(scope,/applyTransitBoundaryVisibility\(map,active,/);
+ assert.match(scope,/applyTransitBoundaryVisibility\(map,active&&Boolean\(seoulTransitGeometry\),/);
+ assert.match(scope,/syncSeoulTransitBoundary\(active\)/);
  const theme=readFileSync(new URL('../src/ui-environment.js',import.meta.url),'utf8');
  assert.match(theme,/if\(app.dataset.djTransitExterior==='true'\)maskPaint\['fill-opacity'\]=0/);
  assert.match(scope,/districtExteriorThemePaint\(visualTheme.currentTheme\(\)\)\['fill-opacity'\]/);
