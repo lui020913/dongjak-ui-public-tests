@@ -63,9 +63,9 @@ export function createPrimarySurfaceTransition({doc,win,app,replay,reduced}){
   // by at most 32ms per rendered frame, never skip the visible dissolve.
   // The prior live surface and destination stay mounted until completion.
   let previousFrame=null,elapsed=0;
-  // A stalled remote WebGL renderer must not consume the presentation before
-  // the first delivered frame. Bound only a truly unresponsive renderer.
-  const armWatchdog=()=>{if(timer)win.clearTimeout(timer);timer=win.setTimeout(cleanup,15000);};
+  // Preserve the delivered-frame dissolve, but enforce a fixed lifetime.
+  // Repeated sparse frames must never extend an outgoing panel indefinitely.
+  const armWatchdog=()=>{timer=win.setTimeout(cleanup,4000);};
   const paint=now=>{
    if(finished)return;
    // A programmatic navigation or a newly opened modal must win over a
@@ -83,7 +83,7 @@ export function createPrimarySurfaceTransition({doc,win,app,replay,reduced}){
    previousFrame=now;
    const progress=Math.min(1,elapsed/300),alpha=progress*progress*(3-2*progress);
    write(fade,{opacity:String(revealIncoming?alpha:1-alpha)});
-   if(progress<1){armWatchdog();raf=win.requestAnimationFrame(paint);}
+   if(progress<1){raf=win.requestAnimationFrame(paint);}
    else cleanup();
   };
   armWatchdog();

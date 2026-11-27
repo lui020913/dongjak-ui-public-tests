@@ -13,7 +13,7 @@ function fixture(){
  const news=nodes.get('news-panel'),community=nodes.get('participation-panel');
  const ctrl=createPrimarySurfaceTransition({doc,win,app,reduced:()=>false,replay:button=>{app.dataset.tab=button.dataset.tab;news.hidden=true;community.hidden=true;return true;}});
  const tick=t=>{const entries=[...frames];frames.clear();for(const [,f] of entries)f(t);};
- return {app,news,community,ctrl,tick,frames};
+ return {app,news,community,ctrl,tick,frames,timers};
 }
 test('stable primary IDs retain direct cross dissolve even when legacy hides the logical panels',()=>{
  const {news,community,ctrl,tick,frames}=fixture();
@@ -52,4 +52,17 @@ test('explicit report-location dismissal cannot be reopened by compositor frames
  app.dataset.tab='participate';
  ctrl.dissolvePrimary({dataset:{tab:'map'}},'participate',community);
  assert.equal(community.hidden,true);assert.equal(frames.size,0);
+});
+
+test('sparse frames cannot extend the outgoing panel watchdog; the committed tab remains usable',()=>{
+ const {app,news,community,ctrl,tick,frames,timers}=fixture();
+ ctrl.dissolvePrimary({dataset:{tab:'participate'}},'news',news);
+ const [deadline]=timers.keys();assert.ok(deadline);
+ tick(0);tick(1100);tick(2400);tick(3700);
+ assert.deepEqual([...timers.keys()],[deadline],'the same absolute deadline survives every sparse frame');
+ assert.equal(news.hidden,false);assert.equal(community.hidden,false);
+ timers.get(deadline)();
+ assert.equal(app.dataset.tab,'participate');assert.equal(news.hidden,true);assert.equal(community.hidden,false);
+ assert.equal(news.dataset.djTabOutgoing,undefined);assert.equal(news.dataset.djPrimaryTransition,undefined);
+ assert.equal(news.style.getPropertyValue('display'),'');assert.equal(app.dataset.djPrimaryDissolving,undefined);assert.equal(frames.size,0);
 });
