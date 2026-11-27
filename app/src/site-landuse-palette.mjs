@@ -1,16 +1,19 @@
 // Use mapped site/landuse polygons only; no synthetic lots or building recoloring.
 export const SITE_LANDUSE_PALETTE=Object.freeze({
- light:Object.freeze({residential:'#e9e0d2',commercial:'#eadcda',education:'#dbe6ee',industrial:'#e0dce6'}),
- dark:Object.freeze({residential:'#3a3733',commercial:'#43363a',education:'#303e4b',industrial:'#3c3646'})
+ light:Object.freeze({residential:'#e9e0d2',commercial:'#f0e5cb',education:'#dbe6ee',industrial:'#e0dce6',hospital:'#f3dfda',public:'#d8e8e3'}),
+ dark:Object.freeze({residential:'#3a3733',commercial:'#443d2c',education:'#303e4b',industrial:'#3c3646',hospital:'#50373b',public:'#30463e'})
 });
 const PREFIX='dj-site-use-fill-';
+// Prefer specific institutional uses over generic mixed-use classifications.
 const groups=[
+ ['hospital',['hospital','clinic','healthcare','medical','medical_centre','doctors']],
+ ['public',['public','civic','government','governmental','public_building','public_service','townhall','police','fire_station','courthouse','community_centre','community_center','library','post_office','social_facility','administrative','public_facility']],
  ['education',['school','college','university','kindergarten','childcare','education','educational']],
  ['commercial',['commercial','retail','shopping','marketplace']],
  ['industrial',['industrial','warehouse']],
  ['residential',['residential','apartments','apartment','housing']]
 ];
-const anyTag=values=>['any',...['class','subclass','type','amenity','landuse'].map(k=>['in',['coalesce',['get',k],''],['literal',values]])];
+const anyTag=values=>['any',...['class','subclass','type','amenity','landuse','healthcare','office'].map(k=>['in',['coalesce',['get',k],''],['literal',values]])];
 const filter=['any',...groups.map(([,values])=>anyTag(values))];
 export function siteLandusePaint(theme='light'){
  const palette=SITE_LANDUSE_PALETTE[theme==='dark'?'dark':'light'];
@@ -32,7 +35,7 @@ export function installSiteLanduse({map,app}){
  const ids=[];
  for(const [i,src] of [...sources.values()].entries()){
   const id=PREFIX+i;ids.push(id);if(map.getLayer(id))continue;
-  map.addLayer({id,type:'fill',...src,minzoom:13.2,filter,paint:{'fill-color':siteLandusePaint(app?.dataset?.theme),'fill-opacity':.88,'fill-antialias':true}},before);
+  map.addLayer({id,type:'fill',...src,minzoom:13.2,filter,paint:{'fill-color':siteLandusePaint(app?.dataset?.theme==='dark'||app?.dataset?.sangdoNight==='on'?'dark':'light'),'fill-opacity':.88,'fill-antialias':true}},before);
  }
  return ids;
 }
