@@ -64,7 +64,7 @@ import {cachedOfficialSearchPlaces,queryOfficialPlaces} from './seoul-official-f
 import {routeStationMatches,mergeRouteSearchResults,routeResultSubtitle} from './route-search-results.js';
 import {walkingRouteViewportPadding,strictRoutePreviewPadding,routeProjectionCorrection} from './route-map-focus.js';
 import {installDistrictBuildingScope} from './district-building-scope.mjs';
-import {installExteriorRoadScope} from './exterior-road-scope.mjs';
+import {installExteriorRoadScope,exteriorTileRequest} from './exterior-road-scope.mjs';
 import {loadConfirmedDevelopments,installConfirmedDevelopmentDisplay} from './confirmed-development-display.mjs';
 import {initMapQuickSearch} from './map-quick-search.js';
 import './map-search-refinement.css';
@@ -634,6 +634,7 @@ const map = new maplibregl.Map({
   container: 'map',
   attributionControl:false,
   style: 'https://tiles.openfreemap.org/styles/bright',
+  transformRequest:(url,type)=>exteriorTileRequest(url,type,app.dataset.djTransitExterior==='true',Capacitor.isNativePlatform()?'https://dongjak-walk-safety-preview.pages.dev':location.origin),
   center: themeReloadState?.camera?.center||DONGJAK_CENTER,
   zoom: themeReloadState?.camera?.zoom??12.5,
   pitch: themeReloadState?.camera?.pitch??0,
