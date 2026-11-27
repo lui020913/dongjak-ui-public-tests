@@ -1,3 +1,4 @@
+import {parseRoadTilePath,reduceExteriorRoadTile} from '../server/district-road-tile.mjs';
 // Request a separate vector data product, not a style visibility filter.
 const TILE=/^https:\/\/tiles\.openfreemap\.org\/(planet|backup_planet)\/[A-Za-z0-9_-]+\/\d+\/\d+\/\d+\.pbf$/;
 export function exteriorTileRequest(url,type,active,apiBase=''){
@@ -25,4 +26,45 @@ export function installExteriorRoadScope(map){
  // TileJSON may finish after style.load. Do not touch filters or paint.
  map.on('idle',()=>{if(!original?.length)apply();});
  return {update(geometry,next){if(!geometry)return;const changed=active!==Boolean(next);active=Boolean(next);if(changed||!original?.length)apply();}};
+}
+
+const PROTOCOL='dj-reduced';
+export function reducedTileProtocolRequest(url,type,active,apiBase=''){
+ const request=exteriorTileRequest(url,type,active,apiBase);
+ if(type==='Tile'&&request.url!==url&&request.url.includes('/api/basemap/tile/')){
+  return {...request,url:PROTOCOL+'://'+request.url};
+ }
+ return request;
+}
+async function tileBytes(response){
+ if(!response.ok)throw Error('Map tile HTTP '+response.status);
+ const mime=response.headers.get('content-type')||'';
+ if(!/protobuf|vector-tile|octet-stream/i.test(mime))throw Error('Invalid map tile content type');
+ let bytes=new Uint8Array(await response.arrayBuffer());
+ if(bytes[0]===31&&bytes[1]===139)bytes=new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+ return bytes;
+}
+export async function loadReducedTile(url,signal,{fetcher=fetch}={}){
+ const endpoint=url.slice((PROTOCOL+'://').length);
+ const parsed=parseRoadTilePath(new URL(endpoint).pathname);
+ if(!parsed)throw Error('Invalid reduced tile request');
+ let firstError;
+ try{
+  const response=await fetcher(endpoint,{signal});
+  const bytes=await tileBytes(response);
+  // Require the reduction service response, not a generic Pages response.
+  if(response.headers.get('X-Dongjak-Removed-Road-Features')===null)throw Error('Unverified reduction response');
+  return {data:bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),cacheControl:response.headers.get('cache-control')||undefined};
+ }catch(e){firstError=e;if(signal?.aborted)throw e;}
+ // Failover still removes exterior minor road features from vector bytes
+ // before handing them to MapLibre. It never restores full road styling.
+ try{
+  const upstream=await fetcher(parsed.url,{signal});
+  const bytes=await tileBytes(upstream);
+  const reduced=reduceExteriorRoadTile(bytes,parsed.z,parsed.x,parsed.y).bytes;
+  return {data:reduced.buffer.slice(reduced.byteOffset,reduced.byteOffset+reduced.byteLength),cacheControl:'max-age=300'};
+ }catch(e){if(signal?.aborted)throw e;throw Error('Map tile HTTP recovery failed: '+(e.message||firstError?.message||'unknown'));}
+}
+export function registerReducedTileProtocol(maplibre){
+ maplibre.addProtocol(PROTOCOL,(request,controller)=>loadReducedTile(request.url,controller.signal));
 }
