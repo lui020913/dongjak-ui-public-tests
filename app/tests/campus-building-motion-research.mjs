@@ -85,7 +85,10 @@ try{
     await done;read();
     m.fire('movestart');for(let i=0;i<10;i++){await new Promise(r=>setTimeout(r,65));m.fire('render');}m.fire('moveend');read();
     for(const pitch of [30,12,10.2,9.7,10.1,8,7.2,6,8,10.2,30]){
-     m.jumpTo({pitch});read();
+     m.jumpTo({pitch});
+     // Exercise rendered camera states, not a series of jumps in a single
+     // JS task that prevents coalesced requestAnimationFrame callbacks.
+     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));read();
     }
     return {ids,samples};
    }finally{m.off('render',read);}

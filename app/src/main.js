@@ -1008,6 +1008,13 @@ map.dragRotate.enable();
 map.touchPitch.enable();
 let buildingPitchFrame=0;
 map.on('pitch',()=>{if(buildingPitchFrame)return;buildingPitchFrame=requestAnimationFrame(()=>{buildingPitchFrame=0;syncTiltWithBuildings();});});
+// Commit the final camera mode synchronously on pitchend. A coalesced
+// animation frame may not run before a programmatic jump or gesture ends.
+// Do not wait for the next gesture to restore the flat footprint layers.
+map.on('pitchend',()=>{
+  if(buildingPitchFrame){cancelAnimationFrame(buildingPitchFrame);buildingPitchFrame=0;}
+  syncTiltWithBuildings();
+});
 // Repaint the added GIS 2D footprint/outline sources when theme changes.
 document.getElementById('theme-toggle')?.addEventListener('click',()=>requestAnimationFrame(syncTiltWithBuildings));
 function gotoDongjak(){
