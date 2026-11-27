@@ -871,7 +871,7 @@ async function loadOneBuildingSheet(sheet){
   if(existing?.complete||buildingLoading.has(sheet.sheet)||(buildingRetryAfter.get(sheet.sheet)||0)>Date.now())return;
   buildingLoading.add(sheet.sheet);
   try {
-    const {features, reviewCandidates, displayGeometries, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet);
+    const {features, reviewCandidates, apartmentExcluded=[], displayGeometries, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet);
     for(const problem of errors) console.warn(`[동작하는 안전지도] ${sheet.sheet}번 ${problem.label} 로딩 실패:`,problem.error);
     // Defer geometry filtering and indexing until the phone camera is settled.
     while(djPhone&&map.isMoving?.())await new Promise(resolve=>map.once('moveend',resolve));
@@ -891,7 +891,7 @@ async function loadOneBuildingSheet(sheet){
     const collection={type:'FeatureCollection',features:within};
     if(existing){
       if(successfulSources===totalSources&&map.getSource(sourceId)){
-        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,visible);buildingRetryAfter.delete(sheet.sheet);
+        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,visible,apartmentExcluded);buildingRetryAfter.delete(sheet.sheet);
       }else buildingRetryAfter.set(sheet.sheet,Date.now()+15000);
       return;
     }
@@ -915,7 +915,7 @@ async function loadOneBuildingSheet(sheet){
         'fill-extrusion-base':0}
     },firstSymbol);
     loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources,complete:successfulSources===totalSources,footprint3DMode:visibleBuilding3D()});
-    buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,successfulSources===totalSources?visible:[]);
+    buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,successfulSources===totalSources?visible:[],apartmentExcluded);
     if(successfulSources<totalSources)buildingRetryAfter.set(sheet.sheet,Date.now()+15000);else buildingRetryAfter.delete(sheet.sheet);
     lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
     building3DLastOpacity=-1;
