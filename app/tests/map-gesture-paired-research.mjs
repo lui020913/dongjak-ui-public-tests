@@ -41,7 +41,7 @@ async function sample(url,variant,round){
     const state=await page.evaluate(()=>{const m=window.__qaMap,app=document.getElementById('app');return {tab:app?.dataset?.tab,transit:app?.dataset?.djTransitExterior,center:m.getCenter(),zoom:m.getZoom(),style:m.isStyleLoaded(),tiles:m.areTilesLoaded?.(),layers:m.getStyle().layers.filter(l=>l.type==='symbol').map(l=>[l.id,m.getLayoutProperty(l.id,'visibility')||'visible'])};});
     console.log('MAP_GESTURE_READINESS_FAILURE',JSON.stringify({variant,round,site:site.name,...state}));throw error;
    }
-   const data=await page.evaluate(async({center,checkSharedScope})=>{
+   const data=await page.evaluate(async({center,checkSharedScope,checkBuildingScope})=>{
     const m=window.__qaMap,frames=[],writes={},restores=[],sweeps=[];
     // Lock the matched DPR and wait for labels and buildings in the same
     // browser task that begins measurement. A separate readiness RPC can
@@ -59,7 +59,7 @@ async function sample(url,variant,round){
     let state,stable=0;const deadline=performance.now()+90000;
     while(performance.now()<deadline){
      state=snapshot();
-     const ready=state.ready&&state.icons>0&&(!checkSharedScope||state.building.rendered>0&&!state.building.customDistance)&&Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001&&Math.abs(state.zoom-17.8)<.02;
+     const ready=state.ready&&state.icons>0&&(!checkSharedScope||state.building.rendered>0&&!state.building.customDistance)&&(!checkBuildingScope||state.building.rendered>0&&state.building.customDistance)&&Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001&&Math.abs(state.zoom-17.8)<.02;
      stable=ready?stable+1:0;if(stable>=2)break;
      await new Promise(r=>setTimeout(r,300));
     }
@@ -95,11 +95,15 @@ async function sample(url,variant,round){
      }
     }finally{active=false;m.off('render',frame);for(const restore of restores.reverse())restore();}
     return {frames,writes,sweeps,icons,building,visibleLayers:visibleIds.length,ratio:m.getPixelRatio?.()??null};
-   },{...site,checkSharedScope:variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'});
+   },{...site,checkSharedScope:variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true',checkBuildingScope:variant==='candidate'&&process.env.CHECK_BUILDING_SCOPE==='true'});
    if(variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'){
     console.log('DISTRICT_BUILDING_SCOPE',site.name,JSON.stringify(data.building));
     assert.equal(data.building.customDistance,false,'original native building filters');
     assert.ok(data.building.rendered>0,'actual district buildings must remain rendered');
+   }
+   if(variant==='candidate'&&process.env.CHECK_BUILDING_SCOPE==='true'){
+    console.log('DISTRICT_BUILDING_INTERIOR',site.name,JSON.stringify(data.building));
+    assert.ok(data.building.customDistance&&data.building.rendered>0,'actual district buildings must remain visible');
    }
    report.samples.push({variant,round,site:site.name,...data});
    console.log('MAP_GESTURE_SAMPLE',JSON.stringify({variant,round,site:site.name,icons:data.icons,frames:data.frames.length,writes:data.writes,sweeps:data.sweeps,ratio:data.ratio}));
@@ -108,7 +112,47 @@ async function sample(url,variant,round){
    assert.ok(data.sweeps.every(x=>Math.hypot(x.to[0]-x.from[0],x.to[1]-x.from[1])>.0004&&Math.hypot(x.target[0]-x.to[0],x.target[1]-x.to[1])<.0001&&x.elapsedMs>=4000&&Math.abs(x.afterZoom-x.zoom)<.02),'matched camera sweep did not execute');
    assert.ok(data.frames.length>=10&&data.sweeps.every(x=>x.frames>=2),'insufficient map frames');
   }
+  if(variant==='candidate'&&round===1&&process.env.CHECK_BUILDING_SCOPE==='true')await verifyExteriorBuildings(page);
  }finally{await ctx.close();}
+}
+// Check actual render output, with actual native building data at a wholly
+// exterior viewport. Exercise normal safety map and transit mode, at two pitches.
+async function verifyExteriorBuildings(page){
+ const exterior=[126.910,37.507],interior=[126.941005,37.513534];
+ for(const mode of ['map','transit']){
+  await page.evaluate(mode=>{const app=document.getElementById('app');if(mode==='transit'){window.__qaNavigate('route');app.dataset.djTransitMode='transit';window.dispatchEvent(new CustomEvent('dongjak:transit-mode-change',{detail:'transit'}));}},mode);
+  for(const pitch of [0,35]){
+   for(const [kind,center] of [['interior',interior],['exterior',exterior]]){
+    await page.evaluate(({center,pitch})=>window.__qaMap.jumpTo({center,zoom:17.8,pitch,bearing:0}),{center,pitch});
+    const snapshot=({kind,center,pitch})=>{
+     const m=window.__qaMap,app=document.getElementById('app');
+     const layers=m.getStyle().layers.filter(l=>['fill','fill-extrusion','line'].includes(l.type)&&(l['source-layer']==='building'||/^dongjak-buildings-(?:footprint|outline|3d)-/.test(l.id)));
+     const visible=layers.filter(l=>m.getLayoutProperty(l.id,'visibility')!=='none'&&(pitch===0?l.type==='fill':l.type==='fill-extrusion'));
+     const native=layers.find(l=>l['source-layer']==='building');
+     const nativeData=native?m.querySourceFeatures(native.source,{sourceLayer:'building'}):[];
+     const near=coord=>Math.abs(coord[0]-center[0])<.003&&Math.abs(coord[1]-center[1])<.003;
+     const raw=nativeData.filter(f=>{const g=f.geometry;return g?.type==='Polygon'?g.coordinates[0]?.some(near):g?.type==='MultiPolygon'&&g.coordinates.some(p=>p[0]?.some(near));}).length;
+     const hits=visible.length?m.queryRenderedFeatures({layers:visible.map(l=>l.id)}).length:0;
+     return {kind,pitch,mode:app.dataset.djTransitExterior,center:m.getCenter().toArray(),zoom:m.getZoom(),ready:m.isStyleLoaded()&&!m.isMoving()&&m.areTilesLoaded(),raw,hits,scoped:layers.length>0&&layers.every(l=>JSON.stringify(m.getFilter(l.id)||null).includes('"distance"')),visible:visible.map(l=>l.id)};
+    };
+    // A stable loaded viewport with real source polygons prevents a false
+    // zero from missing tiles or a hidden canvas. Require actual interior
+    // extrusions as well as footprints.
+    const args={kind,center,pitch};
+    let state;
+    for(let i=0;i<90;i++){
+     state=await page.evaluate(snapshot,args);
+     if(state.ready&&state.scoped&&state.raw>0&&Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001&&Math.abs(state.zoom-17.8)<.02&&(kind==='interior'?state.hits>0:state.hits===0))break;
+     await page.waitForTimeout(1000);
+    }
+    console.log('DISTRICT_BUILDING_VISUAL_SCOPE',mode,JSON.stringify(state));
+    assert.ok(state.ready&&state.scoped&&state.raw>0,'real loaded building source required');
+    assert.equal(state.mode==='true',mode==='transit');
+    assert.ok(Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001,'exact district/exterior camera required');
+    assert.ok(kind==='interior'?state.hits>0:state.hits===0,'district only building render required');
+   }
+  }
+ }
 }
 try{
  for(let i=0;i<3;i++)for(const n of (i%2?[1,0]:[0,1]))await sample(urls[n],n?'candidate':'baseline',i+1);

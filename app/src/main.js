@@ -75,6 +75,7 @@ import {installAdminDongLayer} from './admin-dong-layer.js';
 import {installBaseLayerControls} from './base-layer-controls.js';
 import {loadBuildingTileFeatures} from './building-assets.js';
 import {createBuildingCoverage,buildingModeVisibility,nextBuildingPitchMode} from './building-coverage.js';
+import {createDistrictBuildingScope} from './district-building-scope.mjs';
 import {isDisplayBuilding,partitionDisplayBuildings} from './building-display-detail.js';
 import {greenBuildingFilterEnabled,partitionGreenReview} from './green-building-filter.js';
 import {nearestBuildingSheets} from './building-prewarm.js';
@@ -251,6 +252,7 @@ let lastBuildingCount = 0;
 let baseLayerControls=null;
 let baseBuildingsVisible=true;
 let buildingCoverage=null;
+let districtBuildingScope=null;
 
 let overviewSheetState = 'expanded';
 let overviewDrag = null;
@@ -906,6 +908,7 @@ async function loadOneBuildingSheet(sheet){
         'fill-extrusion-height':['interpolate',['linear'],['zoom'],BUILDING_ZOOM_FADE_START,0,BUILDING_ZOOM_FADE_END,['get','h']],
         'fill-extrusion-base':0}
     },firstSymbol);
+    districtBuildingScope?.sync([footprintFillId,footprintLineId,layerId]);
     loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources,complete:successfulSources===totalSources,footprint3DMode:visibleBuilding3D()});
     buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,successfulSources===totalSources?visible:[]);
     if(successfulSources<totalSources)buildingRetryAfter.set(sheet.sheet,Date.now()+15000);else buildingRetryAfter.delete(sheet.sheet);
@@ -1169,8 +1172,9 @@ async function loadDongjakBoundary(){
     if(app.dataset.djTransitExterior!=='true')map.setMaxBounds(bufferedDistrictBounds(boundaryGeometry));
     // 동작구 밖 원본 시설명은 가리되, 추가 자치구 라벨은 별도 심벌로 표시합니다.
     clipBasemapLabelsToDistrict(map,boundaryGeometry);
-    // Retain the original native building filters and reviewed GIS coverage.
-    // Transit must never change the shared basemap geometry or layer owners.
+    // Apply one geographic building filter for every map mode. Roads,
+    // terrain, facility labels and mode-specific camera state are untouched.
+    districtBuildingScope?.update(boundaryGeometry);
     districtBuildingsReady=true;
     syncTiltWithBuildings();
     scheduleBuildingLoad();
@@ -1717,6 +1721,8 @@ map.on('load',()=>{
   installForestShade({map,app});
   const nativeBuildingLayers=installBaseBuildingPalette({map,app});
   buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers);
+  districtBuildingScope=createDistrictBuildingScope(map);
+  if(boundaryGeometry)districtBuildingScope.update(boundaryGeometry);
   buildingCoverage.setExtruding(visibleBuilding3D());
   status('지도 준비 완료 · 동작구 경계 불러오는 중');
   // 공개 Terrarium DEM: API 키 없이 지형을 표시합니다. 지형 데이터의 상세도는 지역별로 다릅니다.
@@ -1838,6 +1844,7 @@ map.on('load',()=>{
       if(gpsLastPosition)outsideDistrictAlert.check(...gpsLastPosition,boundaryGeometry,gpsLastAccuracy);
       map.getSource('district-outline')?.setData({type:'FeatureCollection',features:[feature]});
       map.getSource('district-exterior')?.setData(maskOutside(boundaryGeometry));
+      districtBuildingScope?.update(boundaryGeometry);
       // Reclip bus tile fallback against the updated SGIS district polygon.
       map.fire('dongjak:boundary-updated');
       // 통계청 SGIS 기준 시군구 외곽으로 변경되어 행정동 경계와 불일치를 줄입니다.

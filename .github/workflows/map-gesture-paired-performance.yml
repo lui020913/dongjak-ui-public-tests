@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   compare:
-    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && (github.event.pull_request.head.ref == 'fix/transit-pill-label-motion-20261127' || github.event.pull_request.head.ref == 'fix/transit-visible-camera-zoom-20261127' || github.event.pull_request.head.ref == 'fix/transit-gps-auto-guide-20261127'))
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && (github.event.pull_request.head.ref == 'fix/transit-pill-label-motion-20261127' || github.event.pull_request.head.ref == 'fix/transit-visible-camera-zoom-20261127' || github.event.pull_request.head.ref == 'fix/transit-gps-auto-guide-20261127' || github.event.pull_request.head.ref == 'fix/district-only-building-render-20261127'))
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -41,7 +41,7 @@ jobs:
               s=p.read_text()
               marker='installSolidMapLines(map);'
               assert s.count(marker)==1, str(p)
-              p.write_text(s.replace(marker,'globalThis.__qaMap=map;\n'+marker))
+              p.write_text(s.replace(marker,'globalThis.__qaMap=map;globalThis.__qaNavigate=navigate;\n'+marker))
           PY
       - name: Build baseline and candidate
         run: |
@@ -60,7 +60,7 @@ jobs:
             for i in $(seq 1 60); do curl -fsS "http://127.0.0.1:$port/" >/dev/null && break; sleep 1; done
             curl -fsS "http://127.0.0.1:$port/" >/dev/null
           done
-          BASELINE_URL=http://127.0.0.1:4195 CANDIDATE_URL=http://127.0.0.1:4196 CANDIDATE_SHA="$(git rev-parse HEAD)" CHECK_SHARED_SCOPE="${{ github.event.pull_request.head.ref == 'fix/transit-gps-auto-guide-20261127' }}" node app/tests/map-gesture-paired-research.mjs
+          BASELINE_URL=http://127.0.0.1:4195 CANDIDATE_URL=http://127.0.0.1:4196 CANDIDATE_SHA="$(git rev-parse HEAD)" CHECK_SHARED_SCOPE="${{ github.event.pull_request.head.ref == 'fix/transit-gps-auto-guide-20261127' }}" CHECK_BUILDING_SCOPE="${{ github.event.pull_request.head.ref == 'fix/district-only-building-render-20261127' }}" node app/tests/map-gesture-paired-research.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
