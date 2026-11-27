@@ -198,7 +198,10 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     root.dataset.closing='true';
     if(frame){win.cancelAnimationFrame(frame);frame=0;}
     doc.body.dataset.djCommunityEditor='closing';
-    // Keep dock hidden until the editor is fully dismissed and keyboard closes.
+    // Reveal the destination dock behind the fading editor only if the keyboard is closed.
+    // A keyboard-constrained viewport must never pull the dock above the keyboard.
+    const layout=Math.max(initialLayoutHeight,Number(win.innerHeight)||0,Number(doc.documentElement.clientHeight)||0);
+    if(communityVisibleViewport(win,layout).keyboardInset<=80)restoreDock();
   }
   function dismiss({animate=true,onClosed=()=>{}}={}){
     if(!root||root.hidden||root.dataset.closing==='true')return;
