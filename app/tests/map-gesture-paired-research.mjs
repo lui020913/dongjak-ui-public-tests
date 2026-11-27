@@ -42,7 +42,8 @@ async function sample(url,variant,round){
     console.log('MAP_GESTURE_READINESS_FAILURE',JSON.stringify({variant,round,site:site.name,...state}));throw error;
    }
    const data=await page.evaluate(async({center,checkSharedScope,checkDistrictBuildings})=>{
-    const m=window.__qaMap,frames=[],writes={},restores=[],sweeps=[];
+    const m=window.__qaMap,frames=[],writes={},restores=[],sweeps=[],settle=[],longTasks=[];
+    let observer;try{observer=new PerformanceObserver(list=>{for(const entry of list.getEntries())longTasks.push({start:entry.startTime,duration:entry.duration});});observer.observe({entryTypes:['longtask']});}catch{}
     // Lock the matched DPR and wait for labels and buildings in the same
     // browser task that begins measurement. A separate readiness RPC can
     // observe a previous tile frame before a pending GIS update clears it.
@@ -91,10 +92,12 @@ async function sample(url,variant,round){
       const ended=performance.now(),after=m.getCenter();
       active=false;
       sweeps.push({elapsedMs:ended-started,frames:frames.length-count,from:[before.lng,before.lat],to:[after.lng,after.lat],target,zoom,beforeZoom,afterZoom:m.getZoom(),tailMs:ended-last});
-      await new Promise(r=>setTimeout(r,650));
+      const settleStart=performance.now(),settleFrames=[];let prev=settleStart;
+      await new Promise(resolve=>{const tick=now=>{settleFrames.push(now-prev);prev=now;if(now-settleStart>=1500)resolve();else requestAnimationFrame(tick);};requestAnimationFrame(tick);});
+      settle.push({frames:settleFrames,elapsed:performance.now()-settleStart});
      }
-    }finally{active=false;m.off('render',frame);for(const restore of restores.reverse())restore();}
-    return {frames,writes,sweeps,icons,building,visibleLayers:visibleIds.length,ratio:m.getPixelRatio?.()??null};
+    }finally{active=false;m.off('render',frame);observer?.disconnect();for(const restore of restores.reverse())restore();}
+    return {frames,writes,sweeps,settle,longTasks,icons,building,visibleLayers:visibleIds.length,ratio:m.getPixelRatio?.()??null};
    },{...site,checkSharedScope:variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true',checkDistrictBuildings:variant==='candidate'&&process.env.CHECK_DISTRICT_BUILDINGS==='true'});
    if(variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'){
     console.log('DISTRICT_BUILDING_SCOPE',site.name,JSON.stringify(data.building));
@@ -122,6 +125,7 @@ try{
  for(let i=0;i<3;i++)for(const n of (i%2?[1,0]:[0,1]))await sample(urls[n],n?'candidate':'baseline',i+1);
  const stats=rows=>{const a=rows.flatMap(x=>x.frames).sort((x,y)=>x-y);return {samples:a.length,p50:a[Math.floor((a.length-1)*.5)],p95:a[Math.floor((a.length-1)*.95)],slowPct:100*a.filter(x=>x>32).length/a.length,gestureWrites:rows.reduce((n,x)=>n+Object.values(x.writes).reduce((s,v)=>s+v,0),0)};};
  report.summary=Object.fromEntries(['baseline','candidate'].map(v=>[v,stats(report.samples.filter(x=>x.variant===v))]));
+ for(const variant of ['baseline','candidate']){const rows=report.samples.filter(x=>x.variant===variant);const post=rows.flatMap(x=>x.settle.flatMap(s=>s.frames)).sort((a,b)=>a-b);const tasks=rows.flatMap(x=>x.longTasks);report.summary[variant].postMoveP95=post[Math.floor((post.length-1)*.95)];report.summary[variant].longTaskCount=tasks.length;report.summary[variant].longTaskMax=tasks.reduce((m,x)=>Math.max(m,x.duration),0);}
  console.log('MAP_GESTURE_COMPARISON',JSON.stringify(report.summary));
  // Do not conceal a regression or claim a physical-device guarantee.
  assert.equal(report.summary.candidate.gestureWrites,0,'candidate must not mutate monitored POI or label sources/styles during camera motion');

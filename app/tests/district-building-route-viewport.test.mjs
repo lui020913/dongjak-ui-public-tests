@@ -17,9 +17,12 @@ test('route framing never reduces the real occlusion padding',()=>{
  assert.deepEqual(strictRoutePreviewPadding({mapTop:0,viewportHeight:844,toolbarBottom:110,sheetTop:410}),{top:136,bottom:460,left:34,right:34});
  assert.equal(strictRoutePreviewPadding({mapTop:0,viewportHeight:500,toolbarBottom:110,sheetTop:150}),null);
 });
-test('route candidate confirmation suppresses the picker hint and worker preparation is shared',()=>{
+test('route candidate confirmation suppresses the picker hint and normal-profile building cache is retained',()=>{
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  assert.match(main,/panel.hidden=false;\s*document.getElementById\('route-pick-hint'\).hidden=true/);
- assert.match(main,/new Worker\(new URL\('\.\/workers\/building-tile-worker.mjs'/);
- assert.match(main,/await waitBuildingQuiet\(\);\s*if\(boundary!==boundaryGeometry\)/);
+ assert.doesNotMatch(main,/building-tile-worker/);
+ assert.match(main,/function djTrimOffscreenBuildings\(sheets\)\{\s*if\(!djRenderBudget.isEconomy\(\)/);
+ const civic=readFileSync(new URL('../src/civic-facility-layer.js',import.meta.url),'utf8');
+ assert.match(civic,/map.on\('moveend',scheduleReconcile\)/);
+ assert.match(civic,/const matches=new Set\(matchedIds\)/);
 });

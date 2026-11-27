@@ -62,7 +62,6 @@ import {cachedOfficialSearchPlaces,queryOfficialPlaces} from './seoul-official-f
 import {routeStationMatches,mergeRouteSearchResults,routeResultSubtitle} from './route-search-results.js';
 import {walkingRouteViewportPadding,strictRoutePreviewPadding} from './route-map-focus.js';
 import {installDistrictBuildingScope} from './district-building-scope.mjs';
-import {prepareBuildingTile} from './building-tile-prepare.mjs';
 import {initMapQuickSearch} from './map-quick-search.js';
 import './map-search-refinement.css';
 import {installMapProduct} from './v815-map-product.js';
@@ -254,27 +253,7 @@ let baseLayerControls=null;
 let baseBuildingsVisible=true;
 let buildingCoverage=null;
 let districtBuildingScope=null;
-let buildingWorker=null,buildingWorkerId=0;
-const buildingWorkerPending=new Map();
-let buildingMotionAt=0;
-async function waitBuildingQuiet(){
- if(!djPhone)return;
- while(map.isMoving?.()||performance.now()-buildingMotionAt<650)await new Promise(r=>setTimeout(r,150));
-}
-async function prepareBuildingSheet(sheet,boundary){
- const green=greenBuildingFilterEnabled(globalThis.location?.search);
- if(typeof Worker==='function'){
-  try{
-   if(!buildingWorker){buildingWorker=new Worker(new URL('./workers/building-tile-worker.mjs',import.meta.url),{type:'module'});
-    buildingWorker.onmessage=({data})=>{const p=buildingWorkerPending.get(data.id);if(!p)return;buildingWorkerPending.delete(data.id);data.error?p.reject(Error(data.error)):p.resolve(data.result);};
-    buildingWorker.onerror=()=>{for(const p of buildingWorkerPending.values())p.reject(Error('building worker unavailable'));buildingWorkerPending.clear();buildingWorker?.terminate();buildingWorker=null;};}
-   const id=++buildingWorkerId;
-   return await new Promise((resolve,reject)=>{buildingWorkerPending.set(id,{resolve,reject});buildingWorker.postMessage({id,sheet,boundary,green});});
-  }catch(error){console.info('[건물 작업자] 기본 로더 재시도:',error?.message);}
- }
- await waitBuildingQuiet();
- return prepareBuildingTile(await loadBuildingTileFeatures(sheet),boundary,green);
-}
+
 
 let overviewSheetState = 'expanded';
 let overviewDrag = null;
@@ -865,7 +844,7 @@ function getVisibleBBox(){
 function scheduleBuildingLoad(){
   if (!visibleBuilding2D() || map.getZoom()<BUILDING_ZOOM_MIN || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
   clearTimeout(buildingLoadTimer);
-  buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},djPhone?600:230);
+  buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},230);
 }
 async function ensureBuildingManifest(){
   if(buildingManifest)return buildingManifest;
@@ -888,16 +867,19 @@ async function loadOneBuildingSheet(sheet){
   if(existing?.complete||buildingLoading.has(sheet.sheet)||(buildingRetryAfter.get(sheet.sheet)||0)>Date.now())return;
   buildingLoading.add(sheet.sheet);
   try {
-    await waitBuildingQuiet();
+    const {features, reviewCandidates, displayGeometries, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet);
+    for(const problem of errors) console.warn(`[동작하는 안전지도] ${sheet.sheet}번 ${problem.label} 로딩 실패:`,problem.error);
+    // Defer geometry filtering and indexing until the phone camera is settled.
+    while(djPhone&&map.isMoving?.())await new Promise(resolve=>map.once('moveend',resolve));
     if(!boundaryGeometry)return;
-    const boundary=boundaryGeometry;
-    const {within,visible,excluded,reviewExcluded,successfulSources,totalSources,errors}=await prepareBuildingSheet(sheet,boundary);
-    for(const problem of errors)console.warn('[건물 데이터]',problem.label,problem.error);
-    // Parsing, green review and geometry preparation run off the UI thread.
-    // Never install a completed sheet in the middle of another gesture.
-    await waitBuildingQuiet();
-    if(boundary!==boundaryGeometry){buildingRetryAfter.delete(sheet.sheet);return;}
     if(djPhone&&!intersects(sheet.bbox,getVisibleBBox()))return;
+    // Tile-native buildings are incomplete in parts of Sangdo 1-dong. The
+    // supplied base+supplement GIS footprints must also be available overhead.
+    const districtBuildings=features.filter(f=>Number.isFinite(f.properties?.x)&&Number.isFinite(f.properties?.y)&&
+      isDongjak(f.properties.x,f.properties.y)===true&&['Polygon','MultiPolygon'].includes(f.geometry?.type));
+    const {visible:eligible,excluded}=partitionDisplayBuildings(districtBuildings);
+    const {visible,reviewExcluded}=partitionGreenReview(eligible,reviewCandidates,greenBuildingFilterEnabled(globalThis.location?.search));
+    const within=visible.map(f=>({...f,geometry:displayGeometries.get(f)||f.geometry,properties:{...f.properties,_render3d:true}}));
     const sourceId=`dongjak-buildings-data-${sheet.sheet}`;
     const layerId=`dongjak-buildings-3d-${sheet.sheet}`;
     const footprintFillId=`dongjak-buildings-footprint-${sheet.sheet}`;
@@ -972,9 +954,9 @@ function scheduleInitialBuildingWarmup(){
   else setTimeout(()=>void run(),900);
 }
 function djTrimOffscreenBuildings(sheets){
-  if(!djPhone||app.dataset.sangdoNight==='on'||map.isMoving?.())return;
+  if(!djRenderBudget.isEconomy()||app.dataset.sangdoNight==='on'||map.isMoving?.())return;
   const visible=sheets.map(s=>s.sheet);
-  for(const id of offscreenEvictionIds([...loadedBuildingTiles.keys()],visible,djRenderBudget.isEconomy()?2:6)){
+  for(const id of offscreenEvictionIds([...loadedBuildingTiles.keys()],visible,2)){
     const info=loadedBuildingTiles.get(id),sourceId='dongjak-buildings-data-'+id;
     if(!info||buildingLoading.has(id))continue;
     const owned=[info.footprintFillId,info.footprintLineId,info.layerId];
@@ -1011,8 +993,8 @@ async function loadVisibleBuildingSheets(){
     if(buildingRetryAfter.size&&visibleBuilding2D()&&map.getZoom()>=BUILDING_ZOOM_MIN){buildingRetryTimer=setTimeout(()=>scheduleBuildingLoad(),16000);}
   }
 }
-map.on('movestart',()=>{buildingMotionAt=performance.now();if(djPhone)clearTimeout(buildingLoadTimer);});
-map.on('moveend',()=>{buildingMotionAt=performance.now();scheduleBuildingLoad();});
+map.on('movestart',()=>{if(djPhone)clearTimeout(buildingLoadTimer);});
+map.on('moveend',scheduleBuildingLoad);
 map.on('zoomend',()=>{syncTiltWithBuildings();});
 // Preserve the loaded building representation during pan, rotation and pitch.
 // The phone render budget may adapt resolution and defer new tile work, but it
@@ -1857,12 +1839,11 @@ map.on('load',()=>{
     picker:document.getElementById('admin-dong-picker'),
     onDistrictBoundary:(feature)=>{
       if(!feature.geometry)return;
+      const changed=JSON.stringify(boundaryGeometry)!==JSON.stringify(feature.geometry);
       boundaryGeometry=feature.geometry;
       districtBuildingScope?.update(boundaryGeometry);
       boundaryBounds=computeBounds(boundaryGeometry);
-      // Rebuild previously prepared GIS sheets against the authoritative boundary.
-      for(const info of loadedBuildingTiles.values())info.complete=false;
-      scheduleBuildingLoad();
+      if(changed){for(const info of loadedBuildingTiles.values())info.complete=false;scheduleBuildingLoad();}
       if(gpsLastPosition)outsideDistrictAlert.check(...gpsLastPosition,boundaryGeometry,gpsLastAccuracy);
       map.getSource('district-outline')?.setData({type:'FeatureCollection',features:[feature]});
       map.getSource('district-exterior')?.setData(maskOutside(boundaryGeometry));
@@ -3505,7 +3486,7 @@ window.addEventListener('dongjak:transit-comparison-focus',event=>{
  map.easeTo({center:[routeEnd.lng,routeEnd.lat],offset:[0,(padding.top-padding.bottom)/2],padding:{top:0,bottom:0,left:0,right:0},pitch:0,duration:350});
 });
 window.addEventListener('dongjak:transit-comparison-dismiss',()=>{delete app.dataset.transitComparison;drawRouteMarkers();});
-let routePreviewFitTimer=null,routePreviewFitObserver=null,routePreviewFitKey='';
+let routePreviewFitTimer=null,routePreviewFitObserver=null,routePreviewFitKey='',routePreviewFitWatching=false;
 function scheduleVisibleRouteFit(){
  clearTimeout(routePreviewFitTimer);
  routePreviewFitTimer=setTimeout(()=>{
@@ -3525,9 +3506,10 @@ function scheduleVisibleRouteFit(){
  },260);
 }
 function watchVisibleRouteFit(){
- if(routePreviewFitObserver)return;
+ if(routePreviewFitWatching)return;
  const card=document.getElementById('route-map-card'),head=document.getElementById('dj-walk-map-head');
  if(!card||!head)return;
+ routePreviewFitWatching=true;
  if(typeof ResizeObserver==='function'){routePreviewFitObserver=new ResizeObserver(scheduleVisibleRouteFit);routePreviewFitObserver.observe(card);routePreviewFitObserver.observe(head);}
  window.addEventListener('resize',scheduleVisibleRouteFit);
  window.visualViewport?.addEventListener('resize',scheduleVisibleRouteFit);

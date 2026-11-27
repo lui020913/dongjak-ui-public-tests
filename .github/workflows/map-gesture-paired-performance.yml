@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      BASELINE_SHA: 5a286b2869f3dfa3ac33f3e1d9c4179422cadd19
+      BASELINE_SHA: 98764077336ecb9ef291dc18290de7a8a489e6ce
       VITE_SUPABASE_URL: https://placeholder.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
     steps:
@@ -27,7 +27,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          ref: 5a286b2869f3dfa3ac33f3e1d9c4179422cadd19
+          ref: 98764077336ecb9ef291dc18290de7a8a489e6ce
           path: before-transit
           persist-credentials: false
       - uses: actions/setup-node@v4
