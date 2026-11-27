@@ -55,7 +55,7 @@ test('지도 화살표는 베이스맵 일방통행 레이어의 간격만 조�
 test('지하철 원거리 정보 제한·버전 누적 이력',async()=>{
   const code=await source('src/transport-map.js');
   assert.match(code,/if\(!station\|\|p.openable/);
-  assert.match(code,/nearby:\(lng,lat\)=>isNearBoundary\(lng,lat\)/);
+  assert.match(code,/isDistrict:scopeContains/);
   assert.equal(VERSION_HISTORY[0].version,'v7.0.29');
   assert.ok(LEGACY_VERSION_HISTORY.some(v=>v.version==='v5.1'));
 });
