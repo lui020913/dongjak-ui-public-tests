@@ -72,6 +72,6 @@ test('Dark map land palette is muted with a mild district mask, without recolori
   assert.match(src,/set\('background-color','#22272d'\)/);
   assert.match(src,/water\?'#273741':green\?'#303c34'/);
   assert.match(zoom,/role!=='ground'&&role!=='vegetation'/);
-  assert.match(zoom,/\(theme==='dark'\?'#2b3138':'#f7f7f7'\)/);
+  assert.match(zoom,/\(theme==='dark'\?'#2b3138':'#e7e7e5'\)/);
   assert.match(read('src/theme-contract.css'),/never paint route-line, warning, PRI or transport/);
 });

@@ -29,7 +29,7 @@ const releaseSmokeNames=[
  'map report fades out over its real destination',
  'phone browser install choices',
  'iOS PWA status edge stays flat',
- 'bottom dock swipes change',
+ 'bottom dock uses taps only',
  'AI full-screen conversation',
  'community tab opens a usable feed',
  'phone production settings, cards and nearby overlays follow rendered geometry',
