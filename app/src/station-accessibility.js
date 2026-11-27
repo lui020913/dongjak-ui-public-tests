@@ -1,4 +1,5 @@
 import {promoteReadable3DLabelLayers} from './readable-3d-labels.js';
+import {fetchStationAccessSnapshot} from './metro-station-access.mjs';
 /**
  * Georeferenced metro entrances and verified accessibility equipment.
  * 1) local transport proxy -> 2) public ArcGIS exit points if proxy is absent.
@@ -95,38 +96,19 @@ async function fetchJson(url,timeout=9000){
   }finally{clearTimeout(timer);}
 }
 async function fetchAccessibility(){
-  let proxyData=null,proxyError='';
+  // The normal metro layer owns exit markers. The accessibility layer needs
+  // only explicitly verified mobility equipment, not another exit API call.
+  const data=await fetchStationAccessSnapshot();
+  const exits=data.elements.filter(e=>e.type==='node'&&inRange(e.lon,e.lat)).map(e=>({
+    type:'Feature',geometry:{type:'Point',coordinates:[e.lon,e.lat]},
+    properties:{type:'exit',station:String(e.tags?.station||''),number:entranceNumber(e.tags?.ref),label:'출입구',equipment:'unknown',source:e.tags?.source||'OpenStreetMap'}
+  }));
+  let equipment=[];
   try{
-    const raw=await fetchJson('/api/transport/accessibility',7000);
-    if(raw?.features?.type==='FeatureCollection')proxyData=raw;
-    else throw new Error('응답 구조 불일치');
-  }catch(error){proxyError=error?.message||'서버 연결 실패';}
-  const known=(proxyData?.features?.features||[]).filter(isKnownAccessibility);
-  const hasExits=known.some(f=>f.properties.type==='exit');
-  if(hasExits && known.filter(f=>f.properties.type==='exit').every(f=>f.properties.number))return {geo:{...EMPTY,features:known},source:'서울시 교통정보 서버',warning:''};
-  // Old 5178 server may lack the accessibility endpoint. Query the authoritative
-  // ArcGIS layer directly rather than leaving the user with an invisible layer.
-  try{
-    const response=await fetchJson(makeArcGISQuery(),11000);
-    const exits=parsePublicExitArcGIS(response).features;
-    if(exits.length){
-      const key=f=>`${f.properties.type}:${f.geometry.coordinates.map(v=>v.toFixed(6)).join(':')}:${f.properties.number||''}`;
-      // Prefer authoritative numbered exits over unnamed proxy points in the same place.
-      // Merge only at matching coordinates; never assign a nearby exit's number by guess.
-      const merged=new Map([...known,...exits].map(f=>[key(f),f]));
-      for(const [k,f] of merged){
-        if(f.properties.type!=='exit'||f.properties.number)continue;
-        const match=exits.find(x=>x.properties.number && x.geometry.coordinates.every((v,i)=>Math.abs(v-f.geometry.coordinates[i])<0.000015));
-        if(match)merged.set(k,{...f,properties:{...f.properties,number:match.properties.number,label:match.properties.label}});
-      }
-      return {geo:{...EMPTY,features:[...merged.values()]},source:'공개 역사 출입구 좌표(직접 조회)',
-        warning:proxyError?'5178 서버의 출구 API는 연결되지 않았습니다.':''};
-    }
-    throw new Error('출구 좌표 0건');
-  }catch(error){
-    if(known.length)return {geo:{...EMPTY,features:known},source:'교통정보 서버',warning:'출구 좌표 별도 조회 실패'};
-    throw new Error(`5178: ${proxyError||'데이터 없음'} / 공개 출구 API: ${error?.message||'연결 실패'}`);
-  }
+    const raw=await fetchJson('/data/safety/metro/dongjak_elevators_verified.geojson',7000);
+    equipment=(raw?.features||[]).filter(f=>isKnownAccessibility(f)&&f.properties.type!=='exit');
+  }catch{}
+  return {geo:{...EMPTY,features:[...exits,...equipment]},source:'정적 검증 공간정보',warning:''};
 }
 function readCache(){
   try{
@@ -161,7 +143,7 @@ export function initStationAccessibility({map,maplibregl,isInDistrict=()=>false,
   const source='metro-accessibility-local';
   map.addSource(source,{type:'geojson',data:EMPTY});
   const firstLabel=map.getStyle().layers.find(x=>x.type==='symbol')?.id;
-  const numberedExitFilter=['all',['==',['get','type'],'exit'],
+  const numberedExitFilter=['all',['==',['get','type'],'exit'],['==',1,0],
     ['!=',['coalesce',['get','number'],''],'']];
   // Accessible-facility icons are drawn as compact pictograms so they stand out
   // from subway badges. They are only shown at close zoom to avoid clutter.
@@ -247,11 +229,7 @@ export function initStationAccessibility({map,maplibregl,isInDistrict=()=>false,
   }
   function display(geo,via,warning=''){
     let raw=(geo?.features||[]).filter(isKnownAccessibility);
-    { // Always supplement the public exit feed with individually numbered OSM entrances.
-      const existing=new Set(raw.map(f=>`${f.properties.type}/${f.geometry.coordinates.map(v=>v.toFixed(6)).join('/')}`));
-      const additional=visibleBasemapEntrances().filter(f=>!existing.has(`${f.properties.type}/${f.geometry.coordinates.map(v=>v.toFixed(6)).join('/')}`));
-      if(additional.length)raw=[...raw,...additional];
-    }
+
     if(!raw.length)throw new Error('표시 가능한 좌표 없음');
     lastCollection={...EMPTY,features:raw};lastVia=via;lastWarning=warning;
     const good=filterDistrictAccessibility(raw,isInDistrict).map(f=>{
@@ -298,16 +276,7 @@ export function initStationAccessibility({map,maplibregl,isInDistrict=()=>false,
   });
   retry?.addEventListener('click',()=>{loaded=false;load(true);});
   map.on('zoomend',()=>load());
-  map.on('moveend',()=>{
-    load();
-    if(map.getZoom()>=14.8){
-      const known=new Set(lastCollection.features.filter(f=>f.properties.type==='exit'&&f.properties.number)
-        .map(f=>f.geometry.coordinates.map(n=>n.toFixed(6)).join(',')));
-      const extra=visibleBasemapEntrances().filter(f=>f.properties.number &&
-        !known.has(f.geometry.coordinates.map(n=>n.toFixed(6)).join(',')));
-      if(extra.length)display({...EMPTY,features:[...lastCollection.features,...extra]},lastVia||'지도 출구 태그',lastWarning);
-    }
-  });
+  map.on('moveend',()=>load());
   for(const layer of layers){
     map.on('click',layer,event=>{
       if(!enabled||!canOpen())return;

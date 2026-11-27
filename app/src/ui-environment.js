@@ -120,7 +120,7 @@ export function nativePavedAreaFill(layer={}){
  const id=String(layer.id||'').toLowerCase();
  return layer.type==='fill'&&source==='transportation'&&!/rail|metro|subway|tram|water|river|lake|pier|ferry|bridge|tunnel|contour/.test(id);
 }
-export const LIGHT_PAVED_AREA_COLOR='#e7e9e2';
+export const LIGHT_PAVED_AREA_COLOR='#f7f7f7';
 // The highway-area layer mixes pedestrian plazas with bridges and vehicle roads.
 export function nativePavedAreaPaint(fallback='#ffffff'){
  return ['match',['coalesce',['get','class'],''],['path','pedestrian','footway','cycleway','steps'],LIGHT_PAVED_AREA_COLOR,fallback];
@@ -243,8 +243,8 @@ export function initTheme({map,app}){
         continue;
       }
       if(themeState.value==='light'){
-        if(entry.type==='background')set('background-color',entry.landRole==='ground'?'#e2e4dc':entry.background);
-        if(entry.type==='fill')set('fill-color',entry.pavedArea?nativePavedAreaPaint(entry.roadRole?(entry.roadRole==='edge'?'#d0d8d3':'#ffffff'):entry.fill):entry.roadRole ? (entry.roadRole==='edge'?'#d0d8d3':'#ffffff') : entry.landRole==='vegetation'?'#a5ca92':entry.landRole==='ground'?'#e1e4dc':entry.fill);
+        if(entry.type==='background')set('background-color',entry.landRole==='ground'?'#f7f7f7':entry.background);
+        if(entry.type==='fill')set('fill-color',entry.pavedArea?nativePavedAreaPaint(entry.roadRole?(entry.roadRole==='edge'?'#d0d8d3':'#ffffff'):entry.fill):entry.roadRole ? (entry.roadRole==='edge'?'#d0d8d3':'#ffffff') : entry.landRole==='vegetation'?'#a5ca92':entry.landRole==='ground'?'#f7f7f7':entry.fill);
         if(entry.type==='line')set('line-color',entry.roadRole ? (entry.roadRole==='edge'?'#cbd4d0':'#ffffff') : entry.line);
         if(entry.type==='symbol') {set('text-color',entry.text);set('text-halo-color',entry.halo);set('text-halo-width',entry.haloWidth);}
       }else{
@@ -283,7 +283,7 @@ export function initTheme({map,app}){
     // Keep official and fallback bus-stop names readable even in initial night mode.
     applyBusStopLabelTheme(map,themeState.value);
     repaintVegetation(map,app); // Include forest shade installed after baseline capture.
-    repaintSiteLanduse(map,app); // Preserve site categories through temporary night mode.
+    repaintSiteLanduse(map,app); // One daytime site palette; night safety analysis keeps its own map.
     syncMapLabelContrast(true); // Base and late map labels share the same theme contrast.
     // existing building polygons are handled separately when each tile is loaded.
     for(const layer of map.getStyle().layers){

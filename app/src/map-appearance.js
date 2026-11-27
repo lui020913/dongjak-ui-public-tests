@@ -112,7 +112,7 @@ export function installForestShade({map,app}){
 
 /** Native footprints share a zoom-faded paint model with the GIS building overlays. */
 export const BUILDING_VISUAL_PALETTE=Object.freeze({
-  light:Object.freeze({footprint:'#d2dcdb',footprintOpacity:1,obliqueOpacity:0.12,extrusion:'#f1f3f1',nearOpacity:0.38,farOpacity:0.22}),
+  light:Object.freeze({footprint:'#fafafa',footprintOpacity:1,obliqueOpacity:0.12,extrusion:'#f1f3f1',nearOpacity:0.38,farOpacity:0.22}),
   dark:Object.freeze({footprint:'#444d56',footprintOpacity:0.74,obliqueOpacity:0.07,extrusion:'#525d66',nearOpacity:0.94,farOpacity:0.89})
 });
 export function nativeBuildingFootprint(layer={}){
@@ -158,9 +158,10 @@ export function buildingZoomOpacityExpression(maxOpacity=1){
 export function buildingFootprintPaint(theme='light',pitch=0){
   const p=BUILDING_VISUAL_PALETTE[theme==='dark'?'dark':'light'];
   return {'fill-color':p.footprint,
+    ...(theme==='dark'?{}:{'fill-outline-color':'#e2e2e2'}),
     // Subtle overhead footprints, transparent for dark mode and off in 3D view.
     'fill-opacity':Number((p.footprintOpacity*buildingPlanVisibility(pitch)).toFixed(3)),
-    'fill-antialias':false};
+    'fill-antialias':theme!=='dark'};
 }
 export function buildingFootprintOutlinePaint(theme='light',pitch=0){
   return {'line-color':theme==='dark'?'#9cb6b7':'#7c918f',

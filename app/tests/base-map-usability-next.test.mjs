@@ -27,10 +27,10 @@ test('빈 지도 클릭 시 시트 접기 및 옵션 닫기, 자동 버전 배�
   assert.doesNotMatch(html,/id="site-update-banner"/);
   assert.match(css,/map-quick-search-dropdown/);
 });
-test('밝은 테마 건물은 회녹색, 시설 심볼은 캔버스 도형 사용',()=>{
+test('밝은 테마 건물은 밝은 회백색, 시설 심볼은 캔버스 도형 사용',()=>{
   const building=readFileSync(new URL('../src/map-appearance.js',import.meta.url),'utf8');
   const facility=readFileSync(new URL('../src/station-accessibility.js',import.meta.url),'utf8');
-  assert.match(building,/#d2dcdb/);
+  assert.match(building,/#fafafa/);
   assert.match(facility,/registerAccessibilityPictogram/);
 });
 

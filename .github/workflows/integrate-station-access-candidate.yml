@@ -1,0 +1,61 @@
+name: Integrate validated static station access candidate
+on:
+  push:
+    branches: [fix/station-access-integrate-20261128]
+    paths: ['.github/workflows/integrate-station-access-candidate.yml']
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: station-access-integration-629
+  cancel-in-progress: false
+jobs:
+  integrate:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.actor == 'lui020913'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 42
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ACQUISITION_RUN: '46053691328'
+      ACQUISITION_BASE: ac120273239e5ee012deb9d8c88584a7d52015d6
+      STAGED_HEAD: 5fa00ef52c49c28c009d2ecafd2f98fd0b9c0392
+      CANDIDATE_BRANCH: fix/light-basemap-station-exits-20261128
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Require the exact successful acquisition run
+        run: |
+          set -euo pipefail
+          gh run view "$ACQUISITION_RUN" --json headSha --jq .headSha | grep -Fx "$ACQUISITION_BASE"
+          gh run watch "$ACQUISITION_RUN" --exit-status --interval 20
+      - name: Integrate only the verified data commit and approved staged edits
+        run: |
+          set -euo pipefail
+          git fetch origin "$CANDIDATE_BRANCH" fix/station-access-palette-tests-staged-20261128
+          test "$(git rev-parse origin/fix/station-access-palette-tests-staged-20261128)" = "$STAGED_HEAD"
+          candidate="$(git rev-parse origin/$CANDIDATE_BRANCH)"
+          test "$(git rev-parse "$candidate^")" = "$ACQUISITION_BASE"
+          test "$(git diff --name-only "$ACQUISITION_BASE" "$candidate")" = "app/public/data/transport/seoul-station-access-v1.json"
+          git switch --detach "$candidate"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git merge --no-ff --no-edit "$STAGED_HEAD"
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          import assert from 'node:assert/strict';
+          const d=JSON.parse(readFileSync('app/public/data/transport/seoul-station-access-v1.json','utf8'));
+          assert.equal(d.schema,1);
+          assert.ok(d.counts.official>=500 && d.counts.osmCells===9 && d.counts.exit>=700 && d.counts.way>=30);
+          assert.equal(d.counts.exit,d.elements.filter(e=>e.type==='node').length);
+          assert.equal(d.counts.way,d.elements.filter(e=>e.type==='way').length);
+          assert.match(readFileSync('app/src/site-landuse-palette.mjs','utf8'),/#e6ded4/);
+          NODE
+          cd app
+          node --test tests/metro-station-access.test.mjs tests/site-landuse-palette.test.mjs tests/night-building-contrast.test.mjs tests/base-map-usability-next.test.mjs tests/map-response-regression-20261126.test.mjs
+          cd ..
+          git push origin HEAD:refs/heads/"$CANDIDATE_BRANCH"
+      - name: Request source CI without changing main or bypassing deployment gates
+        run: gh workflow run public-app-pr.yml --ref "$CANDIDATE_BRANCH"

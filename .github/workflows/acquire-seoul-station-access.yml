@@ -1,0 +1,34 @@
+name: Acquire static Seoul subway exits and passages
+on:
+  push:
+    branches: [fix/light-basemap-station-exits-20261128]
+    paths:
+      - 'scripts/research/acquire-seoul-station-access.mjs'
+      - '.github/workflows/acquire-seoul-station-access.yml'
+permissions:
+  contents: write
+jobs:
+  acquire:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.actor == 'lui020913'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - run: node scripts/research/acquire-seoul-station-access.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-seoul-station-access-snapshot
+          path: app/public/data/transport/seoul-station-access-v1.json
+      - name: Commit validated data to candidate branch only
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/fix/light-basemap-station-exits-20261128"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/public/data/transport/seoul-station-access-v1.json
+          git commit -m 'Pin verified Seoul subway exit and passage snapshot'
+          git push origin HEAD:refs/heads/fix/light-basemap-station-exits-20261128

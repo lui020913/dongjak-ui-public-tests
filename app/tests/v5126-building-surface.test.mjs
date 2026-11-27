@@ -8,7 +8,8 @@ test('수직 2D: 라이트 면 유지, 다크 건물은 반투명하게 표시�
   for(const theme of ['dark','light']){
     const paint=buildingFootprintPaint(theme,0);
     assert.equal(paint['fill-opacity'],theme==='dark'?0.74:1);
-    assert.equal(paint['fill-antialias'],false);
+    assert.equal(paint['fill-antialias'],theme==='light');
+    if(theme==='light'){assert.equal(paint['fill-color'],'#fafafa');assert.equal(paint['fill-outline-color'],'#e2e2e2');}
     assert.equal(buildingFootprintOutlinePaint(theme,0)['line-opacity'],0);
   }
   assert.notEqual(buildingFootprintPaint('dark',0)['fill-color'],buildingFootprintPaint('light',0)['fill-color']);

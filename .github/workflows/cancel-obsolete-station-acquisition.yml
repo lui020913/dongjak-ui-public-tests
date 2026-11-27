@@ -1,0 +1,25 @@
+name: Cancel superseded metro passage acquisition
+on:
+  push:
+    branches: [fix/station-access-integrate-20261128]
+    paths: ['.github/workflows/cancel-obsolete-station-acquisition.yml']
+permissions:
+  actions: write
+jobs:
+  cancel:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.actor == 'lui020913'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: lui020913/dongjak-ui-public-tests
+    steps:
+      - name: Cancel only superseded passage runs
+        run: |
+          set -euo pipefail
+          for id in 46054657950 46053691328; do
+            state="$(gh run view "$id" --json status --jq .status)"
+            if [ "$state" != completed ]; then
+              gh run cancel "$id"
+            fi
+          done
