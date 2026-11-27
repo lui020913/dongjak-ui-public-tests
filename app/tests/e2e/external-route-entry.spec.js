@@ -160,6 +160,11 @@ test('real transit detail buttons navigate to the visible route editor, includin
    const outside={kind:'point',name:'외부 테스트 장소',lng:127.026,lat:37.497};
    await expect(app).toHaveAttribute('data-dj-transit-boundary','seoul',{timeout:25000});
    if(await page.evaluate(()=>Boolean(window.__qaMap)))await expect.poll(()=>page.evaluate(()=>{const m=window.__qaMap;return Boolean(m.getSource('dj-city-transit-rail'))&&m.getLayoutProperty('dj-city-transit-rail','visibility')!=='none';}),{timeout:30000}).toBe(true);
+   if(await page.evaluate(()=>Boolean(window.__qaMap))){
+    const localRailHidden=()=>page.evaluate(()=>{const m=window.__qaMap;return ['transport-schematic-subway-casing','transport-schematic-subway','transport-real-rail-overview-casing','transport-real-rail-overview'].every(id=>!m.getLayer(id)||m.getLayoutProperty(id,'visibility')==='none');});
+    await page.evaluate(()=>{const m=window.__qaMap;const old=m.getZoom();m.jumpTo({zoom:Math.max(15.6,old+.2)});m.fire('moveend');m.fire('resize');m.jumpTo({zoom:old});});
+    await expect.poll(localRailHidden,{timeout:15000}).toBe(true);
+   }
    expect(await register('end',{...outside,name:'서울 밖',lng:127.14,lat:37.43})).toBe(false);
    expect(await register('end',outside)).toBe(true);
    await expect(route.locator('#v3-end')).toContainText(outside.name);
