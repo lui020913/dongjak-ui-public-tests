@@ -89,5 +89,7 @@ test('transit framing uses actual visible map area and complete endpoint bounds'
  assert.match(main,/center:\[routeEnd.lng,routeEnd.lat\]/);
  assert.match(main,/transitVisiblePadding\(card.getBoundingClientRect\(\).top,head.getBoundingClientRect\(\).bottom\)/);
  assert.match(main,/const all=\[\.\.\.coords,\.\.\.\[routeStart,routeEnd\]/);
+ assert.match(main,/waitForRouteViewport\(measure/);
+ assert.match(main,/fitSettledRoute\(coords/);
  assert.match(main,/map.fitBounds\(bounds,\{padding,maxZoom:16,duration:480/);
 });

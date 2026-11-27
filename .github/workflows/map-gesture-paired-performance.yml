@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   compare:
-    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && (github.event.pull_request.head.ref == 'fix/transit-pill-label-motion-20261127' || github.event.pull_request.head.ref == 'fix/transit-visible-camera-zoom-20261127' || github.event.pull_request.head.ref == 'fix/transit-gps-auto-guide-20261127'))
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && (github.event.pull_request.head.ref == 'fix/transit-pill-label-motion-20261127' || github.event.pull_request.head.ref == 'fix/transit-visible-camera-zoom-20261127' || github.event.pull_request.head.ref == 'fix/transit-gps-auto-guide-20261127' || github.event.pull_request.head.ref == 'fix/district-buildings-route-viewport-20261127'))
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:

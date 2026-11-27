@@ -59,7 +59,7 @@ async function sample(url,variant,round){
     let state,stable=0;const deadline=performance.now()+90000;
     while(performance.now()<deadline){
      state=snapshot();
-     const ready=state.ready&&state.icons>0&&(!checkSharedScope||state.building.rendered>0&&!state.building.customDistance)&&Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001&&Math.abs(state.zoom-17.8)<.02;
+     const ready=state.ready&&state.icons>0&&(!checkSharedScope||state.building.rendered>0&&state.building.customDistance)&&Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001&&Math.abs(state.zoom-17.8)<.02;
      stable=ready?stable+1:0;if(stable>=2)break;
      await new Promise(r=>setTimeout(r,300));
     }
@@ -98,7 +98,7 @@ async function sample(url,variant,round){
    },{...site,checkSharedScope:variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'});
    if(variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'){
     console.log('DISTRICT_BUILDING_SCOPE',site.name,JSON.stringify(data.building));
-    assert.equal(data.building.customDistance,false,'original native building filters');
+    assert.equal(data.building.customDistance,true,'native district building geometry filter');
     assert.ok(data.building.rendered>0,'actual district buildings must remain rendered');
    }
    report.samples.push({variant,round,site:site.name,...data});
