@@ -309,7 +309,7 @@ for j,indices in site_by_current.items():
     for n in nearby:
         if n==owner:continue
         sheet,kind,row,f,g=legacy_rows[n];h=float(f['properties'].get('h') or 0)
-        if kind!='file' or not (0<h<=9 and g.area>=20 and current_g.area/g.area>=3):continue
+        if kind not in ('file','supplement') or not (0<h<=9 and g.area>=20 and current_g.area/g.area>=3):continue
         if g.intersection(current_g).area/g.area<.98 or g.intersection(owner_g).area/g.area<.98:continue
         if any(int(k)!=j and g.intersection(cur[int(k)]).area/g.area>=.25 for k in tree.query(g,predicate='intersects')):continue
         key=(sheet,kind,row)
@@ -323,7 +323,8 @@ for j,indices in site_by_current.items():
 # corroborated OSM site boundary, not a buffer around an apartment name.
 # A current building can be represented by multiple retained pieces; measure
 # actual coverage rather than demanding one geometrically identical polygon.
-# The newer GIS supplement is never suppressed by the absence of MOIS geometry.
+# For supplemental candidates require the same confirmed site, retained tower coverage,
+# interior, size, unnamed and current separation checks as base candidates.
 gap_decisions=collections.Counter()
 for i,(site_g,ref,confirmed) in site_boundaries.items():
     site=sites[i]
@@ -364,17 +365,17 @@ for i,(site_g,ref,confirmed) in site_boundaries.items():
     if interior.is_empty:continue
     for n0 in legacy_tree.query(interior,predicate='intersects'):
         n=int(n0);sheet,kind,row,f,g=legacy_rows[n]
-        if kind!='file' or not interior.covers(g) or not 20<=g.area<=300:continue
+        if kind not in ('file','supplement') or not interior.covers(g) or not 20<=g.area<=300:continue
         h=float(f['properties'].get('h') or 0)
         if not 0<h<=9 or planned.intersects(g):continue
         if any(g.distance(cur[int(j)])<2 for j in tree.query(g.buffer(2),predicate='intersects')):continue
-        # Preserve any building independently represented in October 2026 GIS.
-        if any(legacy_rows[int(k)][1]=='supplement' and legacy_geoms[int(k)].distance(g)<2 for k in legacy_tree.query(g.buffer(2),predicate='intersects')):continue
+        # Preserve a base footprint independently represented by a supplement.
+        if kind=='file' and any(legacy_rows[int(k)][1]=='supplement' and legacy_geoms[int(k)].distance(g)<2 for k in legacy_tree.query(g.buffer(2),predicate='intersects')):continue
         # Do not suppress named or otherwise independently identified assets.
         if any(f['properties'].get(k) for k in ('name','name:ko','building_name','buildingName')):continue
         key=(sheet,kind,row)
         if key in edits:continue
-        edit={'sheet':sheet,'kind':'base','row':row,'original':f['geometry'],'original_height':h,'source_count':source_counts[(sheet,kind)],'source_sha256':source_hashes[(sheet,kind)],'site':site['name'],'approved':site['approved'],'reason':'completed-site legacy low-rise display remnant; inside independently corroborated boundary, no nearby current or October GIS footprint, retained high-rise coverage verified','boundary_reference':ref,'retained_towers':retained_towers,'expected_towers':expected}
+        edit={'sheet':sheet,'kind':'base' if kind=='file' else 'supplement','row':row,'original':f['geometry'],'original_height':h,'source_count':source_counts[(sheet,kind)],'source_sha256':source_hashes[(sheet,kind)],'site':site['name'],'approved':site['approved'],'reason':'completed-site low-rise display remnant inside independently corroborated boundary, no nearby current footprint, retained high-rise coverage verified; display only','boundary_reference':ref,'retained_towers':retained_towers,'expected_towers':expected}
         edits[key]=edit;gap_decisions[site['name']]+=1
         print('VERIFIED_DISPLAY_EDIT '+json.dumps(edit,ensure_ascii=False,separators=(',',':')),flush=True)
 # District-wide residual audit: no hand-selected apartment names.
@@ -430,7 +431,10 @@ print('DISTRICT_RESIDUAL_SCOPE '+json.dumps({'registered_sites':len(sites),'revi
 for record in remaining:print('REPORTED_SITE_ROW '+json.dumps(record,ensure_ascii=False,separators=(',',':')),flush=True)
 (OUT/'reported-site-remaining-overlaps.json').write_text(json.dumps(remaining,ensure_ascii=False,separators=(',',':')))
 print('COMPLETED_SITE_DISPLAY_CLEANUP '+json.dumps(dict(gap_decisions),ensure_ascii=False),flush=True)
-(OUT/'verified-apartment-display-edits.json').write_text(json.dumps({'schema':1,'edits':list(edits.values())},ensure_ascii=False,separators=(',',':')))
+combined_edits=dict(active_edits)
+combined_edits.update(edits)
+(OUT/'verified-apartment-display-edits.json').write_text(json.dumps({'schema':1,'edits':list(combined_edits.values())},ensure_ascii=False,separators=(',',':')))
+print('DISTRICT_NEW_DISPLAY_EDITS '+json.dumps({'previous_active':len(active_edits),'new':len(set(edits)-set(active_edits)),'combined':len(combined_edits)},ensure_ascii=False),flush=True)
 (OUT/'apartment-site-gap-review.geojson').write_text(json.dumps({'type':'FeatureCollection','features':site_gap_rows},ensure_ascii=False,separators=(',',':')))
 counts['official_completed_boundary_matches']=official_matches;counts['verified_display_edits']=len(edits);counts['completed_site_gap_candidates']=len(site_gap_rows)
 # Only derived comparisons, official registry metadata and existing app
