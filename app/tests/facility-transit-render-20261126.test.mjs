@@ -3,10 +3,10 @@ import {normalMapPixelRatio,phoneProfile} from '../src/adaptive-phone-map-budget
 import {facilityPresentation} from '../src/v912-poi-presentation.js';
 import {fetchArrivalHistory} from '../server/bus-arrival-history.mjs';
 const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
-test('normal phones smooth edges, legacy economy remains one pixel per CSS px',()=>{
- assert.equal(normalMapPixelRatio({phone:true,ua:'iPhone OS 18_2',deviceRatio:3}),2.5);
+test('normal and economy phones smooth edges with bounded DPR',()=>{
+ assert.equal(normalMapPixelRatio({phone:true,ua:'iPhone OS 18_2',deviceRatio:3}),3);
  assert.equal(phoneProfile({phone:true,ua:'Android 10; SM-N960N'}),'economy');
- assert.match(read('main.js'),/antialias: djInitialBudget!=='economy'/);
+ assert.match(read('main.js'),/antialias: true/);
  assert.match(read('bus-route-overlay.js'),/tolerance:0,buffer:128,maxzoom:19/);
 });
 test('major and public facilities are available earlier without promoting all commercial icons',()=>{

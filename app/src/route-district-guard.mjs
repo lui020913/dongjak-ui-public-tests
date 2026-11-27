@@ -30,3 +30,6 @@ export function routeWithinDistrict(coords, geometry, contains) {
   }
   return true;
 }
+
+// Only classify confirmed coordinate results; an empty or unresolved search is not evidence of an exterior location.
+export function walkingSearchOutside(matches,inside){return Array.isArray(matches)&&matches.length>0&&matches.every(p=>inside(p)===false);}

@@ -53,7 +53,7 @@ import {initPedestrianTools} from './pedestrian-tools.js';
 import {fetchDongjakPedestrianVariants} from './dongjak-local-routing.js';
 import {fetchDistrictOsmWalk} from './district-osm-walk-client.mjs';
 import {chooseShortestPedestrianNetwork,shouldCompareTransitPedestrianNetwork} from './pedestrian-network-comparison.mjs';
-import {routeWithinDistrict} from './route-district-guard.mjs';
+import {routeWithinDistrict,walkingSearchOutside} from './route-district-guard.mjs';
 import {TRANSIT_SEARCH_BOUNDS,transitPointInScope,transitCoordinatesInScope,transitEndpointPolicy,exteriorMapActive,transitWalkStyle,transitContextBounds,transitFramingBounds,applyTransitBoundaryVisibility,applyDistrictOutlineVisibility} from './transit-exterior-scope.mjs';
 import {installDongjakOfficialDataLayers} from './dongjak-verified-data-layers.js';
 import {installDongjakLiveTransit} from './features/liveTransit/integrate.js';
@@ -3095,7 +3095,7 @@ window.addEventListener('dongjak:transit-mode-change',event=>{
   let changed=false;
   if(routeStart&&routeLocationInside(routeStart)!==true){routeStart=null;changed=true;}
   if(routeEnd&&routeLocationInside(routeEnd)!==true){routeEnd=null;changed=true;}
-  if(changed){invalidateRoute();updateRouteLabels();drawRouteMarkers();toast('도보 길찾기는 동작구 안에서만 지원합니다.');}
+  if(changed){invalidateRoute();updateRouteLabels();drawRouteMarkers();window.dispatchEvent(new CustomEvent('dongjak:route-boundary-denied',{detail:{unavailable:!boundaryGeometry}}));}
  }
  syncTransitExterior();
 });
@@ -3335,7 +3335,7 @@ function paintRouteSearchResults(matches,message){
   const results=document.getElementById('route-search-results');
   results.replaceChildren();
   const allowed=matches.filter(p=>routeLocationInside(p)===true||transitLocationAllowed(p,routeSearchTarget));
-  document.getElementById('route-search-status').textContent=!boundaryGeometry?'동작구 경계정보를 확인하는 중입니다.':allowed.length!==matches.length?(allowed.length?`지원 범위 검색 결과 ${allowed.length}개`:'지원 범위 검색 결과가 없습니다.'):message;
+  document.getElementById('route-search-status').textContent=!boundaryGeometry?'동작구 경계정보를 확인하는 중입니다.':allowed.length!==matches.length?(allowed.length?`지원 범위 검색 결과 ${allowed.length}개`:(app.dataset.djTransitMode!=='transit'&&walkingSearchOutside(matches,routeLocationInside)?'동작구 밖 지역입니다. 도보 길찾기는 동작구 안에서만 지원합니다.':'지원 범위 검색 결과가 없습니다.')):message;
   for(const place of allowed){
     const button=document.createElement('button');button.type='button';button.className='route-search-item';
     const head=document.createElement('strong');head.textContent=place.name;
@@ -3385,6 +3385,9 @@ async function runRouteSearch(event){
     if(signal.aborted||seq!==routeSearchSequence)return;
     const matches=mergeRouteSearchResults(query,local,official.status==='fulfilled'?official.value:[],remote.status==='fulfilled'?remote.value:[]);
     const partial=official.status==='rejected'||remote.status==='rejected';
+    if((app.dataset.djTransitMode!=='transit'||routeSearchTarget==='waypoint')&&walkingSearchOutside(matches,routeLocationInside)){
+      requireDongjakRouteLocation(matches[0]);
+    }
     paintRouteSearchResults(matches,matches.length?`검색 결과 ${matches.length}개${partial?' · 일부 외부 결과를 불러오지 못했습니다.':''}`:
       partial?'검색 결과가 없습니다. 연결 상태를 확인하거나 지도에서 선택하세요.':'검색 결과가 없습니다. 다른 장소명 또는 주소를 입력하세요.');
   }finally{

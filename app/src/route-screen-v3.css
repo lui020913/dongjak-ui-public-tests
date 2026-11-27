@@ -7,7 +7,7 @@
   height:100dvh;
   z-index:7450;
   pointer-events:none;
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+  font-family: var(--dj-ui-font, "Pretendard Variable", Pretendard, system-ui, sans-serif);
   color:#182c27;
   --v3-page-bg:#edf3ef;
   -webkit-font-smoothing:antialiased;
@@ -170,3 +170,6 @@ input:focus{border-color:#596368}
 /* A single route-settings entry within the existing measured route card. */
 .pri-trigger{display:block;box-sizing:border-box;width:100%;min-height:44px;margin:4px 0 0;padding:7px 12px;border:1px solid var(--dj-route-pri-border,#d5e3dc);border-radius:999px;background:var(--dj-route-pri-bg,#edf4ef);color:var(--dj-route-pri-ink,#245547);font:inherit;font-size:13px;font-weight:700;line-height:1.35;text-align:center;pointer-events:auto}
 
+
+/* Shadow DOM must use the same UI face as the ordinary DOM panels. */
+:host .canvas, :host .canvas :is(button,input,select,textarea,strong,small,span,p,h1,h2,h3) {font-family:var(--dj-ui-font, "Pretendard Variable", Pretendard, system-ui, sans-serif)!important;}

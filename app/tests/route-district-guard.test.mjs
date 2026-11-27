@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {routeWithinDistrict} from '../src/route-district-guard.mjs';
+import {routeWithinDistrict,walkingSearchOutside} from '../src/route-district-guard.mjs';
 const outer=[[0,0],[10,0],[10,10],[0,10],[0,0]],hole=[[4,4],[6,4],[6,6],[4,6],[4,4]];
 const polygon={type:'Polygon',coordinates:[outer,hole]};
 const inside=(x,y)=>x>0&&x<10&&y>0&&y<10&&!(x>=4&&x<=6&&y>=4&&y<=6);
@@ -21,3 +21,5 @@ test('cannot bridge two disjoint district polygons',()=>{
   assert.equal(routeWithinDistrict([[1,1],[4,1]],geometry,contains),false);
   assert.equal(routeWithinDistrict([[.5,1],[1.5,1]],geometry,contains),true);
 });
+
+test('outside walking search requires confirmed exterior coordinates and never treats no results as outside',()=>{const inside=p=>p.inside;assert.equal(walkingSearchOutside([{inside:false}],inside),true);assert.equal(walkingSearchOutside([],inside),false);assert.equal(walkingSearchOutside([{inside:null}],inside),false);assert.equal(walkingSearchOutside([{inside:false},{inside:true}],inside),false);});

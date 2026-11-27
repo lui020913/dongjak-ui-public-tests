@@ -24,7 +24,8 @@ export function installMobile832(doc=document,win=window){
   const close=()=>{if(modal.hidden)return;const finish=()=>{modal.hidden=true;};if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(modal,finish);else finish();};
   const onDenied=e=>{
     const msg=modal.querySelector('#dj832-boundary-body');
-    msg.textContent=e?.detail?.unavailable?'동작구 경계정보를 불러오지 못했습니다. 경계가 준비된 뒤 동작구 내 영역을 다시 선택해주세요.':'동작구 밖은 길찾기 대상에 포함되지 않습니다. 동작구 내 영역을 다시 선택해주세요.';
+    modal.querySelector('#dj832-boundary-title').textContent=e?.detail?.unavailable?'동작구 경계정보 확인 필요':'동작구 밖 지역입니다';
+    msg.textContent=e?.detail?.unavailable?'동작구 경계정보를 불러오지 못했습니다. 경계가 준비된 뒤 동작구 내 영역을 다시 선택해주세요.':'도보 길찾기는 동작구 안에서만 지원합니다. 출발지·도착지·경유지를 동작구 내 장소로 다시 선택해 주세요.';
     if(modal.hidden){modal.hidden=false;win.DongjakWindowMotion?.open(modal);}
     modal.querySelector('.dj832-boundary-confirm')?.focus({preventScroll:true});
   };
