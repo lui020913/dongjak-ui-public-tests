@@ -22,10 +22,12 @@ export function transitStreamAssetsPlugin(){
  let assets;
  const get=()=>assets??=makeTransitAssets(JSON.parse(readFileSync(new URL('../public/data/transport/seoul-bus-stops.json',import.meta.url),'utf8')),readFileSync(new URL('../data-source/seoul-station-coordinates.csv',import.meta.url),'utf8'));
  const prefix='data/transit-stream/v1/';
+ const manifest=()=>[...get()].filter(([,rows])=>rows.length>0).map(([key])=>key);
  const serve=server=>server.middlewares.use('/'+prefix,(req,res,next)=>{
+  if(/^\/?index\.json(?:\?.*)?$/.test(req.url||'')){res.setHeader('Content-Type','application/json');res.end(JSON.stringify(manifest()));return;}
   const key=req.url?.match(/^\/?((?:rail|bus)_\d+_\d+)\.json(?:\?.*)?$/)?.[1];
   if(!key||!get().has(key))return next();
   res.setHeader('Content-Type','application/json');res.end(JSON.stringify(get().get(key)));
  });
- return {name:'transit-cell-assets',configureServer:serve,generateBundle(){for(const [key,rows] of get())this.emitFile({type:'asset',fileName:prefix+key+'.json',source:JSON.stringify(rows)});}};
+ return {name:'transit-cell-assets',configureServer:serve,configurePreviewServer:serve,generateBundle(){this.emitFile({type:'asset',fileName:prefix+'index.json',source:JSON.stringify(manifest())});for(const [key,rows] of get())if(rows.length)this.emitFile({type:'asset',fileName:prefix+key+'.json',source:JSON.stringify(rows)});}};
 }
