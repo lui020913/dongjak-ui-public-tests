@@ -98,7 +98,7 @@ test('bus label owner and district scope agree without recurring filter writes',
  const {readFileSync}=await import('node:fs');
  const transport=readFileSync(new URL('../src/transport-map.js',import.meta.url),'utf8');
  assert.match(transport,/syncNearbyBusStopNameFilters\(map,cityScope\(\)\?getSeoulBoundary\(\):getDistrictGeometry\(\)\)/);
- assert.match(transport,/const next=district\?\['all',base,\['within'/);
+ assert.match(transport,/const next=layerId\.startsWith\('transport-bus-'\)\?base:district\?\['all',base,\['within'/);
  const {clipBasemapLabelsToDistrict,restoreBasemapLabelsOutsideDistrict}=await import('../src/ui-environment.js');
  const geometry={type:'Polygon',coordinates:[[[0,0],[2,0],[2,2],[0,0]]]};
  const within=['within',geometry],filters=new Map([['transport-bus-names',['all',['!=',['get','label'],''],within]]]);

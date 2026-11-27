@@ -1,6 +1,5 @@
 // v17.8 지도 시인성: 경계 밖 자치구 이름, 장식용 공원 수목, 축척·나침반.
 // 정확한 수목 위치/수량 데이터가 아닙니다. 공원 폴리곤 범위 안에서 장식용으로 배치합니다.
-import {queryOverpass, SAFETY_BBOX} from './safety-layers.js';
 import {NEIGHBOR_ADMIN_LABELS} from './neighbor-admin-label-data.mjs';
 const empty=()=>({type:'FeatureCollection',features:[]});
 
@@ -145,44 +144,15 @@ export function makeDecorativeTrees(elements,isInside=()=>true,maxTrees=320){
   }
   return {trunks:{type:'FeatureCollection',features:trunks},crowns:{type:'FeatureCollection',features:crowns}};
 }
-export function installDecorativeParkTrees({map,isDongjak}){
-  const stems='dongjak-decorative-tree-stems',canopies='dongjak-decorative-tree-canopies';
-  map.addSource(stems,{type:'geojson',data:empty()});
-  map.addSource(canopies,{type:'geojson',data:empty()});
-  const firstLabel=map.getStyle().layers.find(l=>l.type==='symbol')?.id;
-  for(const [id,source,color] of [['dongjak-tree-trunks',stems,'#8e8973'],['dongjak-tree-crowns',canopies,'#83b69a']]){
-    map.addLayer({id,type:'fill-extrusion',source,minzoom:15.3,layout:{visibility:'none'},
-      paint:{'fill-extrusion-color':color,'fill-extrusion-height':['get','height'],
-      'fill-extrusion-base':['get','base'],'fill-extrusion-opacity':0.85}},firstLabel);
+// No invented tree geometry or Overpass request. Keep landcover/forest fills untouched.
+export function installDecorativeParkTrees({map}){
+  for(const id of ['dongjak-tree-trunks','dongjak-tree-crowns','dongjak-tree-symbols'])if(map.getLayer?.(id))map.removeLayer?.(id);
+  for(const id of ['dongjak-decorative-tree-stems','dongjak-decorative-tree-canopies'])if(map.getSource?.(id))map.removeSource?.(id);
+  // Some basemap versions also supply standalone tree symbols; leave polygon vegetation alone.
+  for(const l of map.getStyle?.()?.layers||[]){
+    if(!['symbol','circle'].includes(l.type))continue;
+    if(/(?:^|[-_])(?:tree|trees|canopy|canopies)(?:$|[-_])/i.test(l.id))map.setLayoutProperty?.(l.id,'visibility','none');
   }
-  // At street-level zoom use small 2D canopies; at street-level 3D they become extrusions.
-  map.addLayer({id:'dongjak-tree-symbols',type:'circle',source:canopies,minzoom:15.5,maxzoom:18.3,
-    layout:{visibility:'none'},paint:{'circle-radius':['interpolate',['linear'],['zoom'],15.5,2.2,17,3.3,18.3,4.1],
-      'circle-color':'#68a17b','circle-stroke-color':'#e5f2de','circle-stroke-width':0.7,'circle-opacity':0.72}},firstLabel);
-  let loaded=false,busy=false,lastAttempt=0;
-  async function loadIfUseful(){
-    const zoom=map.getZoom(), pitch=map.getPitch();
-    // Do not cover wide-area parks with invented green dots.
-    // Detailed, user-initiated zoom is required before decorative trees appear.
-    const visible=zoom>=15.3 && pitch>=30;
-    const flat=zoom>=15.5 && pitch<30;
-    for(const id of ['dongjak-tree-trunks','dongjak-tree-crowns'])if(map.getLayer(id))map.setLayoutProperty(id,'visibility',visible?'visible':'none');
-    if(map.getLayer('dongjak-tree-symbols'))map.setLayoutProperty('dongjak-tree-symbols','visibility',flat?'visible':'none');
-    if(zoom<15.3||loaded||busy||Date.now()-lastAttempt<180000)return;
-    lastAttempt=Date.now();
-    busy=true;
-    try{
-      const q=`[out:json][timeout:25];(way["leisure"~"^(park|garden)$"](${SAFETY_BBOX});way["landuse"~"^(grass|forest)$"](${SAFETY_BBOX});way["natural"="wood"](${SAFETY_BBOX}););out geom tags;`;
-      const trees=makeDecorativeTrees(await queryOverpass(q),isDongjak);
-      map.getSource(stems)?.setData(trees.trunks);
-      map.getSource(canopies)?.setData(trees.crowns);
-      loaded=true;
-    }catch(e){console.warn('공원 장식용 나무 조회 실패: 기존 녹지 유지',e);}
-    finally{busy=false;}
-  }
-  map.on('moveend',loadIfUseful);
-  map.on('pitch',loadIfUseful);
-  loadIfUseful();
 }
 export function installMapOrientationControls(map,maplibregl){
   map.addControl(new maplibregl.ScaleControl({maxWidth:110,unit:'metric'}),'bottom-left');

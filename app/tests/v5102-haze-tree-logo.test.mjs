@@ -25,12 +25,14 @@ test('native MapLibre atmosphere reacts only to oblique pitch and supports theme
   assert.equal(calls.at(-1),undefined);
 });
 
-test('decorative canopy markers cannot appear in broad zoom or at a distance',()=>{
-  const s=read('src/map-polish.js');
-  assert.match(s,/id:'dongjak-tree-symbols'[\s\S]*?minzoom:15\.5/);
-  assert.match(s,/const flat=zoom>=15\.5 && pitch<30/);
-  assert.match(s,/const visible=zoom>=15\.3 && pitch>=30/);
-  assert.match(s,/if\(zoom<15\.3\|\|loaded/);
+test('decorative canopy layers never install or fetch, vegetation fills remain',async()=>{
+ const {installDecorativeParkTrees}=await import('../src/map-polish.js');
+ const removed=[],hidden=[],sources=[];
+ const map={getLayer:id=>id.startsWith('dongjak-tree-'),removeLayer:id=>removed.push(id),getSource:()=>true,removeSource:id=>sources.push(id),getStyle:()=>({layers:[{id:'native-tree',type:'symbol'},{id:'forest',type:'fill'},{id:'park',type:'fill'}]}),setLayoutProperty:(id,key,value)=>hidden.push([id,value])};
+ installDecorativeParkTrees({map});
+ assert.equal(removed.length,3);assert.equal(sources.length,2);assert.deepEqual(hidden,[['native-tree','none']]);
+ const body=read('src/map-polish.js').split('export function installDecorativeParkTrees')[1].split('export function installMapOrientationControls')[0];
+ assert.doesNotMatch(body,/addLayer|addSource|queryOverpass|map\.on\(/);
 });
 
 test('logo is not replaced and left header has no stray white tab or shadow',()=>{
