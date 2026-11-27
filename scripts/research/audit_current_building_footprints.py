@@ -115,6 +115,16 @@ for j,p in enumerate(props):
     for k in ('building_name','buld_nm_dc'):
         n=norm(p.get(k))
         if len(n)>=5:by_name[n].add(j)
+# District official address list corroborates the current road address.
+# K-apt may retain a pre-completion parcel. Use exact road + house number,
+# never a radius, and record the match independently of OSM availability.
+ROAD_ADDRESS_OVERRIDES={
+    '이수푸르지오더프레티움':('동작대로39길','39','https://www.dongjak.go.kr/portal/bbs/B0001407/view.do?menuNo=201713&nttId=10728481&viewType=BODY'),
+}
+by_road=collections.defaultdict(set)
+for j,p in enumerate(props):
+    if p.get('street_name') and p.get('house_number'):
+        by_road[(norm(p['street_name']),str(p['house_number']).strip())].add(j)
 site_ids={};site_by_current=collections.defaultdict(set);site_match_methods={}
 for i,site in enumerate(sites):
     parcel=by_lot.get((DONG[site['dong']],lot_key(site['lot'])),set())
@@ -124,9 +134,12 @@ for i,site in enumerate(sites):
     else:named|=by_name.get(name+'아파트',set())
     named={j for j in named if str(props[j].get('emd_cd') or '').zfill(3)==DONG[site['dong']]}
     # No radius-based matches and no short/ambiguous substring matches.
-    selected=set(parcel)|named
+    address_override=ROAD_ADDRESS_OVERRIDES.get(name)
+    road=set(by_road.get((norm(address_override[0]),address_override[1]),set())) if address_override else set()
+    selected=set(parcel)|named|road
+    if address_override:print('VERIFIED_ROAD_ADDRESS '+json.dumps({'site':site['name'],'road':address_override[0]+' '+address_override[1],'source':address_override[2],'matches':len(road)},ensure_ascii=False),flush=True)
     site_ids[i]=selected
-    site_match_methods[i]={'exact_parcel':len(parcel),'exact_name_in_dong':len(named)}
+    site_match_methods[i]={'exact_parcel':len(parcel),'exact_name_in_dong':len(named),'official_road_address_matches':len(road)}
     for j in selected:site_by_current[j].add(i)
 # Cross-check whole completed complexes using mapped OSM residential polygons.
 # Keep only closed named ways with a unique K-apt identity. Never use a hull
@@ -261,7 +274,7 @@ edits={};decisions=[]
 for j,indices in site_by_current.items():
     if len(indices)!=1:continue
     i=next(iter(indices));site=sites[i]
-    if not (site_match_methods[i]['exact_parcel'] or site_match_methods[i]['exact_name_in_dong'] or site_match_methods[i].get('official_site_footprints')):continue
+    if not (site_match_methods[i]['exact_parcel'] or site_match_methods[i]['exact_name_in_dong'] or site_match_methods[i].get('official_road_address_matches') or site_match_methods[i].get('official_site_footprints')):continue
     if planned.covers(cur[j].representative_point()):continue
     try:floors=int(props[j].get('gro_flo_co') or 0)
     except (TypeError,ValueError):continue
