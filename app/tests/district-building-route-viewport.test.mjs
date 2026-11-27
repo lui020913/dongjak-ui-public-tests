@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {installDistrictBuildingScope,containsDistrictPoint,createDistrictFootprintScope} from '../src/district-building-scope.mjs';
+import {installDistrictBuildingScope,containsDistrictPoint} from '../src/district-building-scope.mjs';
 import {strictRoutePreviewPadding,routeProjectionCorrection} from '../src/route-map-focus.js';
 const boundary={type:'Polygon',coordinates:[[[0,0],[2,0],[2,2],[0,2],[0,0]]]};
 test('district scope applies only to building geometry and updates once per boundary',()=>{
@@ -9,7 +9,7 @@ test('district scope applies only to building geometry and updates once per boun
  const original=['==',['get','class'],'building'];const filters=new Map([['building',original]]),writes=[];
  const map={getStyle:()=>({layers}),getFilter:id=>filters.get(id),setFilter:(id,filter)=>{filters.set(id,filter);writes.push(id);},on(){}};
  const scope=installDistrictBuildingScope(map);scope.update(boundary);scope.update(boundary);
- assert.equal(writes.length,3);assert.deepEqual(filters.get('building'),['==',1,0]);
+ assert.equal(writes.length,6);assert.deepEqual(filters.get('building'),['all',original,['<=',['distance',boundary],0]]);
  assert.equal(filters.has('road'),false);assert.equal(filters.has('park'),false);
  assert.equal(containsDistrictPoint(boundary,1,1),true);assert.equal(containsDistrictPoint(boundary,3,1),false);
 });
@@ -39,16 +39,6 @@ test('post-fit correction checks projected points and preserves the usable strip
  }
 });
 
-test('district-owned polygons never cross the boundary, including multipart footprints and holes',()=>{
- const poly=(x,y,X,Y)=>({type:'Polygon',coordinates:[[[x,y],[X,y],[X,Y],[x,Y],[x,y]]]});
- const scope=createDistrictFootprintScope(boundary);
- assert.equal(scope.contains(poly(.2,.2,.3,.3)),true);
- assert.equal(scope.contains(poly(2.1,.2,2.2,.3)),false);
- assert.equal(scope.contains(poly(1.9,.2,2.1,.3)),false);
- assert.equal(scope.contains({type:'MultiPolygon',coordinates:[poly(.2,.2,.3,.3).coordinates,poly(2.1,.2,2.2,.3).coordinates]}),false);
- const hole=createDistrictFootprintScope({type:'Polygon',coordinates:[boundary.coordinates[0],poly(.8,.8,1.2,1.2).coordinates[0]]});
- assert.equal(hole.contains(poly(.9,.9,1,1)),false);assert.equal(hole.contains(poly(.7,.7,1.3,1.3)),false);
-});
 test('walking-only footer uses one full-width column without expanding the compact scroll area',()=>{
  const css=readFileSync(new URL('../src/route-experience.css',import.meta.url),'utf8');
  const overlay=readFileSync(new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');

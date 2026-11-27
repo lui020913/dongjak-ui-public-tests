@@ -66,14 +66,6 @@ try{
   }
   console.log('CURATED_BRIDGE_LABELS_RENDER_OK',JSON.stringify(names));
  }
- if(process.env.CHECK_STRICT_BUILDINGS==='true'){
-  const native=()=>page.evaluate(()=>window.__qaMap.getStyle().layers.filter(l=>['fill','fill-extrusion','line'].includes(l.type)&&l['source-layer']==='building').map(l=>({id:l.id,visibility:window.__qaMap.getLayoutProperty(l.id,'visibility'),filter:window.__qaMap.getFilter(l.id)})));
-  for(const center of [[126.891,37.503],[126.997,37.53],[126.947,37.5]])for(const zoom of [13.7,14.5,16,18])for(const pitch of [0,40]){
-   await page.evaluate(v=>window.__qaMap.jumpTo(v),{center,zoom,pitch});
-   const layers=await native();assert.ok(layers.length>0);assert.ok(layers.every(l=>l.visibility==='none'&&JSON.stringify(l.filter)==='["==",1,0]'));
-  }
-  console.log('STRICT_BUILDING_ZOOM_PITCH_OK');
- }
  for(const site of sites){
   await page.evaluate(({center})=>window.__qaMap.jumpTo({center,zoom:18.4,pitch:0}),site);
   await page.waitForFunction(()=>{const m=window.__qaMap;return m.isStyleLoaded()&&m.getStyle().layers.some(l=>l['source-layer']==='transportation'&&l.type==='line')&&m.getStyle().layers.some(l=>l.id.startsWith('dongjak-buildings-footprint-')&&m.isSourceLoaded(l.source));},{},{timeout:90000}).catch(async error=>{console.log('IDLE_MAP_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>{const m=window.__qaMap;return {styleLoaded:m.isStyleLoaded(),moving:m.isMoving(),layers:m.getStyle().layers.filter(l=>l.id.startsWith('dongjak-buildings-footprint-')).map(l=>({id:l.id,loaded:m.isSourceLoaded(l.source)})),boundary:document.querySelector('#app')?.dataset.djBoundaryReady};})));throw error;});

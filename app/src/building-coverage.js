@@ -95,5 +95,5 @@ export function createBuildingCoverage(map,layers){
  };
  map.on('style.load',()=>{clearHidden();original.clear();dirty=true;sync();});
  map.on('moveend',()=>{dirty=true;});map.on('idle',reconcile);
- return {setExtruding(value){const next=Boolean(value);if(extruding!==next){extruding=next;dirty=true;if(next)clearHidden();}sync();},setSheet(id,excluded=[],reviewExcluded=[],retained=[]){if(!layers.length)return;excludedBySheet.set(id,createCoverageIndex(excluded));reviewBySheet.set(id,createCoverageIndex(reviewExcluded));retainedBySheet.set(id,createCoverageIndex(retained,{strict:true}));dirty=true;sync();},removeSheet(id){excludedBySheet.delete(id);reviewBySheet.delete(id);retainedBySheet.delete(id);clearHidden();dirty=true;sync();}};
+ return {setExtruding(value){const next=Boolean(value);if(extruding!==next){extruding=next;dirty=true;if(next)clearHidden();}sync();},setSheet(id,excluded=[],reviewExcluded=[],retained=[]){excludedBySheet.set(id,createCoverageIndex(excluded));reviewBySheet.set(id,createCoverageIndex(reviewExcluded));retainedBySheet.set(id,createCoverageIndex(retained,{strict:true}));dirty=true;sync();},removeSheet(id){excludedBySheet.delete(id);reviewBySheet.delete(id);retainedBySheet.delete(id);clearHidden();dirty=true;sync();}};
 }
