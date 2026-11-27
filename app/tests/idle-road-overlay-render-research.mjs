@@ -57,6 +57,15 @@ try{
   await page.waitForFunction(()=>{const m=window.__qaMap;if(!m.getLayer('transport-schematic-subway'))return false;const p=m.project([126.9822,37.512]);return m.queryRenderedFeatures([[p.x-30,p.y-30],[p.x+30,p.y+30]],{layers:['transport-schematic-subway']}).some(f=>f.properties.line==='4호선'&&f.properties.schematic===false);},{},{timeout:90000});
   await page.screenshot({path:out+'/line4-dongjak-bridge.png'});console.log('ADMIN_RAIL_RENDER_OK',JSON.stringify(names));
  }
+ if(process.env.CHECK_BRIDGE_LABELS==='true'){
+  const names=['원효대교','한강철교','한강대교','동작대교','반포대교'];
+  const centers=[[126.94588,37.52715],[126.95180,37.51960],[126.95780,37.51590],[126.98189,37.51070],[126.99600,37.51550]];
+  for(let i=0;i<names.length;i++){
+   await page.evaluate(center=>window.__qaMap.jumpTo({center,zoom:13.5,pitch:0}),centers[i]);
+   await page.waitForFunction(name=>{const m=window.__qaMap,id='dj-hangang-bridge-osm-labels';return m.getLayer(id)&&m.queryRenderedFeatures({layers:[id]}).some(f=>f.properties.name===name);},names[i],{timeout:90000});
+  }
+  console.log('CURATED_BRIDGE_LABELS_RENDER_OK',JSON.stringify(names));
+ }
  for(const site of sites){
   await page.evaluate(({center})=>window.__qaMap.jumpTo({center,zoom:18.4,pitch:0}),site);
   await page.waitForFunction(()=>{const m=window.__qaMap;return m.isStyleLoaded()&&m.getStyle().layers.some(l=>l['source-layer']==='transportation'&&l.type==='line')&&m.getStyle().layers.some(l=>l.id.startsWith('dongjak-buildings-footprint-')&&m.isSourceLoaded(l.source));},{},{timeout:90000}).catch(async error=>{console.log('IDLE_MAP_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>{const m=window.__qaMap;return {styleLoaded:m.isStyleLoaded(),moving:m.isMoving(),layers:m.getStyle().layers.filter(l=>l.id.startsWith('dongjak-buildings-footprint-')).map(l=>({id:l.id,loaded:m.isSourceLoaded(l.source)})),boundary:document.querySelector('#app')?.dataset.djBoundaryReady};})));throw error;});
