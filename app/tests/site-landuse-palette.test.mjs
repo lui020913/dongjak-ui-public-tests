@@ -27,6 +27,8 @@ test('healthcare and civic polygons get distinct colors ahead of generic site cl
   ])assert.equal(evaluate(e,tags),p[kind],JSON.stringify(tags));
   assert.equal(evaluate(e,{class:'park'}),'rgba(0,0,0,0)');
   assert.equal(evaluate(e,{class:'residential'}),'rgba(0,0,0,0)');
-  assert.equal(p.residential,'#a77b58');
+  assert.equal(p.residential,'#f0eeeb');
  }
 });
+
+test('apartment reference color is painted without blending into the base ground',()=>{const layers=[{id:'landuse',type:'fill',source:'base','source-layer':'landuse'}],added=[];installSiteLanduse({map:{getStyle:()=>({layers}),getLayer:()=>null,addLayer:l=>added.push(l)},app:{dataset:{theme:'light'}}});assert.equal(evaluate(added[0].paint['fill-opacity'],{class:'apartments'}),1);});
