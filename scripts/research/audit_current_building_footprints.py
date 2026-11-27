@@ -331,15 +331,34 @@ for i,(site_g,ref,confirmed) in site_boundaries.items():
     # A neighboring future-plan boundary must not exclude an entire completed
     # complex. Exclude only the individual footprints that intersect it.
     inside={int(j) for j in tree.query(site_g,predicate='intersects') if site_g.covers(cur[int(j)].representative_point())}
-    towers=[j for j in inside if int(props[j].get('gro_flo_co') or 0)>=5 and cur[j].area>=100 and not planned.covers(cur[j].representative_point())]
+    # MOIS floor attributes are incomplete for some completed complexes
+    # (Clavenue, Isu Prugio and Jangseungbaegi). Corroborate height using the
+    # existing app's independently sourced high-rise footprint and require
+    # unique, one-to-one geometric ownership. Never infer heights from area.
     expected=int(str(site['expected_dongs']).replace(',',''))
-    print('COMPLETED_SITE_GATE '+json.dumps({'site':site['name'],'boundary':ref,'site_area_m2':round(site_g.area),'planned_overlap_m2':round(site_g.intersection(planned).area),'expected':expected,'current_towers':len(towers),'current_floor_distribution':dict(collections.Counter(str(props[j].get('gro_flo_co')) for j in inside))},ensure_ascii=False),flush=True)
-    if len(towers)<max(1,expected*.7):continue
-    retained_towers=0
-    for j in towers:
-        parts=[legacy_geoms[int(n)] for n in legacy_tree.query(cur[j],predicate='intersects') if float(legacy_rows[int(n)][3]['properties'].get('h') or 0)>=12]
-        if parts and cur[j].intersection(unary_union(parts)).area/cur[j].area>=.65:retained_towers+=1
-    print('COMPLETED_SITE_RETAINED_TOWERS '+json.dumps({'site':site['name'],'expected':expected,'current':len(towers),'retained':retained_towers,'boundary':ref},ensure_ascii=False),flush=True)
+    candidates=[j for j in inside if cur[j].area>=100 and not planned.covers(cur[j].representative_point())]
+    owners={};tower_candidates=0;retained_towers=0
+    for j in candidates:
+        high=int(props[j].get('gro_flo_co') or 0)>=5
+        nearby=[int(n) for n in legacy_tree.query(cur[j],predicate='intersects') if float(legacy_rows[int(n)][3]['properties'].get('h') or 0)>=12]
+        strong=[]
+        for n in nearby:
+            g=legacy_geoms[n];a=g.intersection(cur[j]).area
+            if a/g.area>=.65 and a/cur[j].area>=.65:strong.append((a,n))
+        if high or strong:tower_candidates+=1
+        if strong:
+            _,n=max(strong)
+            owners.setdefault(n,[]).append(j)
+        elif high and nearby and cur[j].intersection(unary_union([legacy_geoms[n] for n in nearby])).area/cur[j].area>=.65:
+            # Multiple retained shapes are allowed only with no reused owner.
+            for n in nearby:owners.setdefault(n,[]).append(j)
+    # Count distinct matched current footprints, not repeated pieces of one
+    # apartment block. Reject any ambiguous owner shared across footprints.
+    ambiguous={j for js in owners.values() if len(js)>1 for j in js}
+    retained={js[0] for js in owners.values() if len(js)==1}-ambiguous
+    retained_towers=len(retained)
+    print('COMPLETED_SITE_GATE '+json.dumps({'site':site['name'],'boundary':ref,'site_area_m2':round(site_g.area),'planned_overlap_m2':round(site_g.intersection(planned).area),'expected':expected,'current_towers':tower_candidates,'current_floor_distribution':dict(collections.Counter(str(props[j].get('gro_flo_co')) for j in inside))},ensure_ascii=False),flush=True)
+    print('COMPLETED_SITE_RETAINED_TOWERS '+json.dumps({'site':site['name'],'expected':expected,'current':tower_candidates,'retained':retained_towers,'boundary':ref,'height_corroboration':'independent matched legacy high-rise geometry'},ensure_ascii=False),flush=True)
     if retained_towers<max(1,expected*.7):continue
     interior=site_g.buffer(-3)
     if interior.is_empty:continue
