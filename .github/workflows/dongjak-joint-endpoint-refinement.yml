@@ -1,0 +1,33 @@
+name: Dongjak joint endpoint refinement
+on:
+  pull_request:
+    paths:
+      - 'scripts/research/dongjak_joint_endpoint_refinement.py'
+      - '.github/workflows/dongjak-joint-endpoint-refinement.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  joint-refinement:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-gap-recovery-review
+          path: dongjak-gap-review
+          run-id: 45761084195
+          github-token: ${{ github.token }}
+      - run: python scripts/research/dongjak_corridor_gap_recovery.py --test
+      - run: python scripts/research/dongjak_joint_endpoint_refinement.py dongjak-gap-review dongjak-joint-refinement
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-joint-endpoint-refinement-review
+          path: dongjak-joint-refinement/
+          if-no-files-found: error
+          retention-days: 14

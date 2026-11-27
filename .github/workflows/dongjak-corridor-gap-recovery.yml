@@ -1,0 +1,33 @@
+name: Dongjak bounded corridor gap recovery
+on:
+  pull_request:
+    paths:
+      - 'scripts/research/dongjak_corridor_gap_recovery.py'
+      - '.github/workflows/dongjak-corridor-gap-recovery.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  gap-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-district-refined-review
+          path: dongjak-refined-review
+          run-id: 45756265086
+          github-token: ${{ github.token }}
+      - run: python scripts/research/dongjak_corridor_gap_recovery.py --test
+      - run: python scripts/research/dongjak_corridor_gap_recovery.py dongjak-refined-review dongjak-gap-review
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-gap-recovery-review
+          path: dongjak-gap-review/
+          if-no-files-found: error
+          retention-days: 14

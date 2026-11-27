@@ -1,0 +1,41 @@
+name: Dongjak exact free-space remaining road review
+on:
+  pull_request:
+    paths:
+      - 'scripts/research/dongjak_exact_free_space_review.py'
+      - '.github/workflows/dongjak-exact-free-space-review.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: dongjak-exact-free-space-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  review:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'preview/road-surface-geometry-20261126'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2 mapbox-vector-tile==2.2.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-remaining-fixed-endpoint-review
+          path: reviewed
+          run-id: 45765644207
+          github-token: ${{ github.token }}
+      - run: python scripts/research/dongjak_exact_free_space_review.py --test
+      - run: python scripts/research/dongjak_exact_free_space_review.py reviewed/fine-gap-review exact-review
+      - run: python scripts/research/dongjak_road_polygon_alignment.py --test
+      - run: python scripts/research/dongjak_road_polygon_alignment.py exact-review exact-alignment
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-exact-free-space-review
+          path: |
+            exact-review/
+            exact-alignment/
+          retention-days: 14
+          if-no-files-found: error

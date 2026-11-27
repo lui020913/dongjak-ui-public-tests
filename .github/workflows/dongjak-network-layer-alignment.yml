@@ -1,0 +1,33 @@
+name: Dongjak connected road layer alignment
+on:
+  pull_request:
+    paths:
+      - 'scripts/research/dongjak_network_layer_alignment.py'
+      - '.github/workflows/dongjak-network-layer-alignment.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  connected-alignment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-district-refined-review
+          path: dongjak-refined-review
+          run-id: 45756265086
+          github-token: ${{ github.token }}
+      - run: python scripts/research/dongjak_network_layer_alignment.py --test
+      - run: python scripts/research/dongjak_network_layer_alignment.py dongjak-refined-review dongjak-connected-alignment
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-connected-road-layer-review
+          path: dongjak-connected-alignment/
+          if-no-files-found: error
+          retention-days: 14

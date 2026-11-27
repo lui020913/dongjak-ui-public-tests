@@ -1,0 +1,33 @@
+name: Dongjak selective native road eligibility
+on:
+  pull_request:
+    paths:
+      - 'scripts/research/dongjak_native_id_eligibility.py'
+      - '.github/workflows/dongjak-native-id-eligibility.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  review:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'preview/road-surface-geometry-20261126'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2 mapbox-vector-tile==2.2.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-hybrid-road-display-review
+          path: hybrid-review
+          run-id: 45771682292
+          github-token: ${{ github.token }}
+      - run: python scripts/research/dongjak_native_id_eligibility.py hybrid-review native-id-review
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-native-id-eligibility
+          path: native-id-review/
+          retention-days: 14
+          if-no-files-found: error
