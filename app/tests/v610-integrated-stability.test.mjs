@@ -86,12 +86,7 @@ test('v6.1: 3D night removes duplicate WebGL sawtooth roads but retains accessib
 test('v6.1.2: continuous terrain prevents pitch or viewport-boundary suppression and preserves history',()=>{
   const js=read('src/main.js');
   assert.match(js,/map\.setTerrain\(\{source:'dongjak-terrain-dem',exaggeration:1\.0\}\)/);
-  const sync=js.split('function syncAutomaticTerrain(_pitch) {')[1].split('function visibleBuilding2D')[0];
-  assert.doesNotMatch(sync,/map\.setTerrain\(null\)/);
-  assert.match(sync,/djTransitExterior==='true'/);
-  const scope=js.split('function syncTransitExterior(force=false){')[1].split('function clearTransitPreview(){')[0];
-  assert.match(scope,/if\(active\)\{[\s\S]*?map\.setTerrain\(null\)/);
-  assert.match(scope,/transitContextLayers\.restore\(\);[\s\S]*?syncTiltWithBuildings\(\)/);
+  assert.doesNotMatch(js,/map\.setTerrain\(null\)/);
   assert.doesNotMatch(js,/TERRAIN_DISABLE_PITCH|TERRAIN_ENABLE_PITCH/);
   assert.match(read('src/version-history.js'),/v6\.0\.21/);
   assert.doesNotMatch(read('src/version-history-v7.js'),/버전별 업데이트 내역/);

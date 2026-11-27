@@ -58,7 +58,6 @@ export function installLandmarks({map,maplibregl,isDongjak}) {
   }
   for(const place of VERIFIED_LANDMARKS)add(place); // universities are provided by education-layer.js
   function syncZoom(){
-    if(document.getElementById('app')?.dataset?.djTransitExterior==='true')return;
     const zoom=map.getZoom();
     for(const [id,marker] of mounted){
       const el=marker.getElement(),place=positions.get(id);

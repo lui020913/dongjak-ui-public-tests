@@ -22,7 +22,8 @@ test('PRI and transit arrival are scoped to verified walking legs and matching r
  assert.ok(detail.includes('value.coverage<.65'));
  assert.ok(detail.includes('String(data.arsId)===String(detail.arsId)'));
  assert.ok(detail.includes('String(x.routeId)===String(detail.routeId)'));
- assert.ok(detail.includes('승하차 단계는 직접 전환합니다'));
+ assert.match(detail,/advanceTransitGps/);
+ assert.doesNotMatch(detail,/승하차 단계는 직접 전환합니다|하차 접근 진동|data-step-next|data-step-prev/);
 });
 
 test('all transit cards show automatic walking review and no redundant global disclaimer',()=>{

@@ -40,32 +40,11 @@ export function transitContextBounds(districtBounds,endpoints=[],routeCoords=[])
  return [[Math.max(TRANSIT_SEARCH_BOUNDS[0][0],x-lngPad),Math.max(TRANSIT_SEARCH_BOUNDS[0][1],y-latPad)],
  [Math.min(TRANSIT_SEARCH_BOUNDS[1][0],X+lngPad),Math.min(TRANSIT_SEARCH_BOUNDS[1][1],Y+latPad)]];
 }
-export function transitContextLayer(layer){
- const id=String(layer.id||''),source=String(layer.source||''),kind=String(layer['source-layer']||'');
- if(layer.type==='background'||layer.type==='raster'&&id==='osm-emergency-base')return true;
- if(/^(?:dj815-transit-|dj-transit-(?:rail-|multi-))/.test(id))return true;
- if(/^(?:district-exterior-fade|district-border(?:-halo)?)$/.test(id))return true;
- if(/(?:^|[-_])gps(?:[-_]|$)/i.test(id))return true;
- // Shared vector tiles: retain only ordinary street/water context, not POIs,
- // buildings, land-use, transit networks, or district analysis overlays.
- return (layer.type==='line'||layer.type==='fill')&&(
-   /^(?:water|waterway|transportation)$/.test(kind)&&
-   !/rail|subway|tram|platform|transit|bridge.*label/i.test(id)||
-   /^(?:dj-)?reviewed-base-road(?:-|$)/.test(id)&&/road/.test(source)
- );
-}
-export function createTransitContextLayers(map){
- const saved=new Map();
- const enforce=()=>{
-   for(const layer of map.getStyle()?.layers||[]){
-     if(transitContextLayer(layer))continue;
-     const old=map.getLayoutProperty(layer.id,'visibility')||'visible';
-     if(!saved.has(layer.id))saved.set(layer.id,old);
-     if(old!=='none')map.setLayoutProperty(layer.id,'visibility','none');
-   }
- };
- return {enforce,restore(){
-   for(const [id,value] of saved)if(map.getLayer(id)&&(map.getLayoutProperty(id,'visibility')||'visible')!==value)map.setLayoutProperty(id,'visibility',value);
-   saved.clear();
- }};
+// The original safety map is authoritative. No geometry, filter, source,
+// visibility or terrain changes are made when entering transit.
+export function applyTransitBoundaryVisibility(map,active,phone=false){
+ for(const [id,opacity] of [['district-border',.96],['district-border-halo',phone?.42:.92]]){
+  if(map.getLayer(id)&&map.getPaintProperty(id,'line-opacity')!==(active?0:opacity))
+   map.setPaintProperty(id,'line-opacity',active?0:opacity);
+ }
 }

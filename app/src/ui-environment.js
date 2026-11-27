@@ -183,7 +183,6 @@ export function initTheme({map,app}){
   const stationSize=['interpolate',['linear'],['zoom'],13.3,10,16,11.6,17.15,11.7,20,11.7];
   let labelStyleSignature='';
   function syncMapLabelContrast(force=false){
-    if(app.dataset.djTransitExterior==='true')return;
     if(map.isMoving?.()){scheduleMapLabelContrast();return;}
     const layers=map.getStyle?.()?.layers;
     if(!Array.isArray(layers))return;
@@ -223,7 +222,7 @@ export function initTheme({map,app}){
   }
   let labelSyncTimer=null;
   function scheduleMapLabelContrast(){
-    if(app.dataset.djTransitExterior==='true'||labelSyncTimer!==null||map.isMoving?.())return;
+    if(labelSyncTimer!==null||map.isMoving?.())return;
     labelSyncTimer=setTimeout(()=>{labelSyncTimer=null;if(!map.isMoving?.())syncMapLabelContrast();},180);
   }
   map.on('styledata',scheduleMapLabelContrast);
@@ -265,7 +264,7 @@ export function initTheme({map,app}){
     // 토글할 때마다 현재 존재하는 레이어의 색상과 불투명도를 별도로 갱신합니다.
     if(map.getLayer('district-exterior-fade')){
       const maskPaint=districtExteriorThemePaint(themeState.value);
-      if(app.dataset.djTransitExterior==='true')maskPaint['fill-opacity']=0;
+
       for(const [key,value] of Object.entries(maskPaint)){
         try{map.setPaintProperty('district-exterior-fade',key,value);}catch(error){console.warn('[외부지역 마스크] 테마 전환 실패:',error);}
       }

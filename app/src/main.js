@@ -9,7 +9,6 @@ import {installMobileMapControls} from './mobile-map-controls.js';
 import {phoneProfile,normalMapPixelRatio,installPhoneRenderBudget,offscreenEvictionIds} from './adaptive-phone-map-budget.mjs';
 import {baseMapRecoveryDecision,BASE_STYLE_INITIAL_WAIT_MS} from './map-basemap-recovery.mjs';
 import './adaptive-phone-map-budget.css';
-import './transit-exterior-scope.css';
 import './button-material.css';
 import './browser-install-menu.css';
 import {installMobileLayoutCoordinator,installBottomTabNavigation} from './mobile-ui/index.js';
@@ -49,7 +48,7 @@ import {readSharedCommunity,publishCommunityPost,deleteSharedCommunityPost,setSh
 import {initPedestrianTools} from './pedestrian-tools.js';
 import {fetchDongjakPedestrianVariants} from './dongjak-local-routing.js';
 import {routeWithinDistrict} from './route-district-guard.mjs';
-import {TRANSIT_SEARCH_BOUNDS,transitPointInScope,transitCoordinatesInScope,transitEndpointPolicy,exteriorMapActive,transitWalkStyle,transitContextBounds,createTransitContextLayers} from './transit-exterior-scope.mjs';
+import {TRANSIT_SEARCH_BOUNDS,transitPointInScope,transitCoordinatesInScope,transitEndpointPolicy,exteriorMapActive,transitWalkStyle,transitContextBounds,applyTransitBoundaryVisibility} from './transit-exterior-scope.mjs';
 import {installDongjakOfficialDataLayers} from './dongjak-verified-data-layers.js';
 import {installDongjakLiveTransit} from './features/liveTransit/integrate.js';
 import './features/liveTransit/live-transit.css';
@@ -741,7 +740,7 @@ let lastPitchStatus = '';
 let djBuildingBatchBusy=false;
 let lastFootprintPaintKey='';
 function syncAutomaticTerrain(_pitch) {
-  if(!mapReady || !terrainAvailable || terrainEnabled || app.dataset.djTransitExterior==='true')return;
+  if(!mapReady || !terrainAvailable || terrainEnabled)return;
   try {
     map.setTerrain({source:'dongjak-terrain-dem',exaggeration:1.0});
     terrainEnabled=true;
@@ -759,15 +758,15 @@ function syncAutomaticTerrain(_pitch) {
 function visibleBuilding2D(){
   // Loaded layers remain visible across the threshold; minzoom and paint
   // expressions smoothly fade them rather than flipping visibility on zoomend.
-  return mapReady && Boolean(boundaryGeometry) && app.dataset.djTransitExterior!=='true';
+  return mapReady && Boolean(boundaryGeometry);
 }
 function visibleBuilding3D(){
   // Camera movement and slow frames are never a visibility predicate.
   // The minzoom and paint expressions handle zoom without a layout flip.
-  return baseBuildingsVisible && mapReady && Boolean(boundaryGeometry) && buildingPitchActive && loadedBuildingTiles.size>0 && app.dataset.djTransitExterior!=='true';
+  return baseBuildingsVisible && mapReady && Boolean(boundaryGeometry) && buildingPitchActive && loadedBuildingTiles.size>0;
 }
 function syncTiltWithBuildings() {
-  if (!mapReady || app.dataset.djTransitExterior==='true') return;
+  if (!mapReady) return;
   const pitch=map.getPitch();
   is3D=pitch>=PITCH_BUILDING_START;
   buildingPitchActive=nextBuildingPitchMode(buildingPitchActive,pitch,PITCH_BUILDING_START,PITCH_BUILDING_EXIT);
@@ -840,7 +839,7 @@ function getVisibleBBox(){
   return [minX-dx,minY-dy,maxX+dx,maxY+dy];
 }
 function scheduleBuildingLoad(){
-  if (app.dataset.djTransitPreview || !visibleBuilding2D() || map.getZoom()<BUILDING_ZOOM_MIN || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
+  if (!visibleBuilding2D() || map.getZoom()<BUILDING_ZOOM_MIN || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
   clearTimeout(buildingLoadTimer);
   buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},djPhone?600:230);
 }
@@ -861,7 +860,6 @@ export function shouldRender3DBuilding(geometry){
 // v17.12: 기존 국가기본도와 GIS건물 보완 GeoJSON을 모두 로딩합니다.
 
 async function loadOneBuildingSheet(sheet){
-  if(app.dataset.djTransitExterior==='true')return;
   const existing=loadedBuildingTiles.get(sheet.sheet);
   if(existing?.complete||buildingLoading.has(sheet.sheet)||(buildingRetryAfter.get(sheet.sheet)||0)>Date.now())return;
   buildingLoading.add(sheet.sheet);
@@ -870,7 +868,7 @@ async function loadOneBuildingSheet(sheet){
     for(const problem of errors) console.warn(`[동작하는 안전지도] ${sheet.sheet}번 ${problem.label} 로딩 실패:`,problem.error);
     // Defer geometry filtering and indexing until the phone camera is settled.
     while(djPhone&&map.isMoving?.())await new Promise(resolve=>map.once('moveend',resolve));
-    if(!boundaryGeometry||app.dataset.djTransitExterior==='true')return;
+    if(!boundaryGeometry)return;
     // Tile-native buildings are incomplete in parts of Sangdo 1-dong. The
     // supplied base+supplement GIS footprints must also be available overhead.
     const districtBuildings=features.filter(f=>Number.isFinite(f.properties?.x)&&Number.isFinite(f.properties?.y)&&
@@ -928,7 +926,7 @@ function scheduleInitialBuildingWarmup(){
   if(initialBuildingWarmupScheduled||!boundaryGeometry||!mapReady||djRenderBudget.isEconomy())return;
   initialBuildingWarmupScheduled=true;
   const run=async()=>{
-    if(!boundaryGeometry||app.dataset.djTransitExterior==='true')return;
+    if(!boundaryGeometry)return;
     try{
       const manifest=await ensureBuildingManifest();
       const center=map.getCenter();
@@ -942,7 +940,7 @@ function scheduleInitialBuildingWarmup(){
           if(typeof requestIdleCallback==='function')requestIdleCallback(resolve,{timeout:2200});
           else setTimeout(resolve,350);
         });
-        if(!map.getStyle?.()?.layers?.length||app.dataset.djTransitExterior==='true')return;
+        if(!map.getStyle?.()?.layers?.length)return;
         await loadOneBuildingSheet(sheet);
       }
     }catch(error){console.info('[3D 건물 사전 준비] 요청 시 재시도 가능:',error?.message);}
@@ -966,18 +964,18 @@ function djTrimOffscreenBuildings(sheets){
   lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
 }
 async function loadVisibleBuildingSheets(){
-  if(app.dataset.djTransitPreview||!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN||djBuildingBatchBusy||(djPhone&&map.isMoving?.()))return;
+  if(!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN||djBuildingBatchBusy||(djPhone&&map.isMoving?.()))return;
   djBuildingBatchBusy=true;
   let interrupted=false;
   try{
     const manifest=await ensureBuildingManifest();
-    if(app.dataset.djTransitPreview||!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN)return;
+    if(!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN)return;
     const bbox=getVisibleBBox();
     const nearby=manifest.sheets.filter(s=>intersects(s.bbox,bbox));
     const center=map.getCenter();const sheets=nearestBuildingSheets({sheets:nearby},[center.lng,center.lat],nearby.length);
     djTrimOffscreenBuildings(sheets);
     for(const sheet of sheets){
-      if(app.dataset.djTransitPreview||!visibleBuilding2D()||(djPhone&&map.isMoving?.())){interrupted=true;break;}
+      if(!visibleBuilding2D()||(djPhone&&map.isMoving?.())){interrupted=true;break;}
       if(loadedBuildingTiles.get(sheet.sheet)?.complete){
         const old=loadedBuildingTiles.get(sheet.sheet);loadedBuildingTiles.delete(sheet.sheet);loadedBuildingTiles.set(sheet.sheet,old);continue;
       }
@@ -1171,8 +1169,8 @@ async function loadDongjakBoundary(){
     if(app.dataset.djTransitExterior!=='true')map.setMaxBounds(bufferedDistrictBounds(boundaryGeometry));
     // 동작구 밖 원본 시설명은 가리되, 추가 자치구 라벨은 별도 심벌로 표시합니다.
     clipBasemapLabelsToDistrict(map,boundaryGeometry);
-    // 건물은 검증된 원본 벡터 타일을 유지합니다. 별도 지리 필터로 건물을 누락시키지 않습니다.
-    // 참고: 동작구 외부 3D 건물을 완전히 숨기는 문제는 아직 미해결입니다.
+    // Retain the original native building filters and reviewed GIS coverage.
+    // Transit must never change the shared basemap geometry or layer owners.
     districtBuildingsReady=true;
     syncTiltWithBuildings();
     scheduleBuildingLoad();
@@ -1197,7 +1195,6 @@ async function loadDongjakBoundary(){
     baseLayerControls?.apply();
     syncTransitExterior(true);
     map.on('pitch',()=>{
-      if(app.dataset.djTransitExterior==='true')return;
       const pitch=map.getPitch();
       // 측면에서 지표면 경계선이 가늘어지는 현상을 보완합니다(수직 벽 모델은 아님).
       if(map.getLayer('district-border'))map.setPaintProperty('district-border','line-width',2.6+pitch/28);
@@ -1719,7 +1716,7 @@ map.on('load',()=>{
   installGrassTexture({map,app});
   installForestShade({map,app});
   const nativeBuildingLayers=installBaseBuildingPalette({map,app});
-  buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers,()=>app.dataset.djTransitExterior==='true');
+  buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers);
   buildingCoverage.setExtruding(visibleBuilding3D());
   status('지도 준비 완료 · 동작구 경계 불러오는 중');
   // 공개 Terrarium DEM: API 키 없이 지형을 표시합니다. 지형 데이터의 상세도는 지역별로 다릅니다.
@@ -2919,12 +2916,10 @@ function drawRouteMarkers(visible=(app.dataset.tab==='map'||app.dataset.transitC
   routeStartMarker=update(routeStartMarker,app.dataset.transitComparison==='true'?null:routeStart,'start','#2563eb');
   routeEndMarker=update(routeEndMarker,routeEnd,'end','#0ba876');
 }
-// Keep the shared map instance, but suspend non-route presentation while transit is active.
+// Shared district map; transit owns only the camera extent and selected route.
 var transitHomeCamera;
 var transitRouteContext=[];
 var transitContextSignature='';
-var transitContextLayers;
-var transitContextDirty=false;
 function syncTransitContextBounds(active){
  const bounds=active?transitContextBounds(bufferedDistrictBounds(boundaryGeometry,0),[routeStart,routeEnd],transitRouteContext):bufferedDistrictBounds(boundaryGeometry);
  const signature=JSON.stringify(bounds);
@@ -2939,23 +2934,9 @@ function syncTransitExterior(force=false){
  if(active&&!previous&&!transitHomeCamera){
   transitHomeCamera={center:map.getCenter(),zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing()};
  }
- const duration=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:180;
- if(map.getLayer('district-exterior-fade')){
-  map.setPaintProperty('district-exterior-fade','fill-opacity-transition',{duration,delay:0});
-  map.setPaintProperty('district-exterior-fade','fill-opacity',active?0:districtExteriorThemePaint(visualTheme.currentTheme())['fill-opacity']);
- }
- if(map.getLayer('district-border'))map.setPaintProperty('district-border','line-opacity',active?0:0.96);
- if(map.getLayer('district-border-halo'))map.setPaintProperty('district-border-halo','line-opacity',active?0:(window.matchMedia('(max-width:699px)').matches?0.42:0.92));
- transitContextLayers??=createTransitContextLayers(map);
- if(active){
-  clearTimeout(buildingLoadTimer);
-  if(terrainEnabled){map.setTerrain(null);terrainEnabled=false;}
-  transitContextLayers.enforce();transitContextDirty=false;
- }else{
-  transitContextDirty=false;transitContextLayers.restore();
-  baseLayerControls?.apply();
-  syncTiltWithBuildings();
- }
+ // Hide only the district outline during transit; preserve original map
+ // rendering, including the existing exterior tint and building filters.
+ applyTransitBoundaryVisibility(map,active,matchMedia('(max-width:699px)').matches);
  syncTransitContextBounds(active);
  if(!active&&previous&&app.dataset.tab==='map'&&transitHomeCamera){
   const camera=transitHomeCamera;transitHomeCamera=null;
@@ -2964,9 +2945,6 @@ function syncTransitExterior(force=false){
   transitHomeCamera=null;
  }
 }
-// Recheck only after actual style changes, not every idle/zoom cycle.
-map.on('styledata',()=>{if(app.dataset.djTransitExterior==='true')transitContextDirty=true;});
-map.on('idle',()=>{if(app.dataset.djTransitExterior==='true'&&transitContextDirty&&!map.isMoving?.()){transitContextLayers?.enforce();transitContextDirty=false;}});
 function clearTransitPreview(){
   transitRouteContext=[];
   const wasPreview=Boolean(transitPreview);

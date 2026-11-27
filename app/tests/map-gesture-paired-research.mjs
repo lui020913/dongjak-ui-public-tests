@@ -41,14 +41,30 @@ async function sample(url,variant,round){
     const state=await page.evaluate(()=>{const m=window.__qaMap,app=document.getElementById('app');return {tab:app?.dataset?.tab,transit:app?.dataset?.djTransitExterior,center:m.getCenter(),zoom:m.getZoom(),style:m.isStyleLoaded(),tiles:m.areTilesLoaded?.(),layers:m.getStyle().layers.filter(l=>l.type==='symbol').map(l=>[l.id,m.getLayoutProperty(l.id,'visibility')||'visible'])};});
     console.log('MAP_GESTURE_READINESS_FAILURE',JSON.stringify({variant,round,site:site.name,...state}));throw error;
    }
-   const data=await page.evaluate(async({center})=>{
+   const data=await page.evaluate(async({center,checkSharedScope})=>{
     const m=window.__qaMap,frames=[],writes={},restores=[],sweeps=[];
-    // Match quality between revisions, including any adaptive DPR changes.
+    // Lock the matched DPR and wait for labels and buildings in the same
+    // browser task that begins measurement. A separate readiness RPC can
+    // observe a previous tile frame before a pending GIS update clears it.
+    m.setPixelRatio?.(2.5);
     const originalDpr=m.setPixelRatio;if(originalDpr){m.setPixelRatio=function(){};restores.push(()=>{m.setPixelRatio=originalDpr;});}
     const label=/poi|metro|bus|civic|facility|featured|name|label|transport/i;
-    const visible=m.getStyle().layers.filter(l=>l.type==='symbol'&&label.test(l.id)&&m.getLayoutProperty(l.id,'visibility')!=='none');
-    const visibleIds=visible.map(l=>l.id);
-    const icons=m.queryRenderedFeatures({layers:visibleIds}).length;
+    const snapshot=()=>{
+     const layers=m.getStyle().layers,shown=l=>m.getLayoutProperty(l.id,'visibility')!=='none';
+     const visibleIds=layers.filter(l=>l.type==='symbol'&&label.test(l.id)&&shown(l)).map(l=>l.id);
+     const native=layers.filter(l=>l['source-layer']==='building'),gis=layers.filter(l=>l.id.startsWith('dongjak-buildings-footprint-'));
+     const buildingIds=[...native,...gis].filter(l=>l.type==='fill'&&shown(l)).map(l=>l.id);
+     return {visibleIds,icons:visibleIds.length?m.queryRenderedFeatures({layers:visibleIds}).length:0,building:{native:native.map(l=>l.id),gis:gis.map(l=>l.id),customDistance:native.some(l=>JSON.stringify(m.getFilter(l.id)||null).includes('"distance"')),rendered:buildingIds.length?m.queryRenderedFeatures({layers:buildingIds}).length:0},center:m.getCenter().toArray(),zoom:m.getZoom(),ready:m.isStyleLoaded()&&!m.isMoving()};
+    };
+    let state,stable=0;const deadline=performance.now()+90000;
+    while(performance.now()<deadline){
+     state=snapshot();
+     const ready=state.ready&&state.icons>0&&(!checkSharedScope||state.building.rendered>0&&!state.building.customDistance)&&Math.hypot(state.center[0]-center[0],state.center[1]-center[1])<.0001&&Math.abs(state.zoom-17.8)<.02;
+     stable=ready?stable+1:0;if(stable>=2)break;
+     await new Promise(r=>setTimeout(r,300));
+    }
+    if(stable<2){for(const restore of restores.reverse())restore();throw Error('MAP_SAMPLE_NOT_READY '+JSON.stringify(state));}
+    const {icons,visibleIds,building}=state;
     let last=0,active=false;
     const record=(kind,id)=>{if(active&&m.isMoving()&&label.test(String(id)))writes[kind+':'+id]=(writes[kind+':'+id]||0)+1;};
     for(const kind of ['setLayoutProperty','setPaintProperty','setFilter','moveLayer']){
@@ -78,8 +94,13 @@ async function sample(url,variant,round){
       await new Promise(r=>setTimeout(r,650));
      }
     }finally{active=false;m.off('render',frame);for(const restore of restores.reverse())restore();}
-    return {frames,writes,sweeps,icons,visibleLayers:visibleIds.length,ratio:m.getPixelRatio?.()??null};
-   },site);
+    return {frames,writes,sweeps,icons,building,visibleLayers:visibleIds.length,ratio:m.getPixelRatio?.()??null};
+   },{...site,checkSharedScope:variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'});
+   if(variant==='candidate'&&process.env.CHECK_SHARED_SCOPE==='true'){
+    console.log('DISTRICT_BUILDING_SCOPE',site.name,JSON.stringify(data.building));
+    assert.equal(data.building.customDistance,false,'original native building filters');
+    assert.ok(data.building.rendered>0,'actual district buildings must remain rendered');
+   }
    report.samples.push({variant,round,site:site.name,...data});
    console.log('MAP_GESTURE_SAMPLE',JSON.stringify({variant,round,site:site.name,icons:data.icons,frames:data.frames.length,writes:data.writes,sweeps:data.sweeps,ratio:data.ratio}));
    assert.ok(data.icons>0,'actual visible POI/transport labels required');

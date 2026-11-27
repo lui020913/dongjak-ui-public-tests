@@ -3,7 +3,7 @@ import {busRouteColor} from './bus-route-overlay.js';
 import {subwayLineColor} from './transport-map.js';
 import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 import './transit-route-detail.css';
-import {transitProximity} from './transit-guide-proximity.mjs';
+import {advanceTransitGps} from './transit-guide-proximity.mjs';
 import {transitRailArrival} from './transit-rail-arrival.mjs';
 const labels={walk:'도보',bus:'버스',rail:'지하철'};
 const paths={
@@ -23,7 +23,7 @@ export function transitPriText(value){
 }
 export function mountTransitDetail({doc,win,app,mapCard,actions}){
  const root=doc.createElement('section');root.id='dj-transit-detail';root.hidden=true;root.setAttribute('aria-label','대중교통 경로 상세');actions?.before(root);
- let current=null,arrivalRequest=null,step=null,gps=null,nearCount=0,lastStep=null,lastPosition=null,notifiedStep=null,reminder=false;
+ let current=null,arrivalRequest=null,step=null,gps=null,nearCount=0,lastPosition=null,arrived=false;
  // Explicit inline hiding wins over legacy mobile !important action docks.
  // Restore only the attributes this presenter owns on departure.
  const nativeActionState=new Map();
@@ -45,42 +45,37 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
  const button=(text,cls,fn)=>{const b=el('button',cls,text);b.type='button';b.addEventListener('click',fn);return b;};
  const same=(a,b)=>a&&b&&JSON.stringify(a.legs||[])===JSON.stringify(b.legs||[])&&a.kind===b.kind&&a.routeId===b.routeId&&a.from===b.from&&a.to===b.to&&a.board===b.board&&a.alight===b.alight&&JSON.stringify(a.lines)===JSON.stringify(b.lines)&&JSON.stringify(a.stops)===JSON.stringify(b.stops);
 
- function stopGps(message='위치 확인이 꺼져 있습니다.'){
-  gps?.abort();gps=null;nearCount=0;lastPosition=null;notifiedStep=null;
-  const b=root.querySelector('.dj-tr-gps-toggle'),status=root.querySelector('.dj-tr-gps-status');
-  if(b){b.textContent='위치 확인 켜기';b.setAttribute('aria-pressed','false');}
-  if(status)status.textContent=message;
+ function setGpsStatus(text,retry=false){
+  const status=root.querySelector('.dj-tr-gps-status'),button=root.querySelector('.dj-tr-gps-retry');
+  if(status)status.textContent=text;
+  if(button)button.hidden=!retry;
+ }
+ function stopGps(){
+  gps?.abort();gps=null;nearCount=0;lastPosition=null;
  }
  function showPosition(position){
-  const status=root.querySelector('.dj-tr-gps-status');
-  if(!gps||!status||step===null)return;
-  // A duplicate/old native fix must not count as repeated evidence.
-  const stamp=Number(position?.timestamp);
-  if(!Number.isFinite(stamp)||Date.now()-stamp>15000||stamp-Date.now()>5000||stamp===lastPosition)return;
-  lastPosition=stamp;
-  const result=transitProximity(position,current?.targets?.[step],nearCount);nearCount=result.count;
-  const riding=root.querySelectorAll('.dj-tr-leg')[step]?.querySelector('.dj-tr-marker')?.dataset.kind;
-  const alight=riding==='bus'||riding==='rail';
-  const text=result.state==='uncertain'?'위치 오차가 커서 접근 여부를 확인할 수 없습니다.':result.state==='near'?(alight?'하차 예정 지점 근처입니다. 실제 역·정류장 안내를 확인하세요.':'다음 지점 근처입니다. 실제 위치를 확인하세요.'):'다음 지점까지 직선 약 '+result.meters+'m';
-  status.dataset.near=String(result.state==='near');
-  if(status.textContent!==text)status.textContent=text;
-  if(result.state==='near'&&alight&&reminder&&notifiedStep!==step){notifiedStep=step;try{win.navigator?.vibrate?.([120,70,120]);}catch{}}
+  if(!gps||step===null||arrived)return;
+  const count=root.querySelectorAll('.dj-tr-leg').length;
+  const result=advanceTransitGps({position,targets:current?.targets,step,rows:count,count:nearCount,lastTimestamp:lastPosition});
+  if(result.ignored)return;
+  lastPosition=result.timestamp;nearCount=result.count;
+  if(result.arrived){arrived=true;step=count-1;stopGps();updateStep();return;}
+  if(result.step!==step){step=result.step;updateStep();return;}
+  setGpsStatus(result.state==='uncertain'?'GPS 신호 대기 중':'다음 지점까지 약 '+result.meters+'m');
  }
+ function startGps(){
+  if(gps||step===null||arrived||doc.hidden)return;
+  const controller=new AbortController();gps=controller;nearCount=0;lastPosition=null;
+  setGpsStatus('GPS 연결 중');
+  win.dispatchEvent(new CustomEvent('dongjak:transit-gps-start',{detail:{signal:controller.signal,onPosition:position=>{if(gps===controller)showPosition(position);},onError:()=>{if(gps===controller){stopGps();setGpsStatus('GPS 연결 실패',true);}}}}));
+ }
+ function beginGuide(){step=0;arrived=false;updateStep();startGps();}
+ function endGuide(){stopGps();step=null;arrived=false;updateStep();}
  function gpsControls(){
-  const box=el('div','dj-tr-gps');const status=el('small','dj-tr-gps-status','위치 확인이 꺼져 있습니다.');
-  status.setAttribute('role','status');
-  const b=button('위치 확인 켜기','dj-tr-gps-toggle',()=>{
-   if(gps){stopGps();return;}
-   if(step===null||!current?.targets?.[step])return;
-   const controller=new AbortController();gps=controller;nearCount=0;lastPosition=null;
-   b.textContent='위치 확인 끄기';b.setAttribute('aria-pressed','true');status.textContent='위치 권한 및 GPS 확인 중…';
-   win.dispatchEvent(new CustomEvent('dongjak:transit-gps-start',{detail:{signal:controller.signal,onPosition:position=>{if(gps===controller)showPosition(position);},onError:()=>{if(gps===controller)stopGps('위치를 확인하지 못했습니다. 권한 및 GPS를 확인하세요.');}}}));
-  });
-  b.setAttribute('aria-pressed','false');
-  const alert=button('하차 접근 진동 끄기','dj-tr-gps-toggle',()=>{reminder=!reminder;alert.setAttribute('aria-pressed',String(reminder));alert.textContent=reminder?'하차 접근 진동 켜기':'하차 접근 진동 끄기';});
-  alert.setAttribute('aria-pressed','false');box.append(b,alert,status);return box;
+  const box=el('div','dj-tr-gps');const status=el('small','dj-tr-gps-status','GPS 연결 중');status.setAttribute('role','status');
+  const retry=button('다시 연결','dj-tr-gps-retry',startGps);retry.hidden=true;box.append(status,retry);return box;
  }
- const pauseGps=()=>{if(doc.hidden)stopGps('화면을 다시 열면 위치 확인을 직접 켜 주세요.');};
+ const pauseGps=()=>{if(doc.hidden){stopGps();if(step!==null&&!arrived)setGpsStatus('GPS 연결 대기 중');}else if(step!==null&&!arrived)startGps();};
  const pagehide=()=>stopGps();
  doc.addEventListener('visibilitychange',pauseGps);win.addEventListener('pagehide',pagehide);
 
@@ -93,10 +88,11 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   rows.forEach((row,i)=>{row.classList.toggle('is-current',step===i);if(step===i)row.setAttribute('aria-current','step');else row.removeAttribute('aria-current');});
   const guide=root.querySelector('.dj-tr-step-guide'),start=root.querySelector('.dj-tr-start'),progress=root.querySelector('.dj-tr-progress');
   guide.hidden=step===null;start.hidden=step!==null;
-  const guideBody=root.querySelector('.dj-tr-guide-body');if(guideBody)guideBody.hidden=step===null;
-  if(step!==lastStep){nearCount=0;lastPosition=null;notifiedStep=null;lastStep=step;const status=root.querySelector('.dj-tr-gps-status');if(gps&&status)status.textContent='다음 지점 위치 확인 중…';}
-  if(step===null)stopGps();
-  if(step!==null){progress.textContent=(step+1)+' / '+rows.length+' · 직접 단계 선택';guide.querySelector('[data-step-prev]').disabled=step===0;guide.querySelector('[data-step-next]').textContent=step===rows.length-1?'안내 종료':'다음 단계';rows[step]?.scrollIntoView?.({block:'nearest',behavior:'instant'});}
+  const guideBody=root.querySelector('.dj-tr-guide-body');if(guideBody)guideBody.hidden=step===null||arrived;
+  if(step===null){stopGps();return;}
+  progress.textContent=arrived?'목적지 도착':(step+1)+' / '+rows.length;
+  if(!arrived)setGpsStatus('GPS 위치 확인 중');
+  rows[step]?.scrollIntoView?.({block:'nearest',behavior:'instant'});
  }
  function appendRailArrival(board,station,lineId){
   if(!station||!lineId)return;
@@ -135,16 +131,16 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   const parts=[leg.firstTime?'첫차 '+leg.firstTime:'',leg.lastTime?'막차 '+leg.lastTime:''].filter(Boolean);
   board.append(el('small','dj-tr-service-hours','승차 정류장 제공 운행시간 · '+parts.join(' / ')+' (변동 가능)'));
  }
- function layoutDetail(header,track,fare,timeline,note,footer,guideBody){
+ function layoutDetail(header,track,fare,timeline,footer,guideBody){
   const fixed=el('header','dj-tr-fixed-head');fixed.append(header,track);
-  const body=el('div','dj-tr-scroll');body.append(fare,timeline,note,guideBody);
+  const body=el('div','dj-tr-scroll');body.append(fare,timeline,guideBody);
   root.append(fixed,body,footer);
  }
  function render(detail){
   if(!detail){restoreNativeActions();stopGps();arrivalRequest?.abort();arrivalRequest=null;current=null;step=null;cancelSurfaceMotion(root);const finish=()=>{if(current)return;root.hidden=true;root.replaceChildren();root.style.removeProperty('pointer-events');};if(!root.hidden){root.style.setProperty('pointer-events','none');exitSurface(root,finish);}else finish();return;}
   if(same(current,detail)){current=detail;updatePri();return;}
   cancelSurfaceMotion(root);root.style.removeProperty('pointer-events');hideNativeActions();
-  stopGps();reminder=false;arrivalRequest?.abort();arrivalRequest=null;current=detail;step=null;root.replaceChildren();root.hidden=false;
+  stopGps();arrived=false;arrivalRequest?.abort();arrivalRequest=null;current=detail;step=null;root.replaceChildren();root.hidden=false;
   if(detail.legs){renderMulti(detail);return;}
   const kind=detail.kind,color=kind==='bus'?busRouteColor(detail.routeType):subwayLineColor(railLabel(detail.lines[0]));root.style.setProperty('--tr-line-color',color);
   const name=kind==='bus'?detail.route:[...new Set(detail.lines)].map(railLabel).join(' · ');
@@ -185,17 +181,13 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   const last=row('walk',detail.alight+' 하차','도보 '+detail.last.meters+'m · 약 '+detail.last.minutes+'분');
   const lastPri=el('span','dj-tr-pri');lastPri.dataset.priLeg='last';last.append(lastPri);
   row('end',detail.to,'목적지');
-  const note=el('p','dj-tr-note');note.innerHTML=icon('shield')+'<span>PRI는 도보 구간의 조사 자료만 반영하며 안전을 보장하지 않습니다.</span>';
   const footer=el('div','dj-tr-footer');
-  const start=button('안내 시작','dj-tr-start',()=>{step=0;updateStep();});
+  const start=button('안내 시작','dj-tr-start',beginGuide);
   const guide=el('div','dj-tr-step-guide');guide.hidden=true;const progress=el('small','dj-tr-progress');
-  const controls=el('div','dj-tr-step-controls');
-  const prev=button('이전','',()=>{step=Math.max(0,step-1);updateStep();});prev.dataset.stepPrev='';
-  const next=button('다음 단계','',()=>{step=step>=root.querySelectorAll('.dj-tr-leg').length-1?null:step+1;updateStep();});next.dataset.stepNext='';
-  controls.append(prev,next);guide.append(progress,controls);
-  const guideBody=el('div','dj-tr-guide-body');guideBody.hidden=true;guideBody.append(gpsControls(),el('small','','승하차 단계는 직접 전환합니다. 위치 확인과 하차 접근 진동은 화면이 켜진 동안의 참고 정보이며 지하에서는 오차가 클 수 있습니다.'));
+  guide.append(progress,button('안내 종료','dj-tr-end',endGuide));
+  const guideBody=el('div','dj-tr-guide-body');guideBody.hidden=true;guideBody.append(gpsControls());
   footer.append(start,guide);
-  layoutDetail(header,track,walkInfo(detail),timeline,note,footer,guideBody);updatePri();revealSurface(root);
+  layoutDetail(header,track,walkInfo(detail),timeline,footer,guideBody);updatePri();revealSurface(root);
  }
 
  function renderMulti(detail){
@@ -243,16 +235,13 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
    walkRow(i+1,leg.destination+' 하차'+(i<detail.legs.length-1?' · 환승':''));
   }
   row('end',detail.to,'목적지');
-  const note=el('p','dj-tr-note');note.innerHTML=icon('shield')+'<span>PRI는 실제 도보 연결 구간만 평가합니다. 환승 통로와 차량 내부 안전을 보장하지 않습니다.</span>';
   const footer=el('div','dj-tr-footer');
-  const start=button('안내 시작','dj-tr-start',()=>{step=0;updateStep();});
+  const start=button('안내 시작','dj-tr-start',beginGuide);
   const guide=el('div','dj-tr-step-guide');guide.hidden=true;
-  const progress=el('small','dj-tr-progress'),controls=el('div','dj-tr-step-controls');
-  const prev=button('이전','',()=>{step=Math.max(0,step-1);updateStep();});prev.dataset.stepPrev='';
-  const next=button('다음 단계','',()=>{step=step>=root.querySelectorAll('.dj-tr-leg').length-1?null:step+1;updateStep();});next.dataset.stepNext='';
-  controls.append(prev,next);guide.append(progress,controls);
-  const guideBody=el('div','dj-tr-guide-body');guideBody.hidden=true;guideBody.append(gpsControls(),el('small','','승하차 단계는 직접 전환합니다. 위치 확인과 하차 접근 진동은 화면이 켜진 동안의 참고 정보이며 지하에서는 오차가 클 수 있습니다.'));
-  footer.append(start,guide);layoutDetail(header,track,walkInfo(detail),timeline,note,footer,guideBody);updatePri();revealSurface(root);
+  const progress=el('small','dj-tr-progress');
+  guide.append(progress,button('안내 종료','dj-tr-end',endGuide));
+  const guideBody=el('div','dj-tr-guide-body');guideBody.hidden=true;guideBody.append(gpsControls());
+  footer.append(start,guide);layoutDetail(header,track,walkInfo(detail),timeline,footer,guideBody);updatePri();revealSurface(root);
  }
 
  const listener=e=>render(e.detail);win.addEventListener('dongjak:transit-detail',listener);

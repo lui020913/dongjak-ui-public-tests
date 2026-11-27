@@ -1705,8 +1705,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   bringRailToForeground();
   const refreshNearbyBusStopNames=()=>syncNearbyBusStopNameFilters(map);
   refreshNearbyBusStopNames();
-  const transitContextActive=()=>document.getElementById('app')?.dataset?.djTransitExterior==='true';
-  const viewportLabels=coalesceViewportWork(full=>{if(transitContextActive())return;refreshNearbyBusStopNames();if(full)updateTileBusFallbackFilter();},{delay:100,isMoving:()=>map.isMoving?.()===true});
+  const viewportLabels=coalesceViewportWork(full=>{refreshNearbyBusStopNames();if(full)updateTileBusFallbackFilter();},{delay:100,isMoving:()=>map.isMoving?.()===true});
   map.on('moveend',()=>viewportLabels.request(true));
   map.on('zoomend',()=>viewportLabels.request(true));
   map.on('styledata',()=>viewportLabels.request());
@@ -2127,7 +2126,6 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       && Number.isFinite(item.lng)&&Number.isFinite(item.lat);
   }
   function drainOfficialBusQueue(){
-    if(transitContextActive())return;
     if(officialStaticStopCount>0 || officialBusAuthDisabled || (officialBusErrorAt && Date.now()-officialBusErrorAt<45000))return;
     while(officialBusInFlight<2 && officialBusQueue.length){
       const cell=officialBusQueue.shift();officialBusQueued.delete(cell.key);
@@ -2207,7 +2205,6 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   }
   let fallbackScans=0;
   const viewportEnrichment=coalesceViewportWork(scan=>{
-    if(transitContextActive())return;
     if(scan&&fallbackScans<20){fallbackScans++;augmentWithBasemapStations();}
     enrichNearbyBusStops();enrichMedianStops();enrichViewportBusStops();void fillHighZoomOSMBusStops();
   },{delay:200,isMoving:()=>map.isMoving?.()===true});

@@ -13,7 +13,6 @@ test('facility reconciliation is dirty-driven, deferred, and cancels pending wor
  const s=src('civic-facility-layer.js');
  assert.match(s,/if\(!dedupDirty\|\|dedupTimer\|\|map\.isMoving/);
  assert.match(s,/map\.on\('idle',scheduleReconcile\)/);
- assert.match(s,/if\(app\?\.dataset\?\.djTransitExterior==='true'\)return/);
  assert.match(s,/map\.on\('movestart',\(\)=>\{if\(dedupTimer\)/);
  assert.doesNotMatch(s,/map\.on\('idle',reconcileOfficialDuplicates\)/);
 });
@@ -75,12 +74,4 @@ test('safety and public overlay network completion is batched and cannot change 
  assert.match(s,/if\(map.isMoving\?\.\(\)\)\{pendingVisibility.set\(id,desired\);publish.request\(\);continue;\}/);
  assert.match(s,/delay:350,isMoving:\(\)=>map.isMoving\?\.\(\)===true/);
  assert.match(s,/catch\(error\) \{\s*s.active=false;\s*button.setAttribute\('aria-pressed','false'\);\s*setControlVisibility\(ctl,false\)/);
-});
-
-test('transit context suspends viewport facility requests and resumes after mode exit',()=>{
- const s=src('seoul-official-facilities.js');
- assert.match(s,/const transitContextActive=\(\)=>app\?\.dataset\?\.djTransitExterior==='true'/);
- assert.match(s,/async function refresh\(\)\{[\s\S]*?if\(transitContextActive\(\)\)return;/);
- assert.match(s,/function schedule\(\)\{clearTimeout\(timer\);if\(transitContextActive\(\)\)return;/);
- assert.match(s,/data-dj-transit-exterior'\)\)\{schedulePublish\(\);schedule\(\);\}/);
 });

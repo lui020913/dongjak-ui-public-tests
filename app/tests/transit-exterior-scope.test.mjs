@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {transitEndpointPolicy,transitCoordinatesInScope,transitPointInScope,exteriorMapActive,transitWalkStyle,transitContextBounds,transitContextLayer,createTransitContextLayers} from '../src/transit-exterior-scope.mjs';
+import {transitEndpointPolicy,transitCoordinatesInScope,transitPointInScope,exteriorMapActive,transitWalkStyle,transitContextBounds,applyTransitBoundaryVisibility} from '../src/transit-exterior-scope.mjs';
 const a={lng:126.95,lat:37.50},b={lng:127.01,lat:37.55},c={lng:127.1,lat:37.6};
 const inside=(lng,lat)=>lng===a.lng&&lat===a.lat;
 test('one endpoint must be in Dongjak; neither endpoint may exceed pilot search rectangle',()=>{
@@ -43,32 +43,22 @@ test('local render extent is narrower than service search and includes complete 
  for(const [x,y] of coords)assert.ok(x>=bounds[0][0]&&x<=bounds[1][0]&&y>=bounds[0][1]&&y<=bounds[1][1]);
  assert.ok(bounds[0][0]>126.78&&bounds[1][0]<127.20);
 });
-test('transit context retains ordinary roads and selected route, suspends other layers, and restores prior settings',()=>{
- const layers=[{id:'road_primary',type:'line','source-layer':'transportation'},{id:'building',type:'fill','source-layer':'building'},{id:'rail',type:'line','source-layer':'transportation'},{id:'dj-transit-multi-stops-circle',type:'circle'},{id:'district-pri',type:'line'},{id:'facility',type:'symbol'},{id:'water',type:'fill','source-layer':'water'}];
- const visibility=new Map([['facility','none']]);
- const writes=[];
- const map={getStyle:()=>({layers}),getLayer:id=>layers.find(x=>x.id===id),getLayoutProperty:id=>visibility.get(id),setLayoutProperty:(id,k,v)=>{visibility.set(id,v);writes.push(id);}};
- const context=createTransitContextLayers(map);
- context.enforce();context.enforce();
- assert.deepEqual(writes,['building','rail','district-pri']);
- for(const id of ['road_primary','dj-transit-multi-stops-circle','water'])assert.ok(transitContextLayer(map.getLayer(id)));
- context.restore();
- assert.equal(visibility.get('building'),'visible');assert.equal(visibility.get('facility'),'none');
+test('transit changes only the two original boundary line opacities; all map filters and layers are untouched',()=>{
+ const paint=new Map([['district-border',.96],['district-border-halo',.42]]),writes=[];
+ const map={getLayer:id=>paint.has(id),getPaintProperty:id=>paint.get(id),setPaintProperty:(id,key,value)=>{paint.set(id,value);writes.push([id,key,value]);}};
+ applyTransitBoundaryVisibility(map,true,true);applyTransitBoundaryVisibility(map,true,true);
+ assert.deepEqual(writes,[['district-border','line-opacity',0],['district-border-halo','line-opacity',0]]);
+ applyTransitBoundaryVisibility(map,false,true);
+ assert.equal(paint.get('district-border'),.96);assert.equal(paint.get('district-border-halo'),.42);
+ const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
+ assert.doesNotMatch(main,/installSharedDistrictScope|createTransitContextLayers|map\.setTerrain\(null\)|import '\.\/transit-exterior-scope.css'/);
+ const scope=main.split('function syncTransitExterior(force=false){')[1].split('function clearTransitPreview(){')[0];
+ assert.match(scope,/applyTransitBoundaryVisibility\(map,active,/);
+ assert.doesNotMatch(scope,/setLayoutProperty|setFilter|setStyle|setTerrain/);
 });
-
-test('initial camera keeps about 750 metres of context and ignores unrelated raster overlays',()=>{
+test('initial camera keeps about 750 metres of context',()=>{
  const district=[[126.91,37.47],[126.99,37.53]];
  const bounds=transitContextBounds(district);
  assert.ok(district[0][0]-bounds[0][0]<.009);
- assert.ok(district[1][1]-bounds[1][1]<.007);
- assert.equal(transitContextLayer({id:'unrelated-raster',type:'raster'}),false);
- assert.equal(transitContextLayer({id:'osm-emergency-base',type:'raster'}),true);
-});
-
-test('non-route DOM markers and heavy facility refresh are suspended during transit',()=>{
- const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
- const css=read('transit-exterior-scope.css');
- assert.match(css,/data-dj-transit-exterior="true"\] \.dongjak-landmark/);
- assert.match(css,/\.dongjak-education-marker/);
- for(const file of ['civic-facility-layer.js','education-layer.js','landmark-layer.js','readable-3d-labels.js','ui-environment.js','transport-map.js'])assert.match(read(file),/djTransitExterior/);
+ assert.ok(bounds[1][1]-district[1][1]<.007);
 });
