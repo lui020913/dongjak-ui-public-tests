@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import {statSync} from 'node:fs';
 import {onRequestGet,onRequestPost} from './functions/api/place-insight.js';
+import {serveDistrictRoadTile} from './server/district-road-tile.mjs';
 import {platformHtml} from './platforms/shared/platform-html.js';
 // Cloudflare Pages serves the identical /api/place-insight route in production.
 // Vite alone has no Workers AI binding. Use npm run dev:ai for local inference.
@@ -9,6 +10,14 @@ const outputs={
   'ios-pwa':'build/ios-pwa',
   android:'build/android'
 };
+function districtTileMiddleware(server){
+ server.middlewares.use('/api/basemap/tile',async(req,res,next)=>{
+  if(req.method!=='GET')return next();
+  const reply=await serveDistrictRoadTile(new Request('http://localhost/api/basemap/tile'+req.url));
+  res.writeHead(reply.status,Object.fromEntries(reply.headers.entries()));
+  res.end(Buffer.from(await reply.arrayBuffer()));
+ });
+}
 export default defineConfig(({mode})=>{
 const target=outputs[mode]?mode:'universal';
 const uiOnly=mode==='ui-only';
@@ -16,7 +25,7 @@ return ({
   define:{__DJ_PLATFORM_BUILD__:JSON.stringify(target),__DJ_GUIDEBOOK_BYTES__:JSON.stringify(statSync(new URL('./public/dongjak-guidebook.pdf',import.meta.url)).size)},
   build:{outDir:outputs[target]||'dist',emptyOutDir:true},
 
-  plugins:[{name:'dongjak-platform-html',enforce:'pre',transformIndexHtml(html){return platformHtml(html,target);}},
+  plugins:[{name:'district-road-data',configureServer:districtTileMiddleware,configurePreviewServer:districtTileMiddleware},{name:'dongjak-platform-html',enforce:'pre',transformIndexHtml(html){return platformHtml(html,target);}},
     {name:'dongjak-ui-only-transport-fallback',configureServer(server){
       if(!uiOnly)return;
       server.middlewares.use('/api/transport',(req,res)=>{
