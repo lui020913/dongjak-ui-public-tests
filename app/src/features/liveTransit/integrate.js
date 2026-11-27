@@ -4,6 +4,17 @@ import {railGeojson,stationsGeojson,FIXED_RAIL_STATION_ORDER} from '../../fixed-
 import {attachLiveTransitOverlay,LIVE_METRO_LAYER,LIVE_BUS_LAYER} from './index.js';
 import {railDirectionLabel} from './train-lanes.js';
 export const LIVE_PREF_KEY='dongjak_live_vehicle_options_v827';
+// Live vehicle displays are mutually exclusive; static transport layers
+// remain independent. For an old dual-enabled preference, bus wins because
+// it was opt-in while metro was enabled by default.
+export function normalizeLiveVehicleSelection(raw){
+  const bus=raw?.bus===true;
+  return {metro:!bus&&(typeof raw?.metro==='boolean'?raw.metro:true),bus};
+}
+export function toggleLiveVehicleSelection(current,mode){
+  if(mode!=='metro'&&mode!=='bus')return normalizeLiveVehicleSelection(current);
+  return {metro:mode==='metro'&&!current.metro,bus:mode==='bus'&&!current.bus};
+}
 // Start showing vehicles at a neighborhood zoom, rather than only at street level.
 export const METRO_LIVE_MIN_ZOOM=13.0;
 export function buildDongjakMetroLines(){
@@ -135,7 +146,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
   try{const v=JSON.parse(localStorage.getItem(LIVE_PREF_KEY)||'null');
     for(const mode of ['metro','bus'])if(typeof v?.[mode]==='boolean')saved[mode]=v[mode];
   }catch{}
-  const state={...saved};
+  const state=normalizeLiveVehicleSelection(saved);
   const setStatus=value=>safeText(message,value);
   function showQuota(until){
     const active=state.metro&&until>Date.now();
@@ -164,8 +175,8 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
         if(state.metro)line.push(map.getZoom?.()<METRO_LIVE_MIN_ZOOM?'열차: 지도 확대 시 표시':`지하철 ${info.metro}대`);
         if(state.bus)line.push(`버스 ${info.bus}대`);
         const warnings=(info.warnings||[]).length;
-        setStatus(`${line.join(' · ')||'차량 없음'} · 역간 이동은 추정${warnings?' · 일부 API 제한':''}`);
-        if(state.bus&&!info.availability?.bus)setStatus('버스 위치 API 키가 등록되지 않았습니다. · 지하철 위치는 추정');
+        setStatus(`${line.join(' · ')||'차량 없음'}${state.metro?' · 역간 이동은 추정':''}${warnings?' · 일부 API 제한':''}`);
+        if(state.bus&&!info.availability?.bus)setStatus('버스 위치 API 키가 등록되지 않았습니다.');
         else if(state.bus&&info.availability?.bus&&info.availability.busRoutes===0)
           setStatus('버스 노선 조회 불가 · API 인증/노선 설정 확인');
         else if(state.bus&&!info.bus)setStatus('현재 동작구 내 수신된 버스 좌표 없음 · 위치 API 및 노선 확인');
@@ -181,8 +192,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
     const allowBus=state.bus&&app.dataset.baseBus!=='off';
     btnMetro?.setAttribute('aria-pressed',String(state.metro));
     btnBus?.setAttribute('aria-pressed',String(state.bus));
-    overlay.setVisible('metro',allowMetro);
-    overlay.setVisible('bus',allowBus);
+    overlay.setModes({metro:allowMetro,bus:allowBus});
     if(active&&(allowMetro||allowBus))overlay.start();else overlay.stop();
     if(!state.metro&&!state.bus)setStatus('기본 OFF · 켜면 약 60초마다 공식 API 조회');
     else if(!isMap)setStatus('안전지도 탭에서 차량 위치를 조회합니다.');
@@ -193,7 +203,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
     if(!state.metro)showQuota(0);
   }
   for(const [button,mode] of [[btnMetro,'metro'],[btnBus,'bus']])button?.addEventListener('click',()=>{
-    state[mode]=!state[mode];
+    Object.assign(state,toggleLiveVehicleSelection(state,mode));
     try{localStorage.setItem(LIVE_PREF_KEY,JSON.stringify(state));}catch{}
     sync();if(app.dataset.tab==='map'&&!document.hidden)void overlay.refresh();
   });

@@ -300,5 +300,14 @@ export function attachLiveTransitOverlay(map,opts={}){
     for(const line of [...Object.keys(LINE_COLORS),'unknown'])for(const facing of ['right','left'])for(const lit of [true,false])if(map.hasImage?.(trainImageId(line,facing,lit)))map.removeImage?.(trainImageId(line,facing,lit));
   }
   function setVisible(mode,on){if(!(mode in visible))throw new Error('Unknown mode');visible[mode]=Boolean(on);render(true);}
-  return {start,stop,destroy,refresh,setVisible,getStatus:()=>({started,visible:{...visible},lastUpdate,metroQuotaUntil:quotaActive()?metroQuotaUntil:0,features:display.features.length,vehicles:display.features.length,trainArtwork:atlasApplied?'atlas':atlasState}),sourceId:LIVE_SOURCE};
+  // Atomically switch UI modes and invalidate an older in-flight feed.
+  // Keep the low-level independent setVisible API for other callers/tests.
+  function setModes(next){
+    const desired={metro:Boolean(next?.metro),bus:Boolean(next?.bus)};
+    if(visible.metro===desired.metro&&visible.bus===desired.bus)return;
+    visible=desired;
+    if(request){request.abort();request=null;}
+    render(true);
+  }
+  return {start,stop,destroy,refresh,setVisible,setModes,getStatus:()=>({started,visible:{...visible},lastUpdate,metroQuotaUntil:quotaActive()?metroQuotaUntil:0,features:display.features.length,vehicles:display.features.length,trainArtwork:atlasApplied?'atlas':atlasState}),sourceId:LIVE_SOURCE};
 }
