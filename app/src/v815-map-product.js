@@ -215,5 +215,5 @@ export function installMapProduct({map,maplibregl,navigate,getRoutePoints,onWayp
     };
     setTimeout(fill,400);
   }
-  return {setWaypoints,renderStored};
+  return {setWaypoints,renderStored,renderTransit};
 }
