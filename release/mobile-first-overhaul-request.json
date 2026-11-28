@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.258",
+  "application_version": "9.2.259",
   "public_work_branch": "main",
-  "purpose": "Change only saved-place star marker from blue to the existing map brand teal #0D8875; retain white star, outline, sizes, click behavior, sync, and all previous map fixes. Existing direct-visual protected release.",
-  "attempt": 500,
+  "purpose": "Repair observed 48m line 9 display gap and other short local same-line endpoint discontinuities (max 60m, mutually nearest, aligned, separate components), label connections as approximate display only; tighten coverage fallback; preserve real vertices, routing source, favorite teal, exits and palette. Existing direct-visual protected release.",
+  "attempt": 501,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

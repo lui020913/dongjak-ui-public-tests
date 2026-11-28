@@ -142,7 +142,7 @@ export function selectRepresentativeRailPaths(paths,reference){
 // displayed stations, rather than accepting a line merely because enough
 // individual stations are near surveyed fragments. A missing river crossing
 // must never replace the continuous offline schematic.
-export function hasContinuousRailCoverage(features,ref,maxGap=130){
+export function hasContinuousRailCoverage(features,ref,maxGap=60){
  const intervals=[];
  for(const f of features){
   const coords=f.geometry?.coordinates||[];

@@ -1634,7 +1634,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   map.addSource('transport-rail-tracks',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
   map.addSource('transport-rail-platforms',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
   const localRailGeometry=withMappedLine4(fixedRailCollection(boundaryGeometry));
-  let displayedLocalRail=alignNamseongDisplayRail(localRailGeometry);
+  let displayedLocalRail=displayRailCollection(localRailGeometry,alignNamseongDisplayRail);
   let renderedRailPaths=indexRenderedMetroRail(displayedLocalRail);
   let lastMetroMarkerItems=[];
   map.addSource('transport-schematic-connections',{type:'geojson',data:displayedLocalRail,tolerance:0,buffer:128,maxzoom:19});
