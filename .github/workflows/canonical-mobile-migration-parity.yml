@@ -118,6 +118,9 @@ jobs:
           # Test/build references are separate from actual public runtime references.
           git grep -n -I -E 'manifest-dark|dongjak-dark-|dongjak-\$\{|manifest-\$\{' -- app/tests tests frontend scripts app/public app/scripts app/platforms .github/workflows > "$RUNNER_TEMP/retired-theme/asset-consumers.txt" || test "$?" -eq 1
           cat "$RUNNER_TEMP/retired-theme/asset-consumers.txt" | cut -c1-320
+          # Identify all runtime and regression consumers before deleting night UI modules.
+          git grep -n -I -E 'night-visibility-map|night-visibility-panel\.css|night-visibility\.css|v862-night-analysis-session|v7120-night-panel|v913-night-poi-isolation|night-map-roads-gl|night-road-canvas|nightOwnsLayerOrder|installNightVisibility|nightOcclusionBuildingPaint|MOBILE_DARK_BUILDING_PALETTE|vegetationPalette' -- app/src app/tests app/index.html app/platforms app/scripts tests frontend scripts > "$RUNNER_TEMP/retired-theme/module-consumers.txt" || test "$?" -eq 1
+          cat "$RUNNER_TEMP/retired-theme/module-consumers.txt" | cut -c1-320
       - uses: actions/upload-artifact@v4
         if: always()
         with:
