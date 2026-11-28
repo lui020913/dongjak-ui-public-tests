@@ -1,7 +1,6 @@
 /* v5.9.7 – One authoritative responsive header rule after older patch styles.
    Do not change MapLibre canvas positioning, map sources, or navigation state. */
-#app .topbar,
-#app[data-theme="dark"] .topbar{
+#app .topbar{
   display:grid!important;
   
   
@@ -32,8 +31,7 @@
   box-shadow:none!important;
   z-index:1!important;
 }
-#app .topbar .map-quick-search-form,
-#app[data-theme="dark"] .topbar .map-quick-search-form{
+#app .topbar .map-quick-search-form{
   display:flex!important;flex-direction:row!important;align-items:center!important;
   width:100%!important;max-width:100%!important;min-width:0!important;
   height:44px!important;min-height:44px!important;
@@ -68,17 +66,12 @@
   position:relative!important;flex:0 0 auto!important;z-index:2!important;
   margin:0!important;box-sizing:border-box!important;
 }
-#app[data-theme="dark"] .topbar .map-quick-search-form{
-  background:var(--dj-ui-field,#233a40)!important;
-  border-color:var(--dj-ui-border,#3d5658)!important;
-}
-#app[data-theme="dark"] .topbar .map-quick-search-form input{
-  color:var(--dj-ui-text,#ebf5ef)!important;
-}
+
+
 #app .topbar .map-quick-search-dropdown{left:0!important;right:0!important;top:calc(100% + 8px)!important;}
 
 @media(min-width:951px){
-  #app .topbar,#app[data-theme="dark"] .topbar{
+  #app .topbar{
     
   }
   #app .topbar>.header-tools .weather-widget{
@@ -87,7 +80,7 @@
   }
 }
 @media(min-width:701px) and (max-width:950px){
-  #app .topbar,#app[data-theme="dark"] .topbar{
+  #app .topbar{
     
     
     
@@ -99,7 +92,7 @@
   }
 }
 @media(max-width:700px){
-  #app .topbar,#app[data-theme="dark"] .topbar{
+  #app .topbar{
     
     
     
@@ -112,8 +105,7 @@
   #app .topbar>.brand .logo{width:32px!important;min-width:32px!important;height:32px!important;border-radius:10px!important;}
   #app .topbar>.brand .brand-name{font-size:clamp(10.5px,3vw,12.5px)!important;letter-spacing:-.4px!important;}
   #app .topbar>.brand .eyebrow{display:none!important;}
-  #app .topbar .map-quick-search-form,
-  #app[data-theme="dark"] .topbar .map-quick-search-form{
+  #app .topbar .map-quick-search-form{
     height:42px!important;min-height:42px!important;
     padding:4px 4px 4px 8px!important;border-radius:11px!important;
   }
@@ -139,7 +131,7 @@
   #app[data-tab="map"] .map-actions.map-actions-horizontal{}
 }
 @media(max-width:359px){
-  #app .topbar,#app[data-theme="dark"] .topbar{
+  #app .topbar{
     
     
   }
@@ -159,18 +151,16 @@
 #app #ped-tools-panel .ped-access-list button{display:flex;justify-content:space-between;gap:8px;align-items:center;text-align:left;border:1px solid #dce9e2;border-radius:9px;padding:9px 10px;background:#fff;color:#234d3e;font-size:12px;cursor:pointer;}
 #app #ped-tools-panel .ped-access-list button span:last-child{white-space:nowrap;color:#58786b;font-size:10px;}
 #app #ped-tools-panel .ped-access-note{margin:2px 0;font-size:11px;line-height:1.55;color:#607a70;}
-#app[data-theme="dark"] #ped-tools-panel .ped-access-stat{background:#29433d;border-color:#4a6b60;}
-#app[data-theme="dark"] #ped-tools-panel .ped-access-stat strong{color:#b9eed4;}
-#app[data-theme="dark"] #ped-tools-panel .ped-access-stat span,
-#app[data-theme="dark"] #ped-tools-panel .ped-access-note{color:#b7d0c5;}
-#app[data-theme="dark"] #ped-tools-panel .ped-access-actions button{background:#285243;border-color:#538872;color:#d9f8e6;}
-#app[data-theme="dark"] #ped-tools-panel .ped-access-list button{background:#223b35;border-color:#55776a;color:#e6f7ed;}
-#app[data-theme="dark"] #ped-tools-panel .ped-access-list button span:last-child{color:#bbd8c9;}
+
+
+
+
+
+
 
 /* The legacy light-mode selector is more specific than the generic form rule. */
 @media(max-width:700px){
-  #app .topbar>.map-quick-search .map-quick-search-form,
-  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
+  #app .topbar>.map-quick-search .map-quick-search-form{
     height:42px!important;min-height:42px!important;max-height:42px!important;
     padding:4px 4px 4px 8px!important;margin:0!important;
     box-sizing:border-box!important;

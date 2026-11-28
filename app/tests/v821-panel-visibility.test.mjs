@@ -17,10 +17,10 @@ test('desktop place popup has a viewport-limited, independently scrolling body',
   assert.match(css,/max-height:min\(62dvh,640px\)/);
   assert.match(css,/overflow-y:auto!important/);
 });
-test('desktop safety tab icon is round in light and dark themes',()=>{
+test('desktop safety tab icon retains its round light-theme shape',()=>{
   assert.match(css,/\.nav-tab\[data-tab="map"\] \.nav-icon/);
   assert.match(css,/border-radius:50%!important/);
-  assert.match(css,/\[data-theme="dark"\].*#bottom-nav/);
+  assert.doesNotMatch(css,/\[data-theme="dark"\].*#bottom-nav/);
 });
 test('mobile bus and subway bottom sheets leave the map visible',()=>{
   assert.match(css,/max-height:min\(43dvh,440px\)/);

@@ -160,24 +160,12 @@ html body #app#app #transport-sheet[data-kind="subway"] .dj-news-metro-neighbor-
 }
 html body #app#app #transport-sheet[data-kind="subway"] .metro-neighbor-row [role="button"]{cursor:pointer!important;}
 /* Dark palette matches the same Noryangjin grid structure. */
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .dj-news-metro-favorite-slot #transport-save-place{
-  background:#234438!important;border-color:#497261!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group.up{
-  background:#24272c!important;border-color:#3a4147!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group.down{
-  background:#24272c!important;border-color:#3a4147!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-direction-heading.up{
-  background:#2d333a!important;color:#9bcdf4!important;border-color:#3a4147!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-direction-heading.down{
-  background:#2d333a!important;color:#e8c68d!important;border-color:#3a4147!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .transport-arrival-row{
-  background:#24272c!important;color:#eef1f3!important;
-}
+
+
+
+
+
+
 @media(max-width:359px){
   html body #app#app #transport-sheet[data-kind="subway"] .transport-panel-head{
     grid-template-columns:minmax(0,1fr) 34px 105px!important;column-gap:5px!important;
@@ -201,9 +189,5 @@ html body #app#app #transport-sheet[data-kind="subway"] .transport-timetable-pan
 html body #app#app #transport-sheet[data-kind="subway"] .transport-timetable-pane--down{
   border-color:#f0d49b!important;background:#fff9ec!important;
 }
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-timetable-pane--up{
-  background:#24272c!important;border-color:#3a4147!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-timetable-pane--down{
-  background:#24272c!important;border-color:#3a4147!important;
-}
+
+

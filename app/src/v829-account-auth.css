@@ -44,8 +44,6 @@ html body #app#app #dj824-account .dj829-notice-toggle input{
 html body #app#app #dj824-account .dj829-notice-settings .dj815-helper{margin:0!important;font-size:12px!important;line-height:1.55!important}
 html body #app#app #dj824-account .dj829-notice-settings .dj829-notice-status{font-weight:650!important;color:var(--dj800-accent,#168774)!important}
 html body #app#app #dj824-account .dj829-notice-link{font-size:12px!important;font-weight:650;color:var(--dj800-accent,#168774)!important;text-decoration:underline;}
-html body #app#app[data-theme="dark"] #dj824-account :is(.dj829-signed-summary,.dj829-notice-settings){background:#294144;border-color:#4b7368}
-html body #app#app[data-theme="dark"] #dj824-account .dj829-summary-copy strong{color:#effaf5!important}
-html body #app#app[data-theme="dark"] #dj824-account .dj829-summary-copy small,
-html body #app#app[data-theme="dark"] #dj824-account .dj829-notice-link,
-html body #app#app[data-theme="dark"] #dj824-account .dj829-notice-status{color:#a0eacc!important}
+
+
+

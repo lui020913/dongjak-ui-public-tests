@@ -28,7 +28,7 @@ test('mobile safety menu state stays synchronized with independent close actions
 });
 test('iOS PWA topbar stays opaque and distant map haze cannot blur it',()=>{
   assert.match(css, /background:#fcfefd!important/);
-  assert.match(css, /#app\[data-theme="dark"\] \.topbar\{background:#192d31!important\}/);
+  assert.doesNotMatch(css, /#app\[data-theme="dark"\] \.topbar/);
   assert.match(css, /#app #map\.dj-far-haze-active::before\{/);
   assert.match(css, /-webkit-backdrop-filter:none!important/);
   assert.match(css, /@media \(max-width:1079px\) and \(display-mode:standalone\)/);

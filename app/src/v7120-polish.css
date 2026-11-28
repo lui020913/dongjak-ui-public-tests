@@ -14,13 +14,7 @@ html #dj-full-transition{
   padding:calc(28px + env(safe-area-inset-top,0px)) 22px calc(28px + env(safe-area-inset-bottom,0px))!important;
   gap:0!important;
 }
-html[data-theme="dark"] #dj-full-transition{
-  --dj-load-base:#172b30;--dj-load-panel:rgba(21,45,46,.84);
-  --dj-load-text:#e9fff2;--dj-load-muted:#a9c9bd;--dj-load-stroke:rgba(151,219,190,.2);
-  --dj-load-accent:#80e9bb;
-  background:linear-gradient(145deg,rgba(14,34,39,.88),rgba(19,48,46,.82))!important;
-  color:var(--dj-load-text)!important;
-}
+
 html #dj-full-transition .dj-transition-card{
   width:min(340px,calc(100vw - 48px));max-width:100%;box-sizing:border-box;
   display:flex;flex-direction:column;align-items:center;gap:0;

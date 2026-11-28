@@ -47,9 +47,7 @@ html body #app#app#app[data-dj860-onboarding-open="true"] .topbar .map-quick-sea
     grid-column:1!important;min-height:0!important;padding:8px 12px 10px!important;
     touch-action:pan-y!important;background:#e9f3ed!important;
   }
-  html body #app#app#app#app[data-theme="dark"] .dj860-visual-pane {
-    background:#263d39!important;
-  }
+  
   html body #app#app#app#app .dj860-visual {
     width:100%!important;height:100%!important;min-height:0!important;
     border-radius:17px!important;border-color:rgba(255,255,255,.85)!important;
@@ -375,22 +373,10 @@ html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus
   }
 }
 @media(max-width:699px){
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-quick-button,
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed #transport-use-start,
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed #transport-use-end,
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-bookmark,
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-share {
-  background:#27473f!important;border-color:#45675c!important;color:#e2f4ea!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-bookmark::before {
-  color:#e2f4ea!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals>.transport-arrival-row {
-  background:#203a36!important;border-color:#45675c!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals .transport-arrival-time {
-  color:#9bd8bd!important;
-}
+
+
+
+
 }
 @media(prefers-reduced-motion:reduce) {
   html body #app#app#app#app #map-gesture-guide .dj864-accordion-content,
@@ -399,13 +385,7 @@ html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed[dat
 }
 
 @media(max-width:699px){
-  html body #app#app[data-theme="dark"] .dj860-card {
-    background:#1d322b!important;border-color:#36594c!important;color:#e6f5ec!important;
-  }
-  html body #app#app[data-theme="dark"] .dj860-visual-pane {
-    background:linear-gradient(145deg,#244a3a,#172e29)!important;
-  }
-  html body #app#app[data-theme="dark"] .dj860-footer {
-    border-top-color:#36594c!important;
-  }
+  
+  
+  
 }

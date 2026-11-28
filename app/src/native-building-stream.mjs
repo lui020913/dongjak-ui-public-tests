@@ -9,15 +9,16 @@ export function createBuildingTileQueue(load,{concurrency=1,gap=65,schedule=setT
  let active=0;const pending=[];
  function drain(){
   while(active<concurrency&&pending.length){
-   const job=pending.shift();if(job.signal?.aborted){job.reject(new DOMException('Aborted','AbortError'));continue;}
+   const job=pending.shift();job.detach();if(job.signal?.aborted){job.reject(new DOMException('Aborted','AbortError'));continue;}
    active++;
    Promise.resolve().then(()=>load(job.url,job.signal)).then(job.resolve,job.reject).finally(()=>schedule(()=>{active--;drain();},gap));
   }
  }
  return (url,signal)=>new Promise((resolve,reject)=>{
   if(signal?.aborted){reject(new DOMException('Aborted','AbortError'));return;}
-  const job={url,signal,resolve,reject};pending.push(job);
-  signal?.addEventListener('abort',()=>{const i=pending.indexOf(job);if(i>=0){pending.splice(i,1);reject(new DOMException('Aborted','AbortError'));}},{once:true});
+  const abort=()=>{const i=pending.indexOf(job);if(i>=0){pending.splice(i,1);job.detach();reject(new DOMException('Aborted','AbortError'));}};
+  const job={url,signal,resolve,reject,detach:()=>signal?.removeEventListener('abort',abort)};pending.push(job);
+  signal?.addEventListener('abort',abort,{once:true});
   drain();
  });
 }

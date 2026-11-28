@@ -7,11 +7,7 @@
   --dj882-hover: #f0f8f3;
   --dj882-card-shadow: 0 3px 13px rgba(17,55,42,.045);
 }
-#app[data-theme="dark"] {
-  --dj882-card-tint: #21383b;
-  --dj882-hover: #29453f;
-  --dj882-card-shadow: 0 3px 14px rgba(0,0,0,.11);
-}
+
 
 /* Shared visual rhythm for non-primary map sheets and secondary settings. */
 #app :is(

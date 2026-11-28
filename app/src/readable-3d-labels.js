@@ -1,4 +1,3 @@
-import {nightOwnsLayerOrder} from './v913-night-poi-isolation.js';
 /**
  * v6.0.11 — Keep names anchored to the terrain, not raised 25–95 metres.
  * Layer order below, rather than symbol-height-offset, gives labels priority
@@ -68,7 +67,7 @@ function lastLayersMatch(actual,desired){
  */
 const promotingMaps=new WeakSet();
 export function promoteReadable3DLabelLayers(map){
-  if(!map?.getStyle||!map?.moveLayer||map.isMoving?.()||nightOwnsLayerOrder(map)||promotingMaps.has(map))return false;
+  if(!map?.getStyle||!map?.moveLayer||map.isMoving?.()||promotingMaps.has(map))return false;
   promotingMaps.add(map);
   try {return applyReadableLayerOrder(map);}finally{promotingMaps.delete(map);}
 }
@@ -104,7 +103,7 @@ export function installReadable3DLabels({map}={}){
   let removed=false,pending=false,updating=false,lastOrder='';
   function update(){
     pending=false;
-    if(removed||updating||map.isMoving?.()||nightOwnsLayerOrder(map))return;
+    if(removed||updating||map.isMoving?.())return;
     const order=(map.getStyle()?.layers||[]).map(l=>l.id).join('|');
     if(order===lastOrder)return;
     updating=true;

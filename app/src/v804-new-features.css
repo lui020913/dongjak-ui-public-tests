@@ -44,14 +44,14 @@
 #app #nav-live-card .dj804-nav-gps-quality{grid-column:1/-1;text-align:center;font-size:11px;padding:6px;border-radius:7px;background:rgba(90,120,125,.09);font-weight:700}
 #app #nav-live-card .dj804-nav-gps-quality[data-level=poor]{background:rgba(192,87,65,.13);color:#ac4838}
 #app #nav-live-card .dj804-nav-gps-quality[data-level=good]{background:rgba(42,137,94,.13);color:#247c57}
-#app[data-theme=dark] .dj804-compare-card{background:#1d3336;color:#e4eeed;border-color:#45646b}
-#app[data-theme=dark] .dj804-compare-card[aria-pressed=true]{background:#173e39;border-color:#52b29d}
-#app[data-theme=dark] .dj804-compare-meta{color:#afc4bf}
-#app[data-theme=dark] .dj804-compare-action{color:#8ce0c5}
-#app[data-theme=dark] #dj804-safety-extensions button,#app[data-theme=dark] #dj804-report-area{background:#263c3c;color:#e4f1ee;border-color:#4e6565}
-#app[data-theme=dark] #dj804-safety-extensions .dj804-main-button,#app[data-theme=dark] #dj804-report-print{background:#166f65;color:white}
-#app[data-theme=dark] #nav-live-card .dj804-nav-extra-options button{background:#263b3a;color:#d3e7de;border-color:#4a6962}
-#app[data-theme=dark] #nav-live-card .dj804-nav-extra-options button[aria-pressed=true]{background:#135342;border-color:#2b9376;color:#f0fff8}
-#app[data-theme=dark] .dj804-weather-advice{background:rgba(41,150,125,.16)}
+
+
+
+
+
+
+
+
+
 @media(max-width:650px){.dj804-compare-grid{grid-template-columns:1fr}.dj804-compare-card{gap:6px}.dj804-tool-head{flex-wrap:wrap}#dj804-route-compare{padding:10px}#dj804-safety-extensions .dj804-tool{padding:12px}#app #nav-live-card .dj804-nav-extra-options button{font-size:11px;padding:7px 4px}}
 @media(prefers-reduced-motion:reduce){#dj804-safety-extensions *,#dj804-route-compare *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}

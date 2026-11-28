@@ -12,7 +12,7 @@ export function uniqueValidWaypoints(points){
 export function combineRouteSegments(segments,kind){
   if(!segments.length||segments.some(s=>!Array.isArray(s?.coords)||s.coords.length<2))throw new Error('일부 경유 구간의 실제 보행경로를 계산하지 못했습니다.');
   const coords=[],maneuvers=[];
-  let seconds=0,kilometers=0,slopeAscentM=0,slopeDescentM=0,slopeUncertainM=0;
+  let seconds=0,kilometers=0,slopeAscentM=0,slopeDescentM=0,slopeUncertainM=0,vehiclePermittedM=0;
   const sourceNames=new Set();
   for(let i=0;i<segments.length;i++){
     const segment=segments[i];
@@ -25,28 +25,31 @@ export function combineRouteSegments(segments,kind){
     seconds+=Number(segment.seconds)||0;kilometers+=Number(segment.kilometers)||0;
     slopeAscentM+=Number(segment.slopeAscentM)||0;slopeDescentM+=Number(segment.slopeDescentM)||0;
     slopeUncertainM+=Number(segment.slopeUncertainM)||0;
+    vehiclePermittedM+=Number(segment.vehiclePermittedM)||0;
     sourceNames.add(String(segment.source||'unknown'));
   }
-  return {coords,maneuvers,seconds,kilometers,slopeAscentM,slopeDescentM,slopeUncertainM,
+  return {coords,maneuvers,seconds,kilometers,slopeAscentM,slopeDescentM,slopeUncertainM,vehiclePermittedM,
     source:sourceNames.size===1?[...sourceNames][0]:'mixed-walking-network',routeMode:kind,
     waypoints:segments.length-1,segmentCount:segments.length,sourceLabel:'경유지 구간별 보행경로 결과 합산 · 실제 현장 통행상태 미검증'};
 }
 export async function computeMultiStopRoutes(points,fetchPair,{signal,onProgress}={}){
   if(points.length<3||points.length>7)throw new Error('출발지·목적지 사이 경유지 1~5개를 지정하세요.');
-  const std=[],gentleSegments=[];
+  const std=[],gentleSegments=[],balancedSegments=[];
   for(let i=0;i<points.length-1;i++){
     if(signal?.aborted)throw new DOMException('길찾기 취소','AbortError');
     onProgress?.(i+1,points.length-1);
     const pair=await fetchPair(points[i],points[i+1],signal);
     if(pair?.standard)std.push(pair.standard);
     if(pair?.gentle)gentleSegments.push(pair.gentle);
+    if(pair?.balanced)balancedSegments.push(pair.balanced);
     if(!pair?.standard&&!pair?.gentle)throw new Error(`${i+1}번째 경유 구간 계산 실패`);
     // A missing mode is not silently replaced by a different mode.
   }
   const standard=std.length===points.length-1?combineRouteSegments(std,'standard'):null;
   const gentle=gentleSegments.length===points.length-1?combineRouteSegments(gentleSegments,'gentle'):null;
   if(!standard&&!gentle)throw new Error('모든 경유 구간을 연결하는 경로를 찾지 못했습니다.');
-  return {standard,gentle,usingLocal:[...std,...gentleSegments].every(s=>s.source==='seoul-pedestrian-graph')};
+  const balanced=balancedSegments.length===points.length-1?combineRouteSegments(balancedSegments,'balanced'):null;
+  return {standard,gentle,balanced,usingLocal:[...std,...gentleSegments,...balancedSegments].every(s=>s.source==='seoul-pedestrian-graph')};
 }
 export function crowDistanceMeters(a,b){
   const r=Math.PI/180,dy=(a.lat-b.lat)*111320,dx=(a.lng-b.lng)*111320*Math.cos(((a.lat+b.lat)/2)*r);

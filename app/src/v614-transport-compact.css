@@ -47,9 +47,5 @@
   #app #transport-sheet[data-kind="subway"] .metro-neighbor-row{grid-template-columns:minmax(0,1fr) minmax(64px,1.05fr) minmax(0,1fr)!important;}
 }
 /* Day/night retains independent palette: colored line remains the subway route color. */
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-info-line-card{
-  background:#203536!important;border-color:#395950!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-neighbor-row .metro-rail-current{
-  background:#f9fffc!important;
-}
+
+

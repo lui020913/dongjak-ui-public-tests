@@ -1,10 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {slimMapTextHalos} from '../src/map-label-halo.js';
-import {nightOcclusionBuildingPaint,buildingExtrusionAppearance} from '../src/map-appearance.js';
+import {buildingExtrusionAppearance} from '../src/map-appearance.js';
 import {busFilterInsideDistrict,BASEMAP_BUS_FILTER} from '../src/bus-stop-dedup.js';
 import {installBasemapBusStopFallback} from '../src/transport-map.js';
-import {createNightMapRoadLayer} from '../src/night-map-roads-gl.js';
 import {readFileSync} from 'node:fs';
 
 const district={type:'Polygon',coordinates:[[[126.91,37.48],[126.98,37.48],[126.98,37.52],[126.91,37.52],[126.91,37.48]]]};
@@ -20,18 +19,8 @@ test('map label halo shrinks once, including basemap post-office and bus labels'
   assert.equal(slimMapTextHalos(m),0,'idempotent: no endless styledata/idle reflows');
 });
 
-test('night analysis dark building blocks road show-through and restores on exit',()=>{
-  const old=buildingExtrusionAppearance('dark',52);
-  assert.ok(old.opacity>=0.89,'normal dark building remains nearly opaque');
-  const night=nightOcclusionBuildingPaint(old,true);
-  assert.equal(night.opacity,0.98);
-  assert.equal(night.color,'#192c34');
-  assert.deepEqual(nightOcclusionBuildingPaint(old,false),old);
-});
-
-test('night analytical 3D road shares building depth rather than drawing through roofs',()=>{
-  const native=createNightMapRoadLayer({getPitch:()=>48,getZoom:()=>18},{});
-  assert.equal(native.layer.renderingMode,'3d');
+test('old night preference cannot alter ordinary building appearance',()=>{
+  assert.deepEqual(buildingExtrusionAppearance('dark',52),buildingExtrusionAppearance('light',52));
 });
 
 test('bus tile fallback is explicitly clipped to polygon; missing polygon is fail-closed',()=>{

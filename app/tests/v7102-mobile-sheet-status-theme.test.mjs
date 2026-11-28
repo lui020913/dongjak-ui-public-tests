@@ -26,7 +26,7 @@ test('iOS theme roots stay in sync without a fullscreen theme mask',()=>{
   const ios=read('platforms/ios-pwa/ios-pwa.css');
   const pwa=read('src/mobile-pwa-status-tone-v793.js');
   const env=read('src/ui-environment.js');
-  assert.match(ios,/color-scheme:dark!important/);
+  assert.doesNotMatch(ios,/color-scheme:dark!important/);
   assert.match(ios,/color-scheme:light!important/);
   assert.match(pwa,/root\.style\.colorScheme=theme/);
   assert.doesNotMatch(env,/themeFlash|showThemeTransition/);

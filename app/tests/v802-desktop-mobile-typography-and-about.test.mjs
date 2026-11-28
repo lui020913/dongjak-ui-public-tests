@@ -36,7 +36,7 @@ test('desktop search/button 56px sizing, inset spacing, typography hierarchy and
   assert.match(css,/night-visibility-quick-off/);
   assert.match(css,/#map-gesture-guide-open/);
   assert.match(css,/bottom:auto!important;height:max-content!important/);
-  assert.match(css,/\[data-theme="dark"\]/);
+  assert.doesNotMatch(css,/\[data-theme="dark"\]/);
 });
 
 test('mobile type icon separates the two syllables and mobile sheets have a real re-open motion',()=>{

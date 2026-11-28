@@ -32,7 +32,7 @@ test('canonical compass bearing and artwork are mirrored onto the mobile proxy',
 test('first paint defaults to light without reload splash',()=>{
   const h=read('index.html');
   assert.ok(h.includes('/* Critical first paint:'));
-  assert.ok(h.includes('--start-bg:#22282e'));
+  assert.ok(!h.includes('--start-bg:#22282e'));
   assert.ok(h.includes('background:var(--start-bg)!important'));
   assert.doesNotMatch(h,/data-dj-reload-splash|dj-pwa-transition-v7104/);
   assert.match(h,/var displayTheme='light'/);
@@ -41,7 +41,7 @@ test('mobile and desktop get separate layout, colors and animations',()=>{
   const c=read('src/v800-ui-architecture.css');
   assert.match(c,/@media\(max-width:699px\)/);
   assert.match(c,/@media\(min-width:1080px\)/);
-  assert.match(c,/html\[data-theme="dark"\]/);
+  assert.doesNotMatch(c,/html\[data-theme="dark"\]/);
   assert.match(c,/dj800-sheet-enter/);
   assert.match(c,/--dj800-panel-bottom/);
   assert.match(c,/#dj800-type-trigger/);

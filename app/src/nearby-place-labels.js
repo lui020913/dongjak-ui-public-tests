@@ -1,5 +1,4 @@
 import {hasTransportPoiHit} from './poi-click-identity.js';
-import {nightOwnsLayerOrder} from './v913-night-poi-isolation.js';
 import {openPlaceDetails} from './place-details.js';
 /** Context labels near Dongjak-gu; place coordinates are explicit map anchors. */
 export const NEARBY_PLACE_LABELS=[
@@ -145,7 +144,7 @@ export function installNodeulseomDetailLabel(map){
       paint:{'icon-opacity':1}});
   }
   try{
-    if(nightOwnsLayerOrder(map))return;
+
     map.setLayoutProperty?.(dotId,'visibility',hasLabel?'none':'visible');
     if(hasIcon)map.setLayoutProperty?.(pinId,'visibility','visible');
     map.setLayoutProperty?.(nameId,'visibility',hasLabel?'none':'visible');

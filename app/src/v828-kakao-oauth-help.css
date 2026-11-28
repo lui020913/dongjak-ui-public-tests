@@ -13,7 +13,5 @@ html body #app#app #dj824-account .dj828-kakao-help :is(p,a){
   margin:10px 0 0;overflow-wrap:anywhere;word-break:keep-all;
 }
 html body #app#app #dj824-account .dj828-kakao-help a{color:var(--dj800-accent,#117d66);text-decoration:underline;}
-html body #app#app[data-theme="dark"] #dj824-account .dj828-kakao-help{
-  background:#294144;border-color:#4b7369;color:#e5f3ee;
-}
-html body #app#app[data-theme="dark"] #dj824-account .dj828-kakao-help a{color:#a9e8cf;}
+
+

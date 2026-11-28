@@ -12,15 +12,8 @@ test('v728 applies one last stylesheet while retaining 5-tab mobile controls',()
   assert.equal((main.match(/mobile-ui-baseline\.css/g)||[]).length,1);
   assert.ok(main.indexOf('mobile-ui-baseline.css')<main.indexOf('v815-map-product.css'));
   assert.match(css,/#app\[data-tab\] #map-tools-toggle/);
-  assert.match(css,/#app\[data-tab\] #night-visibility-quick-off/);
   assert.match(css,/#app\[data-tab\] #map-safety-toggle/);
   assert.equal(VERSION_HISTORY[0].version,'v7.0.29');
-});
-test('night view excludes competing drawers and has full night-off label',()=>{
-  const src=read('src/night-visibility-map.js');
-  assert.match(src,/app\.classList\.remove\('map-controls-open','map-safety-open'\)/);
-  assert.match(src,/label\.textContent=enabled\?'야간 시야 해제':'야간 시야'/);
-  assert.match(css,/#app\[data-tab="map"\]\.map-controls-open #night-visibility-float/);
 });
 test('road width uses exclusive road-layer state and an explicit aligned close X',()=>{
   const src=read('src/road-width-layer.js');
@@ -38,7 +31,7 @@ test('mobile no fake page scroll and restores 16px offset, stable across five ta
   assert.match(css,/--dj-ios-edge-clearance:0px!important/);
   assert.match(css,/#app\[data-tab\] \.topbar/);
   assert.doesNotMatch(css,/scrollTo\(|scrollBy\(/);
-  assert.match(css,/#app::before,#app\[data-theme="dark"\]::before/);
+  assert.match(css,/#app::before/);
 });
 test('search placeholder cycles without PC-only condition and preserves typing',()=>{
   const s=read('src/map-quick-search.js');

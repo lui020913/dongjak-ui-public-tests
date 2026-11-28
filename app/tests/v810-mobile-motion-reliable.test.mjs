@@ -34,7 +34,7 @@ test('mobile sheet animation remains loaded while legacy PC precision assets sta
   assert.equal(html.includes('v809-precision-polish.css'),false);
   assert.ok(html.includes('dongjak-ios-home-180.png'));
   assert.ok(html.includes('dongjak-light-512.png'));
-  assert.ok(html.includes('dongjak-dark-512.png'));
+  assert.ok(!html.includes('dongjak-dark-512.png'));
 });
 test('mobile compact dialogs no longer fade independently',()=>{
   assert.doesNotMatch(coordinator,/fadeOnlyMobileIds/);

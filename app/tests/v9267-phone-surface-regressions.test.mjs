@@ -23,7 +23,7 @@ test('recording mode cannot push the independent AI action down',()=>{
 });
 test('full-screen tabs switch immediately without a white WebGL snapshot or opaque curtain',()=>{
  const local=new URL('../src/mobile-next.css',import.meta.url);
- const material=readFileSync(existsSync(local)?local:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+ const material=readFileSync(local,'utf8');
  assert.match(tab,/if\(!replay\(button\)\)\{[^}]*return;/);
  assert.match(tab,/clearEntrance\(\)/);
  assert.match(tab,/panel\.classList\.add\('dj-tab-content-enter'\)/);
@@ -40,20 +40,17 @@ test('fullscreen footer and My Info icons use the shared theme card surface',()=
   assert.match(css,/--dj-primary-page-bg/);
   assert.match(css,/#bottom-nav/); // this patch only documents that dock state is preserved elsewhere
 });
-test('night consent is centered, stale exit motion is cancelled and pill remains active',()=>{
-  assert.match(css,/#dj833-night-modal:not\(\[hidden\]\)/);
-  assert.match(css,/place-items:center!important/);
-  assert.match(css,/#dj-v794-night\[aria-pressed="true"\]/);
-  assert.match(night,/function openNightConfirm\(\)/);
-  assert.match(night,/DongjakWindowMotion\?\.cancel\?\.\(card\)/);
+test('retired night consent has no active public toolbar handler',()=>{
+  assert.doesNotMatch(night,/function openNightConfirm|buildNightConfirm|requestNight/);
+  assert.doesNotMatch(html,/id="night-visibility-quick-off"/);
 });
 test('iPhone manual theme switch stores camera before a single native-color refresh',()=>{
   assert.match(theme,/export function installManualThemeReload\(\)\{return \(\)=>\{\};\}/);
   assert.match(theme,/requestIosThemeRefresh/);
   assert.match(theme,/sessionStorage\.setItem\(MANUAL_THEME_RELOAD_KEY/);
   assert.match(theme,/win\.location\.reload\(\)/);
-  assert.match(pwa,/nightActive=app\.dataset\.sangdoNight==='on'/);
-  assert.match(pwa,/data-sangdo-night/);
+  assert.doesNotMatch(pwa,/nightActive|sangdoNight/);
+  assert.doesNotMatch(pwa,/data-sangdo-night/);
 });
 
 test('night confirmation has one stationary fade owner, not nested CSS keyframes',()=>{

@@ -38,9 +38,7 @@
   #app .transport-sheet .transport-updated-actions{
     flex-wrap:wrap!important;gap:6px!important;min-width:0;
   }
-  #app[data-theme="dark"] .transport-sheet .metro-direction-grid .transport-arrival-time{
-    background:#315848;color:#dbffed;
-  }
+  
 }
 @media (max-width:360px){
   #app .transport-sheet .metro-direction-grid .transport-arrival-row{
@@ -203,7 +201,7 @@
   #app[data-tab="map"] .maplibregl-ctrl-bottom-left{
     
   }
-  #app[data-theme="dark"][data-tab="map"] .sheet.overview-sheet{background:#172831!important;}
+  
 }
 
 @media(max-width:700px){

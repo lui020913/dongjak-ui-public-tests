@@ -19,47 +19,15 @@ html body #app#app #map .dj-place-detail-popup{max-width:min(410px,calc(100vw - 
 html body #app#app #map .dj-place-detail-popup .maplibregl-popup-content{width:auto!important;max-height:min(70dvh,660px)!important;overflow-y:auto!important;overflow-x:hidden!important;border-radius:19px!important;}
 
 /* Dark state: all empty cards and the text they contain must be legible. */
-html[data-theme="dark"] body #app#app,
-html body #app#app[data-theme="dark"]{
- --dj807-bg:#1a3034;--dj807-card:#29464b;--dj807-card-soft:#223e42;
- --dj807-border:#51756f;--dj807-text:#edf8f4;--dj807-muted:#bfd9d1;
-}
-html body #app#app[data-theme="dark"] :is(
- .empty-hint,.record-empty,.records-list>.empty,.records-list .empty,.community-feed>.empty-hint,
- .community-feed>.empty,.community-feed>.empty-state,.community-empty,.community-feed>p,
- #mine-panel .empty-hint,#mine-panel .record-empty,#participation-panel .empty-hint,
- .records-list>p,.records-list>div,.community-note,.records-list .record-item,
- .dj-place-detail-popup .dj-place-ai-response){
- background:var(--dj807-card)!important;border:1px solid var(--dj807-border)!important;
- color:var(--dj807-text)!important;opacity:1!important;
-}
-html body #app#app[data-theme="dark"] :is(
- .empty-hint,.record-empty,.records-list>.empty,.records-list .empty,
- .community-feed>.empty-hint,.community-feed>.empty,.community-feed>.empty-state,
- .records-list>p,.records-list>div,.community-note,.records-list .record-item,
- .stat-grid>div,.dj-place-detail-popup .dj-place-ai-response)
- :is(span,p,small,li,dt,dd){color:var(--dj807-text)!important;opacity:1!important;}
-html body #app#app[data-theme="dark"] :is(
- #participation-panel,#mine-panel,#news-panel,#route-panel,#map-advanced-controls,#map-safety-controls)
- :is(.page-section-title,.page-heading,h2,h3,strong,summary,label){color:var(--dj807-text)!important;opacity:1!important;}
-html body #app#app[data-theme="dark"] :is(
- #map-advanced-controls,#map-safety-controls,#route-panel,#participation-panel,#news-panel,#mine-panel,
- #transport-sheet,#road-width-legend,#map-gesture-guide,#dj-app-about .dj-about-card,
- #dj-map-settings .dj-map-settings-card,#version-history-modal .version-history-dialog){
- background:var(--dj807-bg)!important;border-color:var(--dj807-border)!important;
- color:var(--dj807-text)!important;
-}
-html body #app#app[data-theme="dark"] :is(.map-options-group,.base-layer-controls,.dj-safety-group,.dj-import-entry,
- .transport-arrival-row,.transport-hours-line-panel,.route-card,.route-location-row,.community-filter,.stat-grid>div){
- background:var(--dj807-card-soft)!important;color:var(--dj807-text)!important;border-color:var(--dj807-border)!important;
-}
-html body #app#app[data-theme="dark"] :is(.map-options-group,.base-layer-controls,.dj-safety-group,.dj-import-entry,
- .transport-arrival-row,.route-card,.route-location-row,.community-filter,.stat-grid>div)
- :is(p,small,span,label){color:var(--dj807-muted)!important;}
-html body #app#app[data-theme="dark"] :is(.map-options-group,.base-layer-controls,.dj-safety-group,.dj-import-entry,
- .transport-arrival-row,.route-card,.route-location-row,.stat-grid>div)
- :is(strong,b,h2,h3,summary){color:var(--dj807-text)!important;}
-html body #app#app[data-theme="dark"] :is(.transport-arrival-time,.transport-auto-refresh-label,.map-options-heading strong){color:#9cebd0!important;}
+
+
+
+
+
+
+
+
+
 
 @media(min-width:1080px){
  /* Match major desktop panel headings. */

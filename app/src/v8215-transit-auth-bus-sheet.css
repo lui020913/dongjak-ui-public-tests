@@ -98,12 +98,8 @@ html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .dj-t
     --dj-news-sticky-top:24px!important;
   }
 }
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed>.handle{
-  background:#172831!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed>.handle::after{
-  background:#58746b!important;
-}
+
+
 /* Login required floating sheet sits above the bottom tab, not over the map's
    existing transport heading. It never displays a fake successful login. */
 #dj-transit-signin-prompt[hidden]{display:none!important}
@@ -134,8 +130,7 @@ html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed>.ha
 }
 #dj-transit-signin-prompt .dj-transit-signin-kakao{background:#fee500;color:#1a1918;border-color:#fee500!important}
 #dj-transit-signin-prompt .dj-transit-signin-account{background:#eaf6f1;color:#146c58}
-html body #app#app[data-theme="dark"] #dj-transit-signin-prompt .dj-transit-signin-card,
-html body #app#app[data-theme="dark"] ~ #dj-transit-signin-prompt .dj-transit-signin-card{background:#1f3030;color:#e3f2e9;border-color:#42665a}
+
 @keyframes dj-transit-signin-rise{from{opacity:0;transform:translateY(28px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){#dj-transit-signin-prompt .dj-transit-signin-card{animation:none!important}}
 @media(max-width:380px){

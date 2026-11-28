@@ -56,10 +56,10 @@ test('app information and help contain requested text, safety drawer does not ex
   assert.match(css,/#map-gesture-guide \.dj803-ios-install-help/);
   assert.match(css,/#dj-map-settings :is\(\.dj-map-settings-head h2/);
 });
-test('dark palette and close glyphs have dedicated mobile-safe rules',()=>{
-  assert.match(css,/#app#app\[data-theme="dark"\]/);
+test('light palette and close glyphs have dedicated mobile-safe rules',()=>{
+  assert.doesNotMatch(css,/#app#app\[data-theme="dark"\]/);
   assert.match(css,/rotate:45deg!important/);
   assert.match(css,/rotate:-45deg!important/);
-  assert.match(css,/background:rgba\(17,40,43,\.92\)!important/);
+  assert.match(css,/background:rgba\(218,233,225,\.91\)!important/);
   assert.match(css,/visibility:hidden!important;opacity:0!important;pointer-events:none!important/);
 });

@@ -30,20 +30,7 @@
   color-scheme: light;
 }
 
-#app#app#app#app#app[data-theme="dark"] {
-  --mf-surface: var(--dj-theme-surface,#23262c);
-  --mf-surface-raised: var(--dj-theme-raised,#2b3037);
-  --mf-surface-soft: var(--dj-theme-selected,#39434e);
-  --mf-text: var(--dj-theme-ink,#f2f4f7);
-  --mf-muted: var(--dj-theme-muted,#b6bec8);
-  --mf-border: var(--dj-theme-line,#424952);
-  --mf-brand: var(--dj-theme-accent,#b4c8da);
-  --mf-brand-strong: var(--dj-theme-ink,#f2f4f7);
-  --mf-brand-soft: var(--dj-theme-selected,#39434e);
-  --mf-shadow: 0 8px 26px rgba(0, 0, 0, .22);
-  --mf-shadow-raised: 0 14px 38px rgba(0, 0, 0, .32);
-  color-scheme: dark;
-}
+
 
 /* Shared visual language: layout can change by viewport, component treatment does not. */
 #app#app#app#app#app :is(.topbar .map-quick-search-form, #bottom-nav, .page-panel, #transport-sheet,
@@ -647,21 +634,7 @@
 
 /* Source-aligned corrections: the real app theme is on <html>, and its header
    contains weather/theme/version controls rather than a standalone AI orb. */
-html[data-theme="dark"] #app#app#app#app#app,
-#app#app#app#app#app[data-theme="dark"] {
-  --mf-surface: var(--dj-theme-surface,#23262c);
-  --mf-surface-raised: var(--dj-theme-raised,#2b3037);
-  --mf-surface-soft: var(--dj-theme-selected,#39434e);
-  --mf-text: var(--dj-theme-ink,#f2f4f7);
-  --mf-muted: var(--dj-theme-muted,#b6bec8);
-  --mf-border: var(--dj-theme-line,#424952);
-  --mf-brand: var(--dj-theme-accent,#b4c8da);
-  --mf-brand-strong: var(--dj-theme-ink,#f2f4f7);
-  --mf-brand-soft: var(--dj-theme-selected,#39434e);
-  --mf-shadow: 0 8px 26px rgba(0, 0, 0, .22);
-  --mf-shadow-raised: 0 14px 38px rgba(0, 0, 0, .32);
-  color-scheme: dark;
-}
+
 
 @media (max-width: 699px) {
   html body #app#app#app#app#app .topbar > .header-tools {
@@ -761,9 +734,7 @@ html[data-theme="dark"] #app#app#app#app#app,
     line-height: 1;
   }
 
-  html[data-theme="dark"] body #app#app#app#app#app .topbar #theme-toggle::before {
-    content: "☼";
-  }
+  
 
   html body #app#app#app#app#app .topbar #version-history-trigger {
     display: grid !important;
@@ -848,21 +819,7 @@ html[data-theme="dark"] #app#app#app#app#app,
 
 /* Match the established app's charcoal dark surfaces and compact-toolbar
    interaction contract used by the full nine-viewport regression gate. */
-html[data-theme="dark"] #app#app#app#app#app,
-#app#app#app#app#app[data-theme="dark"] {
-  --mf-surface: var(--dj-theme-surface,#23262c);
-  --mf-surface-raised: var(--dj-theme-raised,#2b3037);
-  --mf-surface-soft: var(--dj-theme-selected,#39434e);
-  --mf-text: var(--dj-theme-ink,#f2f4f7);
-  --mf-muted: var(--dj-theme-muted,#b6bec8);
-  --mf-border: var(--dj-theme-line,#424952);
-  --mf-brand: var(--dj-theme-accent,#b4c8da);
-  --mf-brand-strong: var(--dj-theme-ink,#f2f4f7);
-  --mf-brand-soft: var(--dj-theme-selected,#39434e);
-  --mf-shadow: 0 8px 26px rgba(0, 0, 0, .24);
-  --mf-shadow-raised: 0 14px 38px rgba(0, 0, 0, .34);
-  color-scheme: dark;
-}
+
 
 @media (max-width: 699px) {
   html body #app#app#app#app#app .topbar .weather-widget {
@@ -1057,23 +1014,16 @@ html[data-theme="dark"] #app#app#app#app#app,
     --dj-pwa-land-tone:#f5faf7!important;
     --dj-pwa-bridge-gradient:none!important;
   }
-  html.dj-ios-home-pwa[data-theme="dark"]:has(#dj860-onboarding:not([hidden])):not(:has(#map-startup-overlay:not([hidden]))) {
-    --dj-pwa-native-edge:#192e31!important;
-    --dj-pwa-land-tone:#192e31!important;
-  }
+  
   html body #app#app#app#app#app#app#app .dj860-onboarding .dj860-head {
     background:#f5faf7!important;
     border-color:#e0ebe5!important;
   }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] .dj860-onboarding .dj860-head {
-    background:#192e31!important;border-color:#385650!important;
-  }
+  
   html.dj-ios-home-pwa:has(#dj860-onboarding:not([hidden])):not(:has(#map-startup-overlay:not([hidden]))) body #app > :is(#dj-ios-pwa-map-seam,#dj-ios-pwa-status-bridge){
     background:#f5faf7!important;background-image:none!important;transition:none!important;
   }
-  html.dj-ios-home-pwa[data-theme="dark"]:has(#dj860-onboarding:not([hidden])):not(:has(#map-startup-overlay:not([hidden]))) body #app > :is(#dj-ios-pwa-map-seam,#dj-ios-pwa-status-bridge){
-    background:#192e31!important;
-  }
+  
   /* Permission choice is not an app-blocking dim overlay. The shared window
      motion owns its single enter/exit animation; disable duplicate keyframes. */
   html body #app#app#app#app#app#app#app #djNext-permissions:not([hidden]){

@@ -1,22 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {nightFeatureVisible,NIGHT_DETAIL_ZOOM} from '../src/night-visibility-map.js';
 import {busCoverageSamples} from '../src/bus-coverage-grid.js';
 import {HANGANG_BRIDGE_REFERENCES,bridgeReferenceCollection,installHangangBridgeLabels} from '../src/hangang-bridge-labels.js';
 import {createMetroLineCard} from '../src/transport-map.js';
 
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-
-test('night light geometry remains available in close pitched views, but city overview stays clean',()=>{
-  for(const pitch of [0,20,43,59,70]){
-    assert.equal(nightFeatureVisible('dj-night-light-point',NIGHT_DETAIL_ZOOM.light+0.5,true,pitch),true);
-    assert.equal(nightFeatureVisible('dj-night-reach-fill',NIGHT_DETAIL_ZOOM.reach+0.5,true,pitch),true);
-    assert.equal(nightFeatureVisible('dj-night-light-point',13,true,pitch),false);
-    assert.equal(nightFeatureVisible('dj-night-reach-fill',13,true,pitch),false);
-  }
-  assert.match(read('src/night-visibility-map.js'),/placeLampsBelowBuildings/);
-});
 
 test('bus fallback preserves OSM source coordinates while native tile pictograms are suppressed',()=>{
   const code=read('src/transport-map.js');

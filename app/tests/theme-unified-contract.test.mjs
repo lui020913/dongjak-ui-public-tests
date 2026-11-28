@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 const read=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
 
-test('one theme stylesheet with light-only normal UI and temporary night contrast',()=>{
+test('one theme stylesheet with light-only public UI',()=>{
   const html=read('index.html');
   const main=read('src/main.js');
   const env=read('src/ui-environment.js');
@@ -21,23 +21,18 @@ test('one theme stylesheet with light-only normal UI and temporary night contras
   assert.match(html,/var displayTheme='light'/);
   assert.doesNotMatch(html,/id="theme-toggle"/);
   assert.match(html,/\.map-startup-overlay\{display:none!important;\}/);
-  assert.match(env,/const setTemporaryTheme=next/);
-  assert.ok(env.includes('createThemeState(getInitialTheme())'));
+  assert.doesNotMatch(env,/setTemporaryTheme/);
+  assert.ok(env.includes("const theme='light'"));
   assert.doesNotMatch(env,/suppressPreferenceSave|showThemeTransition|themeFlash/);
-  assert.ok(env.includes('const changed=app.dataset.theme!==next'));
+  assert.ok(env.includes('app.dataset.theme=theme'));
   const clickBlock=env.split("toggle?.addEventListener('click',()=>{")[1]?.split('const setTemporaryTheme=')[0]||'';
   assert.doesNotMatch(clickBlock,/map\.(?:jumpTo|flyTo|setStyle|setCenter)|location\.reload|new maplibregl\.Map/);
   assert.equal(existsSync(new URL('../src/theme-contract-v9275.js',import.meta.url)),false);
 });
 
-test('night mode does not click theme button or override saved manual choice',()=>{
-  const night=read('src/night-visibility-map.js');
+test('retired night mode cannot be activated from the public theme controller',()=>{
   const env=read('src/ui-environment.js');
-  assert.doesNotMatch(night,/themeBeforeNight/);
-  assert.match(night,/applyTemporaryTheme\('dark'\)/);
-  assert.match(night,/applyTemporaryTheme\(null\)/);
-  assert.doesNotMatch(night,/themeToggle\.click\(/);
-  assert.match(env,/themeState\.override\(next\)/);
+  assert.doesNotMatch(env,/themeState\.override|setTemporaryTheme/);
   assert.match(env,/return 'light';/);
   assert.doesNotMatch(env,/safeStorageSet\(THEME_KEY/);
 });
@@ -49,18 +44,19 @@ test('guest onboarding reappears on a new signed-out session',()=>{
   assert.ok(tour.includes("if(!auto)overlay.dataset.dj860Manual='true'"));
 });
 
-test('shared color tokens protect legacy dark selectors and leave safety semantics',()=>{
+test('shared light color tokens preserve safety semantics',()=>{
   const css=read('src/theme-contract.css');
   const isolated=new URL('../src/mobile-next.css',import.meta.url);
-  const prod=readFileSync(existsSync(isolated)?isolated:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+  const prod=readFileSync(isolated,'utf8');
   const layout=read('src/mobile-first-layout.css');
   const material=read('src/button-material.css');
-  for(const c of ['#22282e','#2c343d','#35404a','#f1f4f6','#bec8d2','#79dec5','#285b50'])assert.ok(css.includes(c),c);
+  for(const c of ['#edf3ef','#ffffff','#e9f2ed','#20312e','#53675e','#0d8875','#e1ecec'])assert.ok(css.includes(c),c);
+  assert.doesNotMatch(css,/data-theme="dark"|color-scheme:dark/);
   for(const token of ['--dj-theme-bg','--dj-theme-surface','--dj-theme-ink','--dj-theme-muted','--dj-theme-line','--dj-theme-accent'])assert.ok(css.includes(token));
-  assert.ok(prod.includes('--dj9272-surface:var(--dj-theme-surface'));
-  assert.ok(prod.includes('--dj-v4-selected:var(--dj-theme-selected'));
-  assert.ok(layout.includes('var(--dj-theme-surface,#2c343d)'));
-  assert.ok(material.includes('--djNext-tool-selected-face:var(--dj-theme-selected'));
+  assert.ok(prod.includes('--dj9272-surface:#f5faf7'));
+  assert.ok(css.includes('--dj-v4-selected:#e1ecec'));
+  assert.ok(layout.includes('--mf-surface: #ffffff'));
+  assert.ok(material.includes('--djNext-tool-selected-face:#dcf3e8'));
   assert.ok(css.includes('never paint route-line, warning, PRI or transport'));
 });
 
@@ -70,64 +66,59 @@ test('iOS PWA status controller owns the status-area meta rather than two writer
   assert.ok(controller.includes('isIosHomeScreenPhone(win)'));
   assert.ok(controller.includes('!isIosHomeScreenPhone(win)'));
   assert.ok(ios.includes("themeMeta.setAttribute('content',color)"));
-  assert.equal(JSON.parse(read('public/manifest-dark.webmanifest')).theme_color,'#22282e');
+  assert.equal(existsSync(new URL('../public/manifest-dark.webmanifest',import.meta.url)),false);
   assert.equal(JSON.parse(read('public/manifest-light.webmanifest')).theme_color,'#edf3ef');
 });
 
-test('mobile full-height primary pages retain the charcoal status-edge base',()=>{
+test('mobile full-height primary pages retain the light status-edge base',()=>{
   const css=readPrimaryPhoneCss();
   const contract=read('src/theme-contract.css');
-  assert.match(css,/--dj-primary-page-bg:#22282e/);
-  assert.match(contract,/--dj-theme-bg:#22282e/);
-  assert.match(contract,/--dj-primary-page-bg:#22282e!important/);
+  assert.match(css,/--dj-primary-page-bg:#edf3ef/);
+  assert.match(contract,/--dj-theme-bg:#edf3ef/);
+  assert.match(contract,/--dj-primary-page-bg:#edf3ef!important/);
 });
 
-test('dark phone actions use readable selected text and route disabled colors',()=>{
+test('light phone actions keep the selected news and disabled route states',()=>{
+ const mobile=read('src/mobile-next.css');
  const contract=read('src/theme-contract.css');
- assert.match(contract,/#news-panel \.dongjak-news-tabs > button\.active/);
- assert.match(contract,/#participation-panel :is\(/);
- assert.match(contract,/\.community-post-category,\.community-location-link/);
- assert.match(contract,/#route-panel #route-calc:disabled/);
- assert.match(contract,/background:#404a54!important/);
- assert.match(contract,/color:#17232c!important/);
+ assert.match(mobile,/#news-panel \.dongjak-news-tabs \[data-news-source\]\.active\{background:var\(--djNext-active\)!important;color:#fff!important/);
+ assert.match(mobile,/#route-panel #route-calc:disabled\{opacity:\.52!important;cursor:not-allowed!important;box-shadow:none!important/);
+ assert.match(contract,/--djNext-active:#0d8875!important/);
+ assert.doesNotMatch(contract,/data-theme="dark"/);
 });
 
-test('MapLibre labels stay readable in dark mode, while PRI TIP is hidden and route footer hugs dock',()=>{
+test('MapLibre labels stay readable in light mode, while PRI TIP is hidden and route footer hugs dock',()=>{
   const env=read('src/ui-environment.js');
   const pri=read('src/pri-map.js');
   const contract=read('src/theme-contract.css');
   const isolated=new URL('../src/mobile-next.css',import.meta.url);
-  const ui=readFileSync(existsSync(isolated)?isolated:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+  const ui=readFileSync(isolated,'utf8');
   const html=read('index.html');
-  assert.match(env,/mapLabelTextPaint=Object\.freeze/);
-  assert.ok(env.includes("color:'#f1f4f6'"));
-  assert.ok(env.includes("halo:'rgba(18,25,32,0.97)'"));
+  assert.match(env,/mapLabelLightPaint=Object\.freeze/);
+  assert.ok(env.includes("color:'#26352f'"));
+  assert.ok(env.includes("halo:'rgba(255,255,255,0.97)'"));
   assert.ok(env.includes("map.on('styledata',scheduleMapLabelContrast)"));
   assert.ok(env.includes("supplementalLabelBaseline"));
-  assert.ok(env.includes("'text-halo-width':mapLabelTextPaint.width"));
-  assert.ok(env.includes("themeState.value==='dark'"));
+  assert.ok(env.includes("'text-halo-width':mapLabelLightPaint.width"));
+  assert.doesNotMatch(env,/themeState\.value/);
   assert.ok(pri.includes("doc.documentElement.dataset.djPriActive=id?'true':'false'"));
   assert.ok(ui.includes('html[data-dj-pri-active="true"]'));
   assert.ok(ui.includes("padding-bottom:var(--dj910-dock-bottom"));
   assert.ok(ui.includes("#route-panel #route-calc"));
-  assert.ok(contract.includes("body > .dj-pri-dialog"));
-  assert.ok(contract.includes("color:#f1f4f6!important"));
+  assert.ok(contract.includes("body > :is(#dj-pri-dialog,.dj-pri-dialog)"));
+  assert.ok(contract.includes("color:#20312e!important"));
   assert.ok(html.includes("var displayTheme='light'"));
   assert.ok(!html.includes("localStorage.getItem('dongjak_safety_color_theme_v1')"));
 });
 
-test('dark theme buildings are visually solid close-up, and recede smoothly with zoom',async()=>{
+test('light buildings retain their approved near and far opacity and smooth zoom fade',async()=>{
  const {BUILDING_VISUAL_PALETTE,buildingExtrusionAppearance,buildingZoomOpacityExpression}=await import('../src/map-appearance.js');
- assert.ok(BUILDING_VISUAL_PALETTE.dark.nearOpacity>=.9);
- assert.ok(BUILDING_VISUAL_PALETTE.dark.farOpacity>=.85);
- assert.ok(BUILDING_VISUAL_PALETTE.dark.nearOpacity<=1);
- assert.ok(BUILDING_VISUAL_PALETTE.dark.farOpacity<=BUILDING_VISUAL_PALETTE.dark.nearOpacity);
- assert.ok(buildingExtrusionAppearance('dark',10).opacity>=.9);
- assert.ok(buildingExtrusionAppearance('dark',30).opacity>=.85);
- const expression=buildingZoomOpacityExpression(BUILDING_VISUAL_PALETTE.dark.farOpacity);
- assert.equal(expression[0],'interpolate');
- assert.equal(expression[4],0,'remote buildings must fade away');
- assert.ok(expression[6]>=.85,'nearby buildings must become nearly opaque');
+ assert.deepEqual(Object.keys(BUILDING_VISUAL_PALETTE),['light']);
+ assert.equal(BUILDING_VISUAL_PALETTE.light.nearOpacity,.38);
+ assert.equal(BUILDING_VISUAL_PALETTE.light.farOpacity,.22);
+ assert.equal(buildingExtrusionAppearance('dark',10).opacity,.38);
+ assert.equal(buildingExtrusionAppearance('dark',30).opacity,.22);
+ assert.deepEqual(buildingZoomOpacityExpression(.22),['interpolate',['linear'],['zoom'],13,0,15,.22]);
 });
 
 test('native dialog and AI backdrops remain transparent while floating cards keep shadows',()=>{

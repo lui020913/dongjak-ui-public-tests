@@ -26,17 +26,17 @@ test('bus arrival parsing prefers official vehicle direction over current stop n
   assert.equal(item.destination,'서울역');
   assert.equal(item.message,'운행종료');
 });
-test('dark mode applies pale text and dark thin halo to every active bus-stop name layer',()=>{
+test('old dark preferences do not change bus-stop name colors or halo',()=>{
   const used=new Map();
   const map={getLayer:id=>BUS_STOP_LABEL_IDS.includes(id)?{id}:undefined,
     setPaintProperty:(id,k,v)=>used.set(`${id}:${k}`,v)};
   assert.equal(applyBusStopLabelTheme(map,'dark'),4);
   for(const id of BUS_STOP_LABEL_IDS){
-    assert.equal(used.get(`${id}:text-color`),'#EEF7FB');
-    assert.equal(used.get(`${id}:text-halo-color`),'#10252E');
+    assert.equal(used.get(`${id}:text-color`),'#18508E');
+    assert.equal(used.get(`${id}:text-halo-color`),'#F8FBFD');
     assert.ok(used.get(`${id}:text-halo-width`)<=1.1);
   }
-  assert.notEqual(busStopLabelPalette('light').halo,busStopLabelPalette('dark').halo);
+  assert.deepEqual(busStopLabelPalette('light'),busStopLabelPalette('dark'));
 });
 test('Pages server includes verifiable source timestamp and never substitutes check time',async()=>{
   const old=globalThis.fetch;

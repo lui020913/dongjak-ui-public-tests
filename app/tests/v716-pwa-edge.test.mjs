@@ -29,9 +29,9 @@ test('v7.0.29 standalone nav lowers without breaking ordinary Safari and docks p
   assert.match(read('index.html'),/viewport-fit=cover/);
 });
 
-test('v7.0.29 night vision label stays readable in light and dark',()=>{
+test('v7.0.29 version identity and retired dark night label',()=>{
   const css=read('src/mobile-ui-baseline.css');
   assert.match(css,/#night-visibility-quick-off \.dj-night-action-text\{color:#23483d!important/);
-  assert.match(css, /data-theme="dark"\] #night-visibility-quick-off \.dj-night-action-text/);
+  assert.doesNotMatch(css, /data-theme="dark"\] #night-visibility-quick-off \.dj-night-action-text/);
   assert.equal(JSON.parse(read('package.json')).version,APP_VERSION);
 });

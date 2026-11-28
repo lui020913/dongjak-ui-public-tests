@@ -40,17 +40,14 @@ test('selected Dongjak bus stops center the real map and bus status uses officia
   assert.match(source,/bus-service-status/);
 });
 
-test('mobile search/top clarity, night emphasis, safety-last and bottom-seam changes are last CSS layer',()=>{
+test('mobile search/top clarity, safety-last and bottom-seam changes are last CSS layer',()=>{
   const css=read('src/mobile-ui-baseline.css');
   const main=read('src/main.js');
   assert.ok(main.includes("import './mobile-ui-baseline.css'")&&inLegacyOrder('v704-user-request-fixes.css','v705-integrated-ui.css'));
-  assert.match(css,/\.dj-night-action-symbol/);
-  assert.match(css,/#ffd24d/i);
   assert.match(css,/#app #map-safety-toggle\{top:calc\(var\(--dj-controls-under-nav,438px\) \+ 144px\)/);
   assert.match(css,/#app \.topbar>\.map-quick-search/);
   assert.match(css,/#app #map::after\{background:linear-gradient\(0deg/);
   assert.match(css,/#app #bottom-nav\{border-radius:0!important/);
-  assert.match(read('src/night-visibility-map.js'),/renderNightQuickAction\(\)/);
 });
 
 test('release history shows adjacent update/source links and retains v704 and the point attachment workflow',()=>{

@@ -9,7 +9,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {observedFactorScore} from '../src/pri-data.mjs';
-import {buildingExtrusionAppearance,buildingZoomOpacityExpression,nightOcclusionBuildingPaint} from '../src/map-appearance.js';
+import {buildingExtrusionAppearance,buildingZoomOpacityExpression} from '../src/map-appearance.js';
 import {weeklyWeatherUrl} from '../src/v854-weather-desktop.js';
 import {trainLaneOffset} from '../src/features/liveTransit/train-lanes.js';
 import {featuredPlaceStyle} from '../src/featured-place-labels.js';
@@ -24,12 +24,12 @@ const checks=[
    contains(src('src/bottom-tab-navigation.js'),'start(button)','page.hidden=true','clearEntrance()');
    contains(src('src/mobile-ux-energy.css'),'visibility:hidden!important','background-color:var(--dj-primary-page-bg');
  }],
- ['A02','public light-only UI has no active manual theme refresh, night visibility remains temporary',()=>{
+ ['A02','public light-only UI has no active manual or temporary theme refresh',()=>{
    const html=src('index.html'),theme=src('src/ui-environment.js');
    contains(html,"var displayTheme='light'");
    assert.doesNotMatch(html,/id="theme-toggle"/);
    assert.doesNotMatch(theme,/requestIosThemeRefresh\(/);
-   contains(theme,'themeState.override(next)');
+   contains(theme,"const theme='light'");assert.doesNotMatch(theme,/setTemporaryTheme/);
  }],
  ['A03','closing another sheet cannot reopen the AI modal accidentally',()=>{
    contains(src('src/v880-supabase-safety-ai.js'),'transportDismissedAt','guardTransportDismiss','pointerStart','onExplicitEntryClick','event.isTrusted');
@@ -45,9 +45,10 @@ const checks=[
    assert.equal(observedFactorScore({scores:{accidents:100},evidence:{accidents:{modeled:true}}},'accidents'),null);
    assert.equal(observedFactorScore({scores:{accidents:40},evidence:{accidents:{modeled:false}}},'accidents'),40);
  }],
- ['A07','charcoal theme and light on dark typography use separate palette',()=>{
+ ['A07','public UI uses the approved light palette',()=>{
    const s=src('src/theme-contract.css');
-   contains(s,'--dj-theme-bg:#22282e','--dj-theme-surface:#2c343d','--dj-theme-ink:#f1f4f6');
+   contains(s,'--dj-theme-bg:#edf3ef','--dj-theme-surface:#ffffff','--dj-theme-ink:#20312e');
+   assert.doesNotMatch(s,/data-theme="dark"|color-scheme:dark/);
  }],
  ['A08','iOS reload restores camera tab and active vulnerability layer',()=>{
    const s=src('src/manual-pwa-theme-reload.js');
@@ -56,19 +57,20 @@ const checks=[
  }],
  ['B01','native iOS status surface matches first-run and theme surfaces',()=>{
    const s=src('src/mobile-pwa-status-tone-v793.js');
-   contains(s,'--dj-pwa-status-color','const onboarding=visible','themeMeta.setAttribute');
+   contains(s,'--dj-pwa-status-color',"const color=baselineColor()",'themeMeta.setAttribute');
    contains(src('src/mobile-pwa-status-tone-v793.css'),'#dj-ios-pwa-status-sample');
  }],
- ['B02','all map labels have dark text bright halo in light and vice versa',()=>{
+ ['B02','all ordinary map labels retain dark text and bright halo',()=>{
    const s=src('src/ui-environment.js');
-   contains(s,"mapLabelTextPaint=Object.freeze({color:'#f1f4f6',halo:'rgba(18,25,32,0.97)'","mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)'");
+   contains(s,"mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)'");
    assert.equal(featuredPlaceStyle('light').text,'#6d817b');
-   assert.equal(featuredPlaceStyle('dark').text,'#cbd6d3');
+   assert.deepEqual(featuredPlaceStyle('dark'),featuredPlaceStyle('light'));
  }],
  ['B03','active and disabled buttons retain distinct surface, text and border colors',()=>{
    const s=src('src/theme-contract.css');
-   contains(s,'--dj-brand-mint-selected:#285b50','--dj-brand-mint:#79dec5','#route-panel #route-calc:disabled');
-   contains(src('src/mobile-ux-energy.css'),'.dj-pri-button:disabled');
+   contains(s,'--dj-theme-selected:#e1ecec','--dj-theme-accent:#0d8875');
+   contains(src('src/mobile-next.css'),'#route-panel #route-calc:disabled{opacity:.52!important;cursor:not-allowed!important;box-shadow:none!important}');
+   contains(src('src/pri-map.css'),'.dj-pri-button:disabled{opacity:.5;box-shadow:none}');
  }],
  ['B04','icon-only close controls receive full-size 44px touch and focus targets',()=>{
    const s=src('src/theme-contract.css').split('Shared accessible glass-like icon controls')[1]||'';
@@ -110,11 +112,11 @@ const checks=[
    contains(src('src/pri-map.js'),'syncPriHud(Boolean(id))',"node.style.setProperty('display','none','important')");
    contains(src('src/map-scale-docking.js'),"app.dataset.djPriVisible==='true'");
  }],
- ['C07','dark 3D buildings are nearly opaque close-up and fade smoothly at distance',()=>{
+ ['C07','light 3D buildings keep approved opacity and fade smoothly at distance',()=>{
    const near=buildingExtrusionAppearance('dark',10),far=buildingExtrusionAppearance('dark',30);
-   assert.ok(near.opacity>=.9&&far.opacity>=.85);
+   assert.equal(near.opacity,.38);assert.equal(far.opacity,.22);
    assert.deepEqual(buildingZoomOpacityExpression(far.opacity),['interpolate',['linear'],['zoom'],13,0,15,far.opacity]);
-   assert.ok(nightOcclusionBuildingPaint(near,true).opacity>near.opacity);
+   assert.equal(near.color,far.color);
  }],
  ['D01','route compares only computed pedestrian candidates and labels unknown PRI honestly',()=>{
    const s=root('tests/v911-anonymous-ui.spec.mjs');
@@ -172,7 +174,7 @@ const checks=[
  ['E04','signed-out sessions see onboarding, except native theme refresh restoration',()=>{
    const s=src('src/v860-onboarding.js');
    contains(s,"authState==='signed-out'||pendingGuestOnboarding","seenInMemory=isNativeThemeRefresh");
-   contains(src('src/mobile-pwa-status-tone-v793.js'),'const onboarding=visible');
+   contains(src('src/mobile-pwa-status-tone-v793.js'),"const color=baselineColor()");
  }],
  ['E05','My Info and account preferences remain linked to real login and favorites',()=>{
    const html=src('index.html');
@@ -182,7 +184,11 @@ const checks=[
  }],
  ['E06','mobile-first screens honor safe areas, reduced motion and touch navigation',()=>{
    contains(src('src/mobile-first-layout.css'),'safe-area-inset-bottom','grid-template-columns: repeat(5,minmax(0,1fr))');
-   contains(src('src/bottom-tab-navigation.js'),'prefers-reduced-motion:reduce','pointerdown','pointerup');
+   // A single native click handles touch and keyboard activation. Do not re-add
+   // pointerdown/up handlers that compete with click and can replay a tab twice.
+   const tabs=src('src/bottom-tab-navigation.js');
+   contains(tabs,'prefers-reduced-motion:reduce',"win.addEventListener('click',select,true)","win.removeEventListener('click',select,true)",'if(!phone()||replaying)return;','event.stopImmediatePropagation();','button.click()');
+   contains(src('src/primary-surface-transition.js'),'if(!win.requestAnimationFrame||!win.getComputedStyle||reduced())return replay(button);');
  }],
  ['E07','battery heat budget and fast/full mobile CI preserve essential QA',()=>{
    const s=src('src/adaptive-phone-map-budget.mjs');

@@ -19,7 +19,7 @@ test('v8.6.9 Safety Map tab is home-only while original overview remains an expl
   assert.doesNotMatch(js,/overviewExplicitOpen=overview.hidden/);
   assert.doesNotMatch(js,/overview.hidden=!overviewExplicitOpen/);
   assert.match(js,/navigate\('map',\{suppressOverview:true\}\)/);
-  assert.match(js,/!hasSafetyOverviewContent\(\) && !overviewExplicitOpen/);
+  assert.match(js,/!hasSafetyOverviewContent\(\)\s*&&\s*!overviewExplicitOpen/);
 });
 test('v7.0.29 usable help label and theme-aware user icon, credits in map options',()=>{
   const html=read('index.html'),css=read('src/mobile-ui-baseline.css');

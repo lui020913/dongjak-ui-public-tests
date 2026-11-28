@@ -19,8 +19,7 @@
   }
   /* A single safe-area-relative viewport coordinate on ALL five tabs. Avoid
      iOS tab-specific transforms, hardcoded 0px top, and extra white toolbar. */
-  html body #app#app[data-tab] .topbar,
-  html body #app#app[data-theme="dark"][data-tab] .topbar {
+  html body #app#app[data-tab] .topbar{
     position:fixed!important;
     inset:calc(env(safe-area-inset-top,0px) + 8px) 0 auto 0!important;
     top:calc(env(safe-area-inset-top,0px) + 8px)!important;
@@ -52,8 +51,7 @@
   /* R2 shortcut must never be shown on phones. The mobile More menu retains
      the existing full release-history action. JS also blocks its creation. */
   html body #app#app[data-tab] #dj-r2-history-shortcut,
-  html body #app#app[data-tab="map"] #dj-r2-history-shortcut,
-  html body #app#app[data-theme="dark"][data-tab="map"] #dj-r2-history-shortcut {
+  html body #app#app[data-tab="map"] #dj-r2-history-shortcut{
     display:none!important;visibility:hidden!important;pointer-events:none!important;
     opacity:0!important;width:0!important;height:0!important;
   }
@@ -70,11 +68,8 @@
   html body #app#app[data-tab]:not([data-theme="dark"]) #night-visibility-quick-off[aria-pressed="true"] {
     background:#e6f3ed!important;color:#176d55!important;border-color:#8fbca9!important;
   }
-  html body #app#app[data-theme="dark"][data-tab] :is(#map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off,#dj-mobile-more-trigger){
-    background:#21383b!important;color:#e9f5ef!important;border-color:#49625d!important;
-  }
-  html body #app#app[data-theme="dark"][data-tab] #dj-mobile-more-trigger::before,
-  html body #app#app[data-theme="dark"][data-tab] #night-visibility-quick-off .dj-night-action-text {color:#e9f5ef!important;}
+  
+  
   /* Match the native map-options/safety scrim's 36% opacity ABOVE the map
      backdrop, including search and the transparent top gap. Keep tool row
      tappable: scrim covers chrome, not the four launcher buttons. */
@@ -102,9 +97,7 @@
 
 
 @media (max-width:699px) {
-  html[data-theme="dark"], html[data-theme="dark"] body, html[data-theme="dark"] body #app {
-    background-color:#192d32!important;
-  }
+  
   html body #app #dj-mobile-header-dim{display:none!important;opacity:0!important;}
   html body #app#app.map-controls-open #map-options-backdrop:not([hidden]),
   html body #app#app.map-safety-open #map-safety-backdrop:not([hidden]) {

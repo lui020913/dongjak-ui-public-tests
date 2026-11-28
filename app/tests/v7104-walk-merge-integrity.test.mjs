@@ -23,6 +23,7 @@ test('walk safety routes and seven optional layers coexist with v8.0.0 app appea
   assert.match(html,/src="\/src\/app-artwork-v7104.js"/);
   assert.match(html,/class="dj-app-artwork"/);
   assert.ok(existsSync(new URL('../public/data/safety/walk/dongjak_walk_graph.json',import.meta.url)));
-  assert.ok(existsSync(new URL('../public/icons/dongjak-dark-512.png',import.meta.url)));
+  assert.ok(existsSync(new URL('../public/icons/dongjak-light-512.png',import.meta.url)));
+  assert.ok(!existsSync(new URL('../public/icons/dongjak-dark-512.png',import.meta.url)));
   assert.equal(JSON.parse(read('package.json')).version,APP_VERSION);
 });

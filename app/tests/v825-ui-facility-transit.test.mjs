@@ -66,11 +66,11 @@ test('v825: all common closers use a geometric centered X',()=>{
  assert.match(css,/translate\(-50%,-50%\) rotate\(45deg\)/);
  assert.match(css,/\.maplibregl-popup-close-button::after/);
 });
-test('v825: dark and light subway headings have independently tinted up/down surfaces',()=>{
+test('v825: light subway headings retain independently tinted up/down surfaces',()=>{
  for(const name of ['.metro-arrival-direction-group.up','.metro-arrival-direction-group.down',
  '.metro-direction-heading.up','.metro-direction-heading.down'])assert.ok(css.includes(name));
  assert.ok(css.includes('#dcedfa')&&css.includes('#ffebc8'));
- assert.ok(css.includes('#254b61')&&css.includes('#5a4428'));
+ assert.ok(css.includes('#1e5a85')&&css.includes('#80500f'));
 });
 test('v825: version, final stylesheet order and setting-scaled type hierarchy',()=>{
  const current=JSON.parse(read('package.json')).version;

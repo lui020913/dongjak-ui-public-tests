@@ -17,7 +17,19 @@ export function viewportKeys(bounds,zoom,preferences={},direction,pad=1){
 export function createTransitCellStream({load,onChange,limit=224,concurrency=8}){
  const cache=new Map(),inflight=new Map(),failed=new Set();
  let desired=new Set(),critical=new Set(),signature='',disposed=false,publishTimer=null;
- function publish(){if(disposed)return;onChange([...desired].flatMap(k=>cache.get(k)||[]),{pending:[...desired].filter(k=>!cache.has(k)&&!failed.has(k)).length,failed:[...desired].filter(k=>failed.has(k)).length,criticalPending:[...critical].filter(k=>!cache.has(k)&&!failed.has(k)).length});}
+ // Read every requested cell once. Preserve the requested order and distinguish
+ // an empty, successfully loaded cell from a pending or failed cell.
+ function publish(){
+  if(disposed)return;
+  const rows=[];let pending=0,failedCount=0,criticalPending=0;
+  for(const key of desired){
+   const data=cache.get(key);
+   if(data!==undefined){for(const row of data)rows.push(row);}
+   else if(!failed.has(key)){pending++;if(critical.has(key))criticalPending++;}
+   if(failed.has(key))failedCount++;
+  }
+  onChange(rows,{pending,failed:failedCount,criticalPending});
+ }
  function schedulePublish(){if(disposed||publishTimer!==null)return;publishTimer=setTimeout(()=>{publishTimer=null;publish();},45);}
  function trim(){for(const key of cache.keys()){if(cache.size<=limit)break;if(!desired.has(key))cache.delete(key);}}
  function pump(){
@@ -30,9 +42,9 @@ export function createTransitCellStream({load,onChange,limit=224,concurrency=8})
     if(controller.signal.aborted||disposed)return;
     if(!Array.isArray(rows))throw Error('invalid cell');
     cache.set(key,rows);trim();
-   }).catch(()=>{if(!controller.signal.aborted)failed.add(key);}).finally(()=>{
+   }).catch(()=>{if(!disposed&&!controller.signal.aborted&&inflight.get(key)===controller)failed.add(key);}).finally(()=>{
     if(inflight.get(key)===controller)inflight.delete(key);
-    if(!disposed){schedulePublish();pump();}
+    if(!disposed){if(!controller.signal.aborted&&desired.has(key))schedulePublish();pump();}
    });
   }
  }
@@ -45,5 +57,5 @@ export function createTransitCellStream({load,onChange,limit=224,concurrency=8})
   for(const key of desired)if(cache.has(key)){const rows=cache.get(key);cache.delete(key);cache.set(key,rows);}
   trim();if(publishTimer!==null){clearTimeout(publishTimer);publishTimer=null;}publish();pump();
  }
- return {update,retry(){failed.clear();pump();},dispose(){disposed=true;if(publishTimer!==null)clearTimeout(publishTimer);for(const c of inflight.values())c.abort();inflight.clear();cache.clear();desired.clear();}};
+ return {update,retry(){failed.clear();schedulePublish();pump();},dispose(){disposed=true;if(publishTimer!==null)clearTimeout(publishTimer);for(const c of inflight.values())c.abort();inflight.clear();cache.clear();desired.clear();}};
 }

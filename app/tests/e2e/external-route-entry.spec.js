@@ -30,8 +30,10 @@ test('real transit detail buttons navigate to the visible route editor, includin
   await expect(app).toHaveAttribute('data-tab','route',{timeout:10000});
   await expect(route).toBeVisible();
   await expect(page.locator('#route-'+which+'-label')).toContainText(name);
+  await expect(sheet).toHaveAttribute('hidden','');
   await expect(sheet).toBeHidden();
   await page.waitForTimeout(800);
+  await expect(sheet).toBeHidden();
   await expect(route).toBeVisible();
   await expect(page.locator('.dj-route-endpoint-marker,.dj-route-candidate-marker')).toHaveCount(0);
   if(which==='start'){

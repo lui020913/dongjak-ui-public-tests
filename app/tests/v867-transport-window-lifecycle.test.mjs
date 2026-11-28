@@ -48,3 +48,10 @@ test('교통정보 닫기 로직은 합성 버튼 클릭을 재전송하지 않�
   assert.match(transport,/closeInput\.reset\(\)/);
   assert.match(transport,/windowState\.beginOpen\(openKey,\{origin,refresh,mapEvent\}\)/);
 });
+
+test('accepted transport open releases the authoritative close display lock',async()=>{
+  const {readFile}=await import('node:fs/promises');
+  const source=await readFile(new URL('../src/transport-map.js',import.meta.url),'utf8');
+  assert.match(source,/windowState\.dismiss\(\);[\s\S]*?panel\.hidden=true;panel\.style\.setProperty\('display','none','important'\)/);
+  assert.match(source,/if\(!sameStationLineChange\)\{onOpen\(\);panel\.style\.removeProperty\('display'\);panel\.hidden=false;\}/);
+});

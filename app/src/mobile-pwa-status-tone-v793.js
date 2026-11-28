@@ -18,12 +18,12 @@ export function installPwaStatusTone(doc=document,win=window) {
   if(!root || !app || !themeMeta)return ()=>{};
   let band=null,bridge=null,sample=null;
   let enabled=false;
-  const baselineColor=()=>root.dataset.theme==='dark'?'#22282e':'#edf3ef';
+  const baselineColor=()=>'#edf3ef';
   function sync() {
     enabled=isIosHomeScreenPhone(win);
     // The installed PWA's page root may retain a previous theme through page
     // restoration. The app state is authoritative for both background and bar.
-    const theme=app.dataset.theme==='dark'?'dark':'light';
+    const theme='light';
     if(root.dataset.theme!==theme)root.dataset.theme=theme;
     // Native chrome is managed by iOS. Update web-exposed theme hints on
     // every manual toggle, in addition to CSS safe-area colors.
@@ -37,24 +37,9 @@ export function installPwaStatusTone(doc=document,win=window) {
         app.appendChild(band);
       }
       if(!bridge){bridge=doc.createElement('div');bridge.id='dj-ios-pwa-status-bridge';bridge.setAttribute('aria-hidden','true');app.appendChild(bridge);}
-      const visible=id=>{const n=doc.getElementById(id);return !!n&&!n.hidden&&win.getComputedStyle(n).display!=='none'&&win.getComputedStyle(n).visibility!=='hidden';};
-      // Opening an information window must not darken or blur the map behind it.
-      // Keep the former status-bridge layer disabled even when older dialog
-      // classes remain on the app. The top toolbar's own blur is unaffected.
+      // One light edge tone across the map, first-run screens and AI keyboard.
       if(root.dataset.djPwaDimmed!=='false')root.dataset.djPwaDimmed='false';
-      const aiOpen=!!doc.getElementById('dj-ai-search-modal')?.open;
-      const nightActive=app.dataset.sangdoNight==='on';
-      // Night consent is a floating card; the native edge stays undimmed.
-      const startup=visible('map-startup-overlay');
-      const onboarding=visible('dj860-onboarding');
-      // The loading surface takes precedence if it briefly overlaps onboarding.
-      // Once loading ends, the first-run shell owns exactly its own native status tone.
-      // Onboarding is an ordinary full-screen page, not a white dialog.
-      // Use precisely the same tone as the initial iOS status area and
-      // map/home page; do not switch to a special near-white while it opens.
-      // The full-screen AI surface, root and native status sample must share
-      // one color even while the visual viewport contracts for the keyboard.
-      const color=(startup||onboarding)?baselineColor():aiOpen?(theme==='dark'?'#191b1f':'#edf3ef'):nightActive?'#22282e':baselineColor();
+      const color=baselineColor();
       root.style.setProperty('--dj-pwa-status-color',color);
       root.style.setProperty('background-color',color,'important');
       doc.body.style.setProperty('background-color',color,'important');
@@ -68,7 +53,7 @@ export function installPwaStatusTone(doc=document,win=window) {
     }
   }
   let frame=0;
-  const dimIds=new Set(['map-startup-overlay','map-gesture-guide','djNext-layer-panel','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm','dj-transit-signin-prompt','dj832-dongjak-boundary','dj832-info-sheet','dj832-data-sheet','dj-ai-search-modal']);
+  const dimIds=new Set(['map-startup-overlay','map-gesture-guide','djNext-layer-panel','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj-transit-signin-prompt','dj832-dongjak-boundary','dj832-info-sheet','dj832-data-sheet','dj-ai-search-modal']);
   const relevant=node=>node&& (node===app||dimIds.has(node.id));
   const observer=new MutationObserver(records=>{
     if(!records.some(record=>record.type==='attributes'?relevant(record.target):[...record.addedNodes,...record.removedNodes].some(node=>relevant(node)||node.querySelector?.([...dimIds].map(id=>'#'+id).join(',')))))return;
@@ -76,7 +61,7 @@ export function installPwaStatusTone(doc=document,win=window) {
     if(typeof win.requestAnimationFrame==='function')frame=win.requestAnimationFrame(()=>{frame=0;sync();});else sync();
   });
   // AI uses a native dialog attached to body, not to the isolated application.
-  observer.observe(doc.body,{attributes:true,attributeFilter:['data-theme','data-sangdo-night','data-tab','class','hidden','aria-hidden','open'],childList:true,subtree:true});
+  observer.observe(doc.body,{attributes:true,attributeFilter:['data-theme','data-tab','class','hidden','aria-hidden','open'],childList:true,subtree:true});
   const size=win.matchMedia?.('(max-width: 699px)');
   const standalone=win.matchMedia?.('(display-mode: standalone)');
   for(const mq of [size,standalone])mq?.addEventListener?.('change',sync);

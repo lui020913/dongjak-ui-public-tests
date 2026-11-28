@@ -21,14 +21,14 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
     await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();
   }
   await page.waitForSelector('#app');
-  await page.waitForSelector('#dj-v794-toolbar',{timeout:15000});
+  await page.waitForSelector(page.viewportSize().width<700?'#djNext-toolbar':'#dj-v794-toolbar',{timeout:15000});
   await page.waitForTimeout(900);
 
   const metrics=await page.evaluate(()=>{
     const rect=el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,top:r.top,right:r.right,bottom:r.bottom};};
     const style=el=>{const s=getComputedStyle(el);return {position:s.position,display:s.display,gridTemplateColumns:s.gridTemplateColumns,flexDirection:s.flexDirection,visibility:s.visibility};};
     const topbar=document.querySelector('#app > .topbar');
-    const toolbar=document.querySelector('#app > #dj-v794-toolbar');
+    const toolbar=document.querySelector(innerWidth<700?'#app > #djNext-toolbar':'#app > #dj-v794-toolbar');
     const nav=document.querySelector('#app > #bottom-nav');
     const actions=document.querySelector('#app .map-actions');
     return {
@@ -84,7 +84,7 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
       const priorTab=app.dataset.tab,priorTheme=app.dataset.theme;
       const samples=[];
       try {
-        for(const [theme,expected] of [['light','rgb(237, 243, 239)'],['dark','rgb(34, 40, 46)']]){
+        for(const [theme,expected] of [['light','rgb(237, 243, 239)']]){
           app.dataset.theme=theme;
           for(const [tab,id] of [['route','route-panel'],['participate','participation-panel'],['news','news-panel'],['mine','mine-panel']]){
             const panel=document.getElementById(id),hadHidden=panel.hasAttribute('hidden');
@@ -524,31 +524,17 @@ test('retired update history is absent and PRI header is isolated from scrolling
  await expect(page.locator('[data-dj834-action="map"]')).toBeVisible();
 });
 
-test('night consent has one centered fade and tab handoff keeps the dock fixed',async({page})=>{
+test('retired night and dark mode controls are absent and tab handoff keeps the dock fixed',async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
  test.setTimeout(180000);
  await readyForLiveTouch(page);
  const app=page.locator('#app'),nav=page.locator('#bottom-nav');
  await page.emulateMedia({reducedMotion:'no-preference'});
- // The public app mounts the V794 toolbar; djNext-layers belongs to a different shell.
- // Exercise the real V831 consent handler through its visible V794 night shortcut.
- const night=page.locator('#dj-v794-night');
- await expect(night).toBeVisible({timeout:15000});
- await night.click({timeout:15000,noWaitAfter:true});
- const modal=page.locator('#dj833-night-modal'),card=modal.locator('.dj833-night-dialog');
- await expect(modal).toBeVisible();
- await expect(card).toHaveAttribute('data-dj-window-motion-kind','fade');
- const position=await card.evaluate(n=>{
-  const r=n.getBoundingClientRect(),s=getComputedStyle(n),p=getComputedStyle(n.parentElement);
-  return {centerX:Math.abs(r.x+r.width/2-innerWidth/2),centerY:Math.abs(r.y+r.height/2-innerHeight/2),own:s.animationName,parent:p.animationName,translate:s.translate};
- });
- expect(position.centerX).toBeLessThanOrEqual(2);
- expect(position.centerY).toBeLessThanOrEqual(2);
- expect(position.own).toBe('none');expect(position.parent).toBe('none');
- expect(['none','0px','0px 0px']).toContain(position.translate);
- await modal.locator('[data-choice="no"]').click({timeout:12000,noWaitAfter:true});
- await expect(modal).toBeHidden();
+ await expect(app).toHaveAttribute('data-theme','light');
+ await expect(page.locator('#theme-toggle,#dj840-theme-confirm,#dj-v794-night,#night-visibility-toggle,#night-visibility-quick-off,#night-visibility-float,#dj833-night-modal')).toHaveCount(0);
  await expect(app).not.toHaveAttribute('data-sangdo-night','on');
+ await page.emulateMedia({colorScheme:'dark'});
+ await expect(app).toHaveAttribute('data-theme','light');
  // Track actual event-driven tab states; do not depend on a fixed sleep.
  const before=await nav.boundingBox();
  await nav.locator('[data-tab="mine"]').click({timeout:12000,noWaitAfter:true});

@@ -41,20 +41,6 @@ test('v8.6.4 facility body is divided into readable information, favorites, revi
   assert.match(css,/\.dj-place-body\{[\s\S]*?overflow-y:auto/);
 });
 
-test('temporary night theme avoids consent and reload UI',()=>{
-  const night=read('src/night-visibility-map.js');
-  assert.match(night,/const applyTemporaryTheme=next=>/);
-  assert.ok(night.includes('theme?.setTemporaryTheme?.(next)'));
-  assert.doesNotMatch(night,/themeToggle\.dataset\.dj840ThemeConfirmed='1'/);
-  assert.match(night,/applyTemporaryTheme\('dark'\)/);
-  assert.match(night,/applyTemporaryTheme\(null\)/);
-});
-test('v8.6.4 night-analysis map view does not apply the perspective screen blur',()=>{
-  const css=read('src/v864-facility-detail-redesign.css');
-  assert.match(css,/#app\[data-sangdo-night="on"\] #map\.dj-far-haze-active::before/);
-  assert.match(css,/-webkit-backdrop-filter:none!important;backdrop-filter:none!important/);
-});
-
 test('v8.6.4 desktop wrappers remain layout-neutral',()=>{
   const css=read('src/v864-facility-detail-redesign.css');
   assert.match(css,/#app #map \.dj-place-detail-popup \.dj-place-info-card,[\s\S]*?display:contents/);

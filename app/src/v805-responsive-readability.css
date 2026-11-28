@@ -5,8 +5,7 @@
    underlying document as a provenance notice but is not repeated visually. */
 html body #app#app #route-panel .page-heading h2{font-weight:900!important;letter-spacing:-.04em!important;}
 html body #app#app #route-panel>.page-note{display:none!important;}
-html body #app#app #transport-sheet .transport-selection-box,
-html body #app#app[data-theme="dark"] #transport-sheet .transport-selection-box{
+html body #app#app #transport-sheet .transport-selection-box{
   padding:0!important;margin:12px 0 6px!important;background:transparent!important;
   background-color:transparent!important;border:0!important;box-shadow:none!important;
   outline:none!important;border-radius:0!important;

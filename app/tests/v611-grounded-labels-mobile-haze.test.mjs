@@ -42,5 +42,5 @@ test('mobile horizon is subtle below header; no 58% screen-space blur on mobile'
   assert.match(css,/rgba\(245,249,247,\.22\)/);
   assert.match(css,/-webkit-backdrop-filter:none!important/);
   assert.match(css,/-webkit-mask-image:none!important/);
-  assert.match(css,/#app\[data-theme="dark"\] #map\.dj-far-haze-active::before/);
+  assert.doesNotMatch(css,/#app\[data-theme="dark"\] #map\.dj-far-haze-active::before/);
 });

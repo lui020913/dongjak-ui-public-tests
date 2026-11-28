@@ -51,8 +51,8 @@ jobs:
           node --test frontend/production/mobile-first-overhaul.test.mjs tests/mobile-only-gate.test.mjs tests/mobile-qa-parallel.test.mjs
           node --check scripts/apply-mobile-only-gate.mjs
           node --check scripts/apply-mobile-next.mjs
-          node --check frontend/production/mobile-next.js
-          node --check frontend/production/mobile-17-followup.js
+          node --check app/src/mobile-next.js
+          node --check app/src/mobile-17-followup.js
           node --check scripts/run-mobile-regressions.mjs
           node --check playwright.v911-remote.config.mjs
           node --check tests/v911-anonymous-ui.spec.mjs

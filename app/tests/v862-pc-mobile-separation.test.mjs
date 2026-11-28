@@ -6,10 +6,10 @@ import {applyBaseLandPalette,installMapThemeZoomGuard,getLatestMapInstance} from
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
-test('map theme guard and night analysis retain their startup ordering',()=>{
+test('light map guard retains startup ordering without retired night session',()=>{
   const html=read('index.html');
   assert.ok(html.indexOf('/src/v862-map-theme-zoom-guard.js')<html.indexOf('/src/main.js'));
-  assert.ok(html.includes('/src/v862-night-analysis-session.js'));
+  assert.ok(!html.includes('/src/v862-night-analysis-session.js'));
 });
 
 test('PC and tablet do not mount separate layout trees; every viewport uses the shared app shell',()=>{
@@ -30,21 +30,21 @@ test('PC and tablet do not mount separate layout trees; every viewport uses the 
   assert.ok(css.includes('#dj-tablet-utility-group'));
 });
 
-test('dark map theme restores ground and 3D building colors after zoom',()=>{
+test('light map guard restores ground colors after zoom',()=>{
   const guard=read('src/v862-map-theme-zoom-guard-core.js');
   const main=read('src/main.js');
   const appearance=read('src/map-appearance.js');
   assert.ok(guard.includes("role!=='ground'&&role!=='vegetation'"));
-  assert.ok(guard.includes("theme==='dark'?'#2b3138':'#eeeeec'"));
+  assert.ok(guard.includes("role==='ground'?'#e7e7e5':'#a5ca92'"));
   assert.ok(main.includes('buildingExtrusionAppearance(theme,pitch'));
   assert.ok(main.includes('fill-extrusion-color'));
   assert.ok(main.includes('fill-extrusion-opacity'));
-  assert.equal(buildingExtrusionAppearance('dark',10).opacity,0.94);
-  assert.equal(buildingExtrusionAppearance('dark',30).opacity,0.89);
-  assert.equal(buildingExtrusionAppearance('dark',30).color,'#525d66');
+  assert.equal(buildingExtrusionAppearance('dark',10).opacity,0.38);
+  assert.equal(buildingExtrusionAppearance('dark',30).opacity,0.22);
+  assert.equal(buildingExtrusionAppearance('dark',30).color,'#f1f3f1');
   assert.equal(nativeBuildingExtrusion({type:'fill-extrusion',id:'base-building','source-layer':'building'}),true);
   assert.equal(nativeBuildingExtrusion({type:'fill-extrusion',id:'dongjak-buildings-3d-01','source-layer':'building'}),false);
-  assert.ok(appearance.includes('nearOpacity:0.94,farOpacity:0.89'));
+  assert.ok(appearance.includes('nearOpacity:0.38,farOpacity:0.22'));
 });
 
 test('MapLibre zoom guard restores only base-map ground and vegetation and preserves the map instance',()=>{
@@ -78,14 +78,20 @@ test('MapLibre zoom guard restores only base-map ground and vegetation and prese
   try{
     assert.equal(map.fire('zoomend'),map);
     assert.equal(getLatestMapInstance(),map);
-    assert.equal(map.paints['background/background-color'],'#22272d');
-    assert.equal(map.paints['landuse_residential/fill-color'],'#2b3138');
-    assert.equal(map.paints['park/fill-color'],'#303c34');
+    assert.equal(map.paints['background/background-color'],'#e7e7e5');
+    assert.equal(map.paints['landuse_residential/fill-color'],'#e7e7e5');
+    assert.equal(map.paints['park/fill-color'],'#a5ca92');
     assert.equal(map.paints['road-primary/fill-color'],undefined);
     assert.equal(map.paints['water/fill-color'],undefined);
     assert.equal(map.paints['building/fill-color'],undefined);
     assert.equal(map.paints['dj-night-reach-fill/fill-color'],undefined);
     assert.equal(applyBaseLandPalette(map,app),0);
+    app.dataset.theme='light';
+    assert.equal(applyBaseLandPalette(map,app),0);
+    assert.equal(map.paints['background/background-color'],'#e7e7e5');
+    assert.equal(map.paints['landuse_residential/fill-color'],'#e7e7e5');
+    assert.equal(map.paints['park/fill-color'],'#a5ca92');
+    assert.equal(map.paints['building/fill-color'],undefined);
   }finally{
     cleanup();
     if(previousRaf===undefined)delete globalThis.requestAnimationFrame;else globalThis.requestAnimationFrame=previousRaf;
@@ -93,12 +99,8 @@ test('MapLibre zoom guard restores only base-map ground and vegetation and prese
   }
 });
 
-test('night analysis closes when leaving the map and when opening the pedestrian safety workbench',()=>{
-  const session=read('src/v862-night-analysis-session.js');
-  const runtime=read('src/night-visibility-map.js');
-  assert.ok(session.includes("app.dataset.tab!=='map'||app.classList.contains('map-safety-open')"));
-  assert.ok(session.includes("button?.getAttribute('aria-pressed')==='true')button.click()"));
-  assert.ok(session.includes("attributeFilter:['data-tab','class']"));
-  assert.ok(session.includes("safetyToggle?.addEventListener('click',stop,true)"));
-  assert.equal(runtime.includes('safetyWorkbenchToggle?.addEventListener'),false);
+
+test('retired night session and renderer do not exist in production source',()=>{
+  assert.throws(()=>read('src/v862-night-analysis-session.js'),{code:'ENOENT'});
+  assert.throws(()=>read('src/night-visibility-map.js'),{code:'ENOENT'});
 });

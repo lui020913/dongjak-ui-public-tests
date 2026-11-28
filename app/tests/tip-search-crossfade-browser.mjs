@@ -5,7 +5,7 @@ const read=p=>readFileSync(new URL(p,import.meta.url),'utf8');
 const html=read('../index.html');
 const policy=html.match(/\/\* DJ_INTERACTION_FOCUS_START \*\/([\s\S]*?)\/\* DJ_INTERACTION_FOCUS_END \*\//)?.[1];
 assert.ok(policy);
-const css=['style.css','v840-coordinated-ui.css','v854-integrated-ui.css','v869-safety-home-tip.css','map-search-refinement.css'].map(p=>read('../src/'+p)).join('\n')+'\n'+read('../../frontend/production/mobile-next.css');
+const css=['style.css','v840-coordinated-ui.css','v854-integrated-ui.css','v869-safety-home-tip.css','map-search-refinement.css'].map(p=>read('../src/'+p)).join('\n')+'\n'+read('../src/mobile-next.css');
 const tipJS=read('../src/v854-tip-marquee.js').replace('export function','function');
 const fadeJS=read('../src/map-toolbar-crossfade.js').replace('export function','function');
 for(const engine of [chromium,webkit]){

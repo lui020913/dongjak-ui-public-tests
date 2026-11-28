@@ -68,7 +68,9 @@ test('compact docking restores the scale corner before measuring, without forcin
 test('AI keyboard surface shares its root and PWA status background, with no white seam',()=>{
  const tone=code('src/mobile-pwa-status-tone-v793.js'),toneCss=code('src/mobile-pwa-status-tone-v793.css');
  const ai=code('src/v880-supabase-safety-ai.css'),geometry=code('src/v891-mobile-hud-ai-logo.js');
- assert.match(tone,/aiOpen\?\(theme==='dark'\?'#191b1f':'#edf3ef'\)/);
+ assert.match(tone,/const baselineColor=\(\)=>'#edf3ef'/);
+ assert.match(tone,/const color=baselineColor\(\)/);
+ assert.doesNotMatch(tone,/#191b1f|#22282e/);
  assert.doesNotMatch(tone,/aiOpen\?[^;]*'#ffffff'/);
  assert.match(toneCss,/--dj-pwa-status-color:#edf3ef;/);
  assert.match(ai,/html:has\(#dj-ai-search-modal\[open\]\) body\{background-color:#edf3ef!important/);

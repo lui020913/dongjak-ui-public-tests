@@ -14,7 +14,6 @@ export function installMobileToolbarV794(doc=document, win=window) {
     // The final More control uses the same sliders glyph and opens the
     // existing map-options panel from its dedicated action inside More.
     {id:'dj-v794-safety',label:'보행안전',original:'map-safety-toggle',aria:'aria-expanded',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 20 6v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4Z"/><path d="m9 12 2 2 4-4"/></svg>'},
-    {id:'dj-v794-night',label:'야간 시야',original:'night-visibility-quick-off',aria:'aria-pressed',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.2 14.6A8.1 8.1 0 0 1 9.4 4.2a8.5 8.5 0 1 0 8.8 10.4Z"/><path d="M18 2v5M15.5 4.5h5M21 9v3M19.5 10.5h3"/></svg>'}
   ];
   const button=(id,label)=>{
     const node=doc.createElement('button');
@@ -25,8 +24,7 @@ export function installMobileToolbarV794(doc=document, win=window) {
   function sync(){
     if (!row) return;
     const activeId=app.classList.contains('map-controls-open')?'dj-v794-map':
-      app.classList.contains('map-safety-open')?'dj-v794-safety':
-      app.dataset.sangdoNight==='on'?'dj-v794-night':'';
+      app.classList.contains('map-safety-open')?'dj-v794-safety':'';
     for (const c of controls) {
       const n=doc.getElementById(c.id);
       if(!n)continue;
@@ -35,7 +33,7 @@ export function installMobileToolbarV794(doc=document, win=window) {
       n.dataset.active=active?'true':'false';
       n.setAttribute(c.aria,String(active));
       const caption=n.querySelector('.dj-v794-caption');
-      if(caption)caption.textContent=c.id==='dj-v794-night'&&active?'야간 종료':c.label;
+      if(caption)caption.textContent=c.label;
     }
     const weather=doc.getElementById('weather-label')?.textContent||'';
     const place=doc.getElementById('weather-title')?.textContent||'';
@@ -92,8 +90,8 @@ export function installMobileToolbarV794(doc=document, win=window) {
     });
     row.append(weather,more);app.appendChild(row);
     observer=new MutationObserver(sync);
-    observer.observe(app,{attributes:true,attributeFilter:['class','data-sangdo-night','data-theme','data-tab']});
-    for(const id of ['weather-label','weather-title','night-visibility-quick-off','map-tools-toggle','map-safety-toggle','dj-mobile-utilities']){
+    observer.observe(app,{attributes:true,attributeFilter:['class','data-tab']});
+    for(const id of ['weather-label','weather-title','map-tools-toggle','map-safety-toggle','dj-mobile-utilities']){
       const node=doc.getElementById(id);
       if(node)observer.observe(node,{attributes:true,attributeFilter:['hidden','disabled','aria-pressed','aria-expanded'],childList:true,characterData:true,subtree:true});
     }

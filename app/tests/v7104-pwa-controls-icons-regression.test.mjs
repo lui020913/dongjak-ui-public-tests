@@ -46,10 +46,11 @@ test('four mobile map actions proxy original handlers and share independent UI',
   assert.match(js,/getElementById\(action.id\)\?\.click\(\)/);
   assert.match(css,/@media\(max-width:699px\)/);
 });
-test('icon files use the user-supplied art for light, dark and first loading',()=>{
+test('icon files use the user-supplied light art for first loading',()=>{
   const html=read('index.html');
-  for(const mode of ['light','dark'])for(const size of [180,192,512]){
-    assert.ok(existsSync(new URL(`../public/icons/dongjak-${mode}-${size}.png`,import.meta.url)));
+  for(const size of [180,192,512]){
+    assert.ok(existsSync(new URL(`../public/icons/dongjak-light-${size}.png`,import.meta.url)));
+    assert.ok(!existsSync(new URL(`../public/icons/dongjak-dark-${size}.png`,import.meta.url)));
   }
   assert.match(html,/map-startup-logo[^]*?dongjak-light-512.png/);
   assert.match(html,/manifest-light.webmanifest/);

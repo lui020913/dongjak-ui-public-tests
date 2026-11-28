@@ -1,7 +1,7 @@
 /* UI corrective layer, loaded last. Based on the user-provided v8.0.3 ZIP.
    Desktop rules and mobile rules are deliberately separated. */
 :root {color-scheme:light;}
-html[data-theme="dark"] {color-scheme:dark;}
+
 html,body {overscroll-behavior:none;}
 html body #app#app .dj-about-description{
   max-width:min(335px,100%)!important;
@@ -133,8 +133,7 @@ html body #app#app #map-advanced-controls :is(button,label){font-weight:700!impo
  html body #app#app .dj-about-description{font-size:clamp(11px,calc(14px + var(--dj803-text-delta)),16px)!important;max-width:100%!important;}
  /* iOS PWA: no opposite-theme white/black strip between document and map. */
  html,html body,html body #app#app{background-color:#e5ede8!important;}
- html[data-theme="dark"],html[data-theme="dark"] body,
- html[data-theme="dark"] body #app#app{background-color:#14292d!important;}
+ 
  html body #app#app .dj-theme-switch-flash:not([hidden]){background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;}
 }
 @media(prefers-reduced-motion:reduce){

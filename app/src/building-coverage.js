@@ -85,21 +85,25 @@ export function createBuildingCoverage(map,layers){
   if(!dirty||extruding||map.isMoving?.()||!map.queryRenderedFeatures||!map.setFeatureState)return;
   const ids=layers.filter(id=>map.getLayer(id));if(!ids.length)return;
   let features;try{features=map.queryRenderedFeatures({layers:ids});}catch{return;}
+  // Snapshot sheet indexes and source visibility once per settled viewport.
+  // MapLibre source/layer readiness is invariant during this synchronous scan.
+  const excludedIndexes=[...excludedBySheet.values()],reviewIndexes=[...reviewBySheet.values()],apartmentIndexes=[...apartmentBySheet.values()];
+  const retainedIndexes=map.getZoom?.()>=15?[...retainedBySheet].filter(([id])=>{
+    const source='dongjak-buildings-data-'+id,layer='dongjak-buildings-footprint-'+id;
+    return map.getSource?.(source)&&map.isSourceLoaded?.(source)&&map.getLayer(layer)&&map.getLayoutProperty(layer,'visibility')!=='none';
+  }).map(([,idx])=>idx):[];
   const seen=new Map();
   for(const f of features){
    if(f.id==null||!f.source||!f.sourceLayer)continue;
    const key=JSON.stringify([f.source,f.sourceLayer,f.id]),target={source:f.source,sourceLayer:f.sourceLayer,id:f.id};
    const area=f.properties?.area_m2;
    const explicitlySmall=typeof area==='number'&&Number.isFinite(area)&&area>0&&area<20;
-   const matchedSmall=!isDisplayBuilding(f)&&[...excludedBySheet.values()].some(idx=>idx.matches(f.geometry));
-   const matchedReview=!isGreenProtected(f)&&[...reviewBySheet.values()].some(idx=>idx.matches(f.geometry));
+   const matchedSmall=!isDisplayBuilding(f)&&excludedIndexes.some(idx=>idx.matches(f.geometry));
+   const matchedReview=!isGreenProtected(f)&&reviewIndexes.some(idx=>idx.matches(f.geometry));
    // GIS is the displayed owner only once the complete sheet is loaded and
    // fully opaque. A strict match preserves unrelated native buildings.
-   const matchedRetained=map.getZoom?.()>=15&&[...retainedBySheet].some(([id,idx])=>{
-     const source='dongjak-buildings-data-'+id,layer='dongjak-buildings-footprint-'+id;
-     return map.getSource?.(source)&&map.isSourceLoaded?.(source)&&map.getLayer(layer)&&map.getLayoutProperty(layer,'visibility')!=='none'&&idx.matches(f.geometry);
-   });
-   const matchedApartment=[...apartmentBySheet.values()].some(idx=>idx.matches(f.geometry));
+   const matchedRetained=retainedIndexes.some(idx=>idx.matches(f.geometry));
+   const matchedApartment=apartmentIndexes.some(idx=>idx.matches(f.geometry));
    // The name is retained by the independent symbol layer. A confirmed
    // equivalent apartment footprint must not be painted twice just because it is named.
    const apartmentName=/아파트|래미안|힐스테이트|자이|푸르지오|아이파크|롯데캐슬|더샵|주공|센트레빌/.test(String(f.properties?.['name:ko']||f.properties?.name||''));

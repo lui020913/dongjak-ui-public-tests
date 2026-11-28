@@ -4,7 +4,6 @@ import fs from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {searchLocalPlaces,searchPlaces,normalizePlaceSearchResults} from '../src/route-search.js';
-import {nightActivationBlocked} from '../src/night-visibility-map.js';
 import {nextBuildingPitchMode,buildingModeVisibility} from '../src/building-coverage.js';
 const dir=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=file=>fs.readFileSync(path.join(dir,file),'utf8');
@@ -17,15 +16,6 @@ test('v7.13 search preserves venue & general places, not stations only',async()=
   try{assert.ok((await searchPlaces('숭실대')).some(x=>x.category));}
   finally{globalThis.fetch=oldFetch;}
   assert.deepEqual(normalizePlaceSearchResults({features:[]}),[]);
-});
-test('location pick, route preview and guidance block night activation',()=>{
-  const active=new Set();const app={classList:{contains:k=>active.has(k)}};
-  const doc={getElementById:()=>null};
-  assert.equal(nightActivationBlocked(app,doc),false);
-  for(const mode of ['route-picking','route-preview','route-guiding']){
-    active.add(mode);assert.equal(nightActivationBlocked(app,doc),true);active.delete(mode);
-  }
-  assert.equal(nightActivationBlocked(app,{getElementById:id=>id==='route-transit-confirm'?{hidden:false,getClientRects:()=>[{}]}:null}),true);
 });
 test('building palette has no competing PC visibility writer; pitch hysteresis owns 3D mode',()=>{
   const source=read('src/map-appearance.js');

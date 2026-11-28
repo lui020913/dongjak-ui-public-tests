@@ -1,7 +1,7 @@
 import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 
-const css=readFileSync(new URL('../production/mobile-first-overhaul.css',import.meta.url),'utf8');
+const css=readFileSync(new URL('../../app/src/mobile-first-overhaul.css',import.meta.url),'utf8');
 const pin=JSON.parse(readFileSync(new URL('../../release/mobile-first-overhaul-source.json',import.meta.url),'utf8'));
 
 // v9.2.75: reviewed phone weather, 7-day forecast, PRI disclosure and iOS state CSS increased the exact
@@ -15,11 +15,12 @@ for(const char of stripped){if(char==='{')depth++;if(char==='}')depth--;assert.o
 assert.equal(depth,0,'CSS braces must balance');
 for(const token of [
   '--mf-surface:', '--mf-brand:', '--mf-radius-sheet:', '--mf-touch:',
-  '#app#app#app#app#app[data-theme="dark"]', 'html[data-theme="dark"] #app', '@media (max-width: 699px)',
+  '--mf-surface: #ffffff', '--mf-brand: #167c60', '@media (max-width: 699px)',
 'env(safe-area-inset-bottom',
   'prefers-reduced-motion', '#dj-v794-toolbar', '#bottom-nav',
   '#route-panel', '#participation-panel', '#news-panel', '#mine-panel'
 ]) assert.ok(css.includes(token), 'Missing mobile-first requirement: '+token);
+assert.doesNotMatch(css,/data-theme="dark"/);
 assert.match(pin.source_sha,/^[a-f0-9]{40}$/);
 assert.equal(pin.application_version,'8.26.1');
 assert.equal(pin.release_status,'CANDIDATE_PREVIEW_NOT_PRODUCTION');

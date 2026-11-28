@@ -30,7 +30,7 @@ test('onboarding no longer blurs, dims or gradients its backdrop',()=>{
  assert.ok(legacy.includes('-webkit-backdrop-filter:none!important;backdrop-filter:none!important;'));
  assert.ok(legacy.includes('box-shadow:0 7px 22px rgba(8,34,25,.12)!important;'));
  assert.ok(legacy.includes('touch-action:pan-y!important;background:#e9f3ed!important;'));
- assert.ok(legacy.includes('background:#263d39!important;'));
+ assert.ok(!legacy.includes('background:#263d39!important;'));
  for(const old of ['background:rgba(12,30,25,.48)','backdrop-filter:blur(5px)','linear-gradient(145deg,#eef7f1,#e0eee6)','0 22px 72px rgba(8,34,25,.28)']){
   assert.equal(legacy.includes(old),false,'legacy onboarding effect still active: '+old);
  }
@@ -69,9 +69,9 @@ test('phone search, AI and small action controls use restrained glass without pa
  assert.ok(block.includes('.topbar .map-quick-search-form'));
  assert.ok(block.includes('.topbar .header-tools > #dj890-ai-orb'));
  assert.ok(block.includes('background:rgba(255,255,255,.84)!important;'));
- assert.ok(block.includes('background:rgba(35,38,44,.90)!important;'));
+ assert.ok(!block.includes('background:rgba(35,38,44,.90)!important;'));
  assert.ok(block.includes('background:rgba(12,130,107,.91)!important;'));
- assert.ok(block.includes('background:rgba(51,57,67,.94)!important;'));
+ assert.ok(!block.includes('background:rgba(51,57,67,.94)!important;'));
  assert.equal((block.match(/backdrop-filter:blur\(9px\)/g)||[]).length,4);
  assert.ok(block.includes('#dj-ios-pwa-map-seam'));
  assert.ok(block.includes('var(--dj-pwa-native-edge)'));
@@ -84,10 +84,6 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  const css=productionStyle('mobile-next.css');
  const js=productionStyle('mobile-next.js');
  const nav=read('src/bottom-tab-navigation.js');
- const buildApply=new URL('../../scripts/apply-mobile-next.mjs',import.meta.url);
- // The sealed mobile build copies app/ only, so the parent scripts/ folder
- // deliberately does not exist in the isolated release test workspace.
- const hasSourceScript=existsSync(buildApply);
  const main=read('src/main.js');
  const block=css.split('/* v9.2.72 — one mobile visual system')[1];
  assert.ok(block,'expected final v9.2.72 phone UI stylesheet');
@@ -100,12 +96,7 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  assert.ok(read('src/route-experience-20261123.js').includes("actions?.before(choices)"));
  assert.equal(js.includes("button.insertAdjacentHTML('afterbegin',phoneIcon(key))"),false);
  assert.ok(js.includes("Math.max(96,Math.round(win.innerHeight*.12))"));
- if(hasSourceScript){
-  const apply=readFileSync(buildApply,'utf8');
-  assert.ok(apply.includes('installV9272PhoneExperience({app});'));
- }else{
-  assert.ok(main.includes('installV9272PhoneExperience({app});'),'sealed app must contain the injected phone initializer');
- }
+ assert.ok(main.includes('installV9272PhoneExperience({app});'),'canonical initializer must be present');
  assert.ok(main.includes("window.addEventListener('dj-next:fit-route'"));
  const aiMotion=read('src/v880-supabase-safety-ai.css');
  assert.match(aiMotion,/dj9251-ai-content-enter/);

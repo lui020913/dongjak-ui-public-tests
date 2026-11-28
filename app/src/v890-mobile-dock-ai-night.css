@@ -67,10 +67,7 @@
   #app #dj890-ai-orb:focus-visible {
     outline:3px solid #36b38b!important;outline-offset:3px!important;
   }
-  #app[data-theme="dark"] #dj890-ai-orb {
-    background:#192e31!important;
-    border-color:#4d7567!important;
-  }
+  
 }
 @keyframes dj890-ai-green-cycle {
   from{background-position:0% 50%;}

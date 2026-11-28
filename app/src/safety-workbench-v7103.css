@@ -162,8 +162,7 @@
 #app .dj-safety-group-body :is(.pza-section-title,.sangdo-speed-head,.night-visibility-heading){min-width:0;}
 #app .dj-safety-group-body :is(.pza-section-title,.sangdo-speed-head,.night-visibility-heading) strong{word-break:keep-all;}
 #app .dj-safety-group-body .night-visibility-tool{border:0!important;padding:0!important;background:transparent!important;}
-#app[data-theme="dark"] .dj-safety-group[data-active="true"] .dj-safety-group-count,
-#app[data-theme="dark"] .dj-layer-active .dj-feature-state{color:#7bdacb;}
+
 @media(max-width:700px){
   #app .map-safety-controls{padding:11px!important;gap:9px!important;scrollbar-gutter:auto;}
   #app .dj-safety-group>summary{min-height:62px;padding:11px 10px;}
@@ -188,13 +187,12 @@
 }
 /* Explicit dark-surface fallback: older safety CSS sometimes assigns a light
    card background even after the theme token has changed. */
-#app[data-theme="dark"] .dj-import-entry{background:#253d40!important;border-color:#3d6668!important;}
-#app[data-theme="dark"] .dj-import-entry.dj-layer-active{background:#214c48!important;border-color:#24a99c!important;}
-#app[data-theme="dark"] .dj-feature-copy b{color:#edf9f6!important;}
-#app[data-theme="dark"] .dj-feature-copy small,
-#app[data-theme="dark"] .dj-feature-legend{color:#bcd5d1!important;}
-#app[data-theme="dark"] .dj-feature-state{background:#1a3435!important;border-color:#45686a!important;color:#c6dfdc!important;}
-#app[data-theme="dark"] .dj-layer-active .dj-feature-state{background:#135951!important;border-color:#41b7a6!important;color:#e3fff6!important;}
+
+
+
+
+
+
 #app .dj-safety-group-body .dj-section-intro:has(#dj-safety-clear-imports){
   display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:8px;
 }

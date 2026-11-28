@@ -4,10 +4,7 @@
   --dj-ux-border:var(--dj-ui-border,#d9e8e1);--dj-ux-ink:var(--dj-ui-text,#1e4036);
   --dj-ux-muted:var(--dj-ui-subtext,#708980);--dj-ux-accent:#11866e;
 }
-#app#app[data-theme="dark"]{
-  --dj-ux-bg:#1e3438;--dj-ux-field:#294449;--dj-ux-border:#4a6660;
-  --dj-ux-ink:#e7f6ee;--dj-ux-muted:#b4cbc2;--dj-ux-accent:#86e0bb;
-}
+
 /* The emblem is an independent image button, never a second logo inside search. */
 #app#app .topbar #dj-about-pc{
   flex:none;box-sizing:border-box;display:grid;place-items:center;
@@ -78,7 +75,7 @@
 #app#app :is(#transport-mode-tabs,.transport-mode-tabs){display:flex!important;align-items:center!important;gap:4px!important;box-sizing:border-box!important;border-radius:15px!important;padding:4px!important;background:var(--dj-ux-field)!important;border:1px solid var(--dj-ux-border)!important;width:max-content!important;max-width:100%!important;min-height:46px!important;}
 #app#app :is(#transport-tab-live,#transport-tab-hours){flex:1 1 auto!important;display:grid!important;place-items:center!important;min-width:85px!important;min-height:37px!important;padding:8px 18px!important;background:transparent!important;color:var(--dj-ux-muted)!important;border:none!important;box-shadow:none!important;font-size:14px!important;font-weight:750!important;border-radius:11px!important;letter-spacing:-.02em!important;}
 #app#app :is(#transport-tab-live,#transport-tab-hours)[aria-pressed="true"]{background:#16856d!important;color:#fff!important;box-shadow:0 3px 9px rgba(19,95,70,.16)!important;}
-#app#app[data-theme="dark"] :is(#transport-tab-live,#transport-tab-hours)[aria-pressed="true"]{background:#327e69!important;color:#fff!important;}
+
 #app#app #transport-sheet{color:var(--dj-ux-ink)!important;background:var(--dj-ux-bg)!important;border-color:var(--dj-ux-border)!important;}
 #app#app #transport-sheet .transport-panel-head{background:var(--dj-ux-bg)!important;}
 #app#app #transport-sheet .transport-panel-head #transport-description{color:var(--dj-ux-muted)!important;}

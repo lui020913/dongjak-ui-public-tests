@@ -8,9 +8,9 @@ import {
 import {installDongjakOfficialDataLayers,EXTRA_LAYER_DEFS} from '../src/dongjak-verified-data-layers.js';
 
 const source=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
-test('safety drawer uses four accessible groups and function titles rather than team labels',()=>{
+test('safety drawer uses three accessible groups and function titles rather than team labels',()=>{
   const html=source('index.html');
-  for(const group of ['data','facilities','night','actions']){
+  for(const group of ['data','facilities','actions']){
     assert.match(html,new RegExp(`id="dj-safety-${group}"`));
     assert.match(html,new RegExp(`data-dj-safety-target="dj-safety-${group}"`));
   }
@@ -22,7 +22,7 @@ test('safety drawer uses four accessible groups and function titles rather than 
   assert.ok(!html.includes('팀원 횡단지점 조사'));
   assert.ok(html.includes('dj-slope-legend'));
   assert.ok(html.includes('dj-standard-legend'));
-  assert.ok(html.includes('night-coverage-legend'));
+  assert.ok(!html.includes('night-coverage-legend'));
   assert.ok(!html.includes('id="protection-zone-controls"'));
 });
 
@@ -86,7 +86,7 @@ test('new workbench stylesheet remains scoped to safety drawer and mobile widths
   assert.match(css,/#app \.dj-safety-group/);
   assert.match(css,/#app \.dj-import-grid button:is\(\[data-dj-import\],\[data-bocha-import\]\)/);
   assert.match(css,/@media\(max-width:700px\)/);
-  assert.match(css,/#app\[data-theme="dark"\] \.dj-import-entry/);
+  assert.doesNotMatch(css,/#app\[data-theme="dark"\] \.dj-import-entry/);
   const entry=source('src/safety-workbench-entry-v7104.js');
   const html=source('index.html');
   assert.ok(entry.includes('installSafetyWorkbenchUI(document)'));

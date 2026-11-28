@@ -23,7 +23,7 @@ test('legacy safety toggles are hidden while the shared toolbar keeps their cont
 test('night active text and expanded safety toggle remain legible in light and dark themes',()=>{
   assert.match(css,/#app\[data-tab\] #night-visibility-quick-off\[aria-pressed="true"\]/);
   assert.match(css,/#app\[data-tab\] #night-visibility-quick-off\[aria-pressed="true"\] \.dj-night-action-text/);
-  assert.match(css,/#app\[data-theme="dark"\]\[data-tab\]/);
+  assert.doesNotMatch(css,/#app\[data-theme="dark"\]\[data-tab\]/);
   assert.match(css,/#app\[data-tab\] #map-safety-toggle\[aria-expanded="true"\]/);
   assert.match(css,/#app\[data-tab\] #night-visibility-quick-off\[hidden\]\{display:none!important/);
 });
@@ -32,6 +32,6 @@ test('iPhone standalone top edge clearance does not change browser Safari or map
   assert.match(css,/@media\(max-width:699px\) and \(display-mode:standalone\)/);
   assert.match(css,/@supports \(-webkit-touch-callout:none\)/);
   assert.match(css,/--dj-ios-edge-clearance:16px/);
-  assert.match(css,/#app::before,\s*#app\[data-theme="dark"\]::before/);
+  assert.match(css,/#app::before/);
   assert.doesNotMatch(css,/scrollTo\(|scrollBy\(/);
 });

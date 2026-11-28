@@ -12,7 +12,7 @@ export function createMobileEditingLayout({app,doc,win,nav}){
  function restore(){for(const [node,props] of lease)for(const [key,[value,priority]] of props){if(value)node.style.setProperty(key,value,priority);else node.style.removeProperty(key);}lease.clear();}
  const phone=()=>win.matchMedia?.('(max-width:699px)')?.matches===true;
  const input=()=>{let n=doc?.activeElement;while(n?.shadowRoot?.activeElement)n=n.shadowRoot.activeElement;return n?.matches?.('textarea,input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=button]):not([type=submit]):not([type=range]):not([type=hidden]),[contenteditable=true]')?n:null;};
- const setState=active=>{if(active)app.dataset.djEditingKeyboard='true';else delete app.dataset.djEditingKeyboard;};
+ const setState=active=>{if(active){if(app.dataset.djEditingKeyboard!=='true')app.dataset.djEditingKeyboard='true';}else if('djEditingKeyboard' in app.dataset)delete app.dataset.djEditingKeyboard;};
  let prevPanel=null,prevKeyboard=false;
  function sync(){
   if(!doc||!app.dataset||!phone()||doc.body?.dataset.djCommunityEditor){restore();if(app.dataset)setState(false);focusedLast=null;editingSession=false;seenShrink=false;prevPanel=null;return;}

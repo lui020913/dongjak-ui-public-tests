@@ -792,11 +792,7 @@ html body #app#app#app#app#app#app#app#app[data-tab="map"] #dj-v794-toolbar > .d
     max-height: 44px !important;
     flex: 0 0 44px !important;
   }
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .map-actions > button {
-    background: var(--dj-tablet-surface,#192c2b) !important;
-    color: var(--dj-tablet-ink,#e9f8f1) !important;
-    box-shadow: none !important;
-  }
+  
 }
 }
 

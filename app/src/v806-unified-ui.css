@@ -37,66 +37,17 @@ html body #app#app #dj-app-about:not([hidden]){
 }
 
 /* Distinct, readable light/dark surfaces. Avoid pale boxes in dark panels. */
-html[data-theme="dark"] body #app#app,
-html body #app#app[data-theme="dark"]{
- --dj800-canvas:#14282c;--dj800-surface:#1e3439;
- --dj800-secondary:#29464a;--dj800-elevated:#31564f;
- --dj800-border:#4d746b;--dj800-text:#effbf7;
- --dj800-muted:#c0d6d2;--dj800-accent:#9be4c6;
- --dj800-hover:#355951;--dj800-shadow:0 16px 45px rgba(0,0,0,.28);
- color-scheme:dark;
-}
-html body #app#app[data-theme="dark"] :is(
- .page-panel,#map-advanced-controls,#map-safety-controls,#road-width-legend,
- #transport-sheet,#admin-dong-picker,#overview-sheet,#map-gesture-guide,
- #dj800-type-panel,#dj-map-settings .dj-map-settings-card,
- #version-history-modal .version-history-dialog,#dj-app-about .dj-about-card,
- .dj-place-detail-popup .maplibregl-popup-content){
- background:var(--dj800-surface)!important;color:var(--dj800-text)!important;
- border-color:var(--dj800-border)!important;
-}
-html body #app#app[data-theme="dark"] :is(
- .route-card,.route-location-row,.route-select-actions,
- .community-feed>article,.community-note,.community-feed .empty,
- .community-feed .empty-state,.community-empty,.empty-state,
- .records-list .empty,.records-list .record-item,.record-item,
- .stat-grid>div,.dongjak-news-item,.dongjak-news-card,
- .transport-arrival-row,.transport-timetable-route-panel,.transport-mode-tabs,
- .dj-import-entry,.dj-safety-overview,.dj-safety-group,
- .transport-hours-line-panel,.transport-selection-actions,.transport-selection-box,
- .dj-settings-segment,.dj-map-settings-group,.dj-map-settings-footer,
- .dj-place-ai-response,.dj-place-ai-text){
- background:var(--dj800-secondary)!important;border-color:var(--dj800-border)!important;
- color:var(--dj800-text)!important;
-}
-html body #app#app[data-theme="dark"] :is(
- .community-feed .empty,.community-feed .empty-state,.community-empty,.empty-state,
- .records-list .empty,.records-list .record-item,.record-item,
- .stat-grid>div,.dongjak-news-item,.dongjak-news-card,
- .dj-map-settings-group,.dj-place-ai-response,.dj-place-ai-text)
- :is(p,small,span,dd,label){color:var(--dj800-muted)!important;}
-html body #app#app[data-theme="dark"] :is(
- .community-feed .empty,.community-feed .empty-state,.community-empty,
- .route-card,.route-location-row,.dj-import-entry,.record-item)
- :is(strong,b,h2,h3){color:var(--dj800-text)!important;}
-html body #app#app[data-theme="dark"] :is(
- input,textarea,select,.dj-map-settings-group button,.dj-map-settings-footer button,
- .community-filter button,.community-feed button,.route-select-actions button){
- background:var(--dj800-secondary)!important;color:var(--dj800-text)!important;
- border-color:var(--dj800-border)!important;
-}
-html body #app#app[data-theme="dark"] :is(input,textarea)::placeholder{color:#a8c0ba!important;opacity:1!important;}
-html body #app#app[data-theme="dark"] #transport-sheet .transport-selection-box,
-html body #app#app[data-theme="dark"] #transport-sheet .transport-selection-actions{background:transparent!important;border:0!important;}
-html body #app#app[data-theme="dark"] #transport-sheet .transport-selection-actions :is(button,#transport-use-start,#transport-use-end){
- box-shadow:none!important;filter:none!important;
-}
-html body #app#app[data-theme="dark"] #transport-use-start{
- background:#294943!important;border:1px solid #63988a!important;color:#f2fff9!important;
-}
-html body #app#app[data-theme="dark"] #transport-use-end{
- background:#137d68!important;border-color:#559d89!important;color:#fff!important;
-}
+
+
+
+
+
+
+
+
+
+
+
 
 /* Center all bus titles, category and ARS independent of the close button. */
 html body #app#app #transport-sheet[data-kind="bus"] .transport-panel-head{position:relative!important;}

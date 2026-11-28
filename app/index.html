@@ -10,17 +10,15 @@
     <link rel="manifest" id="dj-app-manifest" href="/manifest-light.webmanifest" />
     <link rel="apple-touch-icon" id="dj-apple-touch-icon" sizes="180x180" href="/icons/dongjak-ios-home-180.png" />
     <script>
-      // Light is the only ordinary app theme. Night visibility changes the
-      // effective palette after the map has loaded, never at cold start.
+      // Light is the only application theme.
       (function(){
         try{sessionStorage.removeItem('dj-manual-theme-reload-v1');}catch(_e){}
         var displayTheme='light';
         document.documentElement.dataset.theme=displayTheme;
-        var iconSuffix=displayTheme==='dark'?'dark':'light';
         // iOS Home Screen art is independent of the application's light/dark theme.
         // Never rewrite #dj-apple-touch-icon here; Safari caches it at installation.
         var manifest=document.getElementById('dj-app-manifest');
-        if(manifest)manifest.href='/manifest-'+iconSuffix+'.webmanifest';
+        if(manifest)manifest.href='/manifest-light.webmanifest';
         // Home Screen iOS PWA: let WebKit color the native status strip
         // to match the map. Older black-translucent mode is intentionally absent.
         var nav=typeof navigator==='undefined'?{}:navigator;
@@ -32,11 +30,11 @@
         var phone=win.matchMedia && win.matchMedia('(max-width: 699px)').matches;
         var iosHome=Boolean(ios && standalone && phone);
         document.documentElement.classList?.toggle?.('dj-ios-home-pwa',iosHome);
-        if(iosHome){document.documentElement.style.backgroundColor=displayTheme==='dark'?'#22282e':'#edf3ef';document.documentElement.style.colorScheme=displayTheme;}
+        if(iosHome){document.documentElement.style.backgroundColor='#edf3ef';document.documentElement.style.colorScheme=displayTheme;}
         var themeColor=document.getElementById('dj-browser-theme-color');
         if(themeColor)themeColor.content=iosHome
-          ? (displayTheme==='dark'?'#22282e':'#edf3ef')
-          : (displayTheme==='dark'?'#22282e':'#f3f7f5');
+          ? ('#edf3ef')
+          : ('#f3f7f5');
       })();
     </script>
     <script id="dj-interaction-input">
@@ -120,9 +118,7 @@
       @layer dj-interaction-focus {
         :root { --dj-neutral-focus: #596368; --dj-route-focus-outline: 2px solid var(--dj-neutral-focus); }
         :root[data-dj-focus-input="pointer"] { --dj-route-focus-outline: none; }
-        :root:has(#app[data-theme="dark"]) { --dj-neutral-focus: #b9c2c6; }
         :root { --dj-route-pri-bg: #edf4ef; --dj-route-pri-ink: #245547; --dj-route-pri-border: #d5e3dc; }
-        :root:has(#app[data-theme="dark"]) { --dj-route-pri-bg: #304943; --dj-route-pri-ink: #e5f1eb; --dj-route-pri-border: #47635a; }
         :is(button,[role="button"],[role="tab"],[role="switch"],[role="option"],[role="checkbox"],[role="radio"],[tabindex],a[href],summary,input,textarea,select) {
           -webkit-tap-highlight-color: transparent !important;
         }
@@ -193,10 +189,6 @@
           #app #djNext-rail button.djNext-tool:active:not(:disabled),
           #app #dj-v794-toolbar:not([data-dj-next-ready="1"]) button:active:not(:disabled) {
             box-shadow:inset 0 1px 2px rgba(18,46,35,.075) !important;
-          }
-          #app[data-theme="dark"] #djNext-rail button.djNext-tool,
-          #app[data-theme="dark"] #dj-v794-toolbar:not([data-dj-next-ready="1"]) button {
-            box-shadow:0 1px 3px rgba(0,0,0,.12) !important;
           }
         }
         #dj-user-tip-close {
@@ -328,20 +320,12 @@
         color:var(--start-fg);font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;
         opacity:1;transition:opacity .3s ease;overflow:hidden;
       }
-      html[data-theme="dark"] .map-startup-overlay{
-        --start-bg:#22282e;--start-fg:#edf7f2;--start-muted:#a0b9af;--start-track:#28443e;
-        background:var(--start-bg);
-      }
       /* Standalone iPhone pre-paint: the native status strip and the first
          pixels of the loader share the SAME tone. Start with a flat edge,
          then blend gently toward the centered light wash below the header.
          This is inline so there is no color seam before Vite CSS loads. */
-      html.dj-ios-home-pwa:not([data-theme="dark"]) body #app .map-startup-overlay{
+      html.dj-ios-home-pwa[data-theme="light"] body #app .map-startup-overlay{
         --start-bg:#edf3ef;
-        background:var(--start-bg)!important;
-      }
-      html.dj-ios-home-pwa[data-theme="dark"] body #app .map-startup-overlay{
-        --start-bg:#22282e;
         background:var(--start-bg)!important;
       }
       .map-startup-overlay[hidden]{display:none!important;}
@@ -488,7 +472,6 @@
       <div id="map-startup-overlay" class="map-startup-overlay" role="status" aria-live="polite" aria-busy="true">
         <div class="map-startup-inner">
           <div class="map-startup-logo" aria-hidden="true"><img class="dj-app-artwork" src="/icons/dongjak-light-512.png" alt="" /></div>
-          <script>(function(){var logo=document.querySelector('.map-startup-logo .dj-app-artwork');if(logo&&document.documentElement.dataset.theme==='dark')logo.src='/icons/dongjak-dark-512.png';})();</script>
           <h1 class="map-startup-title">동작하는 안전지도</h1>
           <p class="map-startup-subtitle">우리 동네 길을 더 안전하게</p>
           <div class="map-startup-progress" aria-hidden="true"></div>
@@ -529,7 +512,7 @@
       <button type="button" id="map-safety-toggle" class="map-safety-toggle" aria-expanded="false" aria-controls="map-safety-controls" aria-label="보행안전 도구 열기">보행안전</button>
       <button type="button" id="map-safety-backdrop" class="map-safety-backdrop" aria-label="보행안전 메뉴 닫기" hidden></button>
       <div id="map-safety-controls" class="map-safety-controls" aria-label="보행안전 도구">
-        <div class="map-safety-head"><div><strong>보행안전 도구</strong><span>안전시설 · 야간 시야 · 교통약자</span></div><button type="button" id="map-safety-close" aria-label="보행안전 메뉴 닫기"></button></div>
+        <div class="map-safety-head"><div><strong>보행안전 도구</strong><span>안전시설 · 교통약자</span></div><button type="button" id="map-safety-close" aria-label="보행안전 메뉴 닫기"></button></div>
         <div class="dj-safety-overview" aria-label="보행안전 정보 안내">
           <div class="dj-safety-overview-icon" aria-hidden="true">✓</div>
           <div><strong>필요한 안전정보만 지도에 표시</strong><p>카테고리를 열고 각 항목을 켜거나 끄세요. 지도 범례는 항목 바로 아래에 있습니다.</p></div>
@@ -554,7 +537,6 @@
         <nav class="dj-safety-nav" aria-label="보행안전 메뉴 바로가기">
           <button type="button" data-dj-safety-target="dj-safety-data">사고·지도자료</button>
           <button type="button" data-dj-safety-target="dj-safety-facilities">안전시설</button>
-          <button type="button" data-dj-safety-target="dj-safety-night">야간시야</button>
           <button type="button" data-dj-safety-target="dj-safety-actions">보행도구</button>
         </nav>
         <details class="dj-safety-group" id="dj-safety-data" open>
@@ -647,39 +629,6 @@
         </section>
           </div>
         </details>
-        <details class="dj-safety-group" id="dj-safety-night">
-          <summary><span class="dj-safety-group-name"><strong>야간 보행환경</strong><small>가로등 · 보안등 · 건물 차폐 · 조명 추정</small></span><span class="dj-safety-group-count" aria-label="켜진 항목 개수">0개 켜짐</span><span class="dj-safety-group-chevron" aria-hidden="true"></span></summary>
-          <div class="dj-safety-group-body">
-        <section class="night-visibility-tool" aria-label="상도1동 야간 시야 분석">
-          <div class="night-visibility-heading"><strong>야간 시야 분석</strong><span>상도1동 시범 · 건물 차폐 반영</span></div>
-          <button type="button" id="night-visibility-toggle" disabled aria-pressed="false" aria-controls="night-visibility-controls">야간 시야 켜기</button>
-          <div id="night-visibility-controls" hidden>
-            <label class="night-visibility-radius-label" for="night-visibility-radius">
-              <span>가정한 조명 영향 반경</span><output id="night-visibility-radius-value" for="night-visibility-radius">20 m</output>
-            </label>
-            <input type="range" id="night-visibility-radius" min="10" max="40" step="1" value="20" />
-            <label class="night-visibility-checkbox"><input id="night-visibility-exclude-major" type="checkbox" checked /> 상도로·양녕로·지하차도 제외</label>
-            <label class="night-visibility-checkbox"><input id="night-visibility-show-alley" type="checkbox" checked /> <span class="night-line alley" aria-hidden="true"></span> 골목·차도 조명 미도달 추정</label>
-            <label class="night-visibility-checkbox"><input id="night-visibility-show-path" type="checkbox" checked /> <span class="night-line path" aria-hidden="true"></span> 보행로 조명 미도달 추정</label>
-            <p class="night-visibility-legend"><i class="night-dot street" aria-hidden="true"></i>가로등 <i class="night-dot security" aria-hidden="true"></i>보안등</p>
-            <p class="night-coverage-legend" aria-label="조명 영향 영역 범례"><span class="night-coverage street">가로등 영향권 추정</span><span class="night-coverage security">보안등 영향권 추정</span><span class="night-coverage unlit">색상 없음: 영향권 밖 또는 미확인</span></p>
-            <p class="night-result-legend" aria-label="도로 조명 추정 구간 3종 범례">
-              <span class="lit">조명 도달 추정</span>
-              <span class="alley">골목·차도 조명 미도달 추정</span>
-              <span class="path">보행로 조명 미도달 추정</span>
-            </p>
-            <p id="night-visibility-status" class="night-visibility-status" role="status" aria-live="polite">지도에 야간 시야를 표시할 수 있습니다.</p>
-            <div id="night-visibility-stats" class="night-visibility-stats" aria-live="polite"></div>
-            <div id="night-visibility-top" class="night-visibility-top"></div>
-            <details class="night-visibility-explanation">
-              <summary>분석 기준과 주의사항 자세히</summary>
-              <div id="night-occlusion-details" class="night-occlusion-details" aria-live="polite"></div>
-              <p class="night-visibility-disclaimer">분석은 가정된 조명 높이·건물 높이·거리 반경에 기초한 직광 경로 추정입니다. 실제 조도·보행안전 등급이 아닙니다. 골목·보행로 체크박스는 지도 표시만 제어하고 통계는 두 유형을 모두 포함합니다. 가로등 위치는 지번 중심으로 실제 기둥과 차이가 날 수 있고, 반사광·상가 조명·식생·지형 차폐는 미반영이며, 건물 차폐 모드에서도 건물 높이는 층수 기반 추정값입니다. 도로는 OpenStreetMap에서 조회하며, 상도1동 행정경계를 못 불러오면 분석을 대기합니다. 등록된 조명에 한정되며 실제 밝기나 안전도를 판정하지 않습니다.</p>
-            </details>
-          </div>
-        </section>
-          </div>
-        </details>
         <details class="dj-safety-group" id="dj-safety-actions">
           <summary><span class="dj-safety-group-name"><strong>보행도구</strong><small>교통약자 모드 · 제보 · 내 주변 정보</small></span><span class="dj-safety-group-count" aria-label="켜진 항목 개수">0개 켜짐</span><span class="dj-safety-group-chevron" aria-hidden="true"></span></summary>
           <div class="dj-safety-group-body">
@@ -695,19 +644,6 @@
           </div>
         </details>
       </div>
-      <!-- 야간 시야를 켜면 기존 제어 요소를 이 패널로 이동합니다. ID/이벤트 중복 없음. -->
-      <aside id="night-visibility-float" class="night-visibility-float" aria-label="상도1동 야간 시야 분석 패널" hidden>
-        <div class="night-visibility-float-head">
-          <div class="night-visibility-float-heading"><strong>☾ 야간 시야</strong><span id="night-visibility-float-summary">상도1동 · 건물 차폐 반영 · 20m</span></div>
-          <div class="night-visibility-float-actions">
-            <button type="button" id="night-visibility-float-collapse" aria-controls="night-visibility-float-content" aria-expanded="false">설정·결과 보기</button>
-            <button type="button" id="night-visibility-float-stop" class="night-visibility-float-stop-icon" aria-label="야간 시야 종료" title="닫기"></button>
-          </div>
-        </div>
-        <section id="night-visibility-float-content" class="night-visibility-tool night-visibility-float-content" aria-label="조명 반경 및 도달 추정 분석 결과">
-          <div id="night-visibility-float-slot"></div>
-        </section>
-      </aside>
       <button type="button" id="map-options-backdrop" class="map-options-backdrop" aria-label="지도 표시 옵션 닫기" hidden></button>
       <div id="map-advanced-controls" class="map-advanced-controls" aria-label="지도 표시 옵션">
         <div class="map-options-mobile-heading">
@@ -769,7 +705,6 @@
       </details>
       </div>
       <button type="button" id="map-chrome-restore" class="map-chrome-restore" aria-label="상단 메뉴와 하단 탭 다시 보이기" hidden>메뉴·정보 보기 ↑</button>
-      <button id="night-visibility-quick-off" class="night-visibility-quick-off" type="button" disabled hidden aria-pressed="false" aria-label="야간 시야 켜기">☾ 야간 시야</button>
       <section id="map-gesture-guide" class="map-gesture-guide" role="dialog" aria-modal="true" aria-labelledby="map-gesture-guide-title" data-dj-dialog-fade="true" hidden>
         <header class="map-gesture-guide-head dj856-guide-head">
           <span class="dj856-guide-edge-drag" aria-hidden="true"></span>
@@ -990,6 +925,8 @@
             <div class="route-variant-choice">
               <button type="button" data-route-variant="standard" aria-pressed="true">일반 보행 경로</button>
               <button type="button" data-route-variant="gentle" aria-pressed="false">경사 회피 우선</button>
+              <button type="button" data-route-variant="balanced" aria-pressed="false" disabled>종합 최적 (잠정)</button>
+              <button type="button" id="djNext-transit-option" disabled>대중교통 경로</button>
             </div>
             <p>동작구 내 서울시 도보 네트워크를 우선 사용합니다. 경사도는 지형 기반 추정이며 무계단·휠체어 통행 가능을 보장하지 않습니다. 범위 밖에서는 외부 경로 서버를 사용합니다.</p>
           </div>
@@ -1245,7 +1182,6 @@
     <script type="module" src="/src/v711-experience.js"></script>
     <script type="module" src="/src/v7120-settings.js"></script>
     <script type="module" src="/src/v803-ui-consistency.js"></script>
-    <script type="module" src="/src/v7120-night-panel.js"></script>
     <script type="module" src="/src/v7121-ui-behavior.js"></script>
     <script type="module" src="/src/v7130-ux.js"></script>
     <script type="module" src="/src/safety-workbench-entry-v7104.js"></script>
@@ -1286,7 +1222,6 @@
     <script type="module" src="/src/v861-mobile-sheet-repair.js"></script>
     <script type="module" src="/src/v861-requested-ux.js"></script>
     <script type="module" src="/src/v864-refinements.js"></script>
-    <script type="module" src="/src/v862-night-analysis-session.js"></script>
     <script type="module" src="/src/v864-facility-detail-redesign.js"></script>
     <script type="module" src="/src/v870-mobile-repairs.js"></script>
     <script type="module" src="/src/v874-comprehensive-ui.js"></script>

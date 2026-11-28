@@ -595,25 +595,10 @@
       background:#e8f0eb!important;
       border-radius:17px!important;
     }
-    html body #app#app#app#app#app#app[data-theme="dark"] > #bottom-nav:not([hidden]) {
-      background:var(--dj-theme-surface,#2c343d)!important;
-      border-color:var(--dj-theme-line,#4d5b65)!important;
-    }
-    html body #app#app#app#app#app#app[data-theme="dark"] > #bottom-nav:not([hidden])
-      > .nav-tab:is(.active,[aria-current="page"]) {
-      color:#a0f0da!important;
-      -webkit-text-fill-color:#a0f0da!important;
-      background:transparent!important;
-    }
-    html body #app#app#app#app#app#app[data-theme="dark"] #mine-panel
-      .dj885-type-choices {
-      background:#303c39!important;
-      border-color:#536760!important;
-    }
-    html body #app#app#app#app#app#app[data-theme="dark"] #mine-panel
-      .dj885-type-choices > button:not([aria-pressed="true"]) {
-      color:#cedfd6!important;-webkit-text-fill-color:#cedfd6!important;
-    }
+    
+    
+    
+    
   }
   @media (max-width:699px) and (prefers-reduced-motion:reduce) {
     html body #app#app#app#app#app#app #mine-panel .dj834-detail-nav {

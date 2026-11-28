@@ -64,8 +64,9 @@ test('Subway compact header targets the actual four live controls',()=>{
   assert.ok(css.includes('.dj-news-transport-actions>button{'));
   assert.ok(css.includes('@layerrequest-completion{'));
 });
-test('Bocha switch state has one theme-aware owner at every viewport',()=>{
+test('Bocha switch retains one light-only owner at every viewport',()=>{
   const css=compact(readV914());
   assert.ok(css.includes('#sangdo-bocha-toggle[aria-pressed="true"].dj-feature-state::before{transform:translatex(17px)!important;'));
-  assert.ok(css.includes('#sangdo-bocha-toggle[aria-pressed="false"].dj-feature-state{background:#1a3435!important'));
+  assert.ok(css.includes('#sangdo-bocha-toggle.dj-feature-state{background:#c8d4d1!important'));
+  assert.ok(css.includes('#sangdo-bocha-toggle[aria-pressed="true"].dj-feature-state{background:var(--dj-safe-accent,#138a7f)!important'));
 });

@@ -281,27 +281,13 @@ html body #app#app #transport-sheet[data-kind="subway"] .metro-arrival-direction
 }
 html body #app#app #transport-sheet[data-kind="subway"] :is(
   .metro-direction-heading strong,.metro-arrival-countdown){font-weight:670!important;}
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group.up{
-  background:#183c52!important;border-color:#3c7089!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group.down{
-  background:#483922!important;border-color:#876b42!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-direction-heading.up{
-  background:#254b61!important;color:#d1ecff!important;border-color:#49748d!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-direction-heading.down{
-  background:#5a4428!important;color:#ffe7b8!important;border-color:#8c7049!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group.up .transport-arrival-row{
-  background:#203f4e!important;border-color:#3a667c!important;color:#eaf7ff!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group.down .transport-arrival-row{
-  background:#483b2d!important;border-color:#775d3e!important;color:#fff4df!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] :is(.metro-arrival-direction-group.up,.metro-arrival-direction-group.down) .transport-arrival-row :is(strong,small,span){
-  color:inherit!important;
-}
+
+
+
+
+
+
+
 /* Geographically anchored selected stop, created only on an actual click. */
 .dj825-transport-pin{
   box-sizing:border-box;display:grid;place-items:center;
@@ -316,7 +302,7 @@ html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] :is(.
   transform:rotate(45deg);font:700 18px/1 system-ui,sans-serif;
   color:inherit;
 }
-#app[data-theme="dark"] .dj825-transport-pin{border-color:#e1fff4;box-shadow:0 4px 15px rgba(0,0,0,.55);}
+
 @media(max-width:699px){
   /* Preserve map visibility and tap targets. A phone narrower than 700px
      cannot show four readable bus cards; two are an intentional fallback. */

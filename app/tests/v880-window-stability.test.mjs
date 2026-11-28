@@ -107,8 +107,12 @@ test('v8.8.0: transport background bus layer keeps the real vector source',()=>{
     addLayer:value=>{layer=value;}};
   assert.equal(installBasemapBusStopFallback(map),true);
   assert.equal(layer.source,'original-poi-tiles');assert.equal(layer['source-layer'],'poi');
-  assert.equal(layer.type,'symbol');assert.equal(layer.minzoom,16.4);
+  assert.equal(layer.type,'symbol');assert.equal(layer.minzoom,15.5);
   assert.equal(layer.layout['icon-allow-overlap'],true);
+  assert.deepEqual(layer.layout['text-field'].slice(0,4),['step',['zoom'],'',18]);
+  assert.equal(layer.layout['text-allow-overlap'],false);
+  assert.equal(layer.layout['text-ignore-placement'],false);
+  assert.equal(layer.paint['icon-opacity'],1);
 });
 test('v8.8.0: current selected transit pin rejects invalid geographic coordinates',()=>{
   assert.deepEqual(transportPinCoordinates({lng:126.9,lat:37.5}),[126.9,37.5]);

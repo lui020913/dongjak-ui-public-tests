@@ -170,26 +170,12 @@
     bottom:calc(100px + env(safe-area-inset-bottom,0px))!important;
     max-height:calc(100dvh - 230px)!important;overflow-y:auto!important;
   }
-  html body #app#app#app#app#app#app[data-theme="dark"] #route-panel.page-panel:not([hidden]) > #dj910-route-footer {
-    background:#22282e!important;
-  }
-  html body #app#app#app#app[data-theme="dark"] #participation-panel {
-    --dj-six-community-card:#2a3438;--dj-six-community-ink:#e9f0ed;
-    --dj-six-community-edge:#48585a;--dj-six-community-active:#304c49;
-  }
-  html body #app#app#app#app[data-theme="dark"] #participation-panel .community-filter:is(.active,[aria-pressed="true"]){
-    color:#b6edda!important;border-color:#638a82!important;
-  }
-  html body #app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-item,
-  html body #app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-item:nth-child(3n+2),
-  html body #app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-item:nth-child(3n+3){
-    background:var(--dj-theme-surface,#293237)!important;
-    color:#e9f0ed!important;border-color:#435459!important;
-  }
-  html body #app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-item > strong{color:#eef3f0!important;}
-  html body #app#app#app#app[data-theme="dark"] #mine-panel .dj834-choice-settings > button[aria-pressed="true"]{
-    background:#304d46!important;color:#c4ecde!important;border-color:#64867b!important;
-  }
+  
+  
+  
+  
+  
+  
  }
 }
 @keyframes djTabContentReveal{from{opacity:.28;translate:0 5px}to{opacity:1;translate:0 0}}

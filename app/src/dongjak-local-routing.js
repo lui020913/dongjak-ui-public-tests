@@ -22,7 +22,7 @@ function getWorker(){
     pending.delete(data.id);clearTimeout(task.timer);
     if(data.ok){
       try {
-        const result={standard:toAppRoute(data.routes.standard,'shortest'),gentle:toAppRoute(data.routes.gentle,'gentle')};
+        const result={standard:toAppRoute(data.routes.standard,'shortest'),gentle:toAppRoute(data.routes.gentle,'gentle'),balanced:data.routes.balanced?toAppRoute(data.routes.balanced,'balanced'):null};
         task.resolve(result);
         if(typeof window!=='undefined' && typeof CustomEvent==='function')
           window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:result}));

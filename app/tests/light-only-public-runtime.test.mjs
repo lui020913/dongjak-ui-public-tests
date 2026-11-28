@@ -1,0 +1,64 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync,existsSync} from 'node:fs';
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+test('standalone night scene is not mounted and public palette is light-only',()=>{
+ const main=read('src/main.js'),html=read('index.html'),theme=read('src/ui-environment.js');
+ assert.doesNotMatch(main,/installNightVisibility|promoteNightAnalysisLayers|night-visibility-(?:panel\.)?css/);
+ assert.doesNotMatch(html,/id="(?:night-visibility-toggle|night-visibility-quick-off|night-visibility-float|dj-safety-night|theme-toggle)"/);
+ assert.match(theme,/const theme='light'/);
+ assert.doesNotMatch(theme,/setTemporaryTheme|createThemeState/);
+ assert.doesNotMatch(read('src/mobile-toolbar-v794.js'),/id:'dj-v794-night'/);
+ assert.doesNotMatch(read('src/v831-swipe-feature-toolbar.js'),/buildNightConfirm|requestSafetyNight/);
+ assert.doesNotMatch(read('src/v840-coordinated-ui.js'),/dialog.id='dj840-theme-confirm'/);
+});
+test('lighting PRI factor remains registered with its original data',()=>{
+ const manifest=JSON.parse(read('public/data/pri/manifest.json'));
+ assert.ok(manifest.bundle==='/data/pri/lighting_segments.json');
+ assert.ok(JSON.parse(read('public/data/pri/lighting_segments.json')));
+});
+
+test('public artwork, iOS status bar and land palette do not react to old dark settings',()=>{
+ const artwork=read('src/app-artwork-v7104.js'),status=read('src/mobile-pwa-status-tone-v793.js'),guard=read('src/v862-map-theme-zoom-guard-core.js');
+ assert.match(artwork,/dongjak-light-/);
+ assert.match(artwork,/manifest-light\.webmanifest/);
+ assert.doesNotMatch(artwork,/dataset\.theme==='dark'/);
+ assert.match(status,/const theme='light'/);
+ assert.match(status,/const color=baselineColor\(\)/);
+ assert.doesNotMatch(status,/sangdoNight|nightActive/);
+ assert.doesNotMatch(guard,/theme==='dark'/);
+ assert.doesNotMatch(read('index.html'),/dongjak-dark-|v862-night-analysis-session\.js/);
+ assert.doesNotMatch(read('src/mobile-pwa-status-tone-v793.css'),/data-theme=|#22282e|#191b1f/);
+ assert.doesNotMatch(read('src/onboarding-status-surface.js'),/appTheme|rootTheme|#22282e/);
+ assert.doesNotMatch(read('src/v860-onboarding.css'),/data-theme="dark"/);
+ assert.doesNotMatch(read('src/v7120-settings.js'),/dongjak-dark-|isDark|syncTheme/);
+ assert.doesNotMatch(read('src/theme-contract.css'),/data-theme="dark"|color-scheme:dark/);
+});
+
+test('retired night UI and renderer files are physically absent',()=>{
+ for(const file of ['night-visibility-map.js','night-map-roads-gl.js','night-road-canvas.js','v913-night-poi-isolation.js','v7120-night-panel.js','v862-night-analysis-session.js','night-visibility-panel.css','night-visibility.css'])assert.equal(existsSync(new URL('../src/'+file,import.meta.url)),false,file);
+ for(const file of ['night-occlusion.js','night-visibility-analysis.js','pri-map.js','pri-data.mjs'])assert.ok(existsSync(new URL('../src/'+file,import.meta.url)),file);
+});
+
+test('old theme values cannot select an alternative map palette',()=>{
+  const map=read('src/map-appearance.js');
+  assert.doesNotMatch(map,/MOBILE_DARK_BUILDING_PALETTE|nightOcclusionBuildingPaint|sangdoNight|theme==='dark'|theme-toggle/);
+  assert.doesNotMatch(read('src/bus-stop-label-theme.js'),/theme==='dark'/);
+  assert.doesNotMatch(read('src/ui-environment.js'),/theme==='dark'/);
+  assert.doesNotMatch(read('src/main.js'),/app\.dataset\.theme==='dark'/);
+});
+
+test('major shared styles no longer contain positive dark or standalone night selectors',()=>{
+ for(const file of ['src/style.css','src/mobile-first-layout.css','src/mobile-first-overhaul.css','src/mobile-ui/current.css','src/button-material.css','platforms/ios-pwa/ios-pwa.css'])assert.doesNotMatch(read(file),/data-theme\s*=\s*["']?dark|data-sangdo-night\s*=\s*["']?on/,file);
+});
+
+test('featured map labels remain light even with obsolete preferences',()=>{
+ assert.doesNotMatch(read('src/featured-place-labels.js'),/theme==='dark'|lastTheme|applyTheme/);
+ assert.equal(existsSync(new URL('../src/theme-state-core.mjs',import.meta.url)),false);
+});
+
+test('critical inline startup styles cannot restore a retired dark surface',()=>{
+ const html=read('index.html');
+ assert.doesNotMatch(html,/data-theme="dark"|--start-bg:#22282e/);
+ assert.match(html,/html\.dj-ios-home-pwa\[data-theme="light"\] body #app \.map-startup-overlay\{/);
+});

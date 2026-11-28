@@ -1207,8 +1207,8 @@ export function installBasemapBusStopFallback(map,districtGeometry=null){
         'text-allow-overlap':false,'text-ignore-placement':false,'text-optional':true,'text-padding':1,
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport',
         'icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport'},
-      paint:{'icon-opacity':1,'text-color':busStopLabelPalette(typeof document!=='undefined'?document.documentElement?.dataset?.theme:'light').text,
-        'text-halo-color':busStopLabelPalette(typeof document!=='undefined'?document.documentElement?.dataset?.theme:'light').halo,'text-halo-width':1.05}};
+      paint:{'icon-opacity':1,'text-color':busStopLabelPalette().text,
+        'text-halo-color':busStopLabelPalette().halo,'text-halo-width':1.05}};
     const before=map.getLayer?.('dj-transport-bus-pictogram')?'dj-transport-bus-pictogram':undefined;
     map.addLayer(layer,before);
     return true;
@@ -1595,8 +1595,13 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const wasVisible=!panel.hidden;
     if(wasVisible)markAiSurfaceDismissal();
     cancelSurfaceMotion(panel);
+    globalThis.window?.DongjakWindowMotion?.cancel?.(panel);
     windowState.dismiss();
-    panel.hidden=true;selected=null;resetBusRoutePreview();seq++;syncRoutePresentation();
+    // Hidden is the domain state, but legacy sheet CSS can still force display.
+    // Commit the closed surface after cancelling motion; only an accepted open
+    // may release the inline display lock.
+    panel.hidden=true;panel.style.setProperty('display','none','important');
+    selected=null;resetBusRoutePreview();seq++;syncRoutePresentation();
     selectionMarker?.remove?.();selectionMarker=null;
     document.getElementById('app')?.classList?.remove?.('transport-sheet-open');
     if(wasVisible&&restore)onClose();
@@ -2046,7 +2051,10 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const zoom=map.getZoom(),city=cityScope();
     const keys=bounds.west<=bounds.east&&bounds.south<=bounds.north?viewportKeys(bounds,zoom,{bus:streamApp?.dataset.baseBus!=='off',rail:city},streamDirection):[];
     // Adjacent safety-map stations have their own curated scope. Do not clip their cells at the district border.
-    if(!city&&streamApp?.dataset.baseMetro!=='off')keys.push(...viewportKeys({west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()},zoom,{bus:false,rail:true},streamDirection).filter(k=>officialMetro.some(p=>placeInDisplayScope(p)&&k==='rail_'+cellKey(p.lng,p.lat))));
+    if(!city&&streamApp?.dataset.baseMetro!=='off'){
+      const adjacentRailCells=new Set(officialMetro.filter(placeInDisplayScope).map(p=>'rail_'+cellKey(p.lng,p.lat)));
+      keys.push(...viewportKeys({west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()},zoom,{bus:false,rail:true},streamDirection).filter(k=>adjacentRailCells.has(k)));
+    }
     const critical=viewportKeys(bounds,zoom,{bus:streamApp?.dataset.baseBus!=='off',rail:city},streamDirection,0);
     requestedStreamKeys=new Set(keys);cellStream.update(keys,critical);
   }
@@ -2915,7 +2923,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     serviceHoursEl?.replaceChildren(el('p','transport-hours-notice','계획 운행시간표를 불러오는 중입니다.'));
     timetableExpanded=false;timetableDay=null;timetableLine='all';timetableDirection='all';
     // Switching a transfer-line tab MUST NOT dismiss/reopen the same sheet.
-    if(!sameStationLineChange){onOpen();panel.hidden=false;}
+    if(!sameStationLineChange){onOpen();panel.style.removeProperty('display');panel.hidden=false;}
     syncRoutePresentation();
     panel.classList.toggle('dj874-line-switching',sameStationLineChange);
     document.getElementById('app')?.classList?.add?.('transport-sheet-open');
@@ -2990,7 +2998,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     // The selected route badge and station name form one centered heading.
     title.classList?.toggle?.('subway-title',place.kind==='subway');
     if(panel.dataset)panel.dataset.kind=place.kind;
-    if(title.dataset){if(place.kind==='bus'&&/^\d{5}$/.test(String(place.arsId||'')))title.dataset.dj912Ars=String(place.arsId);else delete title.dataset.dj912Ars;}
+    if(title.dataset){if(place.kind==='bus'&&/^\d{5}$/.test(String(place.arsId||''))&&!globalThis.window?.matchMedia?.('(max-width:699px)')?.matches)title.dataset.dj912Ars=String(place.arsId);else delete title.dataset.dj912Ars;}
     panel.style?.setProperty?.('--transport-line-color',place.kind==='subway'
       ? subwayLineColor(place.selectedLine||place.lines?.[0]||'') : '#13836b');
     // Do not always reset to realtime when the user explicitly chose the timetable.
@@ -3075,7 +3083,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
 
       if(arrival.arsId && !place.arsId){
         place.arsId=arrival.arsId;
-        if(title.dataset&&place.kind==='bus'&&/^\d{5}$/.test(String(place.arsId)))title.dataset.dj912Ars=String(place.arsId);
+        if(title.dataset&&place.kind==='bus'&&/^\d{5}$/.test(String(place.arsId))&&!globalThis.window?.matchMedia?.('(max-width:699px)')?.matches)title.dataset.dj912Ars=String(place.arsId);
         description.textContent=`ARS 정류소번호 ${place.arsId}`;
         chips.append(el('span','transport-chip muted',`ARS ${place.arsId}`));
         if(place.kind==='bus')void refreshServiceHours(place,thisSeq);

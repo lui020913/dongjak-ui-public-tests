@@ -75,8 +75,7 @@ test('AI dialog has one close owner and never opens on a transport close gesture
   const fs=await import('node:fs');
   const {existsSync,readFileSync}=fs;
   const local=new URL('../src/mobile-next.js',import.meta.url);
-  const original=new URL('../../frontend/production/mobile-next.js',import.meta.url);
-  const presentation=readFileSync(existsSync(local)?local:original,'utf8');
+    const presentation=readFileSync(local,'utf8');
   assert.match(ai,/transportDismissedAt/);
   assert.match(ai,/Date\.now\(\)-transportDismissedAt<1600/);
   assert.match(ai,/modal\.classList\.add\('dj887-ai-closing'\)/);

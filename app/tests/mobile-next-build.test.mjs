@@ -118,11 +118,11 @@ test('layer header height follows the finger, then translates below compact',()=
  assert.deepEqual(layerDragFrame(600,-500,600,780),{height:780,offset:0});
 });
 
-test('V11 dark sheets and centered guide inherit the established charcoal surface token',()=>{
+test('V11 sheets and centered guide retain the established light surface token',()=>{
  const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
- assert.match(css, /#app\[data-theme="dark"\]\{--djNext-surface:#2c343d;/);
- assert.match(css, /--dj-v4-surface:var\(--djNext-surface,#2c343d\);/);
- assert.match(css, /#map-gesture-guide\{background:var\(--dj-v4-surface\)!important/);
+ assert.match(css, /#app\{--djNext-surface:#fff;/);
+ assert.doesNotMatch(css, /#app\[data-theme="dark"\]\{--djNext-surface:/);
+ assert.match(css, /#map-gesture-guide:not\(\[hidden\]\)\{[^}]*background:var\(--djNext-surface,#fff\)!important/);
  assert.doesNotMatch(css, /#191b1e\b/i);
 });
 
@@ -161,7 +161,7 @@ test('AI dialogue preserves evidence per turn and occupies the viewport',()=>{
 
 test('compact metro has one layout owner and a single content scroll',()=>{const js=readFileSync(new URL('../src/v875-mobile-stability.js',import.meta.url),'utf8'),css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');assert.ok(js.includes("panel.dataset.djTransportLayout='compact-v2'"));assert.ok(css.includes('[data-dj-transport-layout="compact-v2"][data-kind="subway"]'));assert.ok(css.includes('grid-template-columns:repeat(4,minmax(0,1fr))'));const metro=css.split('\n').filter(line=>line.includes('[data-dj-transport-layout="compact-v2"][data-kind="subway"]'));const row=metro.find(line=>line.includes('.metro-arrival-direction-group .transport-arrival-row{'));const eta=metro.find(line=>line.includes('.metro-arrival-time-block{'));const countdown=metro.find(line=>line.includes('.metro-arrival-countdown{'));assert.match(row,/flex-direction:row!important/);assert.match(row,/min-height:42px!important/);assert.match(eta,/text-align:right!important/);assert.match(countdown,/font-size:13px!important;line-height:1\.35!important/);});
 
-test('button material is shared across app, AI and entry gate',()=>{const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');const tokens=read('button-material.css');assert.ok(tokens.includes(':root:is([data-theme="dark"],:has(#app[data-theme="dark"]))'));assert.ok(read('main.js').includes("import './button-material.css';"));for(const file of ['mobile-next.css','v880-supabase-safety-ai.css','browser-install-menu.css']){const css=read(file);assert.ok(css.includes('var(--djNext-tool-shadow)'));assert.ok(css.includes('var(--djNext-tool-pressed)'));assert.ok(!css.includes('--dj-entry-raised:'));} });
+test('button material is shared across app, AI and entry gate',()=>{const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');const tokens=read('button-material.css');assert.ok(tokens.includes(':root{--djNext-tool-face:#fff'));assert.doesNotMatch(tokens,/data-theme="dark"/);assert.ok(read('main.js').includes("import './button-material.css';"));for(const file of ['mobile-next.css','v880-supabase-safety-ai.css','browser-install-menu.css']){const css=read(file);assert.ok(css.includes('var(--djNext-tool-shadow)'));assert.ok(css.includes('var(--djNext-tool-pressed)'));assert.ok(!css.includes('--dj-entry-raised:'));} });
 
 test('layer rows retain one pill control and independent shortcut switch',()=>{const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8'),js=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8');assert.ok(css.includes('grid-template-columns:minmax(0,1fr) 58px!important'));assert.ok(css.includes('border-radius:var(--djNext-tool-pill)!important'));assert.ok(js.includes("glyph.classList.add('djNext-layer-glyph')"));assert.ok(js.includes("pinHeading.textContent='상단 고정'"));assert.ok(js.includes("add.setAttribute('aria-label',label+' 상단 바로가기 고정')"));assert.ok(!js.includes('djNext-shortcut-caption'));assert.ok(js.includes("line.append(action,add)"));});
 
@@ -176,8 +176,7 @@ test('unavailable incident and enforcement camera layers are visible but cannot 
  assert.match(js,/if\(unavailable\)return/);
 });
 
-// This file runs inside the isolated release app after mobile-next.css is
-// materialized by apply-mobile-next.mjs, not in the repository's source tree.
+// Both source CI and isolated release validation use the same canonical CSS.
 test('production walking footer remains compact and full width',()=>{
  const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
  const block=css.slice(css.lastIndexOf('/* Compact walking recommendation footer;'));

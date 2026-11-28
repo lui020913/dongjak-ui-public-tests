@@ -9,13 +9,13 @@
   color:#123f35!important;text-align:center!important;pointer-events:all!important;
   font-family:system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif;
 }
-html[data-theme="dark"] #dj-full-transition{background:rgba(10,30,33,.62)!important;color:#e2f7ee!important;}
+
 #dj-full-transition .dj-progress-spinner{
   width:46px;height:46px;flex:0 0 46px;box-sizing:border-box;
   border-radius:50%;border:4px solid rgba(21,116,90,.20);border-top-color:#158769;
   animation:dj-v711-spin .83s linear infinite;
 }
-html[data-theme="dark"] #dj-full-transition .dj-progress-spinner{border-color:rgba(189,241,220,.19);border-top-color:#96ecc7;}
+
 #dj-full-transition strong{font-size:19px;font-weight:850;letter-spacing:-.04em;}
 #dj-full-transition p{font-size:12px;margin:0;opacity:.78;}
 @keyframes dj-v711-spin{to{transform:rotate(360deg)}}

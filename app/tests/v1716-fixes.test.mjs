@@ -4,12 +4,12 @@ import {readFile} from 'node:fs/promises';
 import {districtExteriorThemePaint} from '../src/ui-environment.js';
 import {subwayStationQueryCandidates} from '../src/transport-map.js';
 
-test('동작구 외부 음영이 다크모드에서 어두운 색으로 바뀐다', () => {
+test('동작구 외부 음영은 이전 다크모드 설정에도 기존 라이트 색상을 유지한다', () => {
   assert.deepEqual(districtExteriorThemePaint('light'), {
     'fill-color':'#d8e0e3', 'fill-opacity':0.65
   });
   assert.deepEqual(districtExteriorThemePaint('dark'), {
-    'fill-color':'#22272d', 'fill-opacity':0.34
+    'fill-color':'#d8e0e3', 'fill-opacity':0.65
   });
 });
 
@@ -29,7 +29,7 @@ test('테마 전환 시 외부 음영 레이어를 갱신하며 경계 로딩 �
     readFile(new URL('../src/main.js', import.meta.url), 'utf8')
   ]);
   assert.match(theme,/getLayer\('district-exterior-fade'\)/);
-  assert.match(theme,/districtExteriorThemePaint\(themeState\.value\)/);
+  assert.match(theme,/districtExteriorThemePaint\(theme\)/);
   assert.match(main,/paint:\{\.\.\.districtExteriorThemePaint\(visualTheme\.currentTheme\(\)\)/);
   assert.doesNotMatch(main,/djTransitExterior==='true'\?\{'fill-opacity':0\}/);
   assert.match(main,/visualTheme\.refresh\(\)/);

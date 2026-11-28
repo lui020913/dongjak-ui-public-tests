@@ -34,7 +34,7 @@ test('edge blur tracks the scrollport and does not block touch interaction',()=>
   assert.match(toolbar,/edgeBlurLeft\.hidden=!left;edgeBlurRight\.hidden=!right/);
   assert.match(css,/backdrop-filter:blur\(5px\)/);
   assert.match(css,/pointer-events:none!important/);
-  assert.match(css,/data-theme="dark"/);
+  assert.doesNotMatch(css,/data-theme="dark"/);
 });
 
 test('phone priority rail initializes once only after onboarding and never after user interaction',()=>{

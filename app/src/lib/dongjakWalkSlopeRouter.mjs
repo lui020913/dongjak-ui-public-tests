@@ -125,7 +125,7 @@ export class DongjakWalkSlopeRouter {
     if (![start,end].every(v=>Array.isArray(v)&&v.length===2&&v.every(Number.isFinite)))
       throw new Error('Use [longitude,latitude] for both endpoints');
     const mode=options.mode??'shortest';
-    if(!['shortest','avoid_vehicle_permitted','gentle'].includes(mode))throw new Error('Unknown route mode');
+    if(!['shortest','avoid_vehicle_permitted','gentle','balanced'].includes(mode))throw new Error('Unknown route mode');
     const maxSnapMeters=options.maxSnapMeters??100, walkSpeed=options.walkingSpeedKph??4.5;
     if (!(walkSpeed>0)) throw new Error('walkingSpeedKph must be > 0');
     const s=this.nearestEdge(start), e=this.nearestEdge(end);
@@ -163,7 +163,7 @@ export class DongjakWalkSlopeRouter {
         // Gentle mode is exploratory, based on approximate terrain elevation.
         // Each arc traversal reverses ascent/descent when walking backward.
         // Partial edge ascent/descent is prorated by length fraction and is approximate.
-        if (mode==='gentle') {
+        if (mode==='gentle'||mode==='balanced') {
           const p=this.slopeData[String(link[0])];
           if(p) {
             const [meanGrade,maxGrade,asc,desc,za,zb,quality]=p;
@@ -181,6 +181,7 @@ export class DongjakWalkSlopeRouter {
             }
           } else { factor=1.15; }
         }
+        if(mode==='balanced')factor=1+0.65*(factor-1)+(mixed?0.7:0);
         const next=cost+arc.length*factor;
         if(next<distances[arc.to]) {
           distances[arc.to]=next;parent[arc.to]={from:u,arc};heap.push([next,arc.to]);
@@ -219,6 +220,7 @@ export class DongjakWalkSlopeRouter {
     if(s.distanceMeters>25||e.distanceMeters>25)warnings.push('One or both endpoints are >25m from the snapped pedestrian path.');
     if (mode==='avoid_vehicle_permitted')warnings.push('Vehicle-permitted-link penalty is a heuristic, not a verified safety rating.');
     if(mode==='gentle')warnings.push('Gentle routing uses an estimated elevation surface, not surveyed sidewalk grades; stairs/curbs/ramp access are not verified.');
+    if(mode==='balanced')warnings.push('Provisional combined distance, terrain and vehicle-permission heuristic; not a verified PRI or safety rating.');
     if(uncertainTerrainMeters>0)warnings.push('Some links have missing, extreme, or non-ground terrain elevation; grade results are incomplete.');
     return {
       mode, distanceMeters:Math.round(distanceMeters*10)/10,

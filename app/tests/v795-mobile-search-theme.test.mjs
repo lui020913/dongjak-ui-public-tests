@@ -20,11 +20,11 @@ test('mobile search displays suggestions without toolbar overlap and preserves l
   assert.match(css,/gap:12px!important/);
   assert.ok(!css.includes('@media (min-width:'));
 });
-test('night icon and theme state switch without a fullscreen reload mask',()=>{
+test('public toolbar no longer mounts night icon or temporary theme',()=>{
   const js=read('src/mobile-toolbar-v794.js');
   const env=read('src/ui-environment.js');
-  assert.match(js,/M18 2v5M15\.5/);
+  assert.doesNotMatch(js,/id:'dj-v794-night'/);
   assert.doesNotMatch(env,/themeFlash|stopMobileThemeTimers|showThemeTransition/);
-  assert.match(env,/themeState\.override\(next\)/);
+  assert.doesNotMatch(env,/themeState\.override|setTemporaryTheme/);
   assert.match(read('index.html'),/mobile-ui-v795.css/);
 });

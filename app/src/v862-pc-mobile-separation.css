@@ -253,7 +253,5 @@
 }
 
 /* Dark surfaces remain theme-aware for the new desktop-only share action. */
-html body #app#app#app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-share{
-  background:#27473f!important;border-color:#45675c!important;color:#e2f4ea!important;
-}
-html body #app#app#app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-share svg{color:#e2f4ea!important;}
+
+

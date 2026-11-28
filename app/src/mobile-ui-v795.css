@@ -14,9 +14,7 @@
     border-right:1px solid #dceae3!important;
     margin:0!important;
   }
-  html body #app#app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form>.brand {
-    border-right-color:#4a6a62!important;
-  }
+  
   /* Suggestions own the space below the search card while text is focused.
      Temporarily hide the entire auxiliary button row instead of trying to
      layer the dropdown through its interactive buttons. */

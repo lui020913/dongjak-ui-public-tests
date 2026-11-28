@@ -5,19 +5,20 @@ import css from './theme-contract.css?raw';
 import {isIosHomeScreenPhone} from './mobile-pwa-status-tone-v793.js';
 
 const STYLE_ID='dj-theme-contract';
-const EDGE=Object.freeze({light:'#edf3ef',dark:'#22282e'});
+const EDGE='#edf3ef';
 export function syncThemeSurface({app,doc,win,force=false}) {
   const root=doc.documentElement;
-  const theme=app?.dataset?.theme==='dark'?'dark':'light';
+  const theme='light';
+  if(app&&app.dataset.theme!==theme)app.dataset.theme=theme;
   const meta=doc.querySelector('meta[name="theme-color"]');
   const manifest=doc.getElementById('dj-app-manifest');
   root.dataset.theme=theme;
   root.style.colorScheme=theme;
   if(doc.body)doc.body.dataset.djThemeContract=theme;
-  if(manifest){const href=`/manifest-${theme}.webmanifest`;if(manifest.getAttribute('href')!==href)manifest.setAttribute('href',href);}
+  if(manifest){const href='/manifest-light.webmanifest';if(manifest.getAttribute('href')!==href)manifest.setAttribute('href',href);}
   // iOS owns the native status-tone sampling and modal-specific colors.
   // Do not fight the existing standalone PWA status controller's meta writes.
-  if((force||meta?.content!==EDGE[theme])&&!isIosHomeScreenPhone(win)&&meta)meta.content=EDGE[theme];
+  if((force||meta?.content!==EDGE)&&!isIosHomeScreenPhone(win)&&meta)meta.content=EDGE;
   return theme;
 }
 export function installThemeContract(doc=document,win=window) {

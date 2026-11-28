@@ -11,7 +11,7 @@ test('native vulnerability PRI retains 2-factor gap; duplicate research overlay 
  assert.doesNotMatch(main,/installPolicyGapThreeSourceMap\(/);
  assert.ok(!pri.includes('installPolicyGapThreeSourceMap'));
  assert.ok(!manifest.patches.some(p=>p.includes('3source')));
- assert.ok(main.includes('installNightVisibility'));
+ assert.doesNotMatch(main,/installNightVisibility/);
  assert.ok(html.includes('theme-contract.js'));
  assert.ok(!html.includes('id="protection-zone-controls"'));
  assert.ok(!html.includes('walking-vulnerability-layer-group'));
@@ -19,9 +19,10 @@ test('native vulnerability PRI retains 2-factor gap; duplicate research overlay 
  assert.ok(manifest.patches.includes('/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json'));
 });
 
-test('new vulnerability gradient uses a restrained semantic palette and the charcoal theme',()=>{
+test('vulnerability gradient retains its independent semantic palette in the light UI',()=>{
  const css=read('src/theme-contract.css'),pri=read('src/pri-map.js');
- assert.ok(css.includes('var(--dj-theme-selected)'));
+ assert.ok(css.includes('--dj-theme-selected:#e1ecec'));
+ assert.doesNotMatch(css,/data-theme="dark"/);
  assert.ok(pri.includes('#CB6563'));
  assert.ok(pri.includes('#DDA263'));
  assert.ok(pri.includes('#DBC576'));

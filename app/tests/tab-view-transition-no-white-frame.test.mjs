@@ -67,7 +67,7 @@ test('phone tab switches real DOM immediately and animates content, never white 
  assert.match(toolbar,/if\(primaryOwnsPaint\(\)\)/);
  const js=read('src/bottom-tab-navigation.js');
  const built=new URL('../src/mobile-next.css',import.meta.url);
- const css=readFileSync(existsSync(built)?built:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+ const css=readFileSync(built,'utf8');
  assert.equal(js.includes('startViewTransition'),false);
  assert.equal(js.includes("createElement('div')"),false);
  assert.doesNotMatch(css,/::view-transition-(old|new)\(root\)/);

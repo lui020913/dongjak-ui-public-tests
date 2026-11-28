@@ -44,7 +44,7 @@ test('mobile and desktop keep distinct font-size rules',()=>{
   assert.match(css,/@media\(min-width:700px\)/);
   assert.match(css,/@media\(max-width:699px\)/);
   assert.match(css,/dj-ux-text-delta/);
-  assert.match(css,/--dj-ux-bg:#1e3438/);
+  assert.match(css,/--dj-ux-bg:var\(--dj-ui-bg,#fff\)/);
 });
 test('iOS Safari offers manual home-screen guidance without an unsolicited overlay',()=>{
   const js=read('src/v7130-ux.js'),html=read('index.html'),ios=read('platforms/ios-pwa/entry.js');

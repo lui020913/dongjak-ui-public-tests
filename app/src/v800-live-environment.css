@@ -18,8 +18,8 @@
 #app .dj-sdot-summary .dj-metric span{display:block;font-size:10px;color:var(--dj800-muted,#72847d);}
 #app .dj-sdot-summary .dj-metric b{font-size:17px;font-weight:850;font-variant-numeric:tabular-nums;}
 #app .dj-sdot-summary .dj-sdot-caveat{display:block;font-size:10px;color:var(--dj800-muted,#6a8078);word-break:keep-all;}
-html[data-theme="dark"] #app .dj-sdot-summary,#app[data-theme="dark"] .dj-sdot-summary{background:#243b3b!important;border-color:#40605a!important;color:#e2eee9!important;}
-html[data-theme="dark"] #app .dj-sdot-summary .dj-metric,#app[data-theme="dark"] .dj-sdot-summary .dj-metric{background:#1b3033!important;}
-html[data-theme="dark"] #app .dj-feed-source,html[data-theme="dark"] #app .dj-feed-indicator{color:#bad2ca;}
+
+
+
 @media(max-width:699px){#app .dj-feed-meta{padding-left:11px;}#app .dj-sdot-summary{margin-left:11px;margin-right:9px;}#app .dj-feed-entry .dj-feature-copy small{font-size:10px;}}
 @media(prefers-reduced-motion:reduce){#app .dj-feed-indicator:before{transition:none;}}

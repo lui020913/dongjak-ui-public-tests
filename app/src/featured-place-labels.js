@@ -1,5 +1,4 @@
 import {hasTransportPoiHit} from './poi-click-identity.js';
-import {nightOwnsLayerOrder} from './v913-night-poi-isolation.js';
 import {promoteReadable3DLabelLayers} from './readable-3d-labels.js';
 /**
  * Five trusted, named places drawn by MapLibre itself (not floating DOM labels).
@@ -95,14 +94,8 @@ export function featuredPlaceCollection(){
   }))};
 }
 
-export function featuredPlaceStyle(theme='light'){
-  const dark=theme==='dark';
-  return {
-    text:dark?'#cbd6d3':'#6d817b',
-    halo:dark?'#172a30':'#f6f9f7',
-    dot:dark?'#7cd2b7':'#147d68',
-    dotOutline:dark?'#173137':'#ffffff'
-  };
+export function featuredPlaceStyle(){
+  return {text:'#6d817b',halo:'#f6f9f7',dot:'#147d68',dotOutline:'#ffffff'};
 }
 
 export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
@@ -112,7 +105,7 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
   const nameId=FEATURED_PLACES_LABELS;
   try{
     if(!map.getSource?.(sourceId))map.addSource(sourceId,{type:'geojson',data:featuredPlaceCollection()});
-    const palette=featuredPlaceStyle(app?.dataset?.theme);
+    const palette=featuredPlaceStyle();
     if(!map.getLayer?.(dotId))map.addLayer({
       id:dotId,type:'circle',source:sourceId,minzoom:13.5,
       paint:{'circle-radius':['interpolate',['linear'],['zoom'],12.5,3.5,16,5],
@@ -139,28 +132,11 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
     });
   }catch(error){console.warn('[주요시설명] 지도 레이어 설치 실패',error);return ()=>{};}
 
-  function applyTheme(){
-    const palette=featuredPlaceStyle(app?.dataset?.theme);
-    if(!map.getLayer?.(nameId))return;
-    try{
-      map.setPaintProperty(nameId,'text-color',palette.text);
-      map.setPaintProperty(nameId,'text-halo-color',palette.halo);
-      if(map.getLayer(FEATURED_PLACES_LOGOS)){
-        map.setPaintProperty(FEATURED_PLACES_LOGOS,'text-color',palette.text);
-        map.setPaintProperty(FEATURED_PLACES_LOGOS,'text-halo-color',palette.halo);
-      }
-      map.setPaintProperty(dotId,'circle-color',palette.dot);
-      map.setPaintProperty(dotId,'circle-stroke-color',palette.dotOutline);
-    }catch(error){console.info('[주요시설명] 테마 반영 생략',error?.message);}
-  }
   function bringToFront(){
-    if(nightOwnsLayerOrder(map))return;
+
     if(!map.getLayer?.(nameId))return;
     promoteReadable3DLabelLayers(map);
-    const theme=app?.dataset?.theme||'light';
-    if(theme!==lastTheme){lastTheme=theme;applyTheme();}
   }
-  let lastTheme=app?.dataset?.theme||'light';
   function openFeature(evt){
     if(hasTransportPoiHit(map,evt))return;
     const properties=evt.features?.[0]?.properties||{};
@@ -225,8 +201,8 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
                 'icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport',
                 'symbol-height-offset':0},
               paint:{'icon-opacity':1,
-                'text-color':featuredPlaceStyle(app?.dataset?.theme).text,
-                'text-halo-color':featuredPlaceStyle(app?.dataset?.theme).halo,
+                'text-color':featuredPlaceStyle().text,
+                'text-halo-color':featuredPlaceStyle().halo,
                 'text-halo-width':1.35,'text-halo-blur':0.12}});
             logoLayerInstalled=true;
             lastLogoMode=null;

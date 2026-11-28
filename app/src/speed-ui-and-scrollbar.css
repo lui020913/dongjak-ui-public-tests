@@ -28,9 +28,9 @@
 .sangdo-speed-popup{display:grid;gap:4px;line-height:1.5;color:#183b36;font-size:11px}
 .sangdo-speed-popup b{font-size:14px}
 .sangdo-speed-popup small{color:#526963}
-#app[data-theme="dark"] .sangdo-speed-tool{background:#203a3e;border-color:#47605c}
-#app[data-theme="dark"] .sangdo-speed-filters label{background:#1a3135;border-color:#3d5c5d}
-#app[data-theme="dark"] #sangdo-speed-toggle[aria-pressed="false"]{color:#daefec}
+
+
+
 /* The previously white, wide Chromium scrollbar in the safety drawer. */
 #app .map-safety-controls,#app .pza-road-sheet,#app .map-advanced-controls,
 #app .page-panel,#app .night-visibility-panel,#app .pza-advanced-tools{
@@ -40,9 +40,9 @@
 #app :is(.map-safety-controls,.pza-road-sheet,.map-advanced-controls,.page-panel,.night-visibility-panel,.pza-advanced-tools)::-webkit-scrollbar{width:7px;height:7px}
 #app :is(.map-safety-controls,.pza-road-sheet,.map-advanced-controls,.page-panel,.night-visibility-panel,.pza-advanced-tools)::-webkit-scrollbar-track{background:transparent;border-radius:10px}
 #app :is(.map-safety-controls,.pza-road-sheet,.map-advanced-controls,.page-panel,.night-visibility-panel,.pza-advanced-tools)::-webkit-scrollbar-thumb{background:#7d9b95;border-radius:10px;border:1px solid transparent;background-clip:padding-box}
-#app[data-theme="dark"] :is(.map-safety-controls,.pza-road-sheet,.map-advanced-controls,.page-panel,.night-visibility-panel,.pza-advanced-tools){scrollbar-color:#43666b #192f34!important}
-#app[data-theme="dark"] :is(.map-safety-controls,.pza-road-sheet,.map-advanced-controls,.page-panel,.night-visibility-panel,.pza-advanced-tools)::-webkit-scrollbar-track{background:#192f34}
-#app[data-theme="dark"] :is(.map-safety-controls,.pza-road-sheet,.map-advanced-controls,.page-panel,.night-visibility-panel,.pza-advanced-tools)::-webkit-scrollbar-thumb{background:#43666b;border-color:#192f34}
+
+
+
 /* Only one source of ETA for 1호선/신림선: remove the redundant timetable tabs. */
 #app #transport-sheet[data-schedule-merged="true"] #transport-mode-tabs,
 #app #transport-sheet[data-schedule-merged="true"] #transport-tab-hours{display:none!important}
@@ -57,8 +57,8 @@
 #app #sangdo-camera-file{display:none!important}
 #app #sangdo-camera-status{color:var(--dj-ui-subtext,#648277);font-size:11px;line-height:1.5}
 #app .sangdo-camera-tool a{color:var(--dj-ui-link,#148977);text-decoration:underline;text-underline-offset:2px}
-#app[data-theme="dark"] .sangdo-camera-actions button{background:#1b3135;border-color:#496466;color:#dceeea}
-#app[data-theme="dark"] .sangdo-camera-actions #sangdo-camera-toggle[aria-pressed="true"]{background:#255e5d;border-color:#56857f}
+
+
 
 /* The map's primary action should read as "pedestrian safety", not another
  * utility button. Keep dimensions unchanged to prevent mobile overlap. */
@@ -85,11 +85,5 @@
   background:#0e5e50!important;border-color:#9dd9c2!important;
   box-shadow:0 0 0 3px rgba(24,151,119,.22),0 6px 16px rgba(7,81,63,.27)!important;
 }
-#app[data-theme="dark"] #map-safety-toggle{
-  background:linear-gradient(138deg,#176f66,#104b48)!important;
-  border-color:#75cdb1!important;color:#f2fffa!important;
-  box-shadow:0 0 0 3px rgba(56,178,148,.22),0 6px 19px rgba(0,0,0,.42)!important;
-}
-#app[data-theme="dark"] #map-safety-toggle[aria-expanded="true"]{
-  background:#186f62!important;color:#fff!important;
-}
+
+
