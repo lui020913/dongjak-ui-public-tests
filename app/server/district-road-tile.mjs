@@ -16,6 +16,11 @@ const cross=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
 function intersects(a,b,c,d){if(Math.max(a[0],b[0])<Math.min(c[0],d[0])||Math.max(c[0],d[0])<Math.min(a[0],b[0])||Math.max(a[1],b[1])<Math.min(c[1],d[1])||Math.max(c[1],d[1])<Math.min(a[1],b[1]))return false;return cross(a,b,c)*cross(a,b,d)<=0&&cross(c,d,a)*cross(c,d,b)<=0;}
 function tilePolygons(z,x,y,extent,boundary){const n=2**z;const project=([lon,lat])=>[( (lon+180)/360*n-x)*extent,((1-Math.asinh(Math.tan(lat*Math.PI/180))/Math.PI)/2*n-y)*extent];return (boundary.type==='Polygon'?[boundary.coordinates]:boundary.coordinates).map(p=>p.map(r=>r.map(project)));}
 function touches(parts,polys,polygon){return polys.some(poly=>{const ring=poly[0];if(parts.some(part=>part.some(p=>pointIn(p,ring))))return true;for(const part of parts){for(let i=1;i<part.length;i++)for(let j=1;j<ring.length;j++)if(intersects(part[i-1],part[i],ring[j-1],ring[j]))return true;if(polygon&&ring.some(p=>pointIn(p,part)))return true;}return false;});}
+// Retain complete encoded building layers, without decoding individual shapes.
+export function extractBuildingTile(input){
+ const raw=input instanceof Uint8Array?input:new Uint8Array(input);
+ return concat(fields(raw).filter(top=>top.id===3&&top.wire===2&&fields(top.value).some(f=>f.id===1&&f.wire===2&&utf8.decode(f.value)==='building')).map(top=>top.raw));
+}
 export function reduceExteriorRoadTile(input,z,x,y,boundary=districtTileBoundary){
  const raw=input instanceof Uint8Array?input:new Uint8Array(input);
  let removed=0;

@@ -1,4 +1,5 @@
 import {registerLocalTerrainProtocol,LOCAL_TERRAIN_URL} from './local-terrain-surface.mjs';
+import {registerNativeBuildingProtocol,isolateNativeBuildingTiles} from './native-building-stream.mjs';
 import {BUS_GROUP_EXPAND_ZOOM} from './bus-display-grouping.mjs';
 import {installSiteLanduse} from './site-landuse-palette.mjs';
 import {loadSeoulBoundary,getSeoulBoundary} from './seoul-transit-boundary.mjs';
@@ -643,6 +644,7 @@ const djNormalPixelRatio=normalMapPixelRatio({phone:djPhone,ua:navigator.userAge
 const themeReloadState=readManualThemeReload(window.sessionStorage);
 registerReducedTileProtocol(maplibregl);
 registerLocalTerrainProtocol(maplibregl);
+registerNativeBuildingProtocol(maplibregl);
 const map = new maplibregl.Map({
   container: 'map',
   attributionControl:false,
@@ -1793,6 +1795,8 @@ map.on('load',()=>{
   try{installSiteLanduse({map,app});}catch(error){console.warn('[부지 유형 색상]',error?.message);}
   installGrassTexture({map,app});
   installForestShade({map,app});
+  // Separate native building requests before binding palette/ownership managers.
+  if(djPhone)app.dataset.djNativeBuildingStream=isolateNativeBuildingTiles(map)?'sequential':'shared-fallback';
   const nativeBuildingLayers=installBaseBuildingPalette({map,app});
   districtBuildingScope=installDistrictBuildingScope(map);
   exteriorRoadScope=installExteriorRoadScope(map);

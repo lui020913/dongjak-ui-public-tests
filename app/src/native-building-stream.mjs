@@ -1,0 +1,68 @@
+import {extractBuildingTile} from '../server/district-road-tile.mjs';
+const PREFIX='dj-building://';
+export const NATIVE_BUILDING_SOURCE='dj-native-building-stream';
+export const NATIVE_BUILDING_STAGE_MS=65;
+// FIFO follows MapLibre's center-first tile demand. Canceled viewport work
+// never occupies a slot. Only building tiles are throttled.
+export function createBuildingTileQueue(load,{concurrency=1,gap=65,schedule=setTimeout}={}){
+ let active=0;const pending=[];
+ function drain(){
+  while(active<concurrency&&pending.length){
+   const job=pending.shift();if(job.signal?.aborted){job.reject(new DOMException('Aborted','AbortError'));continue;}
+   active++;
+   Promise.resolve().then(()=>load(job.url,job.signal)).then(job.resolve,job.reject).finally(()=>schedule(()=>{active--;drain();},gap));
+  }
+ }
+ return (url,signal)=>new Promise((resolve,reject)=>{
+  if(signal?.aborted){reject(new DOMException('Aborted','AbortError'));return;}
+  const job={url,signal,resolve,reject};pending.push(job);
+  signal?.addEventListener('abort',()=>{const i=pending.indexOf(job);if(i>=0){pending.splice(i,1);reject(new DOMException('Aborted','AbortError'));}},{once:true});
+  drain();
+ });
+}
+export function buildingTileUrl(template){
+ return PREFIX+template.replace(/[?&]dj-road-mode=[^&]*/g,'');
+}
+export function nativeBuildingLayer(layer){
+ return layer?.source==='openmaptiles'&&layer['source-layer']==='building'&&['fill','line','fill-extrusion'].includes(layer.type);
+}
+export function registerNativeBuildingProtocol(maplibre,{fetcher=fetch}={}){
+ const cache=new Map();
+ const queue=createBuildingTileQueue(async(url,signal)=>{
+  const raw=url.slice(PREFIX.length);
+  if(!/^https:\/\/tiles\.openfreemap\.org\/(?:planet|backup_planet)\/[A-Za-z0-9_-]+\/\d+\/\d+\/\d+\.pbf(?:\?.*)?$/.test(raw))throw Error('Invalid building tile');
+  if(cache.has(raw))return {data:cache.get(raw).slice(0)};
+  const response=await fetcher(raw,{signal,cache:'force-cache'});if(!response.ok)throw Error('Building tile HTTP '+response.status);
+  let bytes=new Uint8Array(await response.arrayBuffer());
+  if(bytes[0]===31&&bytes[1]===139)bytes=new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+  const only=extractBuildingTile(bytes),data=only.buffer.slice(only.byteOffset,only.byteOffset+only.byteLength);
+  cache.set(raw,data.slice(0));while(cache.size>32)cache.delete(cache.keys().next().value);
+  return {data};
+ },{concurrency:1,gap:NATIVE_BUILDING_STAGE_MS});
+ maplibre.addProtocol('dj-building',(request,controller)=>queue(request.url,controller?.signal));
+}
+export function isolateNativeBuildingTiles(map){
+ const style=map.getStyle?.(),source=map.getSource?.('openmaptiles');
+ if(!style||!source||map.getSource?.(NATIVE_BUILDING_SOURCE))return false;
+ const templates=source.tiles||style.sources?.openmaptiles?.tiles;
+ if(!Array.isArray(templates)||!templates.length||!templates.every(t=>typeof t==='string'&&t.startsWith('https://tiles.openfreemap.org/')))return false;
+ const original=style.layers.filter(nativeBuildingLayer);
+ if(!original.length)return false;
+ const ids=new Set(original.map(l=>l.id)),installed=[];
+ try{
+  const spec=style.sources?.openmaptiles||{};
+  map.addSource(NATIVE_BUILDING_SOURCE,{type:'vector',tiles:templates.map(buildingTileUrl),minzoom:source.minzoom??spec.minzoom??0,maxzoom:source.maxzoom??spec.maxzoom??14,...(spec.bounds?{bounds:spec.bounds}:{}),...(spec.attribution?{attribution:spec.attribution}:{})});
+  // Keep original IDs, filters, layer ordering and all paint/layout properties.
+  for(const layer of original){
+   const i=style.layers.findIndex(l=>l.id===layer.id),before=style.layers.slice(i+1).find(l=>!ids.has(l.id)&&map.getLayer(l.id))?.id;
+   map.removeLayer(layer.id);installed.push({layer,before});
+   map.addLayer({...layer,source:NATIVE_BUILDING_SOURCE},before);
+  }
+  return true;
+ }catch(error){
+  // If the source cannot be separated, restore the original native style.
+  for(const {layer,before} of installed){try{if(map.getLayer(layer.id))map.removeLayer(layer.id);map.addLayer(layer,before);}catch{}}
+  try{if(map.getSource(NATIVE_BUILDING_SOURCE))map.removeSource(NATIVE_BUILDING_SOURCE);}catch{}
+  return false;
+ }
+}
