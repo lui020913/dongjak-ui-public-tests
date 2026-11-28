@@ -90,7 +90,7 @@ import {createBuildingCoverage,uniqueHighRiseFootprints,buildingModeVisibility,n
 import {isDisplayBuilding,partitionDisplayBuildings} from './building-display-detail.js';
 import {greenBuildingFilterEnabled,partitionGreenReview} from './green-building-filter.js';
 import {nearestBuildingSheets} from './building-prewarm.js';
-import {prepareBuildingChunks,nextBuildingStage,waitForBuildingSource,BUILDING_STAGE_GAP_MS,yieldBuildingFrame} from './progressive-building-stream.mjs';
+import {prepareBuildingChunks,nextBuildingStage,waitForBuildingSource,BUILDING_STAGE_GAP_MS,yieldBuildingFrame,coalesceBuildingOwnership,createBuildingWarmCache} from './progressive-building-stream.mjs';
 import {installSafetyLayers,installBridgeDeck} from './safety-layers.js';
 import {installMapOrientationControls,installNeighborDistrictLabels,installDecorativeParkTrees} from './map-polish.js';
 import {installGrassTexture,installForestShade,installBaseBuildingPalette,nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,buildingFootprintOutlinePaint,buildingPlanVisibility,buildingZoomOpacityExpression,BUILDING_ZOOM_FADE_START,BUILDING_ZOOM_FADE_END} from './map-appearance.js';
@@ -803,14 +803,17 @@ function visibleBuilding3D(){
 }
 // Source ownership is committed only when a full GIS sheet has loaded.
 // Until then the native map is the sole visible owner. Never switch on pan frames.
-let lastBuildingOwnershipCount=-1;
+let lastBuildingOwnershipKey=null;
 function syncBuildingSheetOwnership(){
   if(!districtBuildingScope)return;
   let changed=false;
+  const owned=[];
   for(const [id,info] of loadedBuildingTiles){
     if(!info.owned&&info.complete&&info.count>0&&map.getSource('dongjak-buildings-data-'+id)&&map.isSourceLoaded('dongjak-buildings-data-'+id)){info.owned=true;changed=true;}
+    if(info.owned)owned.push([id,info.bbox]);
   }
-  if(changed||lastBuildingOwnershipCount!==[...loadedBuildingTiles.values()].filter(info=>info.owned).length){const owned=[...loadedBuildingTiles.values()].filter(info=>info.owned);lastBuildingOwnershipCount=owned.length;districtBuildingScope.setCoveredSheets(owned.map(info=>info.bbox));}
+  const key=JSON.stringify(owned.map(([id,bbox])=>[String(id),bbox]).sort((a,b)=>a[0].localeCompare(b[0])));
+  if(changed||lastBuildingOwnershipKey!==key){lastBuildingOwnershipKey=key;districtBuildingScope.setCoveredSheets(owned.map(([,bbox])=>bbox));}
   if(changed){lastFootprintPaintKey='';for(const info of loadedBuildingTiles.values())info.lastOpacity=-1;syncTiltWithBuildings();}
 }
 function syncTiltWithBuildings() {
@@ -889,12 +892,8 @@ function getVisibleBBox(){
 }
 // Bounded warm cache for parsed GIS sheets: network/worker work during motion,
 // source ownership and map writes remain deferred until the camera settles.
-const warmBuildingSheets=new Map();let warmBuildingBusy=false,lastBuildingWarmAt=0;
-function warmBuildingSheet(sheet){
- const id=sheet.sheet;if(warmBuildingSheets.has(id))return warmBuildingSheets.get(id);
- const p=loadBuildingTileFeatures(sheet).then(result=>{if(result.successfulSources!==result.totalSources)warmBuildingSheets.delete(id);return result;}).catch(error=>{warmBuildingSheets.delete(id);throw error;});
- warmBuildingSheets.set(id,p);while(warmBuildingSheets.size>4)warmBuildingSheets.delete(warmBuildingSheets.keys().next().value);return p;
-}
+const warmBuildingSheets=createBuildingWarmCache(loadBuildingTileFeatures,{limit:4});let warmBuildingBusy=false,lastBuildingWarmAt=0;
+function warmBuildingSheet(sheet){return warmBuildingSheets.load(sheet);}
 async function prefetchMovingBuilding(){
  if(!djPhone||djRenderBudget.isEconomy()||!mapReady||!boundaryGeometry||!baseBuildingsVisible||map.getZoom()<BUILDING_ZOOM_MIN||djBuildingBatchBusy||warmBuildingBusy||Date.now()-lastBuildingWarmAt<350)return;
  lastBuildingWarmAt=Date.now();warmBuildingBusy=true;
@@ -1813,8 +1812,9 @@ map.on('load',()=>{
   exteriorRoadScope=installExteriorRoadScope(map);
   buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers);
   buildingCoverage.setExtruding(false);
-  map.on('sourcedata',event=>{if(event.isSourceLoaded&&event.sourceId?.startsWith('dongjak-buildings-data-'))queueMicrotask(syncBuildingSheetOwnership);});
-  map.on('idle',syncBuildingSheetOwnership);
+  const ownershipWork=coalesceBuildingOwnership(syncBuildingSheetOwnership);
+  map.on('sourcedata',event=>{if(event.isSourceLoaded&&event.sourceId?.startsWith('dongjak-buildings-data-'))ownershipWork.request();});
+  map.on('idle',ownershipWork.flush);
   status('지도 준비 완료 · 동작구 경계 불러오는 중');
   // 공개 Terrarium DEM: API 키 없이 지형을 표시합니다. 지형 데이터의 상세도는 지역별로 다릅니다.
   try {
@@ -1934,7 +1934,7 @@ map.on('load',()=>{
       boundaryGeometry=feature.geometry;
       districtBuildingScope?.update(boundaryGeometry);
       boundaryBounds=computeBounds(boundaryGeometry);
-      if(changed){lastBuildingOwnershipCount=-1;for(const info of loadedBuildingTiles.values()){info.complete=false;info.owned=false;info.lastOpacity=-1;}lastFootprintPaintKey='';syncBuildingSheetOwnership();syncTiltWithBuildings();scheduleBuildingLoad();}
+      if(changed){lastBuildingOwnershipKey=null;for(const info of loadedBuildingTiles.values()){info.complete=false;info.owned=false;info.lastOpacity=-1;}lastFootprintPaintKey='';syncBuildingSheetOwnership();syncTiltWithBuildings();scheduleBuildingLoad();}
       if(gpsLastPosition)outsideDistrictAlert.check(...gpsLastPosition,boundaryGeometry,gpsLastAccuracy);
       syncTransitExterior(true);
       // Reclip bus tile fallback against the updated SGIS district polygon.

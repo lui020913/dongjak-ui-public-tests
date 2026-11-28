@@ -25,3 +25,30 @@ export function waitForBuildingSource(map,id,{timeout=1200}={}){
   if(map.isSourceLoaded?.(id))done();
  });
 }
+
+/** Same-turn source notifications share a single ownership reconciliation.
+ * Idle flushes pending work immediately without leaving a redundant microtask.
+ */
+export function coalesceBuildingOwnership(run,{enqueue=queueMicrotask}={}){
+ let pending=false,version=0;
+ function flush(){pending=false;version++;run();}
+ return {request(){if(pending)return;pending=true;const token=++version;enqueue(()=>{if(pending&&version===token)flush();});},flush};
+}
+/** Bound parsed sheets and never let a stale failed request evict a newer one. */
+export function createBuildingWarmCache(load,{limit=4}={}){
+ const entries=new Map();
+ const removeIfCurrent=(id,promise)=>{if(entries.get(id)===promise)entries.delete(id);};
+ return {has:id=>entries.has(id),delete:id=>entries.delete(id),load(sheet){
+  const id=sheet.sheet;
+  if(entries.has(id)){
+   const current=entries.get(id);entries.delete(id);entries.set(id,current);return current;
+  }
+  const pending=Promise.resolve().then(()=>load(sheet)).then(result=>{
+   if(result.successfulSources!==result.totalSources)removeIfCurrent(id,pending);
+   return result;
+  },error=>{removeIfCurrent(id,pending);throw error;});
+  entries.set(id,pending);
+  while(entries.size>limit)entries.delete(entries.keys().next().value);
+  return pending;
+ }};
+}
