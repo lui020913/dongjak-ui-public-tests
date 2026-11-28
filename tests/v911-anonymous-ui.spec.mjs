@@ -860,57 +860,6 @@ test('phone search returns a visible local suggestion and clears input safely',{
  await expect(results).toBeHidden();
 });
 
-test('primary tabs reveal content through live cross-dissolve and keep the pill dock',{tag:'@phone-common'},async({page})=>{
- test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
- await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();await expect.poll(()=>page.locator('#mine-panel').getAttribute('data-dj810-animating')).toBeNull();
- // Use the same real content sampler for direct tab-to-tab and map return.
- await enter(page,'news-panel','news');
- await expect(page.locator('#mine-panel')).toBeHidden();
- await enter(page,'participation-panel','participate');
- await enter(page,'news-panel','news');
- await expect(page.locator('#participation-panel')).toBeHidden();
- await enter(page,'participation-panel','participate');
- await expect(page.locator('#news-panel')).toBeHidden();
- await enter(page,'news-panel','news');
- await expect(page.locator('#participation-panel')).toBeHidden();
- await expect(page.locator('#bottom-nav')).toHaveCSS('border-top-left-radius','999px');
- await expect(page.locator('#bottom-nav')).toHaveAttribute('data-dj-motion-indicator','ready');
- // The older moving selection plate is intentionally hidden. Active icon
- // and text provide selection without a tinted block.
- await expect(page.locator('#bottom-nav > .dj-motion-indicator')).toBeHidden();
- await expect(page.locator('#bottom-nav > .dj-motion-indicator')).toHaveCSS('display','none');
- await expect.poll(()=>page.locator('#bottom-nav').evaluate(el=>getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length)).toBe(5);
- const selected=await page.locator('#bottom-nav').evaluate(el=>{
-  const active=el.querySelector('.nav-tab[aria-current=page]'),inactive=el.querySelector('.nav-tab:not(.active)');
-  return {background:getComputedStyle(active).backgroundColor,
-   selectedInk:getComputedStyle(active).color,inactiveInk:getComputedStyle(inactive).color};
- });
- expect(['transparent','rgba(0, 0, 0, 0)']).toContain(selected.background);
- expect(selected.selectedInk).not.toBe(selected.inactiveInk);
- await tap(page,tab(page,'map'));await expect(page.locator('#news-panel')).toBeHidden();await expect.poll(()=>page.locator('#app').getAttribute('data-dj-pilot-lock-count')).toBe('0');
- // Returning from the map is a fresh stationary fade for the previous tab.
- await enter(page,'news-panel','news');
- // Exercise both the X and the tab route back to the real map, not merely
- // the eventual hidden state. Require multiple intermediate frames.
- for(const [id,key] of [['news-panel','news'],['participation-panel','participate']]){
-   if(key==='participate')await enter(page,id,key);
-   await page.evaluate(id=>{
-     const panel=document.getElementById(id),app=document.getElementById('app'),map=document.getElementById('map'),dock=document.getElementById('bottom-nav');
-     window.__primaryExitFrames=[];
-     const visible=n=>{const c=getComputedStyle(n);return c.display!=='none'&&c.visibility==='visible'&&Number(c.opacity)>.98&&n.getClientRects().length>0;};
-     const capture=()=>{if(panel.hidden)return;window.__primaryExitFrames.push({alpha:Number(getComputedStyle(panel).opacity),tab:app.dataset.tab,map:visible(map)&&visible(map.querySelector('.maplibregl-canvas')),dock:visible(dock)});requestAnimationFrame(capture);};
-     capture();
-   },id);
-   if(key==='news')await tap(page,page.locator('#news-close-to-map'));
-   else await tap(page,tab(page,'map'));
-   await expect(page.locator('#'+id)).toBeHidden();
-   const frames=await page.evaluate(()=>window.__primaryExitFrames.filter(f=>f.alpha>.08&&f.alpha<.95));
-   expect(frames.length).toBeGreaterThan(1);
-   expect(frames.every(f=>f.tab==='map'&&f.map&&f.dock)).toBe(true);
- }
-});
-
-
 test('map report fades out over its real destination without reparenting or resizing mid-frame',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);

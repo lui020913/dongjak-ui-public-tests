@@ -25,7 +25,6 @@ const releaseSmokeNames=[
  'layer header follows a real pointer',
  'ordinary light-only startup has no manual theme dialog; night visibility is retired',
  'phone search returns a visible',
- 'primary tabs reveal content',
  'map report fades out over its real destination',
  'phone browser install choices',
  'iOS PWA status edge stays flat',

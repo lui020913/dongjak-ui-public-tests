@@ -94,8 +94,10 @@ test('fast mobile release has fewer tests and full auditing remains available',(
  const list=config.split('const releaseSmokeNames=[')[1]?.split('];')[0];
  assert.ok(list,'missing fast release case list');
  const selected=[...list.matchAll(/'([^']+)'/g)].map(x=>x[1]);
- // Add one painted-geometry acceptance case; keep every previous smoke case.
- assert.equal(selected.length,22);
+ // The dedicated primary-tab cross-dissolve frame sampler was retired by owner request.
+ // Other functional and painted-geometry smoke cases remain required.
+ assert.equal(selected.length,21);
+ assert.ok(!selected.includes('primary tabs reveal content'));
  assert.ok(selected.includes('map report fades out over its real destination'));
  assert.match(config,/grep:fastMobileQA\?\/layer header follows a real pointer\|map report fades out over its real destination\//);
  assert.ok(selected.includes('phone selected dock has no color plate and route form is vertically balanced'));
