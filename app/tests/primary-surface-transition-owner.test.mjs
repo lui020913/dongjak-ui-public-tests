@@ -2,18 +2,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createPrimarySurfaceTransition} from '../src/primary-surface-transition.js';
 function fixture(){
- const nodes=new Map(),frames=new Map(),timers=new Map();let seq=0;
+ const nodes=new Map(),frames=new Map(),timers=new Map();let seq=0,now=0;
  const app={dataset:{tab:'news'},inert:false,querySelector:()=>null};
  for(const [key,id] of [['news','news-panel'],['participate','participation-panel']]){
    const vals=new Map();
    nodes.set(id,{id,dataset:{page:key},hidden:key==='participate',style:{getPropertyValue:k=>vals.get(k)?.[0]||'',getPropertyPriority:k=>vals.get(k)?.[1]||'',setProperty:(k,v,p)=>vals.set(k,[v,p]),removeProperty:k=>vals.delete(k)}});
  }
  const doc={getElementById:id=>nodes.get(id)||null,querySelector:()=>null};
- const win={getComputedStyle:()=>({display:'flex',visibility:'visible'}),requestAnimationFrame:f=>{frames.set(++seq,f);return seq;},cancelAnimationFrame:i=>frames.delete(i),setTimeout:f=>{timers.set(++seq,f);return seq;},clearTimeout:i=>timers.delete(i)};
+ const win={performance:{now:()=>now},getComputedStyle:()=>({display:'flex',visibility:'visible'}),requestAnimationFrame:f=>{frames.set(++seq,f);return seq;},cancelAnimationFrame:i=>frames.delete(i),setTimeout:f=>{timers.set(++seq,f);return seq;},clearTimeout:i=>timers.delete(i)};
  const news=nodes.get('news-panel'),community=nodes.get('participation-panel');
  const ctrl=createPrimarySurfaceTransition({doc,win,app,reduced:()=>false,replay:button=>{app.dataset.tab=button.dataset.tab;news.hidden=true;community.hidden=true;return true;}});
- const tick=t=>{const entries=[...frames];frames.clear();for(const [,f] of entries)f(t);};
- return {app,news,community,ctrl,tick,frames,timers};
+ const tick=t=>{now=t;const entries=[...frames];frames.clear();for(const [,f] of entries)f(t);};
+ return {app,news,community,ctrl,tick,frames,timers,setClock:t=>{now=t;}};
 }
 test('stable primary IDs retain direct cross dissolve even when legacy hides the logical panels',()=>{
  const {news,community,ctrl,tick,frames}=fixture();
@@ -65,4 +65,31 @@ test('sparse frames cannot extend the outgoing panel watchdog; the committed tab
  assert.equal(app.dataset.tab,'participate');assert.equal(news.hidden,true);assert.equal(community.hidden,false);
  assert.equal(news.dataset.djTabOutgoing,undefined);assert.equal(news.dataset.djPrimaryTransition,undefined);
  assert.equal(news.style.getPropertyValue('display'),'');assert.equal(app.dataset.djPrimaryDissolving,undefined);assert.equal(frames.size,0);
+});
+
+
+test('a late watchdog after a blocked event loop gives the live transition one bounded recovery window',()=>{
+ const {app,news,community,ctrl,tick,frames,timers,setClock}=fixture();
+ ctrl.dissolvePrimary({dataset:{tab:'participate'}},'news',news);
+ tick(0);tick(32);tick(64);
+ const [deadline]=timers.keys();const onDeadline=timers.get(deadline);
+ setClock(7800);timers.delete(deadline);onDeadline();
+ assert.equal(news.hidden,false);assert.equal(community.hidden,false);
+ const [grace]=timers.keys();assert.notEqual(grace,deadline);
+ tick(7800);tick(7832);tick(7864);
+ assert.ok(Number(community.style.getPropertyValue('opacity'))>.12);
+ assert.equal(news.style.getPropertyValue('opacity'),'1');
+ for(let i=7896;i<=8184;i+=32)tick(i);
+ assert.equal(news.hidden,true);assert.equal(community.hidden,false);
+ assert.equal(frames.size,0);assert.equal(timers.size,0);
+ assert.equal(app.dataset.djPrimaryDissolving,undefined);
+});
+test('the recovery deadline releases the outgoing surface even if rendering remains blocked',()=>{
+ const {news,community,ctrl,tick,timers,frames,setClock}=fixture();
+ ctrl.dissolvePrimary({dataset:{tab:'participate'}},'news',news);
+ tick(0);const [deadline]=timers.keys();const onDeadline=timers.get(deadline);
+ setClock(8000);timers.delete(deadline);onDeadline();
+ const [grace]=timers.keys();setClock(16000);timers.get(grace)();
+ assert.equal(news.hidden,true);assert.equal(community.hidden,false);
+ assert.equal(frames.size,0);assert.equal(timers.size,0);
 });
