@@ -31,6 +31,10 @@ export async function queryOverpass(query, timeoutMs = 14500) {
 }
 
 const empty = () => ({type:'FeatureCollection',features:[]});
+// Reuse the current facility pictograms, including on the legacy Safety toggle.
+// The old P (police) and H (hospital) letters are never painted again.
+export const safetyFacilityIcon=['match',['get','kind'],'police',iconName('police'),'fire_station',iconName('fire'),'hospital',iconName('hospital'),'clinic',iconName('hospital'),'pharmacy',iconName('pharmacy'),'defibrillator',iconName('emergency'),iconName('other')];
+export const essentialFacilityIcon=['match',['get','kind'],'pharmacy',iconName('pharmacy'),'convenience',iconName('store'),iconName('other')];
 const categoryLabels = {
   police:'경찰시설', fire_station:'소방시설', hospital:'병원', clinic:'의원', pharmacy:'약국',
   defibrillator:'자동심장충격기(AED)', crossing:'횡단보도(공개지도 등록 위치)', convenience:'편의점',
@@ -109,10 +113,10 @@ export function installSafetyLayers({map,maplibregl,isDongjak,canOpen=()=>true})
   for (const ctl of controls) map.addSource(ctl.source,{type:'geojson',data:empty()});
   // Hospitals remain visible in the entire district view, while other safety POIs appear on zoom-in.
   // This layer is tied to the existing Safety toggle and never represents unverified locations.
-  addLayer({id:'safety-hospital-overview',type:'circle',source:'dongjak-safety-places',minzoom:10.5,maxzoom:12.4,
-    filter:['==',['get','kind'],'hospital'],layout:{visibility:'none'},
-    paint:{'circle-radius':['interpolate',['linear'],['zoom'],10.5,6,12.3,9],
-      'circle-color':'#b53855','circle-stroke-color':'#fff','circle-stroke-width':2.2,'circle-opacity':0.98}});
+  addLayer({id:'safety-hospital-overview',type:'symbol',source:'dongjak-safety-places',minzoom:10.5,maxzoom:12.4,
+    filter:['==',['get','kind'],'hospital'],layout:{visibility:'none','icon-image':iconName('hospital'),
+      'icon-size':['interpolate',['linear'],['zoom'],10.5,.55,12.3,.72],'icon-allow-overlap':false,'icon-ignore-placement':false,
+      'icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport'}});
   addLayer({id:'safety-hospital-names',type:'symbol',source:'dongjak-safety-places',minzoom:11.0,maxzoom:12.4,
     filter:['==',['get','kind'],'hospital'],layout:{visibility:'none','text-field':['get','name'],
       'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':12,'text-offset':[0,1.15],
@@ -121,20 +125,21 @@ export function installSafetyLayers({map,maplibregl,isDongjak,canOpen=()=>true})
   addLayer({id:'safety-points',type:'circle',source:'dongjak-safety-places',minzoom:12.4,
     layout:{visibility:'none'},paint:{'circle-radius':['interpolate',['linear'],['zoom'],12.4,5.5,16,9],
       'circle-color':['match',['get','kind'],...Object.entries(categoryColors).filter(([key])=>key!=='crossing').flat(), '#456b88'],
-      'circle-stroke-color':'#fff','circle-stroke-width':2.2,'circle-opacity':0.97}});
+      'circle-stroke-color':'#fff','circle-stroke-width':2.2,'circle-opacity':0,'circle-stroke-opacity':0}});
   addLayer({id:'safety-glyphs',type:'symbol',source:'dongjak-safety-places',minzoom:12.4,
-    layout:{visibility:'none','text-field':['match',['get','kind'], 'police','P','fire_station','F','hospital','H','clinic','+','pharmacy','+','defibrillator','A','!'],
-      'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':12,'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport','text-allow-overlap':true},
-    paint:{'text-color':'#fff','text-halo-color':'#33443b','text-halo-width':0.25}});
+    layout:{visibility:'none','icon-image':safetyFacilityIcon,
+      'icon-size':['interpolate',['linear'],['zoom'],12.4,.62,16,.78,18,.90],
+      'icon-anchor':'center','icon-allow-overlap':false,'icon-ignore-placement':false,'icon-padding':5,
+      'icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport'}});
   addLayer({id:'essential-points',type:'circle',source:'dongjak-essential-places',minzoom:15,
     layout:{visibility:'none'},paint:{'circle-radius':['interpolate',['linear'],['zoom'],15,6,17,9],
       'circle-color':['match',['get','kind'],'pharmacy','#208769','convenience','#4387b6','#4d8491'],
-      'circle-stroke-color':'#fff','circle-stroke-width':2.1,'circle-opacity':0.98}});
+      'circle-stroke-color':'#fff','circle-stroke-width':2.1,'circle-opacity':0,'circle-stroke-opacity':0}});
   addLayer({id:'essential-glyphs',type:'symbol',source:'dongjak-essential-places',minzoom:15,
-    layout:{visibility:'none','text-field':['match',['get','kind'],'pharmacy','+','convenience','C','?'],
-      'text-font':['Open Sans Bold','Open Sans Regular'],'text-size':11,
-      'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport','text-allow-overlap':true},
-    paint:{'text-color':'#fff','text-halo-color':'#204a45','text-halo-width':0.25}});
+    layout:{visibility:'none','icon-image':essentialFacilityIcon,
+      'icon-size':['interpolate',['linear'],['zoom'],15,.65,17,.85,19,.95],
+      'icon-anchor':'center','icon-allow-overlap':false,'icon-ignore-placement':false,'icon-padding':5,
+      'icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport'}});
   addLayer({id:'public-points',type:'circle',source:'dongjak-public-places',minzoom:13.1,
     layout:{visibility:'none'},paint:{'circle-radius':['interpolate',['linear'],['zoom'],13.1,4.8,16.5,8.3],
       'circle-color':['match',['get','kind'],...Object.entries(categoryColors).filter(([key])=>['government','district_office','administrative_center','senior_center','daycare','school','park'].includes(key)).flat(),'#638c77'],

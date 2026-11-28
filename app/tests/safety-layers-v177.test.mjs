@@ -44,3 +44,14 @@ test('날씨 조회는 API 값을 전달하고 측정하지 않은 날씨를 만
     assert.equal(current.weather,'흐림');
   } finally {globalThis.fetch=previous;}
 });
+
+import {readFileSync} from 'node:fs';
+import {safetyFacilityIcon,essentialFacilityIcon} from '../src/safety-layers.js';
+test('legacy safety and essential overlays use shared pictograms, never H/P letter markers or visible circle underlays',()=>{
+ const lookup=(expr,key)=>{for(let i=2;i<expr.length-1;i+=2)if(expr[i]===key)return expr[i+1];return expr.at(-1);};
+ assert.equal(lookup(safetyFacilityIcon,'hospital'),'dj912-poi-hospital');assert.equal(lookup(safetyFacilityIcon,'police'),'dj912-poi-police');assert.equal(lookup(safetyFacilityIcon,'clinic'),'dj912-poi-hospital');assert.equal(lookup(safetyFacilityIcon,'defibrillator'),'dj912-poi-emergency');assert.equal(lookup(essentialFacilityIcon,'convenience'),'dj912-poi-store');
+ const code=readFileSync(new URL('../src/safety-layers.js',import.meta.url),'utf8');
+ const safety=code.slice(code.indexOf("addLayer({id:'safety-points'"),code.indexOf("addLayer({id:'public-points'"));
+ assert.doesNotMatch(safety,/'text-field'/);assert.match(safety,/'icon-image':safetyFacilityIcon/);assert.match(safety,/'icon-image':essentialFacilityIcon/);assert.equal((safety.match(/'circle-opacity':0,'circle-stroke-opacity':0/g)||[]).length,2);
+ assert.match(code,/id:'safety-hospital-overview',type:'symbol'/);
+});
