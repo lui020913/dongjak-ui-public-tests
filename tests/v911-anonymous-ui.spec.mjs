@@ -149,8 +149,7 @@ test('compact HUD and visible motion; desktop navigation and dark theme',{tag:'@
    await tap(page,tab(page,'map'));await expect(page.locator('#route-panel')).toBeHidden();
    await enter(page,'mine-panel','mine');
  }else{await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();}
- // Ordinary appearance is light-only; temporary dark styling belongs solely
- // to the night-visibility feature, not a resurrected settings button.
+ // Ordinary appearance is light-only; neither retired theme nor night mode is available.
  await expect(page.locator('#mine-panel [data-dj834-action=theme]')).toHaveCount(0);
  await expect(page.locator('#mine-panel [data-dj834-action=map]')).toHaveCount(1);
  await expect(page.locator('#app')).toHaveAttribute('data-theme','light');
@@ -817,14 +816,14 @@ test('layer header follows a real pointer upward and downward; content and X sta
 });
 
 
-test('ordinary light-only startup has no manual theme dialog; night visibility remains available',{tag:'@phone-layout'},async({page})=>{
+test('ordinary light-only startup has no manual theme dialog; night visibility is retired',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
  const root=page.locator('#app');
  await expect(root).toHaveAttribute('data-theme','light');
  await expect(page.locator('#theme-toggle')).toHaveCount(0);
  await expect(page.locator('#mine-panel [data-dj834-action=theme]')).toHaveCount(0);
  await expect(page.locator('#dj840-theme-confirm')).toBeHidden();
- await expect(page.locator('#night-visibility-toggle')).toHaveCount(1);
+ await expect(page.locator('#night-visibility-toggle,#night-visibility-quick-off,#night-visibility-float,#dj833-night-modal')).toHaveCount(0);
 });
 
 test('phone retired update history is absent and records navigation stays above the dock',{tag:'@phone-layout'},async({page})=>{
@@ -1197,9 +1196,9 @@ test('iOS PWA status edge stays flat when a dialog opens',{tag:'@phone-common'},
  await expect(root).toHaveCSS('background-color','rgb(237, 243, 239)');
  await expect(page.locator('body')).toHaveCSS('background-color','rgb(237, 243, 239)');
  await ai.evaluate(n=>n.close());await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');
- // Dark theme palette is tested in the same DOM without requiring an OS-controlled reload.
- await page.evaluate(()=>document.getElementById('app').dataset.theme='dark');await expect.poll(()=>root.evaluate(n=>getComputedStyle(n).getPropertyValue('--dj-pwa-status-color').trim())).toBe('#22282e');
- await expect(sample).toHaveCSS('background-color','rgb(34, 40, 46)');await expect(page.locator('body')).toHaveCSS('background-color','rgb(34, 40, 46)');
+ // A stale legacy dark attribute must not change the light-only PWA status edge.
+ await page.evaluate(()=>document.getElementById('app').dataset.theme='dark');await expect.poll(()=>root.evaluate(n=>getComputedStyle(n).getPropertyValue('--dj-pwa-status-color').trim())).toBe('#edf3ef');
+ await expect(sample).toHaveCSS('background-color','rgb(237, 243, 239)');await expect(page.locator('body')).toHaveCSS('background-color','rgb(237, 243, 239)');
 });
 
 

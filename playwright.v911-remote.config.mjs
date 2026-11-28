@@ -23,7 +23,7 @@ const releaseSmokeNames=[
  'phone weather single window',
  'phone windows share the opaque',
  'layer header follows a real pointer',
- 'ordinary light-only startup has no manual theme dialog; night visibility remains available',
+ 'ordinary light-only startup has no manual theme dialog; night visibility is retired',
  'phone search returns a visible',
  'primary tabs reveal content',
  'map report fades out over its real destination',
