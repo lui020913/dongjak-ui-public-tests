@@ -18,9 +18,7 @@ test('보행안전 메뉴가 지도 옵션 외부의 독립 제어판이며 ID�
   assert.match(html,/id="map-safety-toggle"[^>]+aria-expanded="false"/);
 });
 test('독립 야간 시야와 임시 다크 테마 실행 경로가 제거된다',()=>{
-  const night=read('src/night-visibility-map.js'),theme=read('src/ui-environment.js'),main=read('src/main.js');
-  assert.match(night,/applyTemporaryTheme\('dark'\)/);
-  assert.match(night,/applyTemporaryTheme\(null\)/);
+  const theme=read('src/ui-environment.js'),main=read('src/main.js');
   assert.doesNotMatch(theme,/themeState\.override|setTemporaryTheme/);
   assert.match(theme,/return 'light';/);
   assert.doesNotMatch(theme,/safeStorageSet\(THEME_KEY/);

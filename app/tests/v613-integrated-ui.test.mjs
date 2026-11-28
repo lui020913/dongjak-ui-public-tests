@@ -4,7 +4,6 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
-import {nightFeatureVisible,NIGHT_DETAIL_ZOOM,NIGHT_FOREGROUND_LAYERS} from '../src/night-visibility-map.js';
 import {safetyFeatures,duplicatesFeaturedPlace} from '../src/safety-layers.js';
 import {civicFilter} from '../src/civic-facility-layer.js';
 import {makeCircularFeaturedLogo} from '../src/featured-place-labels.js';
@@ -15,21 +14,6 @@ import {VERSION_HISTORY} from '../src/version-history.js';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=rel=>readFileSync(path.join(root,rel),'utf8');
-
-test('night far / medium / near zoom renders only appropriate detail',()=>{
-  for(const line of ['dj-night-lit-line','dj-night-dark-alley','dj-night-occ-clear']){
-    assert.equal(nightFeatureVisible(line,13),true);
-    assert.equal(nightFeatureVisible(line,19),true);
-    assert.equal(nightFeatureVisible(line,19,false),false);
-  }
-  assert.equal(nightFeatureVisible('dj-night-light-point',15),false);
-  assert.equal(nightFeatureVisible('dj-night-light-point',NIGHT_DETAIL_ZOOM.light),true);
-  assert.equal(nightFeatureVisible('dj-night-reach-fill',13),false);
-  assert.equal(nightFeatureVisible('dj-night-reach-fill',NIGHT_DETAIL_ZOOM.reach),true);
-  assert.equal(nightFeatureVisible('dj-night-light-glow',13),false);
-  assert.ok(!NIGHT_FOREGROUND_LAYERS.includes('dj-night-light-point'), 'lamps must not be promoted in front of 3D buildings');
-  assert.match(read('src/night-visibility-map.js'),/placeLampsBelowBuildings/);
-});
 
 test('same named major place does not reappear as public source/square POI',()=>{
   assert.equal(duplicatesFeaturedPlace('동작구청 신청사'),true);

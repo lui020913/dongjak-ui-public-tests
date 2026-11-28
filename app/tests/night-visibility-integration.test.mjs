@@ -46,15 +46,10 @@ test('간선도로·횡단도·계단·공원길을 기존 분석 정의대로 �
   assert.equal(kindOf({highway:'residential'}),'alley');
 });
 test('야간 분석 연구 코드는 보존하고 독립 UI 제거 및 대중교통 유지',()=>{
-  const html=read('index.html'),main=read('src/main.js'),js=read('src/night-visibility-map.js');
+  const html=read('index.html'),main=read('src/main.js');
   for(const id of ['night-visibility-toggle','night-visibility-quick-off','night-visibility-radius',
     'night-visibility-exclude-major','night-visibility-show-alley','night-visibility-show-path',
     'night-visibility-top','night-visibility-stats'])assert.doesNotMatch(html,new RegExp('id="'+id+'"'));
   assert.doesNotMatch(main,/installNightVisibility/);
   assert.match(main,/initTransportMap\(/);
-  assert.match(js,/dj-night-dark-path/);
-  assert.match(js,/getSangdoBoundary\(map\)/);
-  assert.match(js,/fetchSangdoRoads\(lights\)/);
-  assert.match(js,/scopeIsOfficial/);
-  assert.match(js,/new maplibregl\.Popup/);
 });

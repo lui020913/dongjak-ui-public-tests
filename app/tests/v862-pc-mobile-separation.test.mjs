@@ -99,13 +99,8 @@ test('MapLibre zoom guard restores only base-map ground and vegetation and prese
   }
 });
 
-test('retired night session is not started by the public app',()=>{
-  assert.doesNotMatch(read('index.html'),/src="\/src\/v862-night-analysis-session\.js"/);
-  const session=read('src/v862-night-analysis-session.js');
-  const runtime=read('src/night-visibility-map.js');
-  assert.ok(session.includes("app.dataset.tab!=='map'||app.classList.contains('map-safety-open')"));
-  assert.ok(session.includes("button?.getAttribute('aria-pressed')==='true')button.click()"));
-  assert.ok(session.includes("attributeFilter:['data-tab','class']"));
-  assert.ok(session.includes("safetyToggle?.addEventListener('click',stop,true)"));
-  assert.equal(runtime.includes('safetyWorkbenchToggle?.addEventListener'),false);
+
+test('retired night session and renderer do not exist in production source',()=>{
+  assert.throws(()=>read('src/v862-night-analysis-session.js'),{code:'ENOENT'});
+  assert.throws(()=>read('src/night-visibility-map.js'),{code:'ENOENT'});
 });

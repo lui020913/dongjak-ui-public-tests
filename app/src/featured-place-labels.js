@@ -1,5 +1,4 @@
 import {hasTransportPoiHit} from './poi-click-identity.js';
-import {nightOwnsLayerOrder} from './v913-night-poi-isolation.js';
 import {promoteReadable3DLabelLayers} from './readable-3d-labels.js';
 /**
  * Five trusted, named places drawn by MapLibre itself (not floating DOM labels).
@@ -154,7 +153,7 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
     }catch(error){console.info('[주요시설명] 테마 반영 생략',error?.message);}
   }
   function bringToFront(){
-    if(nightOwnsLayerOrder(map))return;
+
     if(!map.getLayer?.(nameId))return;
     promoteReadable3DLabelLayers(map);
     const theme=app?.dataset?.theme||'light';

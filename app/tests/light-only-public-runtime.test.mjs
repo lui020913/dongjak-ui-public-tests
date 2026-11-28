@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('standalone night scene is not mounted and public palette is light-only',()=>{
  const main=read('src/main.js'),html=read('index.html'),theme=read('src/ui-environment.js');
@@ -33,4 +33,9 @@ test('public artwork, iOS status bar and land palette do not react to old dark s
  assert.doesNotMatch(read('src/v860-onboarding.css'),/data-theme="dark"/);
  assert.doesNotMatch(read('src/v7120-settings.js'),/dongjak-dark-|isDark|syncTheme/);
  assert.doesNotMatch(read('src/theme-contract.css'),/data-theme="dark"|color-scheme:dark/);
+});
+
+test('retired night UI and renderer files are physically absent',()=>{
+ for(const file of ['night-visibility-map.js','night-map-roads-gl.js','night-road-canvas.js','v913-night-poi-isolation.js','v7120-night-panel.js','v862-night-analysis-session.js','night-visibility-panel.css','night-visibility.css'])assert.equal(existsSync(new URL('../src/'+file,import.meta.url)),false,file);
+ for(const file of ['night-occlusion.js','night-visibility-analysis.js','pri-map.js','pri-data.mjs'])assert.ok(existsSync(new URL('../src/'+file,import.meta.url)),file);
 });

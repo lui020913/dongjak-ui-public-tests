@@ -31,12 +31,7 @@ test('one theme stylesheet with light-only public UI',()=>{
 });
 
 test('retired night mode cannot be activated from the public theme controller',()=>{
-  const night=read('src/night-visibility-map.js');
   const env=read('src/ui-environment.js');
-  assert.doesNotMatch(night,/themeBeforeNight/);
-  assert.match(night,/applyTemporaryTheme\('dark'\)/);
-  assert.match(night,/applyTemporaryTheme\(null\)/);
-  assert.doesNotMatch(night,/themeToggle\.click\(/);
   assert.doesNotMatch(env,/themeState\.override|setTemporaryTheme/);
   assert.match(env,/return 'light';/);
   assert.doesNotMatch(env,/safeStorageSet\(THEME_KEY/);

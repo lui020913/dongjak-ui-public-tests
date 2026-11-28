@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {searchLocalPlaces,normalizePlaceSearchResults} from '../src/route-search.js';
-import {nightActivationBlocked} from '../src/night-visibility-map.js';
 import {installAdaptiveMapPerformance} from '../src/v7122-map-performance.js';
 
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
@@ -17,15 +16,6 @@ test('일반 장소와 주소를 검색할 수 있고 특정 역만 검색하는
   assert.equal(active[0].category,'경찰서');assert.equal(active[0].name,'상도지구대');
   const address=normalizePlaceSearchResults({features:[{geometry:{type:'Point',coordinates:[126.955,37.505]},properties:{street:'상도로',housenumber:'10'}}]});
   assert.equal(address[0].category,'장소');
-});
-test('길찾기·위치 선택 동안 야간시야 활성화를 막고 일반 지도에서는 허용',()=>{
-  const classes=new Set(['route-picking']);
-  const app={classList:{contains:k=>classes.has(k)}};
-  assert.equal(nightActivationBlocked(app,{getElementById:()=>null}),true);
-  classes.clear();
-  assert.equal(nightActivationBlocked(app,{getElementById:()=>null}),false);
-  classes.add('route-guiding');
-  assert.equal(nightActivationBlocked(app,{getElementById:()=>null}),true);
 });
 test('PC 드래그 프레임 저하 시 3D만 임시 정지하고 이동 종료 후 복구',()=>{
   const events=new Map(),states=new Map([['dongjak-buildings-3d-12','visible'],['ordinary-road','visible']]);

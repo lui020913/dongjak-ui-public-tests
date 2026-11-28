@@ -34,11 +34,9 @@ test('v5.12.4: unmatched native footprints remain visible across pitch changes',
   assert.deepEqual(changed[2],['building','fill-antialias',false]);
 });
 
-test('v5.12.4: night panel and options use shared theme colors and version menu button is absent',()=>{
-  const css=read('src/night-visibility-panel.css');
+test('v5.12.4: map options and version menu button remain in their approved state',()=>{
   const options=read('src/layout-core.css');
   const html=read('index.html');
-  assert.match(css,/#night-visibility-float\s*\{[^}]*var\(--dj-ui-bg/s);
   assert.match(options,/\.map-advanced-controls #map-status/);
   assert.doesNotMatch(html,/id="version-history-menu"/);
   assert.doesNotMatch(html,/id="version-history-trigger"/);

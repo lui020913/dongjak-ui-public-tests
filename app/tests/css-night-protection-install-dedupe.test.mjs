@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-const sources=['night-visibility-panel.css','protection-zone-map.css','browser-install-menu.css'];
+const sources=['protection-zone-map.css','browser-install-menu.css'];
 function leafRules(src){
  const stack=[],rules=[];let start=0,quote='',escape=false,comment=false;
  for(let i=0;i<src.length;i++){
@@ -23,7 +23,7 @@ function leafRules(src){
  }
  assert.equal(stack.length,0,'unterminated CSS');return rules;
 }
-test('night, protection and install CSS retain all distinct leaf declarations without identical shadow copies',()=>{
+test('protection and install CSS retain all distinct leaf declarations without identical shadow copies',()=>{
  for(const name of sources){
   const content=readFileSync(new URL('../src/'+name,import.meta.url),'utf8');
   const rules=leafRules(content);assert.ok(rules.length>25,name+' was unexpectedly emptied');
@@ -31,9 +31,8 @@ test('night, protection and install CSS retain all distinct leaf declarations wi
   assert.equal(new Set(ids).size,ids.length,'identical repeated selector/property in '+name);
  }
 });
-test('critical night panel, protection sheet and install popup selectors still exist',()=>{
+test('critical protection sheet and install popup selectors still exist',()=>{
  const expectations=[
-  ['night-visibility-panel.css','#app #night-visibility-float[data-collapsed="true"]'],
   ['protection-zone-map.css','#app .pza-road-sheet[hidden]'],
   ['browser-install-menu.css','html[data-theme=dark] dialog#dj-install-menu .dj-install-info']
  ];

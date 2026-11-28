@@ -6,7 +6,6 @@ import {popupViewportOffset} from '../src/map-popup-viewport.js';
 import {isScheduleMergedStation} from '../src/metro-schedule-view.js';
 import {verifiedKorailLine1Timetable} from '../src/metro-korail-line1.js';
 import {verifiedInlineOperatorTimetable} from '../src/metro-inline-schedules.js';
-import {NIGHT_VISUAL_PALETTE} from '../src/night-visibility-map.js';
 
 const read=path=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
@@ -91,18 +90,9 @@ test('the pedestrian-safety launcher stays on one line and user-facing zone text
   assert.doesNotMatch(zone,/도형/);
 });
 
-test('night analysis is fixed to building occlusion with its original light-reach color retained',()=>{
+test('retired standalone night controls do not reappear',()=>{
   const html=read('index.html');
-  const night=read('src/night-visibility-map.js');
-  const css=read('src/night-visibility-panel.css');
   assert.doesNotMatch(html,/night-analysis-mode|기존 조명 거리/);
-  assert.equal(NIGHT_VISUAL_PALETTE.clear.toLowerCase(),'#79dec1');
-  assert.equal(NIGHT_VISUAL_PALETTE.alleyUnlit.toLowerCase(),'#ff8a5b');
-  assert.equal(NIGHT_VISUAL_PALETTE.pathUnlit.toLowerCase(),'#5d9eff');
-  for(const color of [NIGHT_VISUAL_PALETTE.clear,NIGHT_VISUAL_PALETTE.alleyUnlit,NIGHT_VISUAL_PALETTE.pathUnlit])
-    assert.ok(css.toLowerCase().includes(color.toLowerCase()));
-  assert.match(night,/const isOcclusion=\(\)=>true/);
-  assert.match(night,/거리 기반 분석으로 대체하지 않습니다/);
 });
 
 test('v7.0.4 is the current version and records all requested UI changes',()=>{

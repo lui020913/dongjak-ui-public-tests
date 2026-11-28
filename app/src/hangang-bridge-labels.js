@@ -1,4 +1,3 @@
-import {nightOwnsLayerOrder} from './v913-night-poi-isolation.js';
 import {promoteReadable3DLabelLayers} from './readable-3d-labels.js';
 /**
  * Labels for five Han River crossings. An approximate reference is used only
@@ -207,7 +206,7 @@ export function installHangangBridgeLabels(map,{fetchImpl=globalThis.fetch}={}){
   }
   let movingLabels=false;
   function prioritizeBridgeNames(){
-    if(movingLabels||nightOwnsLayerOrder(map))return;
+    if(movingLabels)return;
     suppressNativeBridgeDuplicates();
     if(removed||typeof map.moveLayer!=='function'||typeof map.getStyle!=='function')return;
     movingLabels=true;

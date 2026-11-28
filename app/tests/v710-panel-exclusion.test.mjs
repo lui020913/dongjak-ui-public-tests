@@ -5,7 +5,6 @@ const at=f=>readFileSync(new URL('../'+f,import.meta.url),'utf8');
 const html=at('index.html');
 const css=at('src/mobile-ui-baseline.css');
 const main=at('src/main.js');
-const night=at('src/night-visibility-map.js');
 test('overview uses a short title and only one close control',()=>{
   const panel=html.match(/<section id="overview-sheet"[\s\S]*?<\/section>/)?.[0]||'';
   assert.match(panel,/<h1>안전정보<\/h1>/);
@@ -13,10 +12,8 @@ test('overview uses a short title and only one close control',()=>{
   assert.doesNotMatch(panel,/우리 동네 안전정보 살펴보기/);
 });
 test('public overview still has a single visibility owner after night scene retirement',()=>{
-  assert.match(night,/if\(next\)\{[\s\S]*?overview\.hidden=true;[\s\S]*?if\(next\)await onActivate\(\)/);
   assert.doesNotMatch(main,/exclusiveNightPanelObserver/);
   assert.match(main,/safetyOverviewObserver\.observe\(overview/);
-  assert.match(css,/#app\[data-sangdo-night="on"\] #overview-sheet/);
 });
 test('single X glyph and consistent panel controls',()=>{
   assert.match(css,/::after\s*\{\s*content:none!important;display:none!important;/);

@@ -13,10 +13,7 @@ test('다크 테마 건물 평면·3D는 같은 팔레트에서 저명도로 지
 });
 
 test('폐기된 야간 시야 패널은 표시하지 않는다',()=>{
-  const js=read('src/night-visibility-map.js');
   const html=read('index.html');
-  assert.match(js,/const showFloating=\(\)=>\{[\s\S]*?setFloatingCollapsed\(true\)/);
-  assert.match(js,/quickOff\.hidden=false/);
   assert.doesNotMatch(html,/id="night-visibility-float-collapse"[^>]*aria-expanded="false"/);
   assert.doesNotMatch(html,/id="night-visibility-float-stop"/);
   assert.doesNotMatch(html,/id="night-visibility-float-summary"/);
@@ -31,11 +28,3 @@ test('폐기된 독립 분석 결과와 설명 창은 공개 UI에 없다',()=>{
   assert.doesNotMatch(html,/id="night-visibility-top"/);
 });
 
-test('모바일 바텀시트가 하단 내비게이션 위에 배치되고 접힘 높이를 제한',()=>{
-  const css=read('src/night-visibility-panel.css');
-  assert.match(css,/\[data-collapsed="true"\]/);
-  assert.match(css,/bottom:calc\(var\(--dj-mobile-nav-h,66px\) \+ 8px\)/);
-  assert.match(css,/max-height:min\(56dvh/);
-  assert.match(read('src/night-visibility-map.js'),/touchstart/);
-  assert.match(read('src/night-visibility-map.js'),/touchend/);
-});

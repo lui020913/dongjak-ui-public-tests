@@ -5,13 +5,6 @@ import {readFileSync} from 'node:fs';
 import {mobileScalePosition} from '../src/map-scale-docking.js';
 const read=name=>readFileSync(new URL(`../${name}`,import.meta.url),'utf8');
 
-test('night shortcut stays visible and provides active night-off action',()=>{
-  const src=read('src/night-visibility-map.js');
-  assert.match(src,/quickOff\.hidden=false;/);
-  assert.match(src,/enabled\?'야간 시야 해제':'야간 시야'/);
-  assert.match(src,/quickOff\.addEventListener\('click',\(\)=>\{void setMode\(!enabled\);\}\)/);
-});
-
 test('new overrides load after old floating CSS, preserving button and X centering',()=>{
   const main=read('src/main.js');
   const css=read('src/mobile-ui-baseline.css');

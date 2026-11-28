@@ -34,14 +34,6 @@ test('theme loading uses the existing single overlay but a new glass-card progre
   assert.match(css,/data-theme="dark"\] #dj-full-transition/);
   assert.match(read('src/v711-experience.js'),/dj-transition-message/);
 });
-test('night analysis options group original controls without recreating any input',()=>{
-  const js=read('src/v7120-night-panel.js'),html=read('index.html');
-  assert.doesNotMatch(html,/src="\/src\/v7120-night-panel\.js"/);
-  assert.match(js,/controls\.append\(advanced,top\)/);
-  assert.match(js,/advanced\.append\(node\)/);
-  assert.match(js,/top\.append\(node\)/);
-  assert.match(read('src/v7120-polish.css'),/\.dj-night-group/);
-});
 test('original MapLibre entry and walk-safety layer assets remain connected',()=>{
   const main=read('src/main.js');
   assert.match(main,/installSafetyLayers/);

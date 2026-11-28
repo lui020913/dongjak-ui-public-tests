@@ -41,14 +41,7 @@ test('a 5m sampled road preserves all classified lengths with category changes c
  assert.ok(g.features.some(f=>f.properties.category==='blocked'));
 });
 test('offline building occlusion model is retained but no standalone selector is mounted',()=>{
- const html=read('index.html'),map=read('src/night-visibility-map.js');
+ const html=read('index.html');
  assert.doesNotMatch(html,/name="night-analysis-mode"/);
  assert.doesNotMatch(html,/id="night-visibility-toggle"/);
- assert.match(map,/const requestedOcclusion=\(\)=>true/);
- assert.match(map,/const isOcclusion=\(\)=>true/);
- assert.doesNotMatch(map,/현재는 기존 거리 기반 분석만 표시합니다/);
- assert.match(map,/occlusion-light-reach\.geojson/);
- assert.match(map,/occlusion-road-samples\.json/);
- assert.match(map,/fetchSangdoRoads\(lights\)/);
- assert.match(map,/analyzeOcclusion\(selected,currentRadius/);
 });

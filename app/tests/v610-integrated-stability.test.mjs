@@ -76,13 +76,6 @@ test('v6.1: facility click focuses selected facility coordinates',()=>{
   assert.match(read('src/civic-facility-layer.js'),/feat\.geometry\?\.type==='Point'/);
 });
 
-test('v6.1: 3D night removes duplicate WebGL sawtooth roads but retains accessible analysis layers',()=>{
-  const js=read('src/night-visibility-map.js');
-  assert.match(js,/USE_CUSTOM_NIGHT_ROADS=false/);
-  assert.match(js,/dj-night-dark-alley/);assert.match(js,/dj-night-lit-line/);
-  assert.match(js,/casing:'#304955'/);
-});
-
 test('v6.1.2: continuous terrain prevents pitch or viewport-boundary suppression and preserves history',()=>{
   const js=read('src/main.js');
   assert.match(js,/map\.setTerrain\(\{source:'dongjak-terrain-dem',exaggeration:1\.0\}\)/);
