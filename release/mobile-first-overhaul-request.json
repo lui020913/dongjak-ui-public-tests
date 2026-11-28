@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.269",
+  "application_version": "9.2.270",
   "public_work_branch": "main",
-  "purpose": "Faster map streaming: retain native parent/recent tiles, bounded parsed building prefetch during camera movement, transit requests while moving with visible cells prioritized, shorter settled publish delay, per-new-bus feature opacity fade 180ms and native symbol fade. Preserve existing geometry, terrain, scope, layer styling and duplicate prevention. Direct visual protected production.",
-  "attempt": 511,
+  "purpose": "Faster map streaming: retain native parent/recent tiles, bounded parsed building prefetch during camera movement, transit requests while moving with visible cells prioritized, shorter settled publish delay, per-new-bus feature opacity fade 180ms and native symbol fade. Preserve existing geometry, terrain, scope, layer styling and duplicate prevention. Direct visual protected production. Align border regression assertion with critical-cell publication.",
+  "attempt": 512,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
