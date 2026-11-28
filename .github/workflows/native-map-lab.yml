@@ -41,6 +41,7 @@ jobs:
           PY
           (cd app && npx vite build .native-lab-web --config .native-lab-web/vite.config.mjs --outDir "$GITHUB_WORKSPACE/experiments/native-map-lab/app/src/main/assets" --emptyOutDir)
           test -s experiments/native-map-lab/app/src/main/assets/index.html
+      - uses: android-actions/setup-android@v3
       - name: Build isolated debug APK
         run: |
           sdkmanager "platforms;android-36" "build-tools;36.0.0"
