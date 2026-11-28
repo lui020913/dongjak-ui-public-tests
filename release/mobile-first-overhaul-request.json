@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.263",
+  "application_version": "9.2.264",
   "public_work_branch": "main",
-  "purpose": "Correct all five Sangdo subway exit display positions with independently checked OSM-attributed coordinates; retain MOIS raw snapshot and exits-only display. Prefer Yangnyeong-ro through-road roadside placement specifically for ARS 20890, 20158, 20159; preserve raw bus points, directions and other stops. Preserve full terrain and previous fixes. Direct visual protected production.",
-  "attempt": 505,
+  "purpose": "Local presentation DEM correction for Daebang/Noryangjin (10m) and approximate Yeouido island (12m); preserve other terrain, full 3D buildings and existing fixes; original tile on decode failure. Direct visual protected production.",
+  "attempt": 506,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

@@ -1,3 +1,4 @@
+import {registerLocalTerrainProtocol,LOCAL_TERRAIN_URL} from './local-terrain-surface.mjs';
 import {installSiteLanduse} from './site-landuse-palette.mjs';
 import {loadSeoulBoundary,getSeoulBoundary} from './seoul-transit-boundary.mjs';
 import {sameBusTransfer,transitFollowFix} from './transit-transfer-guidance.mjs';
@@ -639,6 +640,7 @@ const djInitialBudget=phoneProfile({phone:djPhone,ua:navigator.userAgent,memory:
 const djNormalPixelRatio=normalMapPixelRatio({phone:djPhone,ua:navigator.userAgent,memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency,deviceRatio:globalThis.devicePixelRatio});
 const themeReloadState=readManualThemeReload(window.sessionStorage);
 registerReducedTileProtocol(maplibregl);
+registerLocalTerrainProtocol(maplibregl);
 const map = new maplibregl.Map({
   container: 'map',
   attributionControl:false,
@@ -1774,7 +1776,7 @@ map.on('load',()=>{
   try {
     map.addSource('dongjak-terrain-dem', {
       type:'raster-dem',
-      tiles:['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+      tiles:[LOCAL_TERRAIN_URL],
       encoding:'terrarium',
       tileSize:256,
       maxzoom:12,
