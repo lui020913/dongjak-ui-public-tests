@@ -89,6 +89,7 @@ import {createBuildingCoverage,uniqueHighRiseFootprints,buildingModeVisibility,n
 import {isDisplayBuilding,partitionDisplayBuildings} from './building-display-detail.js';
 import {greenBuildingFilterEnabled,partitionGreenReview} from './green-building-filter.js';
 import {nearestBuildingSheets} from './building-prewarm.js';
+import {prepareBuildingChunks,nextBuildingStage,waitForBuildingSource,BUILDING_STAGE_GAP_MS} from './progressive-building-stream.mjs';
 import {installSafetyLayers,installBridgeDeck} from './safety-layers.js';
 import {installMapOrientationControls,installNeighborDistrictLabels,installDecorativeParkTrees} from './map-polish.js';
 import {installGrassTexture,installForestShade,installBaseBuildingPalette,nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,buildingFootprintOutlinePaint,buildingPlanVisibility,buildingZoomOpacityExpression,BUILDING_ZOOM_FADE_START,BUILDING_ZOOM_FADE_END} from './map-appearance.js';
@@ -886,14 +887,14 @@ function warmBuildingSheet(sheet){
  warmBuildingSheets.set(id,p);while(warmBuildingSheets.size>4)warmBuildingSheets.delete(warmBuildingSheets.keys().next().value);return p;
 }
 async function prefetchMovingBuilding(){
- if(!djPhone||djRenderBudget.isEconomy()||!mapReady||!boundaryGeometry||!baseBuildingsVisible||map.getZoom()<BUILDING_ZOOM_MIN||warmBuildingBusy||Date.now()-lastBuildingWarmAt<220)return;
+ if(!djPhone||djRenderBudget.isEconomy()||!mapReady||!boundaryGeometry||!baseBuildingsVisible||map.getZoom()<BUILDING_ZOOM_MIN||djBuildingBatchBusy||warmBuildingBusy||Date.now()-lastBuildingWarmAt<350)return;
  lastBuildingWarmAt=Date.now();warmBuildingBusy=true;
  try{const manifest=await ensureBuildingManifest(),c=map.getCenter(),b=getVisibleBBox();const candidates=manifest.sheets.filter(s=>intersects(s.bbox,b)&&!loadedBuildingTiles.get(s.sheet)?.complete&&!buildingLoading.has(s.sheet)&&!warmBuildingSheets.has(s.sheet));const sheet=nearestBuildingSheets({sheets:candidates},[c.lng,c.lat],1)[0];if(sheet)await warmBuildingSheet(sheet);}catch{}finally{warmBuildingBusy=false;}
 }
 function scheduleBuildingLoad(){
   if (!visibleBuilding2D() || map.getZoom()<BUILDING_ZOOM_MIN || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
   clearTimeout(buildingLoadTimer);
-  buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},90);
+  buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},BUILDING_STAGE_GAP_MS);
 }
 async function ensureBuildingManifest(){
   if(buildingManifest)return buildingManifest;
@@ -917,7 +918,7 @@ async function loadOneBuildingSheet(sheet){
   buildingLoading.add(sheet.sheet);
   try {
     const {features, reviewCandidates, apartmentExcluded=[], displayGeometries, successfulSources, totalSources, errors}=await warmBuildingSheet(sheet);
-    warmBuildingSheets.delete(sheet.sheet);
+    // Keep a parsed sheet cached if camera movement interrupts preparation.
     for(const problem of errors) console.warn(`[동작하는 안전지도] ${sheet.sheet}번 ${problem.label} 로딩 실패:`,problem.error);
     // Defer geometry filtering and indexing until the phone camera is settled.
     while(djPhone&&map.isMoving?.())await new Promise(resolve=>map.once('moveend',resolve));
@@ -925,12 +926,15 @@ async function loadOneBuildingSheet(sheet){
     if(djPhone&&!intersects(sheet.bbox,getVisibleBBox()))return;
     // Tile-native buildings are incomplete in parts of Sangdo 1-dong. The
     // supplied base+supplement GIS footprints must also be available overhead.
-    const districtBuildings=features.filter(f=>Number.isFinite(f.properties?.x)&&Number.isFinite(f.properties?.y)&&
-      isDongjak(f.properties.x,f.properties.y)===true&&['Polygon','MultiPolygon'].includes(f.geometry?.type));
-    const {visible:eligible,excluded}=partitionDisplayBuildings(districtBuildings.filter(f=>!confirmedDevelopmentDisplay?.contains(f.properties.x,f.properties.y)));
+    const current=()=>visibleBuilding2D()&&map.getZoom()>=BUILDING_ZOOM_MIN&&(!djPhone||(!map.isMoving?.()&&intersects(sheet.bbox,getVisibleBBox())));
+    const districtBuildings=await prepareBuildingChunks(features,f=>Number.isFinite(f.properties?.x)&&Number.isFinite(f.properties?.y)&&isDongjak(f.properties.x,f.properties.y)===true&&['Polygon','MultiPolygon'].includes(f.geometry?.type)&&!confirmedDevelopmentDisplay?.contains(f.properties.x,f.properties.y)?f:null,{canContinue:current});
+    if(!districtBuildings)return;
+    const {visible:eligible,excluded}=partitionDisplayBuildings(districtBuildings);
     const {visible:reviewedVisible,reviewExcluded}=partitionGreenReview(eligible,reviewCandidates,greenBuildingFilterEnabled(globalThis.location?.search));
     const visible=uniqueHighRiseFootprints(reviewedVisible);
-    const within=visible.map(f=>({...f,geometry:displayGeometries.get(f)||f.geometry,properties:{...f.properties,_render3d:true}}));
+    const within=await prepareBuildingChunks(visible,f=>({...f,geometry:displayGeometries.get(f)||f.geometry,properties:{...f.properties,_render3d:true}}),{canContinue:current});
+    if(!within)return;
+    warmBuildingSheets.delete(sheet.sheet);
     const sourceId=`dongjak-buildings-data-${sheet.sheet}`;
     const layerId=`dongjak-buildings-3d-${sheet.sheet}`;
     const footprintFillId=`dongjak-buildings-footprint-${sheet.sheet}`;
@@ -982,12 +986,11 @@ function scheduleInitialBuildingWarmup(){
   if(initialBuildingWarmupScheduled||!boundaryGeometry||!mapReady||djRenderBudget.isEconomy())return;
   initialBuildingWarmupScheduled=true;
   const run=async()=>{
-    if(!boundaryGeometry)return;
+    if(!boundaryGeometry||!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN)return;
     try{
       const manifest=await ensureBuildingManifest();
       const center=map.getCenter();
-      const narrow=window.innerWidth<800 || window.matchMedia?.('(pointer:coarse)')?.matches;
-      const nearby=nearestBuildingSheets(manifest,[center.lng,center.lat],narrow?2:4);
+      const nearby=nearestBuildingSheets({sheets:manifest.sheets.filter(s=>intersects(s.bbox,getVisibleBBox()))},[center.lng,center.lat],1);
       // Every sheet is separately parsed/installed; schedule the next sheet on
       // another idle task instead of janking the first interactive map frame.
       for(const sheet of nearby){
@@ -1031,14 +1034,16 @@ async function loadVisibleBuildingSheets(){
     const nearby=manifest.sheets.filter(s=>intersects(s.bbox,bbox));
     const center=map.getCenter();const sheets=nearestBuildingSheets({sheets:nearby},[center.lng,center.lat],nearby.length);
     djTrimOffscreenBuildings(sheets);
-    for(const sheet of sheets){
-      if(!visibleBuilding2D()||(djPhone&&map.isMoving?.())){interrupted=true;break;}
-      if(loadedBuildingTiles.get(sheet.sheet)?.complete){
-        const old=loadedBuildingTiles.get(sheet.sheet);loadedBuildingTiles.delete(sheet.sheet);loadedBuildingTiles.set(sheet.sheet,old);continue;
-      }
+    // One authoritative sheet per stage. Native footprints remain visible in
+    // unowned areas; do not enqueue all detailed sources in the same frame.
+    for(const sheet of sheets)if(loadedBuildingTiles.get(sheet.sheet)?.complete){const old=loadedBuildingTiles.get(sheet.sheet);loadedBuildingTiles.delete(sheet.sheet);loadedBuildingTiles.set(sheet.sheet,old);}
+    const next=()=>nextBuildingStage(sheets,{isComplete:id=>loadedBuildingTiles.get(id)?.complete,isLoading:id=>buildingLoading.has(id),retryAt:id=>buildingRetryAfter.get(id)||0});
+    const sheet=next();
+    if(sheet){
       await loadOneBuildingSheet(sheet);
-      if(djPhone&&getVisibleBBox().some((v,i)=>Math.abs(v-bbox[i])>0.000001)){interrupted=true;break;}
-      if(djRenderBudget.isEconomy())await new Promise(r=>setTimeout(r,0));
+      if(map.getSource('dongjak-buildings-data-'+sheet.sheet))await waitForBuildingSource(map,'dongjak-buildings-data-'+sheet.sheet);
+      syncBuildingSheetOwnership();
+      interrupted=Boolean(next())||getVisibleBBox().some((v,i)=>Math.abs(v-bbox[i])>0.000001);
     }
   }finally{djBuildingBatchBusy=false;if(interrupted)scheduleBuildingLoad();
     clearTimeout(buildingRetryTimer);
