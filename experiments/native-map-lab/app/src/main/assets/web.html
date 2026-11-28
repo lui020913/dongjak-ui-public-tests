@@ -1,0 +1,15 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><link rel="stylesheet" href="./maplibre-gl.css"><style>html,body,#map{width:100%;height:100%;margin:0}#status{position:absolute;bottom:28px;left:8px;right:8px;z-index:2;background:white;padding:8px;font:13px sans-serif;border-radius:6px;pointer-events:none}</style></head><body><div id="map"></div><div id="status">WebGL 로딩 중</div><script src="./maplibre-gl.js"></script><script>
+const route=[[37.502834,126.94791,17.8,0],[37.5040,126.9495,17.8,0],[37.5040,126.9495,16.2,0],[37.502834,126.94791,17.8,0],[37.502834,126.94791,17.8,45],[37.5040,126.9495,17.8,45],[37.502834,126.94791,17.8,0]];
+const camera=([lat,lng,zoom,pitch])=>({center:[lng,lat],zoom,pitch,bearing:0});
+const status=document.getElementById('status');
+const map=new maplibregl.Map({container:'map',style:'https://tiles.openfreemap.org/styles/bright',...camera(route[0]),maxPitch:60});
+let ready=false,running=false,measuring=false,last=0,gaps=[];
+map.on('load',()=>{ready=true;status.textContent='WebGL · 타일 로딩이 끝난 후 측정하세요.';});
+map.on('error',e=>{console.warn(e.error);if(!ready)status.textContent='WebGL 로딩 오류 · 연결 확인';});
+map.on('render',()=>{if(!measuring)return;const t=performance.now();if(last)gaps.push(t-last);last=t;});
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
+window.runLab=async()=>{if(!ready||running)return;running=true;gaps=[];map.jumpTo(camera(route[0]));status.textContent='WebGL · 동일 경로 준비 중';await delay(3000);
+for(const p of route.slice(1)){last=0;measuring=true;await new Promise(resolve=>{map.once('moveend',resolve);map.easeTo({...camera(p),duration:1200,essential:true});});measuring=false;await delay(350);}
+gaps.sort((a,b)=>a-b);const n=gaps.length;const p50=gaps[Math.floor((n-1)/2)],p95=gaps[Math.ceil(n*.95)-1],total=gaps.reduce((a,b)=>a+b,0);
+status.textContent=n<2?'WebGL · 샘플 부족':`WebGL · n=${n} / p50 ${p50.toFixed(1)}ms / p95 ${p95.toFixed(1)}ms / >33ms ${(100*gaps.filter(x=>x>33.33).length/n).toFixed(1)}% / 평균 ${(1000*n/total).toFixed(1)} FPS (렌더 콜백)`;running=false;};
+</script></body></html>
