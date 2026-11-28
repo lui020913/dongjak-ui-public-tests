@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.279",
+  "application_version": "9.2.280",
   "public_work_branch": "main",
-  "purpose": "Separate bus label LOD from icon LOD: icons at 15.5 unchanged, all stop names from 18.0, close labels from 19.0, collision avoidance. Stop center-driven fallback ownership churn with deterministic scoped inventory, delay fallback suppression until official source is loaded, preserve stable display coordinates. Incremental GeoJSON feature diffs, no identical writes, fade only first-seen IDs. Add regression checks. Direct visual protected production.",
-  "attempt": 521,
+  "purpose": "Citywide bus ownership audit and duplicate suppression: preserve every distinct official ARS, match abbreviated compound names against nearby official records, suppress represented tile IDs after canonical source ready, scan all settled bus viewports, retain unmatched stops. Native building vector tiles partitioned into three spatially ordered whole-feature batches without geometry or height changes. Fix v279 label collision regression assertion. Direct visual protected production.",
+  "attempt": 522,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

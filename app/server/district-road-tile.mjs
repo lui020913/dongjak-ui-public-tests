@@ -21,6 +21,20 @@ export function extractBuildingTile(input){
  const raw=input instanceof Uint8Array?input:new Uint8Array(input);
  return concat(fields(raw).filter(top=>top.id===3&&top.wire===2&&fields(top.value).some(f=>f.id===1&&f.wire===2&&utf8.decode(f.value)==='building')).map(top=>top.raw));
 }
+// Split only whole encoded feature records, never cut polygon geometry.
+// Each stage retains the original dictionary, extent and feature IDs.
+export function partitionBuildingTile(input,count=3){
+ const raw=input instanceof Uint8Array?input:new Uint8Array(input),stages=Array.from({length:count},()=>[]);
+ for(const top of fields(raw)){
+  if(top.id!==3||top.wire!==2)continue;
+  const layer=fields(top.value);if(!layer.some(f=>f.id===1&&f.wire===2&&utf8.decode(f.value)==='building'))continue;
+  const features=layer.filter(f=>f.id===2),metadata=layer.filter(f=>f.id!==2);
+  // Spatial ordering by the first point of each full feature, in coarse rows.
+  const ordered=features.map((f,i)=>{let x=0,y=0;try{const g=fields(f.value).find(q=>q.id===4&&q.wire===2),v=g?packed(g.value):[];if(v.length>=3){x=zig(v[1]);y=zig(v[2]);}}catch{}return {f,i,x,y};}).sort((a,b)=>Math.floor(a.y/256)-Math.floor(b.y/256)||a.x-b.x||a.y-b.y||a.i-b.i);
+  for(let i=0;i<count;i++){const start=Math.floor(i*ordered.length/count),end=Math.floor((i+1)*ordered.length/count);stages[i].push(field(3,concat([...metadata.map(f=>f.raw),...ordered.slice(start,end).map(f=>f.f.raw)])));}
+ }
+ return stages.map(concat);
+}
 export function reduceExteriorRoadTile(input,z,x,y,boundary=districtTileBoundary){
  const raw=input instanceof Uint8Array?input:new Uint8Array(input);
  let removed=0;

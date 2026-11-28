@@ -32,7 +32,7 @@ import {fetchOfficialRailPaths,withMappedLine4} from './rail-official-shapes.js'
 import {setDisplayedRailPaths} from './features/liveTransit/geometry.js';
 import {isMedianBusStopName,medianStopBaseName,busStopDisplayName} from './median-bus-stops.js';
 import {busCoverageSamples} from './bus-coverage-grid.js';
-import {deduplicateBusStops,busTileFallbackFilter,busFilterInsideDistrict,busFilterNearDistrict,BUS_BORDER_BUFFER_METERS} from './bus-stop-dedup.js';
+import {deduplicateBusStops,representedNativeBusStops,busTileFallbackFilter,busFilterInsideDistrict,busFilterNearDistrict,BUS_BORDER_BUFFER_METERS} from './bus-stop-dedup.js';
 import {busDisplayGrouping,BUS_GROUP_SPLIT_ZOOM,BUS_GROUP_EXPAND_ZOOM} from './bus-display-grouping.mjs';
 import {createStreamArrivalFade,streamOpacity} from './map-stream-arrivals.mjs';
 import {officialStaticBusPlaces} from './static-bus-stops.js';
@@ -550,7 +550,7 @@ export function baseMapTransitPlace(feature, fallbackLngLat={}) {
   const tagged=kind==='subway'? [p.line,p.ref,p['subway:line'],p['railway:line']].filter(Boolean).flatMap(x=>String(x).split(/[,;/]+/).map(normalizeLineName)).filter(x=>Object.hasOwn(SUBWAY_LINE_COLORS,x)):[];
   const lines=kind==='subway'? [...new Set([...known,...tagged])]:[];
   return {id:`basemap/${kind}/${feature.id??`${lng.toFixed(6)}-${lat.toFixed(6)}`}`,
-    kind,name,lng,lat,lines:[...lines],arsId:'',needsOfficialName,source:'basemap-poi'};
+    kind,name,lng,lat,lines:[...lines],arsId:'',needsOfficialName,source:'basemap-poi',nativeFeatureId:feature.id==null?'':String(feature.id)};
 }
 
 
@@ -1921,7 +1921,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const fallbackBus=osmTransport.filter(p=>p.kind==='bus'&&eligible(p)&&!officialIds.has(String(p.arsId)));
     // The packaged source validates and uniquely indexes each five-digit ARS ID before tiling.
     // Only the mixed, failed-cell fallback requires proximity/name deduplication.
-    const buses=fallbackBus.length?deduplicateBusStops([...officialBus,...fallbackBus]):officialBus;
+    const buses=deduplicateBusStops([...officialBus,...fallbackBus]);
     const stations=new Map();
     for(const p of [...osmTransport.filter(p=>p.kind==='subway'),...official.filter(p=>p.kind==='subway'),...officialMetro]){
       if(!eligible(p))continue;
@@ -1938,9 +1938,13 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(!map.getLayer?.('dj-basemap-bus-pictogram')||!map.setFilter)return;
     if(map.isMoving?.()||map.isSourceLoaded?.('transport-bus')===false)return;
     const boundary=cityScope()?getSeoulBoundary():getDistrictGeometry();
-    const inventory=JSON.stringify([cityScope(),boundary,currentVisibleBusStops.map(p=>[p.id,p.lng,p.lat])]);
+    const native=representedNativeBusStops(osmTransport.filter(p=>p.kind==='bus'&&p.source==='basemap-poi'),currentVisibleBusStops);
+    const nativeIds=[...new Set(native.map(p=>p.nativeFeatureId).filter(Boolean))].sort();
+    const anonymous=native.filter(p=>!p.nativeFeatureId);
+    const inventory=JSON.stringify([cityScope(),boundary,currentVisibleBusStops.map(p=>[p.id,p.lng,p.lat]),nativeIds,anonymous.map(p=>[p.lng,p.lat])]);
     if(inventory===lastFallbackInventory)return;
-    const base=busTileFallbackFilter(currentVisibleBusStops,null,{allScoped:true});
+    const geographic=busTileFallbackFilter([...currentVisibleBusStops,...anonymous],null,{allScoped:true,radiusMeters:8});
+    const base=nativeIds.length?['all',geographic,['!',['in',['to-string',['id']],['literal',nativeIds]]]]:geographic;
     const filter=cityScope()?busFilterInsideDistrict(base,boundary):busFilterNearDistrict(base,boundary);
     const signature=JSON.stringify(filter);
     if(lastTileFallbackFilter===signature){lastFallbackInventory=inventory;return;}
@@ -2053,14 +2057,15 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     try{features=map.querySourceFeatures(poiLayer.source,{sourceLayer:'poi'});}catch{return;}
     if(!features.length)return;
     const additions=[];
-    const known=new Set([...osmTransport,...officialMetro].map(p=>`${p.kind}/${normalizeStationQueryName(p.name)}/${p.lng.toFixed(3)}/${p.lat.toFixed(3)}`));
+    const identity=p=>p.kind==='bus'?p.id+'/'+p.lng.toFixed(6)+'/'+p.lat.toFixed(6):`${p.kind}/${normalizeStationQueryName(p.name)}/${p.lng.toFixed(3)}/${p.lat.toFixed(3)}`;
+    const known=new Set([...osmTransport,...officialMetro].map(identity));
     for(const f of features){
       // querySourceFeatures에는 layer가 없으므로 기존 OpenFreeMap POI layer를 명시합니다.
       const place=baseMapTransitPlace({...f,layer:{id:'poi_transit','source-layer':'poi'}});
       if(!place || (place.kind!=='bus' && place.name.startsWith('이름 미등록')))continue;
       if(place.kind==='subway' && !withinMetroRadius(place.lng,place.lat))continue;
       if(place.kind==='bus' && !busScopeContains(place.lng,place.lat))continue;
-      const key=`${place.kind}/${normalizeStationQueryName(place.name)}/${place.lng.toFixed(3)}/${place.lat.toFixed(3)}`;
+      const key=identity(place);
       if(known.has(key))continue;
       // 기본 역사 중 같은 역은 공식 좌표가 기준이며 중복 마커를 만들지 않습니다.
       if(place.kind==='subway' && officialMetro.some(m=>normalizeStationQueryName(m.name)===normalizeStationQueryName(place.name)
@@ -2286,7 +2291,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     enrichNearbyBusStops();enrichMedianStops();enrichViewportBusStops();void fillHighZoomOSMBusStops();
   },{delay:200,isMoving:()=>map.isMoving?.()===true});
   map.on('idle',()=>{viewportEnrichment.request(fallbackScans<8);if(busRoadIndex&&!busRoadIndex.size&&map.getZoom?.()>=15.5)stopPublish.request();});
-  map.on('moveend',()=>viewportEnrichment.request(fallbackScans<20));
+  map.on('moveend',()=>{if((map.getZoom?.()??0)>=15.5)augmentWithBasemapStations();viewportEnrichment.request(fallbackScans<20);});
   map.on('zoomend',()=>viewportEnrichment.request());
   function fetchAndShow(){
     // 철도/정류장 위치는 저장된 좌표 + 현재 배경지도 POI로 표시합니다.

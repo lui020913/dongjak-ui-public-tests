@@ -24,6 +24,17 @@ function priority(p){
   return (origin(p)==='official'?100:origin(p)==='osm-viewport'?60:origin(p)==='osm'?50:20)
     +(normalizedBusStopName(p.name)?8:0)+(p.arsId?10:0);
 }
+export function matchingBusName(a,b){
+ const x=normalizedBusStopName(a),y=normalizedBusStopName(b);
+ if(!x||!y)return false;
+ if(x===y)return true;
+ // Native tiles often abbreviate a compound stop name or omit CTS/TV.
+ // Never conflate explicit median and curbside stops.
+ if(/\(중\)|중앙차로/.test(a)!==/\(중\)|중앙차로/.test(b))return false;
+ const clean=n=>n.replace(/cts|tv/g,'');
+ const p=clean(x),q=clean(y);
+ return p===q||Math.min(p.length,q.length)>=7&&(p.startsWith(q)||q.startsWith(p));
+}
 export function samePhysicalBusStop(a,b){
   if(!a||!b||a.kind!=='bus'||b.kind!=='bus')return false;
   const idA=String(a.arsId||'').trim(),idB=String(b.arsId||'').trim();
@@ -35,25 +46,27 @@ export function samePhysicalBusStop(a,b){
   const nameA=normalizedBusStopName(a.name),nameB=normalizedBusStopName(b.name);
   const dirA=String(a.direction||'').trim(),dirB=String(b.direction||'').trim();
   if(dirA&&dirB&&dirA!==dirB)return false;
-  if(nameA&&nameB&&nameA!==nameB)return false;
+  if(nameA&&nameB&&!matchingBusName(a.name,b.name))return false;
   // Unnamed records cannot be merged loosely: they may be opposite stops.
   if(!nameA||!nameB)return distance<=8;
   // Two separate OSM/official features from the same feed are normally
   // different stops. Only near-exact geometry can eliminate tile seams.
   if(origin(a)===origin(b))return distance<=5;
   // Two feeds frequently place the same platform a few metres apart.
-  return distance<=27;
+  return distance<=(idA||idB?65:27);
 }
 export function deduplicateBusStops(records=[]){
   const sorted=[...records].filter(p=>p?.kind==='bus'&&Number.isFinite(p.lng)&&Number.isFinite(p.lat))
     .sort((a,b)=>priority(b)-priority(a));
-  const result=[];
-  for(const stop of sorted){
-    if(!result.some(p=>samePhysicalBusStop(p,stop)))result.push(stop);
-  }
+  const result=[],cells=new Map();const key=(x,y)=>x+':'+y;
+  for(const stop of sorted){const x=Math.floor(stop.lng*1000),y=Math.floor(stop.lat*1000);let duplicate=false;for(let i=x-1;i<=x+1&&!duplicate;i++)for(let j=y-1;j<=y+1&&!duplicate;j++)duplicate=(cells.get(key(i,j))||[]).some(p=>samePhysicalBusStop(p,stop));if(duplicate)continue;result.push(stop);const k=key(x,y);if(!cells.has(k))cells.set(k,[]);cells.get(k).push(stop);}
   return result;
 }
 
+export function representedNativeBusStops(native,canonical){
+ const cells=new Map(),key=(x,y)=>x+':'+y;for(const p of canonical){const k=key(Math.floor(p.lng*1000),Math.floor(p.lat*1000));if(!cells.has(k))cells.set(k,[]);cells.get(k).push(p);}
+ return native.filter(p=>{const x=Math.floor(p.lng*1000),y=Math.floor(p.lat*1000);for(let i=x-1;i<=x+1;i++)for(let j=y-1;j<=y+1;j++)if((cells.get(key(i,j))||[]).some(q=>samePhysicalBusStop(p,q)))return true;return false;});
+}
 export const BASEMAP_BUS_FILTER=['any',
   ['==',['get','class'],'bus'],
   ['==',['get','subclass'],'bus_stop'],
