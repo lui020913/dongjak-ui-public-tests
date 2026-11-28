@@ -49,5 +49,7 @@ test('bus-only cell changes do not republish unchanged subway sources',()=>{
  assert.match(code,/if\(railSignature!==lastRailSourceSignature\)/);
  assert.match(code,/if\(metroSignature!==lastMetroInputSignature\)/);
  assert.match(code,/if\(signature!==lastMetroGeoSignature\)/);
- assert.match(code,/fallbackBus\.length\?deduplicateBusStops/);
+ assert.match(code,/const officialIds=new Set\(officialBus\.map\(p=>String\(p\.arsId\)\)\)/);
+ assert.match(code,/const fallbackBus=osmTransport\.filter\(p=>p\.kind==='bus'&&eligible\(p\)&&!officialIds\.has\(String\(p\.arsId\)\)\)/);
+ assert.match(code,/const buses=deduplicateBusStops\(\[\.\.\.officialBus,\.\.\.fallbackBus\]\)/);
 });
