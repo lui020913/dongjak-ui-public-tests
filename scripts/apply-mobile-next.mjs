@@ -11,7 +11,6 @@ for(const ext of ['js','css'])copyFileSync(resolve(publicRoot,'frontend/producti
 const main='src/main.js';
 replace(main,"import {installMobileFollowup} from './mobile-17-followup.js';","import {installMobileFollowup} from './mobile-17-followup.js';\nimport './mobile-next.css';\nimport {installPhoneToolbar,installPhonePermissions,installPhoneRouteComparison,installV9272PhoneExperience} from './mobile-next.js';");
 replace(main,'installMobileFollowup({app,map,maplibregl});','installMobileFollowup({app,map,maplibregl});\ninstallPhoneToolbar({app});\ninstallPhonePermissions({app});\ninstallPhoneRouteComparison({app});\ninstallV9272PhoneExperience({app});');
-replace('src/v831-swipe-feature-toolbar.js',"  if(phone)important(more,'display','none');","  if(phone)important(more,'display','none');\n  if(phone&&row.dataset.djNextReady==='1')important(scrollport,'display','none');");
 const core='src/v840-ui-core.js';
 // TIP text now lives in the canonical core; don't overwrite shortened copy at build time.
 const tipCore=readFileSync(resolve(root,core),'utf8');
@@ -72,5 +71,4 @@ replace(main," navigate('map');syncRoutePresentation();emit();"," window.dispatc
 replace(main,"    navigate('map');syncRoutePresentation();publishTransitDetail(plan,from,to,a,b);","    window.dispatchEvent(new CustomEvent('dj-next:route-selected',{detail:'transit'}));\n    navigate('map');syncRoutePresentation();publishTransitDetail(plan,from,to,a,b);");
 replace('index.html','<button type="button" data-route-variant="balanced" aria-pressed="false" disabled>종합 최적 (잠정)</button>','<button type="button" data-route-variant="balanced" aria-pressed="false" disabled>종합 최적 (잠정)</button>\n              <button type="button" id="djNext-transit-option" disabled>대중교통 경로</button>');
 
-replace('src/v831-swipe-feature-toolbar.js','for(const child of [...row.children])if(child!==scroller&&child!==more)scroller.appendChild(child);','for(const child of [...row.children])if(child!==scroller&&child!==more&&child.id!==\'djNext-rail\')scroller.appendChild(child);');
 console.log('Mobile next integration anchors verified.');

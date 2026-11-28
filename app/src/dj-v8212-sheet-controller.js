@@ -172,7 +172,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
         g.dragging=true;panel.classList.add('dj-sheet-dragging');
       }
       const expandable=['route-panel','participation-panel','news-panel','mine-panel',
-        'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel'].includes(id);
+        'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','map-safety-controls','map-advanced-controls','detail-sheet','entry-sheet','pza-road-sheet','night-visibility-float','road-width-legend','ped-tools-panel','dj854-weather-sheet'].includes(id);
       const offset=sheetDragOffset(dy,g.upLimit,expandable);
       panel.style.setProperty('--dj-sheet-drag-y',`${offset}px`);
       panel.style.setProperty('translate',`0 ${offset}px`,'important');
@@ -204,7 +204,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
         },0);
       }
       const expandable=['route-panel','participation-panel','news-panel','mine-panel',
-        'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel'].includes(id);
+        'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','map-safety-controls','map-advanced-controls','detail-sheet','entry-sheet','pza-road-sheet','night-visibility-float','road-width-legend','ped-tools-panel','dj854-weather-sheet'].includes(id);
       if(id==='map-safety-controls'&&app.classList.contains('dj-safety-peek')&&g.dragging){
         settleMobileSheetDrag(panel,win,()=>{if(projected<-30||delta<-25)app.classList.remove('dj-safety-peek');});return;
       }
@@ -246,7 +246,8 @@ export function installMobileFloatingSheetController(doc=document,win=window){
             panel.dispatchEvent(new CustomEvent('dongjak:transport-dismiss'));
             return;
           }
-          if(btn)dispatchLocalClick(btn,win);else panel.hidden=true;
+          if(id==='dj-mobile-utilities')panel.dispatchEvent(new CustomEvent('dongjak:close-more',{detail:{immediate:true}}));
+        else if(btn)dispatchLocalClick(btn,win);else panel.hidden=true;
         }finally{delete panel.dataset.djSwipeDismissed;}
       });
     };
