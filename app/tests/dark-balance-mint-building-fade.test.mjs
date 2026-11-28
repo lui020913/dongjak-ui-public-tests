@@ -78,6 +78,6 @@ test('Light map land palette and district mask preserve PRI and metro semantics'
   assert.match(src,/set\('background-color',entry.landRole==='ground'\?'#e7e7e5'/);
   assert.doesNotMatch(src,/water\?'#273741':green\?'#303c34'/);
   assert.match(zoom,/role!=='ground'&&role!=='vegetation'/);
-  assert.match(zoom,/\(theme==='dark'\?'#2b3138':'#e7e7e5'\)/);
+  assert.match(zoom,/role==='ground'\?'#e7e7e5':'#a5ca92'/);
   assert.match(read('src/theme-contract.css'),/never paint route-line, warning, PRI or transport/);
 });

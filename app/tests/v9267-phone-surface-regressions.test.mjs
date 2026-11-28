@@ -49,8 +49,8 @@ test('iPhone manual theme switch stores camera before a single native-color refr
   assert.match(theme,/requestIosThemeRefresh/);
   assert.match(theme,/sessionStorage\.setItem\(MANUAL_THEME_RELOAD_KEY/);
   assert.match(theme,/win\.location\.reload\(\)/);
-  assert.match(pwa,/nightActive=app\.dataset\.sangdoNight==='on'/);
-  assert.match(pwa,/data-sangdo-night/);
+  assert.doesNotMatch(pwa,/nightActive|sangdoNight/);
+  assert.doesNotMatch(pwa,/data-sangdo-night/);
 });
 
 test('night confirmation has one stationary fade owner, not nested CSS keyframes',()=>{

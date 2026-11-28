@@ -106,3 +106,18 @@ jobs:
       - name: Verify optimized map and mobile layout contracts
         working-directory: app
         run: node --test tests/native-building-stream.test.mjs tests/building-coverage-performance.test.mjs tests/adaptive-phone-map-budget.test.mjs tests/progressive-building-stream.test.mjs tests/transit-spatial-stream.test.mjs tests/v1713-building-translucency.test.mjs tests/v5125-boundary-building-ui.test.mjs tests/v5126-building-surface.test.mjs tests/rail-exclusive-viewport.test.mjs tests/phone-toolbar-refresh-performance.test.mjs tests/district-building-route-viewport.test.mjs tests/mobile-next-build.test.mjs tests/mobile-followup-build.test.mjs tests/light-only-public-runtime.test.mjs
+      - name: Inventory remaining retired-theme resource references
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/retired-theme"
+          git grep -n -I -E 'manifest-dark|dongjak-dark-|manifest-\$\{|dongjak-\$\{|night-visibility-map\.js|night-visibility(-panel)?\.css|night-analysis-session\.js|v7120-night-panel\.js|setTemporaryTheme|createThemeState' -- app/src app/index.html app/platforms app/android app/vite.config.* app/scripts scripts .github/workflows > "$RUNNER_TEMP/retired-theme/references.txt" || test "$?" -eq 1
+          cat "$RUNNER_TEMP/retired-theme/references.txt" | cut -c1-320
+          git grep -l -I -E 'data-theme=["'\'']dark|prefers-color-scheme:[[:space:]]*dark|data-sangdo-night' -- 'app/src/*.css' 'app/platforms/*.css' > "$RUNNER_TEMP/retired-theme/styles.txt" || test "$?" -eq 1
+          cat "$RUNNER_TEMP/retired-theme/styles.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: retired-theme-references-${{ github.sha }}
+          path: ${{ runner.temp }}/retired-theme
+          if-no-files-found: ignore

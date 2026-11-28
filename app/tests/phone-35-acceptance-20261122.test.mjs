@@ -56,7 +56,7 @@ const checks=[
  }],
  ['B01','native iOS status surface matches first-run and theme surfaces',()=>{
    const s=src('src/mobile-pwa-status-tone-v793.js');
-   contains(s,'--dj-pwa-status-color','const onboarding=visible','themeMeta.setAttribute');
+   contains(s,'--dj-pwa-status-color',"const color=baselineColor()",'themeMeta.setAttribute');
    contains(src('src/mobile-pwa-status-tone-v793.css'),'#dj-ios-pwa-status-sample');
  }],
  ['B02','all ordinary map labels retain dark text and bright halo',()=>{
@@ -172,7 +172,7 @@ const checks=[
  ['E04','signed-out sessions see onboarding, except native theme refresh restoration',()=>{
    const s=src('src/v860-onboarding.js');
    contains(s,"authState==='signed-out'||pendingGuestOnboarding","seenInMemory=isNativeThemeRefresh");
-   contains(src('src/mobile-pwa-status-tone-v793.js'),'const onboarding=visible');
+   contains(src('src/mobile-pwa-status-tone-v793.js'),"const color=baselineColor()");
  }],
  ['E05','My Info and account preferences remain linked to real login and favorites',()=>{
    const html=src('index.html');

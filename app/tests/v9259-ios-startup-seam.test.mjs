@@ -13,7 +13,7 @@ test('iPhone cold-start HTML and runtime status controller use the same light ed
   const startup=html.slice(start,html.indexOf('</script>',start));
   assert.match(startup,/if\(iosHome\)\{document\.documentElement\.style\.backgroundColor='#edf3ef'/);
   assert.match(startup,/\? \('#edf3ef'\)/);
-  assert.match(tone,/theme==='dark'\?'#22282e':'#edf3ef'/);
+  assert.match(tone,/baselineColor=\(\)=>'#edf3ef'/);
   assert.match(css,/--dj-pwa-land-tone:#edf3ef/);
 });
 test('critical splash CSS paints the iPhone top edge before external CSS loads',()=>{

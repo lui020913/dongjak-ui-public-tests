@@ -38,7 +38,7 @@ test('v8.0.3 existing light theme icons have been restored byte-for-byte',()=>{
 
 test('theme artwork module does not rewrite the iOS Home Screen icon',()=>{
   assert.doesNotMatch(artwork,/getElementById\('dj-apple-touch-icon'\)/);
-  assert.match(artwork,/dongjak-\$\{mode\}/);
+  assert.match(artwork,/dongjak-light-/); assert.doesNotMatch(artwork,/dataset\.theme|manifest-\$\{mode\}/);
   for(const mode of ['light','dark']){
     const manifest=JSON.parse(read(`public/manifest-${mode}.webmanifest`).toString('utf8'));
     assert.ok(manifest.icons.every(icon=>icon.src.includes(`dongjak-${mode}-`)));

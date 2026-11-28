@@ -17,3 +17,15 @@ test('lighting PRI factor remains registered with its original data',()=>{
  assert.ok(manifest.bundle==='/data/pri/lighting_segments.json');
  assert.ok(JSON.parse(read('public/data/pri/lighting_segments.json')));
 });
+
+test('public artwork, iOS status bar and land palette do not react to old dark settings',()=>{
+ const artwork=read('src/app-artwork-v7104.js'),status=read('src/mobile-pwa-status-tone-v793.js'),guard=read('src/v862-map-theme-zoom-guard-core.js');
+ assert.match(artwork,/dongjak-light-/);
+ assert.match(artwork,/manifest-light\.webmanifest/);
+ assert.doesNotMatch(artwork,/dataset\.theme==='dark'/);
+ assert.match(status,/const theme='light'/);
+ assert.match(status,/const color=baselineColor\(\)/);
+ assert.doesNotMatch(status,/sangdoNight|nightActive/);
+ assert.doesNotMatch(guard,/theme==='dark'/);
+ assert.doesNotMatch(read('index.html'),/dongjak-dark-|v862-night-analysis-session\.js/);
+});
