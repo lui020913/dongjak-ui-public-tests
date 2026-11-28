@@ -1,4 +1,4 @@
-import {partitionBuildingTile} from '../server/district-road-tile.mjs';
+import {createNativeTilePartitioner} from './native-building-partition.mjs';
 const PREFIX='dj-building://';
 export const NATIVE_BUILDING_SOURCE='dj-native-building-stream';
 export const NATIVE_BUILDING_STAGE_MS=32;
@@ -29,7 +29,7 @@ export function buildingTileUrl(template,stage=0){
 export function nativeBuildingLayer(layer){
  return layer?.source==='openmaptiles'&&layer['source-layer']==='building'&&['fill','line','fill-extrusion'].includes(layer.type);
 }
-export function registerNativeBuildingProtocol(maplibre,{fetcher=fetch}={}){
+export function registerNativeBuildingProtocol(maplibre,{fetcher=fetch,partition=createNativeTilePartitioner()}={}){
  const cache=new Map();
  const queue=createBuildingTileQueue(async(url,signal)=>{
   const full=url.slice(PREFIX.length),match=full.match(/[?&]dj-building-stage=(\d+)$/),stage=Number(match?.[1]||0),raw=match?full.slice(0,match.index):full;
@@ -39,7 +39,8 @@ export function registerNativeBuildingProtocol(maplibre,{fetcher=fetch}={}){
   const response=await fetcher(raw,{signal,cache:'force-cache'});if(!response.ok)throw Error('Building tile HTTP '+response.status);
   let bytes=new Uint8Array(await response.arrayBuffer());
   if(bytes[0]===31&&bytes[1]===139)bytes=new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
-  const parts=partitionBuildingTile(bytes,NATIVE_BUILDING_STAGES).map(p=>p.buffer.slice(p.byteOffset,p.byteOffset+p.byteLength));
+  const parts=await partition(bytes,NATIVE_BUILDING_STAGES,signal);
+  if(signal?.aborted)throw new DOMException('Aborted','AbortError');
   cache.set(raw,parts);while(cache.size>32)cache.delete(cache.keys().next().value);
   return {data:parts[stage].slice(0)};
  },{concurrency:1,gap:NATIVE_BUILDING_STAGE_MS});

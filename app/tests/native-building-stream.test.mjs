@@ -34,3 +34,22 @@ test('queued abort listeners are released as soon as a job starts or is canceled
  assert.deepEqual(events,[['add','abort'],['remove','abort']]);
  release.shift()('b');assert.equal(await b,'b');
 });
+
+import {createNativeTilePartitioner} from '../src/native-building-partition.mjs';
+import {coalesceBuildingOwnership} from '../src/progressive-building-stream.mjs';
+test('native tile worker returns byte-identical stages with transferred input and respects cancellation',async()=>{
+ const name=[10,8,...new TextEncoder().encode('building')],payload=[...name,18,2,8,1,18,2,8,2],bytes=Uint8Array.from([26,payload.length,...payload]);
+ let worker,requests=0;const partition=createNativeTilePartitioner({makeWorker:()=>worker={postMessage({id,input,count},transfer){requests++;assert.equal(transfer[0],input.buffer);queueMicrotask(()=>worker.onmessage({data:{id,parts:partitionBuildingTile(input,count).map(p=>p.buffer)}}));},terminate(){}}});
+ const parts=await partition(bytes,5);assert.deepEqual(parts.map(p=>[...new Uint8Array(p)]),partitionBuildingTile(bytes,5).map(p=>[...p]));
+ const abort=new AbortController();const pending=partition(bytes,5,abort.signal);abort.abort();await assert.rejects(pending,{name:'AbortError'});assert.equal(requests,2);assert.ok(bytes.length>0);
+});
+test('native tile worker infrastructure failure preserves original local partition',async()=>{
+ const bytes=Uint8Array.from([26,10,10,8,...new TextEncoder().encode('building')]);let attempts=0;
+ const partition=createNativeTilePartitioner({makeWorker:()=>{attempts++;throw Error('unavailable');}});
+ assert.deepEqual((await partition(bytes,5)).map(p=>[...new Uint8Array(p)]),partitionBuildingTile(bytes,5).map(p=>[...p]));await partition(bytes,5);assert.equal(attempts,1);
+});
+test('ownership notifications defer all native/GIS filter writes through camera motion',()=>{
+ let moving=true,runs=0;const queue=[];const work=coalesceBuildingOwnership(()=>runs++,{enqueue:f=>queue.push(f),canFlush:()=>!moving});
+ work.request();queue.shift()();work.request();work.flush();assert.equal(runs,0);
+ moving=false;work.flush();assert.equal(runs,1);assert.equal(queue.length,0);
+});
