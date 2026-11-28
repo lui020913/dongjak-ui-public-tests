@@ -62,7 +62,7 @@ jobs:
           node --test "$candidate/app/tests/v863-guest-onboarding-flow.test.mjs"
           echo 'PASS: transformed application trees are byte-identical except the explicitly updated regression tests'
       - name: Run mobile overlay contracts
-        run: node --test frontend/production/mobile-first-overhaul.test.mjs tests/mobile-only-gate.test.mjs tests/mobile-qa-parallel.test.mjs
+        run: node --test frontend/production/mobile-first-overhaul.test.mjs tests/mobile-only-gate.test.mjs tests/mobile-qa-parallel.test.mjs tests/workflow-release-safety-contract.test.mjs
       - name: Compare pre-existing failing source contracts on baseline and candidate
         shell: bash
         run: |
