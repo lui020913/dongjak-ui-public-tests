@@ -116,3 +116,9 @@ export function busFilterNearDistrict(filter,geometry){
 export function nativeBusFallbackNeeded({cityScope=false,nearbyReady=false,streamReady=false,streamFailed=0,busCells=false}={}){
  return !(!cityScope&&nearbyReady||streamReady&&streamFailed===0&&busCells);
 }
+
+// A complete official inventory is the sole marker authority. Name/distance
+// heuristics cannot establish that an extra POI is a real boarding platform.
+export function selectBusMarkerInventory(official,fallback,coverage){
+ return nativeBusFallbackNeeded(coverage)?deduplicateBusStops([...official,...fallback]):deduplicateBusStops(official);
+}

@@ -32,7 +32,7 @@ import {fetchOfficialRailPaths,withMappedLine4} from './rail-official-shapes.js'
 import {setDisplayedRailPaths} from './features/liveTransit/geometry.js';
 import {isMedianBusStopName,medianStopBaseName,busStopDisplayName} from './median-bus-stops.js';
 import {busCoverageSamples} from './bus-coverage-grid.js';
-import {deduplicateBusStops,representedNativeBusStops,nativeBusFallbackNeeded,busTileFallbackFilter,busFilterInsideDistrict,busFilterNearDistrict,BUS_BORDER_BUFFER_METERS} from './bus-stop-dedup.js';
+import {deduplicateBusStops,representedNativeBusStops,nativeBusFallbackNeeded,selectBusMarkerInventory,busTileFallbackFilter,busFilterInsideDistrict,busFilterNearDistrict,BUS_BORDER_BUFFER_METERS} from './bus-stop-dedup.js';
 import {busDisplayGrouping,BUS_GROUP_SPLIT_ZOOM,BUS_GROUP_EXPAND_ZOOM} from './bus-display-grouping.mjs';
 import {createStreamArrivalFade,streamOpacity} from './map-stream-arrivals.mjs';
 import {officialStaticBusPlaces} from './static-bus-stops.js';
@@ -1913,6 +1913,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   // station or bus stop click. Provenance is still available in Data Sources.
   // 실제 철도 OSM 요청은 제거했습니다. 선형은 고정 GeoJSON만 사용합니다.
   let officialStaticStopCount=0;
+  const busCoverageState=()=>({cityScope:cityScope(),nearbyReady:nearbyBusReady,streamReady,streamFailed,busCells:[...activeStreamKeys].some(k=>k.startsWith('bus_'))});
   function combineStations(){
     const eligible=p=>inActiveCell(p)&&placeInDisplayScope(p);
     const official=streamedRows.filter(eligible);
@@ -1921,7 +1922,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const fallbackBus=osmTransport.filter(p=>p.kind==='bus'&&eligible(p)&&!officialIds.has(String(p.arsId)));
     // The packaged source validates and uniquely indexes each five-digit ARS ID before tiling.
     // Only the mixed, failed-cell fallback requires proximity/name deduplication.
-    const buses=deduplicateBusStops([...officialBus,...fallbackBus]);
+    const buses=selectBusMarkerInventory(officialBus,fallbackBus,busCoverageState());
     const stations=new Map();
     for(const p of [...osmTransport.filter(p=>p.kind==='subway'),...official.filter(p=>p.kind==='subway'),...officialMetro]){
       if(!eligible(p))continue;
@@ -1937,8 +1938,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   function updateTileBusFallbackFilter(){
     if(!map.getLayer?.('dj-basemap-bus-pictogram')||!map.setFilter)return;
     if(map.isMoving?.()||map.isSourceLoaded?.('transport-bus')===false)return;
-    const fallbackNeeded=nativeBusFallbackNeeded({cityScope:cityScope(),nearbyReady:nearbyBusReady,streamReady,streamFailed,busCells:[...activeStreamKeys].some(k=>k.startsWith('bus_'))});
-    if(!fallbackNeeded){
+    const fallbackNeeded=nativeBusFallbackNeeded(busCoverageState());
+    if(!fallbackNeeded||currentVisibleBusStops.length>0){
       // Never display the native POI and its imported GeoJSON copy together,
       // even when the tile has no feature ID or its position has shifted.
       const hidden=['==',1,0],signature=JSON.stringify(hidden);
@@ -1952,12 +1953,12 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const nativeIds=[...new Set(native.map(p=>p.nativeFeatureId).filter(Boolean))].sort();
     const anonymous=native.filter(p=>!p.nativeFeatureId);
     const inventory=JSON.stringify([cityScope(),boundary,currentVisibleBusStops.map(p=>[p.id,p.lng,p.lat]),nativeIds,anonymous.map(p=>[p.lng,p.lat])]);
-    if(inventory===lastFallbackInventory)return;
+    if(inventory===lastFallbackInventory&&JSON.stringify(map.getFilter?.('dj-basemap-bus-pictogram'))===lastTileFallbackFilter)return;
     const geographic=busTileFallbackFilter([...currentVisibleBusStops,...anonymous],null,{allScoped:true,radiusMeters:8});
     const base=nativeIds.length?['all',geographic,['!',['in',['to-string',['id']],['literal',nativeIds]]]]:geographic;
     const filter=cityScope()?busFilterInsideDistrict(base,boundary):busFilterNearDistrict(base,boundary);
     const signature=JSON.stringify(filter);
-    if(lastTileFallbackFilter===signature){lastFallbackInventory=inventory;return;}
+    if(lastTileFallbackFilter===signature&&JSON.stringify(map.getFilter?.('dj-basemap-bus-pictogram'))===signature){lastFallbackInventory=inventory;return;}
     try{map.setFilter('dj-basemap-bus-pictogram',filter);lastTileFallbackFilter=signature;lastFallbackInventory=inventory;}
     catch(error){console.debug('[정류장 예비 레이어 중복 필터]',error?.message||error);}
   }
