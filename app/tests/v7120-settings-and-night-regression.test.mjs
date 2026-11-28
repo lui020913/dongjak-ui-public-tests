@@ -20,6 +20,8 @@ test('independent mobile icon and shared desktop settings panel are wired',()=>{
   for(const id of ['dj-settings-mobile','dj-settings-pc','dj-map-settings','dj-settings-motion','dj-settings-weather','dj-settings-tools']) assert.match(js,new RegExp(id));
   assert.match(js,/localStorage\.setItem\(KEY/);
   assert.doesNotMatch(js,/dj-settings-theme|dj-settings-text|getElementById\('theme-toggle'\)/);
+  assert.doesNotMatch(js,/dongjak-dark-|isDark|syncTheme|data-theme/);
+  assert.equal((js.match(/dongjak-light-192\.png/g)||[]).length,3);
   assert.match(css,/#dj-settings-mobile/);
   assert.match(css,/map-quick-search-form>\.brand\{display:none!important/);
 });

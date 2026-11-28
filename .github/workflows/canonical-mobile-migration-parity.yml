@@ -115,6 +115,9 @@ jobs:
           cat "$RUNNER_TEMP/retired-theme/references.txt" | cut -c1-320
           git grep -l -I -E 'data-theme=["'\'']dark|prefers-color-scheme:[[:space:]]*dark|data-sangdo-night' -- 'app/src/*.css' 'app/platforms/*.css' > "$RUNNER_TEMP/retired-theme/styles.txt" || test "$?" -eq 1
           cat "$RUNNER_TEMP/retired-theme/styles.txt"
+          # Test/build references are separate from actual public runtime references.
+          git grep -n -I -E 'manifest-dark|dongjak-dark-|dongjak-\$\{|manifest-\$\{' -- app/tests tests frontend scripts app/public app/scripts app/platforms .github/workflows > "$RUNNER_TEMP/retired-theme/asset-consumers.txt" || test "$?" -eq 1
+          cat "$RUNNER_TEMP/retired-theme/asset-consumers.txt" | cut -c1-320
       - uses: actions/upload-artifact@v4
         if: always()
         with:

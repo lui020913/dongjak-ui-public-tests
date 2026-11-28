@@ -13,7 +13,6 @@ export function installMapPreferences(doc=document,win=window){
   let prefs={...defaults};
   try{prefs={...prefs,...JSON.parse(win.localStorage.getItem(KEY)||'{}')};}catch{}
   const safeSave=()=>{try{win.localStorage.setItem(KEY,JSON.stringify(prefs));}catch{}};
-  const isDark=()=>app.dataset.theme==='dark';
   const mobile=doc.createElement('button');
   mobile.type='button';mobile.id='dj-settings-mobile';mobile.className='dj-settings-entry';
   mobile.setAttribute('aria-haspopup','dialog');mobile.setAttribute('aria-controls','dj-app-about');
@@ -52,8 +51,6 @@ export function installMapPreferences(doc=document,win=window){
     event?.preventDefault?.();
     if(!overlay.hidden)close();
     aboutFocus=doc.activeElement;
-    const dark=isDark();
-    about.querySelector('.dj-about-icon').src=dark?'/icons/dongjak-dark-192.png':'/icons/dongjak-light-192.png';
     about.querySelector('#dj-about-version-number').textContent=PUBLIC_APP_VERSION;
     about.hidden=false;about.querySelector('.dj-about-close')?.focus();
   };
@@ -77,7 +74,6 @@ export function installMapPreferences(doc=document,win=window){
   app.append(overlay);
   const q=sel=>overlay.querySelector(sel);
   let previousFocus=null;
-  const syncTheme=()=>{const icon=isDark()?'/icons/dongjak-dark-192.png':'/icons/dongjak-light-192.png';mobile.querySelector('img').src=icon;pcLogo.querySelector('img').src=icon;};
   // Weather nodes belong to different responsive breakpoints.  A display:none
   // rule cannot itself fade, so wait for the opacity animation to finish before
   // applying the stored hidden state.  Rapid toggles cancel stale completions.
@@ -135,7 +131,7 @@ export function installMapPreferences(doc=document,win=window){
     q('#dj-settings-motion').checked=prefs.motion==='reduced';
     q('#dj-settings-weather').checked=prefs.weather!==false;
     q('#dj-settings-tools').checked=prefs.tools!==false;
-    syncTheme();safeSave();
+    safeSave();
   };
   // Animate the WHOLE overlay, not only its card: otherwise the opaque full-
   // screen backdrop remains visible as a blank white frame until the card ends.
@@ -165,7 +161,7 @@ export function installMapPreferences(doc=document,win=window){
     if(event)event.preventDefault();
     ++settingsTransition;closingSettings?.cancel?.();closingSettings=null;
     previousFocus=doc.activeElement;
-    overlay.hidden=false;app.classList.add('dj-settings-open');syncTheme();q('#dj-settings-close').focus();
+    overlay.hidden=false;app.classList.add('dj-settings-open');q('#dj-settings-close').focus();
   };
   const openHandler=event=>open(event);
   pc.addEventListener('click',openHandler);
@@ -185,10 +181,8 @@ export function installMapPreferences(doc=document,win=window){
   q('#dj-settings-weather').addEventListener('change',event=>{prefs.weather=event.target.checked;apply({animateWeather:true});});
   q('#dj-settings-tools').addEventListener('change',event=>{prefs.tools=event.target.checked;apply();});
   q('#dj-settings-reset').addEventListener('click',()=>{prefs={...defaults};apply();});
-  const observer=new MutationObserver(syncTheme);
-  observer.observe(app,{attributes:true,attributeFilter:['data-theme']});
   apply();
-  return ()=>{doc.removeEventListener('keydown',esc,true);doc.removeEventListener('dj:open-map-settings',externalOpen);mobile.remove();pc.remove();pcLogo.remove();overlay.remove();about.remove();observer.disconnect();};
+  return ()=>{doc.removeEventListener('keydown',esc,true);doc.removeEventListener('dj:open-map-settings',externalOpen);mobile.remove();pc.remove();pcLogo.remove();overlay.remove();about.remove();};
 }
 if(typeof document!=='undefined'){
   const boot=()=>installMapPreferences();

@@ -13,11 +13,11 @@ function stripTags(html,srcs){
 export function platformHtml(html,target){
   if(target==='pc-chromium'){
     html=stripTags(html,[...platformLinks,...platformScripts]);
-    html=stripTags(html,['/manifest.webmanifest','/manifest-light.webmanifest','/manifest-dark.webmanifest','/icons/dongjak-light-180.png','/icons/dongjak-dark-180.png']);
+    html=stripTags(html,['/manifest.webmanifest','/manifest-light.webmanifest','/icons/dongjak-light-180.png']);
   }
   if(target==='android'){
     html=stripTags(html,['/src/mobile-pwa-status-tone-v793.css','/src/mobile-pwa-status-tone-v793.js',
-      '/manifest.webmanifest','/manifest-light.webmanifest','/manifest-dark.webmanifest','/icons/dongjak-light-180.png','/icons/dongjak-dark-180.png']);
+      '/manifest.webmanifest','/manifest-light.webmanifest','/icons/dongjak-light-180.png']);
   }
   return html;
 }
