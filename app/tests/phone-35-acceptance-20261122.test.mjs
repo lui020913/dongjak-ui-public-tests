@@ -45,9 +45,10 @@ const checks=[
    assert.equal(observedFactorScore({scores:{accidents:100},evidence:{accidents:{modeled:true}}},'accidents'),null);
    assert.equal(observedFactorScore({scores:{accidents:40},evidence:{accidents:{modeled:false}}},'accidents'),40);
  }],
- ['A07','charcoal theme and light on dark typography use separate palette',()=>{
+ ['A07','public UI uses the approved light palette',()=>{
    const s=src('src/theme-contract.css');
-   contains(s,'--dj-theme-bg:#22282e','--dj-theme-surface:#2c343d','--dj-theme-ink:#f1f4f6');
+   contains(s,'--dj-theme-bg:#edf3ef','--dj-theme-surface:#ffffff','--dj-theme-ink:#20312e');
+   assert.doesNotMatch(s,/data-theme="dark"|color-scheme:dark/);
  }],
  ['A08','iOS reload restores camera tab and active vulnerability layer',()=>{
    const s=src('src/manual-pwa-theme-reload.js');
@@ -67,7 +68,8 @@ const checks=[
  }],
  ['B03','active and disabled buttons retain distinct surface, text and border colors',()=>{
    const s=src('src/theme-contract.css');
-   contains(s,'--dj-brand-mint-selected:#285b50','--dj-brand-mint:#79dec5','#route-panel #route-calc:disabled');
+   contains(s,'--dj-theme-selected:#e1ecec','--dj-theme-accent:#0d8875');
+   contains(src('src/mobile-next.css'),'#route-panel #route-calc:disabled{opacity:.52!important;cursor:not-allowed!important;box-shadow:none!important}');
    contains(src('src/mobile-ux-energy.css'),'.dj-pri-button:disabled');
  }],
  ['B04','icon-only close controls receive full-size 44px touch and focus targets',()=>{

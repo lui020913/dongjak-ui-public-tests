@@ -19,9 +19,10 @@ test('native vulnerability PRI retains 2-factor gap; duplicate research overlay 
  assert.ok(manifest.patches.includes('/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json'));
 });
 
-test('new vulnerability gradient uses a restrained semantic palette and the charcoal theme',()=>{
+test('vulnerability gradient retains its independent semantic palette in the light UI',()=>{
  const css=read('src/theme-contract.css'),pri=read('src/pri-map.js');
- assert.ok(css.includes('var(--dj-theme-selected)'));
+ assert.ok(css.includes('--dj-theme-selected:#e1ecec'));
+ assert.doesNotMatch(css,/data-theme="dark"/);
  assert.ok(pri.includes('#CB6563'));
  assert.ok(pri.includes('#DDA263'));
  assert.ok(pri.includes('#DBC576'));
