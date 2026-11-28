@@ -182,7 +182,11 @@ const checks=[
  }],
  ['E06','mobile-first screens honor safe areas, reduced motion and touch navigation',()=>{
    contains(src('src/mobile-first-layout.css'),'safe-area-inset-bottom','grid-template-columns: repeat(5,minmax(0,1fr))');
-   contains(src('src/bottom-tab-navigation.js'),'prefers-reduced-motion:reduce','pointerdown','pointerup');
+   // A single native click handles touch and keyboard activation. Do not re-add
+   // pointerdown/up handlers that compete with click and can replay a tab twice.
+   const tabs=src('src/bottom-tab-navigation.js');
+   contains(tabs,'prefers-reduced-motion:reduce',"win.addEventListener('click',select,true)","win.removeEventListener('click',select,true)",'if(!phone()||replaying)return;','event.stopImmediatePropagation();','button.click()');
+   contains(src('src/primary-surface-transition.js'),'if(!win.requestAnimationFrame||!win.getComputedStyle||reduced())return replay(button);');
  }],
  ['E07','battery heat budget and fast/full mobile CI preserve essential QA',()=>{
    const s=src('src/adaptive-phone-map-budget.mjs');

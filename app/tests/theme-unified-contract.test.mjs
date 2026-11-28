@@ -52,7 +52,7 @@ test('guest onboarding reappears on a new signed-out session',()=>{
 test('shared color tokens protect legacy dark selectors and leave safety semantics',()=>{
   const css=read('src/theme-contract.css');
   const isolated=new URL('../src/mobile-next.css',import.meta.url);
-  const prod=readFileSync(existsSync(isolated)?isolated:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+  const prod=readFileSync(isolated,'utf8');
   const layout=read('src/mobile-first-layout.css');
   const material=read('src/button-material.css');
   for(const c of ['#22282e','#2c343d','#35404a','#f1f4f6','#bec8d2','#79dec5','#285b50'])assert.ok(css.includes(c),c);
@@ -97,7 +97,7 @@ test('MapLibre labels stay readable in dark mode, while PRI TIP is hidden and ro
   const pri=read('src/pri-map.js');
   const contract=read('src/theme-contract.css');
   const isolated=new URL('../src/mobile-next.css',import.meta.url);
-  const ui=readFileSync(existsSync(isolated)?isolated:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+  const ui=readFileSync(isolated,'utf8');
   const html=read('index.html');
   assert.match(env,/mapLabelTextPaint=Object\.freeze/);
   assert.ok(env.includes("color:'#f1f4f6'"));

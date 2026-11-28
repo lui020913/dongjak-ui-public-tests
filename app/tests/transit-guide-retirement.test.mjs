@@ -19,7 +19,7 @@ test('only official bus timetable remains in station schedule, and route history
 });
 test('mobile metro schedule mode hides realtime rows, retains navigation and renders official rows',()=>{
  const generated=new URL('../src/mobile-next.css',import.meta.url);
- const css=existsSync(generated)?readFileSync(generated,'utf8'):read('../frontend/production/mobile-next.css'),src=read('src/transport-map.js');
+ const css=readFileSync(generated,'utf8'),src=read('src/transport-map.js');
  assert.match(css,/\[data-transport-view="hours"\] :is\(#transport-arrivals,#transport-neighbors,[^}]+\{display:none!important\}/);
  assert.match(css,/\[data-transport-view="hours"\] #transport-service-hours\{display:grid!important/);
  assert.match(src,/if\(place.kind==='subway'&&Array.isArray\(data.timetable\)&&data.timetable.length\)timetableExpanded=true/);

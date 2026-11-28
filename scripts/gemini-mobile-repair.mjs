@@ -9,9 +9,9 @@ const allowed=[
  'app/src/v834-my-info.css','app/src/v834-my-info.js',
  'app/src/browser-install-menu.mjs','app/src/browser-install-menu.css',
  'app/src/map-startup-loader.js',
- 'frontend/production/mobile-next.js','frontend/production/mobile-next.css',
- 'frontend/production/mobile-17-followup.js','frontend/production/mobile-17-followup.css',
- 'frontend/production/mobile-first-overhaul.css'
+ 'app/src/mobile-next.js','app/src/mobile-next.css',
+ 'app/src/mobile-17-followup.js','app/src/mobile-17-followup.css',
+ 'app/src/mobile-first-overhaul.css'
 ];
 // PR recovery is deliberately narrower than arbitrary code generation. Do not add auth, SQL, edge functions, tests, workflows, or secrets here.
 if(process.env.REPAIR_CONTEXT==='pr')allowed.push('app/src/community-store.js','app/src/place-details.js');

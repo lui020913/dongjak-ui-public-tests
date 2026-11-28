@@ -392,6 +392,7 @@ export function installFavoritesCloud({root,clientFactory=browserClientFactory,c
     const button=linkExisting?linkKakao:(redirectOnly?kakaoFallback:kakaoSignIn);
     // Prevent two overlapping one-time Kakao OAuth grants (popup vs fallback).
     if(kakaoSignIn.disabled||kakaoFallback.disabled||linkKakao.disabled)return;
+    window.dispatchEvent(new Event('dj:mobile-kakao-start'));
     const popup=redirectOnly?null:openKakaoPopup(window);
     kakaoSignIn.disabled=true;kakaoFallback.disabled=true;linkKakao.disabled=true;
     statusText(popup?'카카오 로그인 창에서 인증을 진행해 주세요.':'카카오 로그인 페이지로 이동합니다.');
@@ -422,8 +423,10 @@ export function installFavoritesCloud({root,clientFactory=browserClientFactory,c
       if(!session?.user?.id)throw new Error('로그인 세션을 확인할 수 없습니다.');
       await handleUser(session);
       if(!linkExisting)await sendPendingKakaoNotice(session);
+      window.dispatchEvent(new Event('dj:mobile-kakao-completed'));
       statusText(linkExisting?'카카오 계정을 연결했습니다. 지도 화면은 유지됩니다.':'카카오 로그인 완료 · 지도 화면을 유지했습니다.');
     }catch(error){
+      window.dispatchEvent(new Event('dj:mobile-kakao-cancelled'));
       try{popup?.close();}catch{}
       if(popup&&!linkExisting)kakaoFallback.hidden=false;
       statusText(`카카오 ${linkExisting?'연결':'로그인'} 실패: ${friendlyError(error)}`);

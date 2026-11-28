@@ -176,8 +176,7 @@ test('unavailable incident and enforcement camera layers are visible but cannot 
  assert.match(js,/if\(unavailable\)return/);
 });
 
-// This file runs inside the isolated release app after mobile-next.css is
-// materialized by apply-mobile-next.mjs, not in the repository's source tree.
+// Both source CI and isolated release validation use the same canonical CSS.
 test('production walking footer remains compact and full width',()=>{
  const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
  const block=css.slice(css.lastIndexOf('/* Compact walking recommendation footer;'));

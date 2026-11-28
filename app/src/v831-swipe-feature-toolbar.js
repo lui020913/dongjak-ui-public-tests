@@ -196,6 +196,8 @@ export function enforcePriorityToolbarSingleRow(row,scrollport,more){
     'min-width':phone?'52px':'58px',height:phone?'50px':'56px','min-height':phone?'50px':'56px','max-height':phone?'50px':'56px',
     'border-radius':'17px','box-sizing':'border-box'
   })) important(more,name,value);
+  if(phone)important(more,'display','none');
+  if(phone&&row.dataset.djNextReady==='1')important(scrollport,'display','none');
   return true;
 }
 
@@ -452,8 +454,14 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    });
    nightConfirm.addEventListener('click',e=>{if(e.target===nightConfirm)closeNightConfirm(true);});
  }
+ function requestSafetyNight(e){
+   if(!win.matchMedia?.('(max-width:699px)')?.matches||!e.target.closest?.('#night-visibility-toggle'))return;
+   requestNight(e);
+ }
  function requestNight(e){
-   if(e.target.closest?.('#dj-v794-night')==null)return;
+   const inSafety=win.matchMedia?.('(max-width:699px)')?.matches&&e.target.closest?.('#night-visibility-toggle');
+   if(e.target.closest?.('#dj-v794-night')==null&&!inSafety)return;
+   if(inSafety&&app.dataset.sangdoNight==='on')return;
    // Prevent the legacy proxy from activating the night scene before consent.
    e.preventDefault();e.stopImmediatePropagation();
    closeSheet();closeWeather();hideMore();collapseNative();
@@ -574,7 +582,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    row=target;scroller=doc.createElement('div');scroller.className='dj831-scrollport';scroller.id='dj831-scrollport';
    scroller.setAttribute('role','group');scroller.setAttribute('aria-label','주요 지도 기능: 좌우로 스와이프');scroller.tabIndex=0;
    const more=find('#dj-v794-more');row.insertBefore(scroller,more);
-   for(const child of [...row.children])if(child!==scroller&&child!==more)scroller.appendChild(child);
+   for(const child of [...row.children])if(child!==scroller&&child!==more&&child.id!=='djNext-rail')scroller.appendChild(child);
    scrollCue=doc.createElement('button');scrollCue.type='button';scrollCue.className='dj912-toolbar-next';scrollCue.hidden=true;
    scrollCue.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 5 7 7-7 7"/></svg>';
    scrollCue.setAttribute('aria-controls','dj831-scrollport');scrollCue.setAttribute('aria-label','오른쪽 지도 기능 더 보기');
@@ -599,6 +607,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    }
    scroller.addEventListener('click',nativeClicked);
    scroller.addEventListener('click',requestNight,true);
+   doc.addEventListener('click',requestSafetyNight,true);
    buildSheet();buildWeather();buildNightConfirm();addMore();
    // Preserve the branch's structural guard on initial mount as well as on personalized rebuilds.
    enforcePriorityToolbarSingleRow(row,scroller,more);
@@ -648,6 +657,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    const type=find('#dj800-type-trigger');if(type&&type.parentElement===extra)row.insertBefore(type,find('#dj-v794-more'));
    weatherObserver?.disconnect();weatherObserver=null;weatherSheet?.remove();weatherSheet=null;nightConfirm?.remove();nightConfirm=null;
    scroller?.removeEventListener('click',requestNight,true);
+   doc.removeEventListener('click',requestSafetyNight,true);
    extra?.remove();extra=null;sheet?.remove();sheet=null;featureButtons.clear();
    if(scroller?.parentElement===row){
      scroller.removeEventListener('click',nativeClicked);

@@ -168,7 +168,8 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     if(!media.matches){if(lastScale){lastScale.style.removeProperty('translate');delete lastScale.dataset.djUserHudOffset;}scaleObserver?.disconnect();scaleObserver=null;set('--dj-user-dock-bottom',null);set('--dj-user-editor-top',null);set('--dj-user-editor-bottom',null);set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);flag('data-dj-user-editor-keyboard',false);tipClose?.remove();tipClose=null;tipObserver?.disconnect();tipObserver=null;lastTip=null;return;}
     const query=doc.getElementById('map-quick-search-query');
     const placeholder=app.dataset.djLanguage==='en'?'Where are you going?':'어디로 가시나요?';
-    if(query&&query.placeholder!==placeholder)query.placeholder=placeholder;
+    // The native rotating search placeholder is the sole phone writer.
+    if(!win.matchMedia("(max-width:699px)").matches&&query&&query.placeholder!==placeholder)query.placeholder=placeholder;
     const h=viewportHeight(),n=nav.getBoundingClientRect(),dock=visible(nav)?dockBottom(h,n.top):null;
     set('--dj-user-dock-bottom',dock===null?null:dock+'px');
     const form=doc.getElementById('community-form'),input=doc.activeElement;

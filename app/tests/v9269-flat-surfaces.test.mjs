@@ -84,10 +84,6 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  const css=productionStyle('mobile-next.css');
  const js=productionStyle('mobile-next.js');
  const nav=read('src/bottom-tab-navigation.js');
- const buildApply=new URL('../../scripts/apply-mobile-next.mjs',import.meta.url);
- // The sealed mobile build copies app/ only, so the parent scripts/ folder
- // deliberately does not exist in the isolated release test workspace.
- const hasSourceScript=existsSync(buildApply);
  const main=read('src/main.js');
  const block=css.split('/* v9.2.72 — one mobile visual system')[1];
  assert.ok(block,'expected final v9.2.72 phone UI stylesheet');
@@ -100,12 +96,7 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  assert.ok(read('src/route-experience-20261123.js').includes("actions?.before(choices)"));
  assert.equal(js.includes("button.insertAdjacentHTML('afterbegin',phoneIcon(key))"),false);
  assert.ok(js.includes("Math.max(96,Math.round(win.innerHeight*.12))"));
- if(hasSourceScript){
-  const apply=readFileSync(buildApply,'utf8');
-  assert.ok(apply.includes('installV9272PhoneExperience({app});'));
- }else{
-  assert.ok(main.includes('installV9272PhoneExperience({app});'),'sealed app must contain the injected phone initializer');
- }
+ assert.ok(main.includes('installV9272PhoneExperience({app});'),'canonical initializer must be present');
  assert.ok(main.includes("window.addEventListener('dj-next:fit-route'"));
  const aiMotion=read('src/v880-supabase-safety-ai.css');
  assert.match(aiMotion,/dj9251-ai-content-enter/);

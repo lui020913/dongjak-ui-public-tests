@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
-const css=readFileSync(new URL('./mobile-first-overhaul.css',import.meta.url),'utf8');
+const css=readFileSync(new URL('../../app/src/mobile-first-overhaul.css',import.meta.url),'utf8');
 
 test('mobile-first design tokens and dark theme are defined',()=>{
   for(const token of ['--mf-surface:','--mf-text:','--mf-brand:','--mf-border:','--mf-radius-sheet:','--mf-touch:']) {
@@ -49,7 +49,7 @@ test('all main app surfaces receive the common sheet system',()=>{
 });
 
 test('mobile news source toolbar uses one opaque page tone instead of a white slab',()=>{
-  const css=readFileSync(new URL('./mobile-next.css',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../../app/src/mobile-next.css',import.meta.url),'utf8');
   const news=css.split('#news-panel .dongjak-news-toolbar{').at(-1)?.split('}')[0]||'';
   assert.match(news,/background:var\(--dj-primary-page-bg,#edf3ef\)!important/);
   assert.match(news,/border:0!important/);
@@ -60,7 +60,7 @@ test('mobile news source toolbar uses one opaque page tone instead of a white sl
 });
 
 test('mobile layer drawer stays scrollable and clears the final shortcut above the iOS inset',()=>{
-  const css=readFileSync(new URL('./mobile-next.css',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../../app/src/mobile-next.css',import.meta.url),'utf8');
   const scrollRules=css.split('#djNext-layer-panel .djNext-layer-scroll{').slice(1).map(rule=>rule.split('}')[0]);
   assert.ok(scrollRules.some(rule=>/padding-bottom:calc\(52px \+ env\(safe-area-inset-bottom,0px\)\)!important/.test(rule)),'No safe-area padding in layer scroll CSS');
   assert.ok(scrollRules.some(rule=>/scroll-padding-bottom:52px!important/.test(rule)),'Final list items may be clipped');

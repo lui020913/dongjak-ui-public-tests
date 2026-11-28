@@ -14,11 +14,11 @@ concurrency:
   cancel-in-progress: true
 jobs:
   compare:
-    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && (github.event.pull_request.head.ref == 'fix/transit-pill-label-motion-20261127' || github.event.pull_request.head.ref == 'fix/transit-visible-camera-zoom-20261127' || github.event.pull_request.head.ref == 'fix/transit-gps-auto-guide-20261127' || github.event.pull_request.head.ref == 'fix/district-building-route-viewport-20261127' || github.event.pull_request.head.ref == 'audit/redevelopment-building-overlap-20261127' || github.event.pull_request.head.ref == 'fix/seoul-transit-spatial-stream-20261127'))
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && (github.event.pull_request.head.ref == 'fix/transit-pill-label-motion-20261127' || github.event.pull_request.head.ref == 'fix/transit-visible-camera-zoom-20261127' || github.event.pull_request.head.ref == 'fix/transit-gps-auto-guide-20261127' || github.event.pull_request.head.ref == 'fix/district-building-route-viewport-20261127' || github.event.pull_request.head.ref == 'audit/redevelopment-building-overlap-20261127' || github.event.pull_request.head.ref == 'fix/seoul-transit-spatial-stream-20261127' || github.event.pull_request.head.ref == 'refactor/canonical-mobile-owners-20261128'))
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      BASELINE_SHA: ${{ github.event.pull_request.head.ref == 'fix/seoul-transit-spatial-stream-20261127' && github.event.pull_request.base.sha || '98764077336ecb9ef291dc18290de7a8a489e6ce' }}
+      BASELINE_SHA: ${{ (github.event.pull_request.head.ref == 'fix/seoul-transit-spatial-stream-20261127' || github.event.pull_request.head.ref == 'refactor/canonical-mobile-owners-20261128') && github.event.pull_request.base.sha || '98764077336ecb9ef291dc18290de7a8a489e6ce' }}
       VITE_SUPABASE_URL: https://placeholder.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
     steps:
@@ -27,12 +27,29 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref == 'fix/seoul-transit-spatial-stream-20261127' && github.event.pull_request.base.sha || '98764077336ecb9ef291dc18290de7a8a489e6ce' }}
+          ref: ${{ (github.event.pull_request.head.ref == 'fix/seoul-transit-spatial-stream-20261127' || github.event.pull_request.head.ref == 'refactor/canonical-mobile-owners-20261128') && github.event.pull_request.base.sha || '98764077336ecb9ef291dc18290de7a8a489e6ce' }}
           path: before-transit
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Reconstruct exact released baseline for canonical migration
+        if: github.event.pull_request.head.ref == 'refactor/canonical-mobile-owners-20261128'
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$GITHUB_WORKSPACE/before-transit"
+          cd "$root/app"
+          cp "$root/frontend/production/mobile-first-overhaul.css" src/mobile-first-overhaul.css
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          const path='src/main.js',anchor="import './mobile-ui/current.css';";
+          const source=readFileSync(path,'utf8');
+          if(source.split(anchor).length!==2)throw Error('CSS anchor drift');
+          writeFileSync(path,source.replace(anchor,anchor+String.fromCharCode(10)+"import './mobile-first-overhaul.css';"));
+          NODE
+          node "$root/scripts/apply-mobile-17-followup.mjs" "$PWD"
+          node "$root/scripts/apply-mobile-next.mjs" "$PWD"
       - name: Expose map only in temporary QA checkouts
         run: |
           python - <<'PY'

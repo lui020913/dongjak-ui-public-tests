@@ -106,6 +106,19 @@ async function enrich(p,signal){
   if(p.lat==null||p.lng==null||isFormerPoliceFacility(p.name)||isUnverifiedPoliceFacility(p.name)||isRepurposedPoliceFacility(p.name))return {};
   const id=cacheKey(p);
   if(mem.has(id))return mem.get(id);
+  // First use the app's same-origin facility proxy; validate name and distance.
+  if(p.name.length>=2&&p.name.length<=40&&!signal?.aborted){
+    const child=new AbortController(),abort=()=>child.abort();
+    signal?.addEventListener('abort',abort,{once:true});
+    const timer=setTimeout(abort,10000);
+    try{
+      const response=await fetch('/api/osm-name-search?q='+encodeURIComponent(p.name),{signal:child.signal});
+      if(response.ok){
+        const answer=matchingOsmContact((await response.json()).elements||[],p);
+        if(answer.phone||answer.website||answer.address){mem.set(id,answer);return answer;}
+      }
+    }catch{}finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);}
+  }
   const safe=p.name.replace(/["\\]/g,'').slice(0,80);
   if(!safe||!/[가-힣]/.test(safe))return {};
   const q=`[out:json][timeout:6];(nwr["name"="${safe}"](around:180,${p.lat},${p.lng});nwr["name:ko"="${safe}"](around:180,${p.lat},${p.lng}););out center tags 12;`;

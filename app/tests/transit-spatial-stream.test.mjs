@@ -53,3 +53,23 @@ test('bus-only cell changes do not republish unchanged subway sources',()=>{
  assert.match(code,/const fallbackBus=osmTransport\.filter\(p=>p\.kind==='bus'&&eligible\(p\)&&!officialIds\.has\(String\(p\.arsId\)\)\)/);
  assert.match(code,/const buses=selectBusMarkerInventory\(officialBus,fallbackBus,busCoverageState\(\)\)/);
 });
+
+test('obsolete canceled cells do not publish another unchanged viewport',async()=>{
+ const jobs=new Map(),states=[];
+ const stream=createTransitCellStream({load:(key,signal)=>new Promise((resolve,reject)=>jobs.set(key,{signal,resolve,reject})),onChange:(rows,state)=>states.push({rows,...state}),concurrency:2});
+ stream.update(['old']);await Promise.resolve();
+ stream.update(['new'],['new']);await Promise.resolve();
+ assert.equal(jobs.get('old').signal.aborted,true);
+ jobs.get('new').resolve(['new']);await wait();
+ const count=states.length;
+ jobs.get('old').reject(Error('aborted old request'));await wait();
+ assert.equal(states.length,count);assert.deepEqual(states.at(-1),{rows:['new'],pending:0,failed:0,criticalPending:0});stream.dispose();
+});
+test('empty cells, failed cells, critical cells and retry stay distinct',async()=>{
+ let broken=true;const states=[];
+ const stream=createTransitCellStream({load:async key=>{if(key==='bad'&&broken)throw Error('offline');return key==='empty'?[]:[key]},onChange:(rows,state)=>states.push({rows,...state})});
+ stream.update(['empty','bad','pad'],['empty','bad']);
+ assert.deepEqual(states[0],{rows:[],pending:3,failed:0,criticalPending:2});
+ await wait();assert.deepEqual(states.at(-1),{rows:['pad'],pending:0,failed:1,criticalPending:0});
+ broken=false;stream.retry();await wait();assert.deepEqual(states.at(-1),{rows:['bad','pad'],pending:0,failed:0,criticalPending:0});stream.dispose();
+});

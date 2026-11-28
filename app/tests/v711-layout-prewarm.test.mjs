@@ -33,7 +33,13 @@ test('initial building prewarm prioritizes closest tile, only requested count',(
  assert.deepEqual(nearestBuildingSheets({},[126,37],3),[]);
  const main=read('src/main.js');assert.match(main,/scheduleInitialBuildingWarmup\(\)/);
  assert.match(main,/requestIdleCallback/);
- assert.match(main,/narrow\?2:4/);
+ // The approved mobile budget now warms only the closest visible sheet,
+ // on an idle task, and skips prewarm under the economy budget.
+ const prewarm=main.slice(main.indexOf('function scheduleInitialBuildingWarmup()'),main.indexOf('function djTrimOffscreenBuildings('));
+ assert.match(prewarm,/djRenderBudget\.isEconomy\(\)/);
+ assert.match(prewarm,/nearestBuildingSheets\(\{sheets:manifest\.sheets\.filter\(s=>intersects\(s\.bbox,getVisibleBBox\(\)\)\)\},\[center\.lng,center\.lat\],1\)/);
+ assert.match(prewarm,/requestIdleCallback\(resolve,\{timeout:2200\}\)/);
+ assert.match(prewarm,/await loadOneBuildingSheet\(sheet\)/);
 });
 test('side panels, right controls, top search helpers and scale are coherently aligned',()=>{
  const css=read('src/mobile-ui-baseline.css');

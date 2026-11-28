@@ -5,7 +5,7 @@ const read=p=>readFileSync(new URL(p,import.meta.url),'utf8');
 const html=read('../index.html');
 const policy=html.match(/\/\* DJ_INTERACTION_FOCUS_START \*\/([\s\S]*?)\/\* DJ_INTERACTION_FOCUS_END \*\//)?.[1];
 assert.ok(policy);
-const css=['style.css','mobile-toolbar-v794.css'].map(p=>read('../src/'+p)).join('\n')+'\n'+read('../../frontend/production/mobile-next.css');
+const css=['style.css','mobile-toolbar-v794.css'].map(p=>read('../src/'+p)).join('\n')+'\n'+read('../src/mobile-next.css');
 for(const engine of [chromium,webkit]){
  const browser=await engine.launch();
  try{

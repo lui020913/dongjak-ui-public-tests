@@ -53,3 +53,20 @@ test('native building scope keeps original rendering and repairs overwritten fil
 });
 
 test('ready GIS sheets exclusively own all native building geometries without relying on feature IDs or apartment shapes',()=>{const layers=[{id:'building',type:'fill','source-layer':'building'},{id:'building-outline',type:'line','source-layer':'building'},{id:'building-3d',type:'fill-extrusion','source-layer':'building'},{id:'building-label',type:'symbol','source-layer':'building'},{id:'road',type:'line','source-layer':'transportation'},{id:'dongjak-buildings-footprint-2',type:'fill'}],filters=new Map(),writes=[];const map={getStyle:()=>({layers}),getFilter:id=>filters.get(id),setFilter:(id,v)=>{filters.set(id,v);writes.push(id)},on(){}};const owner=installDistrictBuildingScope(map);owner.update(boundary);const box=[0,0,1,1];owner.setCoveredSheets([box]);for(const id of ['building','building-outline','building-3d'])assert.deepEqual(filters.get(id),['all',districtBuildingFilter(boundary),sheetBuildingMask(box)]);for(const id of ['building-label','road','dongjak-buildings-footprint-2'])assert.equal(filters.has(id),false);const count=writes.length;owner.setCoveredSheets([box]);assert.equal(writes.length,count);owner.setCoveredSheets([]);assert.deepEqual(filters.get('building'),districtBuildingFilter(boundary));});
+
+test('large district filters reuse a single ownership expression and still repair foreign writes and new style layers',()=>{
+ const layers=Array.from({length:15},(_,i)=>({id:'building-stage-'+i,type:'fill','source-layer':'building'}));
+ const filters=new Map(),events={},writes=[];let reads=0;
+ const map={getStyle:()=>({layers}),getFilter:id=>{reads++;return filters.get(id);},setFilter:(id,v)=>{filters.set(id,v);writes.push(id);},on:(k,fn)=>events[k]=fn};
+ const owner=installDistrictBuildingScope(map);
+ owner.update(boundary);owner.setCoveredSheets([[0,0,1,1]]);
+ const shared=filters.get(layers[0].id);
+ for(const layer of layers)assert.equal(filters.get(layer.id),shared);
+ reads=0;const count=writes.length;events.styledata();events.idle();
+ assert.equal(reads,layers.length);assert.equal(writes.length,count);
+ filters.set(layers[0].id,null);events.styledata();events.idle();
+ assert.equal(filters.get(layers[0].id),shared);assert.equal(writes.length,count+1);
+ layers.push({id:'late-building',type:'fill','source-layer':'building'});
+ events.styledata();events.idle();assert.equal(filters.get('late-building'),shared);
+ owner.setCoveredSheets([]);assert.deepEqual(filters.get('late-building'),districtBuildingFilter(boundary));
+});

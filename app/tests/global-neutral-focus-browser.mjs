@@ -8,7 +8,7 @@ const script=html.match(/<script id="dj-interaction-input">[\s\S]*?<\/script>/)?
 assert.ok(focus&&script);
 const policy='<style>'+focus+'</style>'+script;
 assert.ok(policy);
-const style=read('../src/style.css'),production=read('../../frontend/production/mobile-next.css'),route=read('../src/route-screen-v3.css');
+const style=read('../src/style.css'),production=read('../src/mobile-next.css'),route=read('../src/route-screen-v3.css');
 for(const engine of [chromium,webkit]){
  const browser=await engine.launch();
  try{

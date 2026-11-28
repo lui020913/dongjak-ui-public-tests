@@ -23,7 +23,9 @@ test('Production milestone always evaluates after optional QA skips and cannot b
  const end=source.indexOf('\n  announce:',begin);
  assert.ok(begin>=0&&end>begin);
  const block=source.slice(begin,end);
- assert.match(block,/always\(\) && needs\.production\.result == 'success'/);
+ assert.match(block,/needs: \[build, production, production-direct\]/);
+ assert.match(block,/always\(\) && \(needs\.production\.result == 'success' \|\| needs\.production-direct\.result == 'success'\)/);
+ assert.match(block,/github\.ref == 'refs\/heads\/main'/);
  assert.match(block,/continue-on-error: true/);
  assert.match(block,/deployment-milestone:\$GITHUB_RUN_ID:production/);
  assert.doesNotMatch(block,/모바일 24개 샤드/);

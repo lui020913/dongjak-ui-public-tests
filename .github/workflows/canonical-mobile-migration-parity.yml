@@ -1,0 +1,105 @@
+name: Canonical mobile migration equivalence
+on:
+  push:
+    branches: ['refactor/canonical-mobile-owners-20261128']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Reconstruct baseline and candidate production inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="$RUNNER_TEMP/base"
+          candidate="$RUNNER_TEMP/candidate"
+          mkdir "$base" "$candidate"
+          git archive f0c431c00125226d682860586c20272f0069b0a9 | tar -x -C "$base"
+          git archive HEAD | tar -x -C "$candidate"
+          materialize() {
+            local root="$1"
+            local work="$root/app"
+            cd "$work"
+            git init -q
+            git add -f .
+            if [ ! -f src/mobile-first-overhaul.css ]; then
+              cp "$root/frontend/production/mobile-first-overhaul.css" src/mobile-first-overhaul.css
+            git add -N src/mobile-first-overhaul.css
+            node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          const path='src/main.js',anchor="import './mobile-ui/current.css';";
+          const source=readFileSync(path,'utf8');
+          if(source.split(anchor).length!==2)throw Error('CSS anchor drift');
+          writeFileSync(path,source.replace(anchor,anchor+String.fromCharCode(10)+"import './mobile-first-overhaul.css';"));
+          NODE
+            fi
+            node "$root/scripts/apply-mobile-only-gate.mjs" "$work"
+            node "$root/scripts/apply-mobile-17-followup.mjs" "$work"
+            node "$root/scripts/apply-mobile-next.mjs" "$work"
+            git diff --check
+            actual="$(git diff --name-only | LC_ALL=C sort)"
+            expected="$(node -e 'const s=require("node:fs").readFileSync(process.argv[1],"utf8").split(String.fromCharCode(10)).find(l=>l.startsWith("expected_changes=")); const a=s.indexOf("index.html"),b=s.indexOf(" | LC_ALL=C sort"); if(a<0||b<a)throw Error("allowlist missing"); console.log(s.slice(a,b))' "$root/scripts/build-mobile-first-overhaul.sh")"
+            test "$actual" = "$(printf '%s\n' $expected | LC_ALL=C sort)"
+            rm -rf .git
+            if [ ! -f tests/mobile-next-build.test.mjs ]; then cp "$root/frontend/production/mobile-next-build.test.mjs" tests/mobile-next-build.test.mjs; fi
+            if [ ! -f tests/mobile-followup-build.test.mjs ]; then cp "$root/frontend/production/mobile-followup-build.test.mjs" tests/mobile-followup-build.test.mjs; fi
+            node --check src/transport-map.js
+            node --check src/pedestrian-tools.js
+            node --check src/v860-onboarding.js
+          }
+          materialize "$base"
+          materialize "$candidate"
+          # These explicitly listed regression files now check already-approved behavior.
+          diff -qr --exclude=mobile-next-build.test.mjs --exclude=district-building-scope.mjs --exclude=district-building-route-viewport.test.mjs --exclude=mobile-next.js --exclude=rail-exclusive-viewport.test.mjs --exclude=phone-toolbar-refresh-performance.test.mjs --exclude=transit-stream-grid.mjs --exclude=transport-map.js --exclude=transit-spatial-stream.test.mjs --exclude=main.js --exclude=progressive-building-stream.mjs --exclude=progressive-building-stream.test.mjs --exclude=audit-css-exact-duplicates.mjs --exclude=building-coverage.js --exclude=native-building-stream.mjs --exclude=mobile-ui-coordinator.js --exclude=mobile-editing-layout.mjs --exclude=native-building-stream.test.mjs --exclude=building-coverage-performance.test.mjs --exclude=README.md --exclude=mobile-first-layout-contract.test.mjs --exclude=bus-pill-insets-browser.mjs --exclude=facility-transit-render-browser.mjs --exclude=global-neutral-focus-browser.mjs --exclude=tip-search-crossfade-browser.mjs --exclude=toolbar-subtle-shadow-browser.mjs --exclude=v9269-flat-surfaces.test.mjs --exclude=mobile-primary-fullscreen.test.mjs --exclude=requested-phone-ui-20261126.test.mjs --exclude=tab-view-transition-no-white-frame.test.mjs --exclude=theme-unified-contract.test.mjs --exclude=transit-guide-retirement.test.mjs --exclude=v9251-mobile-motion-content-fit.test.mjs --exclude=v9253-mobile-header-community-metro.test.mjs --exclude=v9267-phone-surface-regressions.test.mjs --exclude=route-experience-20261123.test.mjs --exclude=v863-guest-onboarding-flow.test.mjs --exclude=phone-35-acceptance-20261122.test.mjs --exclude=protected-release-ownership-20261123.test.mjs --exclude=v611-static-bus-ai-floating.test.mjs --exclude=v711-layout-prewarm.test.mjs --exclude=v862-pc-mobile-separation.test.mjs --exclude=v880-window-stability.test.mjs "$base/app" "$candidate/app"
+          node --test "$candidate/app/tests/v863-guest-onboarding-flow.test.mjs"
+          echo 'PASS: transformed application trees match except documented tests, README and explicitly tested performance modules'
+      - name: Run mobile overlay contracts
+        run: node --test frontend/production/mobile-first-overhaul.test.mjs tests/mobile-only-gate.test.mjs tests/mobile-qa-parallel.test.mjs tests/workflow-release-safety-contract.test.mjs
+      - name: Compare pre-existing failing source contracts on baseline and candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          baseline="$RUNNER_TEMP/baseline-raw"
+          mkdir "$baseline"
+          git archive f0c431c00125226d682860586c20272f0069b0a9 | tar -x -C "$baseline"
+          npm ci --prefix app --no-audit --no-fund --prefer-offline
+          ln -s "$GITHUB_WORKSPACE/app/node_modules" "$baseline/app/node_modules"
+          files=(phone-35-acceptance-20261122 protected-release-ownership-20261123 v611-static-bus-ai-floating v711-layout-prewarm v862-pc-mobile-separation v863-guest-onboarding-flow v880-window-stability route-experience-20261123 v9269-flat-surfaces mobile-primary-fullscreen requested-phone-ui-20261126 tab-view-transition-no-white-frame theme-unified-contract transit-guide-retirement v9251-mobile-motion-content-fit v9253-mobile-header-community-metro v9267-phone-surface-regressions mobile-first-layout-contract)
+          collect() {
+            local root="$1" name="$2"
+            cd "$root/app"
+            local args=()
+            for file in "${files[@]}"; do args+=("tests/$file.test.mjs"); done
+            set +e
+            node --test --test-reporter=spec "${args[@]}" > "$RUNNER_TEMP/$name.log" 2>&1
+            local rc=$?
+            set -e
+            echo "$name exit=$rc"
+            grep -E '^ℹ (tests|pass|fail|skipped)|^✖ ' "$RUNNER_TEMP/$name.log" | head -40
+            sed -n '/^✖ failing tests:/,$p' "$RUNNER_TEMP/$name.log" | grep '^✖ ' | grep -v '^✖ failing tests:' | sed -E 's/ \([0-9.]+ms\)$//' | sort -u > "$RUNNER_TEMP/$name.failures" || true
+            test "$rc" -eq 0 || test -s "$RUNNER_TEMP/$name.failures"
+          }
+          collect "$baseline" baseline
+          collect "$GITHUB_WORKSPACE" candidate
+          comm -13 "$RUNNER_TEMP/baseline.failures" "$RUNNER_TEMP/candidate.failures" > "$RUNNER_TEMP/new.failures"
+          cat "$RUNNER_TEMP/new.failures"
+          test ! -s "$RUNNER_TEMP/new.failures"
+          test ! -s "$RUNNER_TEMP/candidate.failures"
+          echo 'PASS: all previously failing source-contract suites now pass without reverting approved UI behavior'
+      - name: Inventory remaining release asset references
+        shell: bash
+        run: |
+          git grep -n -I -E 'mobile-first-overhaul\.css|mobile-17-followup\.(js|css)|mobile-next\.(js|css)|apply-mobile-(17-followup|next)\.mjs' -- ':!app/package-lock.json' ':!app/public/data' ':!app/public/buildings' ':!app/src/app-version.js' ':!docs' | cut -c1-350 || true
+      - name: Verify optimized map and mobile layout contracts
+        working-directory: app
+        run: node --test tests/native-building-stream.test.mjs tests/building-coverage-performance.test.mjs tests/adaptive-phone-map-budget.test.mjs tests/progressive-building-stream.test.mjs tests/transit-spatial-stream.test.mjs tests/v1713-building-translucency.test.mjs tests/v5125-boundary-building-ui.test.mjs tests/v5126-building-surface.test.mjs tests/rail-exclusive-viewport.test.mjs tests/phone-toolbar-refresh-performance.test.mjs tests/district-building-route-viewport.test.mjs tests/mobile-next-build.test.mjs tests/mobile-followup-build.test.mjs

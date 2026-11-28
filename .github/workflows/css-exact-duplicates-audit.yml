@@ -1,0 +1,23 @@
+name: CSS declaration audit
+on:
+  push:
+    branches: ['refactor/canonical-mobile-owners-20261128']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --prefix app --no-audit --no-fund --prefer-offline
+      - name: Parse stylesheets and identify exact repeated declarations
+        run: node app/scripts/audit-css-exact-duplicates.mjs
+      - name: Identify runtime CSSOM writers
+        run: git grep -n -E 'cssRules|deleteRule\(|insertRule\(' -- app/src '*.js' '*.mjs' || true

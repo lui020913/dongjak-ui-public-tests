@@ -26,10 +26,19 @@ test('official dataset must be validated and never invent absent stops',()=>{
 test('official static data is loaded by viewport cells instead of whole-city startup fetch',()=>{
   assert.match(code,/createTransitCellStream\(/);
   assert.match(code,/fetch\('\/data\/transit-stream\/v1\//);
-  assert.match(code,/cellStream\.update\(keys\)/);
-  assert.match(code,/streamReady&&streamFailed===0/);
-  assert.match(code,/transport-bus-names-close',type:'symbol',source:'transport-bus',minzoom:18\.4/);
-  assert.match(code,/text-allow-overlap':true,'text-ignore-placement':true/);
+  // Critical viewport cells settle before replacing the last visible inventory;
+  // the padded cells can continue loading without blocking the current map.
+  assert.match(code,/const critical=viewportKeys\(bounds,zoom,[^\n]*,streamDirection,0\)/);
+  assert.match(code,/cellStream\.update\(keys,critical\)/);
+  assert.match(code,/if\(criticalPending>0\)return;[\s\S]{0,200}streamReady=true/);
+  assert.match(code,/selectBusMarkerInventory\(officialBus,fallbackBus,busCoverageState\(\)\)/);
+  // Latest approved label policy: early icons, names only at street-level zoom,
+  // and no name collisions even when fully zoomed.
+  const names=code.slice(code.indexOf("{id:'transport-bus-names',"),code.indexOf("for(const layer of layers){if(layer.source==='transport-bus'"));
+  assert.match(names,/transport-bus-names',type:'symbol',source:'transport-bus',minzoom:18\.0,maxzoom:19\.0/);
+  assert.match(names,/transport-bus-names-close',type:'symbol',source:'transport-bus',minzoom:19\.0/);
+  assert.equal((names.match(/'text-allow-overlap':false,'text-ignore-placement':false/g)||[]).length,2);
+  assert.match(names,/정류장명 미등록/);
 });
 
 test('AI facility tips are different for different real facility types',()=>{

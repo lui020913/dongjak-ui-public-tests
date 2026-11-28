@@ -5,7 +5,7 @@ const read=p=>readFileSync(new URL(p,import.meta.url),'utf8');
 const html=read('../index.html');
 const policy=html.match(/\/\* DJ_BUS_PILL_LAYOUT_START[\s\S]*?\*\/([\s\S]*?)\/\* DJ_BUS_PILL_LAYOUT_END \*\//)?.[1];
 assert.ok(policy);
-const css=['style.css','v8215-news-transit-sticky-redesign.css','v8215-transit-auth-bus-sheet.css','v825-typography-facility-transport.css','v857-requested-ux.css','v875-mobile-stability.css','v887-interaction-polish.css'].map(p=>read('../src/'+p)).join('\n')+'\n'+read('../../frontend/production/mobile-next.css');
+const css=['style.css','v8215-news-transit-sticky-redesign.css','v8215-transit-auth-bus-sheet.css','v825-typography-facility-transport.css','v857-requested-ux.css','v875-mobile-stability.css','v887-interaction-polish.css'].map(p=>read('../src/'+p)).join('\n')+'\n'+read('../src/mobile-next.css');
 const row=(name,dir,time,count='')=>`<div class="transport-arrival-row"><div class="transport-arrival-main"><strong class="dj-transit-bus-route" data-bus-class="village">${name}</strong><small>${dir}</small></div><span class="transport-arrival-time">${time}${count?'<small class="dj875-stop-count">'+count+'</small>':''}</span></div>`;
 for(const engine of [chromium,webkit]){
  const browser=await engine.launch();

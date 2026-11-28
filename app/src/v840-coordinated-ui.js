@@ -109,6 +109,7 @@ export function installCoordinatedShell(doc=document,win=window){
    sync();
  },500);
  const selectedMap=()=>{
+   if(win.matchMedia('(max-width:699px)').matches){delete app.dataset.djUserTipDismissed;label.classList.remove('is-visible');label.hidden=true;}
    const picker=doc.getElementById('admin-dong-picker');if(picker)picker.hidden=true;
    const overview=doc.getElementById('overview-sheet');if(overview)overview.hidden=true;
    sync();
