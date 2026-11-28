@@ -9,3 +9,12 @@ test('intra-tile stages preserve each encoded feature exactly once and keep laye
  const ids=stages.flatMap(p=>{assert.deepEqual([...p.slice(2,12)],name);const a=[];for(let i=12;i<p.length;i+=4){assert.equal(p[i],18);a.push(p[i+3]);}return a;});
  assert.deepEqual(ids.sort((a,b)=>a-b),[1,2,3,4,5,6,7,8,9]);assert.ok(stages.every(p=>p.length===24));
 });
+
+test('protocol parses each stage and serves distinct batches from one fetched tile',async()=>{
+ const {registerNativeBuildingProtocol}=await import('../src/native-building-stream.mjs');
+ const name=[10,8,...new TextEncoder().encode('building')],records=Array.from({length:9},(_,i)=>[18,2,8,i+1]),payload=[...name,...records.flat()],tile=Uint8Array.from([26,payload.length,...payload]);let fetches=0,handler;
+ registerNativeBuildingProtocol({addProtocol:(name,fn)=>handler=fn},{fetcher:async url=>{fetches++;assert.ok(!url.includes('dj-building-stage'));return {ok:true,arrayBuffer:async()=>tile.buffer};}});
+ const url='https://tiles.openfreemap.org/planet/test/14/1/2.pbf';
+ const batches=await Promise.all([0,1,2].map(stage=>handler({url:buildingTileUrl(url,stage)},new AbortController())));
+ assert.equal(fetches,1);assert.equal(new Set(batches.map(b=>[...new Uint8Array(b.data)].join(','))).size,3);
+});

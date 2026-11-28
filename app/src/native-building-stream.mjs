@@ -31,7 +31,7 @@ export function nativeBuildingLayer(layer){
 export function registerNativeBuildingProtocol(maplibre,{fetcher=fetch}={}){
  const cache=new Map();
  const queue=createBuildingTileQueue(async(url,signal)=>{
-  const full=url.slice(PREFIX.length),match=full.match(/[?&]dj-building-stage=(\\d+)$/),stage=Number(match?.[1]||0),raw=match?full.slice(0,match.index):full;
+  const full=url.slice(PREFIX.length),match=full.match(/[?&]dj-building-stage=(\d+)$/),stage=Number(match?.[1]||0),raw=match?full.slice(0,match.index):full;
   if(stage>=NATIVE_BUILDING_STAGES)throw Error('Invalid building stage');
   if(!/^https:\/\/tiles\.openfreemap\.org\/(?:planet|backup_planet)\/[A-Za-z0-9_-]+\/\d+\/\d+\/\d+\.pbf(?:\?.*)?$/.test(raw))throw Error('Invalid building tile');
   if(cache.has(raw))return {data:cache.get(raw)[stage].slice(0)};
