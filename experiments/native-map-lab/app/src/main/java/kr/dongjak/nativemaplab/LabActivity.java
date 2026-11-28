@@ -102,7 +102,7 @@ public final class LabActivity extends AppCompatActivity {
             @Override public WebResourceResponse shouldInterceptRequest(WebView v,WebResourceRequest r){return loader.shouldInterceptRequest(r.getUrl());}
             @Override public void onPageFinished(WebView v,String url){if(token==generation){run.setEnabled(true);status.setText("WebGL · 지도 하단 준비 표시 확인 후 측정");}}
         });
-        host.addView(web,new FrameLayout.LayoutParams(-1,-1));web.loadUrl("https://appassets.androidplatform.net/assets/web.html");
+        host.addView(web,new FrameLayout.LayoutParams(-1,-1));web.loadUrl("https://appassets.androidplatform.net/assets/index.html");
     }
     void startNative(){
         if(!ready||running||nativeMap==null)return;

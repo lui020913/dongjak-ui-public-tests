@@ -26,7 +26,21 @@ jobs:
         run: |
           npm --prefix app ci --no-audit --no-fund
           node -e 'if(require("./app/node_modules/maplibre-gl/package.json").version!=="6.16.0")process.exit(1)'
-          cp app/node_modules/maplibre-gl/dist/maplibre-gl.{js,css} experiments/native-map-lab/app/src/main/assets/
+          # GL JS 6.x is ESM; bundle the lab against the pinned app package,
+          # instead of assuming the removed legacy UMD distribution exists.
+          mkdir -p app/.native-lab-web
+          python - <<'PY'
+          from pathlib import Path
+          src=Path('experiments/native-map-lab/app/src/main/assets/web.html').read_text()
+          src=src.replace('<link rel="stylesheet" href="./maplibre-gl.css">','')
+          old='<script src="./maplibre-gl.js"></script><script>'
+          assert src.count(old)==1
+          src=src.replace(old,'<script type="module">\nimport maplibregl from "maplibre-gl";\nimport "maplibre-gl/dist/maplibre-gl.css";\n')
+          Path('app/.native-lab-web/index.html').write_text(src)
+          Path('app/.native-lab-web/vite.config.mjs').write_text('export default {base:"./",build:{target:"es2022"}};')
+          PY
+          (cd app && npx vite build .native-lab-web --config .native-lab-web/vite.config.mjs --outDir "$GITHUB_WORKSPACE/experiments/native-map-lab/app/src/main/assets" --emptyOutDir)
+          test -s experiments/native-map-lab/app/src/main/assets/index.html
       - name: Build isolated debug APK
         run: |
           sdkmanager "platforms;android-36" "build-tools;36.0.0"
