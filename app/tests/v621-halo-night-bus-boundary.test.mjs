@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {slimMapTextHalos} from '../src/map-label-halo.js';
+import {slimMapTextHalos,installMapTextHaloMaintenance} from '../src/map-label-halo.js';
 import {buildingExtrusionAppearance} from '../src/map-appearance.js';
 import {busFilterInsideDistrict,BASEMAP_BUS_FILTER} from '../src/bus-stop-dedup.js';
 import {installBasemapBusStopFallback} from '../src/transport-map.js';
@@ -39,4 +39,24 @@ test('bus tile fallback is explicitly clipped to polygon; missing polygon is fai
 test('native global bus symbols are hidden even if district boundary fetch fails',()=>{
   const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
   assert.match(main,/suppressNativeBusStopGlyphs\(map\)/);
+});
+
+test('idle halo maintenance skips unchanged camera idles and handles later styles',()=>{
+ const handlers=new Map(),layers=[{id:'base',type:'symbol',layout:{'text-field':'name'}}],values=new Map([['base',2]]);let scans=0,moving=false;
+ const map={on:(k,f)=>handlers.set(k,f),off:k=>handlers.delete(k),isMoving:()=>moving,getStyle:()=>{scans++;return {layers};},getLayer:id=>layers.find(l=>l.id===id),getPaintProperty:id=>values.get(id),setPaintProperty:(id,k,v)=>values.set(id,v)};
+ const dispose=installMapTextHaloMaintenance(map);
+ assert.equal(values.get('base'),1.1);assert.equal(scans,1);
+ for(let i=0;i<20;i++)handlers.get('idle')();assert.equal(scans,1);
+ layers.push({id:'late',type:'symbol',layout:{'text-field':'name'}});values.set('late',2.5);handlers.get('styledata')();handlers.get('styledata')();moving=true;handlers.get('idle')();assert.equal(scans,1);moving=false;handlers.get('idle')();assert.equal(scans,2);assert.equal(values.get('late'),1.1);
+ values.set('base',2.2);handlers.get('style.load')();handlers.get('idle')();assert.equal(values.get('base'),1.1);assert.equal(scans,3);dispose();assert.equal(handlers.size,0);
+});
+
+test('native transit fallback merges the idle and moveend scans without losing late tiles',()=>{
+ const src=readFileSync(new URL('../src/transport-map.js',import.meta.url),'utf8');
+ const block=src.split('let fallbackScans=0,nativeBusScanPending=true;')[1].split('function fetchAndShow(){')[0];
+ assert.match(block,/sourceDataType==='content'\)nativeBusScanPending=true/);
+ assert.match(block,/if\(nativeScan\|\|fallbackScan\)augmentWithBasemapStations\(\)/);
+ assert.equal((block.match(/augmentWithBasemapStations\(\)/g)||[]).length,1);
+ assert.match(block,/if\(nativeScan\)nativeBusScanPending=false/);
+ assert.match(block,/const nativeScan=nativeBusScanPending&&\(map.getZoom\?\.\(\)\?\?0\)>=15.5/);
 });

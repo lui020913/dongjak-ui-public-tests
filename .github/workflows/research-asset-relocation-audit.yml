@@ -1,0 +1,34 @@
+name: Research asset relocation audit
+on:
+  push:
+    branches: [cleanup/map-performance-and-research-assets-20261128]
+permissions:
+  contents: read
+jobs:
+  references:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify archived blobs and original references
+        run: |
+          set -eu
+          base=086ccbb48ff1947ba90724c6e03200b03d36d177
+          test "$(git rev-parse HEAD:app/archive/protection-zone/sangdo1_four_school_proximity_25m_preview.json)" = "24182dc39156a4e56e4ac146b0de987ba4e2bf31"
+          test ! -e "app/public/data/protection-zone/sangdo1_four_school_proximity_25m_preview.json"
+          if git grep -n -F -e 'sangdo1_four_school_proximity_25m_preview.json' "$base" -- app/src app/index.html app/functions app/server app/scripts scripts frontend .github release tests app/tests; then echo 'Active or test path reference requires review'; exit 1; fi
+          test "$(git rev-parse HEAD:app/archive/protection-zone/policy_coverage_25m_preview.csv)" = "55a730693189f0b2af5d3bc611a1c336725a5db8"
+          test ! -e "app/public/data/protection-zone/policy_coverage_25m_preview.csv"
+          if git grep -n -F -e 'policy_coverage_25m_preview.csv' "$base" -- app/src app/index.html app/functions app/server app/scripts scripts frontend .github release tests app/tests; then echo 'Active or test path reference requires review'; exit 1; fi
+          test "$(git rev-parse HEAD:app/archive/protection-zone/sangdo1_four_catchment_school_points.geojson)" = "ddae6145c05d5cd89396cb546c514cd0f34fcd10"
+          test ! -e "app/public/data/protection-zone/sangdo1_four_catchment_school_points.geojson"
+          if git grep -n -F -e 'sangdo1_four_catchment_school_points.geojson' "$base" -- app/src app/index.html app/functions app/server app/scripts scripts frontend .github release tests app/tests; then echo 'Active or test path reference requires review'; exit 1; fi
+          test "$(git rev-parse HEAD:app/archive/protection-zone/sangdo1_tong_school_mapping_20250317.csv)" = "cea579264b324123098bcaef16c1bad92506bd4a"
+          test ! -e "app/public/data/protection-zone/sangdo1_tong_school_mapping_20250317.csv"
+          if git grep -n -F -e 'sangdo1_tong_school_mapping_20250317.csv' "$base" -- app/src app/index.html app/functions app/server app/scripts scripts frontend .github release tests app/tests; then echo 'Active or test path reference requires review'; exit 1; fi
+          test "$(git rev-parse HEAD:app/archive/protection-zone/adjacent_school_catchment_verification.geojson)" = "59ba6b689f7c6219852cdbffa6fe196fd5fb5f4d"
+          test ! -e "app/public/data/protection-zone/adjacent_school_catchment_verification.geojson"
+          if git grep -n -F -e 'adjacent_school_catchment_verification.geojson' "$base" -- app/src app/index.html app/functions app/server app/scripts scripts frontend .github release tests app/tests; then echo 'Active or test path reference requires review'; exit 1; fi
+          echo 'Exact blobs retained; no literal source/build/test reference in original snapshot.'

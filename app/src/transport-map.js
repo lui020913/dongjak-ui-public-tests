@@ -2312,11 +2312,18 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   // not only the first few idle events after app startup.
   map.on('sourcedata',e=>{if(e.sourceId==='openmaptiles'&&e.sourceDataType==='content')nativeBusScanPending=true;});
   const viewportEnrichment=coalesceViewportWork(scan=>{
-    if(scan&&fallbackScans<20){fallbackScans++;augmentWithBasemapStations();}
+    const nativeScan=nativeBusScanPending&&(map.getZoom?.()??0)>=15.5;
+    const fallbackScan=scan&&fallbackScans<20;
+    if(nativeScan)nativeBusScanPending=false;
+    if(fallbackScan)fallbackScans++;
+    // A tile arrival and moveend often describe the same viewport. Merge
+    // both requests with the startup fallback; keep late tile arrivals
+    // independent of the bounded startup scan count.
+    if(nativeScan||fallbackScan)augmentWithBasemapStations();
     enrichNearbyBusStops();enrichMedianStops();enrichViewportBusStops();void fillHighZoomOSMBusStops();
   },{delay:200,isMoving:()=>map.isMoving?.()===true});
-  map.on('idle',()=>{if(nativeBusScanPending&&(map.getZoom?.()??0)>=15.5){nativeBusScanPending=false;augmentWithBasemapStations();}updateTileBusFallbackFilter();viewportEnrichment.request(fallbackScans<8);if(busRoadIndex&&!busRoadIndex.size&&map.getZoom?.()>=15.5)stopPublish.request();});
-  map.on('moveend',()=>{if((map.getZoom?.()??0)>=15.5)augmentWithBasemapStations();viewportEnrichment.request(fallbackScans<20);});
+  map.on('idle',()=>{updateTileBusFallbackFilter();viewportEnrichment.request(fallbackScans<8);if(busRoadIndex&&!busRoadIndex.size&&map.getZoom?.()>=15.5)stopPublish.request();});
+  map.on('moveend',()=>{if((map.getZoom?.()??0)>=15.5)nativeBusScanPending=true;viewportEnrichment.request(fallbackScans<20);});
   map.on('zoomend',()=>viewportEnrichment.request());
   function fetchAndShow(){
     // 철도/정류장 위치는 저장된 좌표 + 현재 배경지도 POI로 표시합니다.
