@@ -11,13 +11,13 @@ export function cellsForBounds(b,pad=1,direction={x:0,y:0}){
  for(let x=Math.max(0,w-pad);x<=Math.min(GRID_WIDTH-1,e+pad);x++)for(let y=Math.max(0,s-pad);y<=Math.min(GRID_HEIGHT-1,n+pad);y++)out.push({key:x+'_'+y,d:(x-cx)**2+(y-cy)**2-.75*((x-cx)*(direction.x||0)+(y-cy)*(direction.y||0)),visible:x>=w&&x<=e&&y>=s&&y<=n});
  return out.sort((a,b)=>Number(b.visible)-Number(a.visible)||a.d-b.d).map(x=>x.key);
 }
-export function viewportKeys(bounds,zoom,preferences={},direction){
- return cellsForBounds(bounds,1,direction).flatMap(key=>kindsAtZoom(zoom).filter(kind=>preferences[kind]!==false).map(kind=>kind+'_'+key));
+export function viewportKeys(bounds,zoom,preferences={},direction,pad=1){
+ return cellsForBounds(bounds,pad,direction).flatMap(key=>kindsAtZoom(zoom).filter(kind=>preferences[kind]!==false).map(kind=>kind+'_'+key));
 }
-export function createTransitCellStream({load,onChange,limit=160,concurrency=6}){
+export function createTransitCellStream({load,onChange,limit=224,concurrency=8}){
  const cache=new Map(),inflight=new Map(),failed=new Set();
- let desired=new Set(),signature='',disposed=false,publishTimer=null;
- function publish(){if(disposed)return;onChange([...desired].flatMap(k=>cache.get(k)||[]),{pending:[...desired].filter(k=>!cache.has(k)&&!failed.has(k)).length,failed:[...desired].filter(k=>failed.has(k)).length});}
+ let desired=new Set(),critical=new Set(),signature='',disposed=false,publishTimer=null;
+ function publish(){if(disposed)return;onChange([...desired].flatMap(k=>cache.get(k)||[]),{pending:[...desired].filter(k=>!cache.has(k)&&!failed.has(k)).length,failed:[...desired].filter(k=>failed.has(k)).length,criticalPending:[...critical].filter(k=>!cache.has(k)&&!failed.has(k)).length});}
  function schedulePublish(){if(disposed||publishTimer!==null)return;publishTimer=setTimeout(()=>{publishTimer=null;publish();},45);}
  function trim(){for(const key of cache.keys()){if(cache.size<=limit)break;if(!desired.has(key))cache.delete(key);}}
  function pump(){
@@ -36,9 +36,9 @@ export function createTransitCellStream({load,onChange,limit=160,concurrency=6})
    });
   }
  }
- function update(keys){
+ function update(keys,criticalKeys=keys){
   if(disposed)return;
-  const next=new Set(keys),sig=[...next].sort().join('|');
+  const next=new Set(keys);critical=new Set(criticalKeys.filter(k=>next.has(k)));const sig=[...next].sort().join('|')+';'+[...critical].sort().join('|');
   if(sig===signature){desired=next;pump();return;}
   signature=sig;desired=next;failed.clear();
   for(const [key,c] of inflight)if(!desired.has(key)){c.abort();inflight.delete(key);}

@@ -656,6 +656,10 @@ const map = new maplibregl.Map({
   // 동작구 경계 바깥 약 10km까지 카메라 이동을 제한합니다.
   maxBounds: bufferedDistrictBounds(fallbackBoundary.features[0].geometry),
   renderWorldCopies: false,
+  // Retain parent and recently visited vector tiles across quick pinch/pan.
+  maxTileCacheZoomLevels: djInitialBudget==='economy'?5:8,
+  cancelPendingTileRequestsWhileZooming:false,
+  fadeDuration:180,
   maxPitch: 70,
   // Cap GPU raster size on high-DPI displays (2x DPR costs 4x pixels).
   pixelRatio: djInitialBudget==='economy'?economyMapPixelRatio(djNormalPixelRatio,'economy'):djNormalPixelRatio,
@@ -873,10 +877,23 @@ function getVisibleBBox(){
   const dx=Math.min(0.012,(maxX-minX)*0.15),dy=Math.min(0.009,(maxY-minY)*0.15);
   return [minX-dx,minY-dy,maxX+dx,maxY+dy];
 }
+// Bounded warm cache for parsed GIS sheets: network/worker work during motion,
+// source ownership and map writes remain deferred until the camera settles.
+const warmBuildingSheets=new Map();let warmBuildingBusy=false,lastBuildingWarmAt=0;
+function warmBuildingSheet(sheet){
+ const id=sheet.sheet;if(warmBuildingSheets.has(id))return warmBuildingSheets.get(id);
+ const p=loadBuildingTileFeatures(sheet).then(result=>{if(result.successfulSources!==result.totalSources)warmBuildingSheets.delete(id);return result;}).catch(error=>{warmBuildingSheets.delete(id);throw error;});
+ warmBuildingSheets.set(id,p);while(warmBuildingSheets.size>4)warmBuildingSheets.delete(warmBuildingSheets.keys().next().value);return p;
+}
+async function prefetchMovingBuilding(){
+ if(!djPhone||djRenderBudget.isEconomy()||!mapReady||!boundaryGeometry||!baseBuildingsVisible||map.getZoom()<BUILDING_ZOOM_MIN||warmBuildingBusy||Date.now()-lastBuildingWarmAt<220)return;
+ lastBuildingWarmAt=Date.now();warmBuildingBusy=true;
+ try{const manifest=await ensureBuildingManifest(),c=map.getCenter(),b=getVisibleBBox();const candidates=manifest.sheets.filter(s=>intersects(s.bbox,b)&&!loadedBuildingTiles.get(s.sheet)?.complete&&!buildingLoading.has(s.sheet)&&!warmBuildingSheets.has(s.sheet));const sheet=nearestBuildingSheets({sheets:candidates},[c.lng,c.lat],1)[0];if(sheet)await warmBuildingSheet(sheet);}catch{}finally{warmBuildingBusy=false;}
+}
 function scheduleBuildingLoad(){
   if (!visibleBuilding2D() || map.getZoom()<BUILDING_ZOOM_MIN || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
   clearTimeout(buildingLoadTimer);
-  buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},230);
+  buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},90);
 }
 async function ensureBuildingManifest(){
   if(buildingManifest)return buildingManifest;
@@ -899,7 +916,8 @@ async function loadOneBuildingSheet(sheet){
   if(existing?.complete||buildingLoading.has(sheet.sheet)||(buildingRetryAfter.get(sheet.sheet)||0)>Date.now())return;
   buildingLoading.add(sheet.sheet);
   try {
-    const {features, reviewCandidates, apartmentExcluded=[], displayGeometries, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet);
+    const {features, reviewCandidates, apartmentExcluded=[], displayGeometries, successfulSources, totalSources, errors}=await warmBuildingSheet(sheet);
+    warmBuildingSheets.delete(sheet.sheet);
     for(const problem of errors) console.warn(`[동작하는 안전지도] ${sheet.sheet}번 ${problem.label} 로딩 실패:`,problem.error);
     // Defer geometry filtering and indexing until the phone camera is settled.
     while(djPhone&&map.isMoving?.())await new Promise(resolve=>map.once('moveend',resolve));
@@ -1028,6 +1046,7 @@ async function loadVisibleBuildingSheets(){
   }
 }
 map.on('movestart',()=>{if(djPhone)clearTimeout(buildingLoadTimer);});
+map.on('move',()=>{void prefetchMovingBuilding();});
 map.on('moveend',scheduleBuildingLoad);
 map.on('zoomend',()=>{syncTiltWithBuildings();});
 // Preserve the loaded building representation during pan, rotation and pitch.

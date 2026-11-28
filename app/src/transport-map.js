@@ -34,6 +34,7 @@ import {isMedianBusStopName,medianStopBaseName,busStopDisplayName} from './media
 import {busCoverageSamples} from './bus-coverage-grid.js';
 import {deduplicateBusStops,busTileFallbackFilter,busFilterInsideDistrict,busFilterNearDistrict,BUS_BORDER_BUFFER_METERS} from './bus-stop-dedup.js';
 import {busDisplayGrouping,BUS_GROUP_SPLIT_ZOOM,BUS_GROUP_EXPAND_ZOOM} from './bus-display-grouping.mjs';
+import {createStreamArrivalFade,streamOpacity} from './map-stream-arrivals.mjs';
 import {officialStaticBusPlaces} from './static-bus-stops.js';
 import {busLastServiceStatus} from './bus-last-service.js';
 import {operatorTimetableResources} from './metro-operator-timetables.js';
@@ -1292,7 +1293,7 @@ function labelVisibility(map){
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},
       paint:{'text-color':'#18508e','text-halo-color':'rgba(255,255,255,0.97)','text-halo-width':1.05}}
   ];
-  for(const layer of layers){try{map.addLayer(layer);}catch(e){console.warn('교통 레이어 오류',layer.id,e);}}
+  for(const layer of layers){if(layer.source==='transport-bus'&&layer.type==='symbol')layer.paint['text-opacity']=streamOpacity;try{map.addLayer(layer);}catch(e){console.warn('교통 레이어 오류',layer.id,e);}}
   if(registerBusStopPictogram(map)){
     // OSM base-map stop coordinates remain available through querySourceFeatures.
     // Display each stop with this one consistent blue pictogram, not native icons.
@@ -1300,7 +1301,7 @@ function labelVisibility(map){
       layout:{'icon-image':'dj-bus-blue-marker',
         'icon-size':['interpolate',['linear'],['zoom'],16.4,0.262,18.2,0.331,20,0.393],
         'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-pitch-alignment':'viewport',
-        'icon-rotation-alignment':'viewport'}});}
+        'icon-rotation-alignment':'viewport'},paint:{'icon-opacity':streamOpacity}});}
     catch(e){console.info('[버스정류장 아이콘] 새 레이어 추가 실패',e);}
   }
   // Keep bus pictogram size and label clearance identical across all viewports.
@@ -1632,6 +1633,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     });
   }
   map.addSource('transport-bus',{type:'geojson',data:featureCollection([])});
+  const busArrivalFade=createStreamArrivalFade(map,'transport-bus');
   map.addSource('transport-subway',{type:'geojson',data:featureCollection([])});
   // OSM 실제 철도 선로/승강장 공간정보. 선로의 호선을 확인하지 못하면 임의로 색을 배정하지 않습니다.
   map.addSource('transport-rail-tracks',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
@@ -1973,7 +1975,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const displayBus=busDisplayGrouping(bus,map.getZoom?.()??19);
     displayBusGroups=new Map(displayBus.filter(p=>p.groupCount>1).map(p=>[p.id,p]));
     const busSignature=JSON.stringify(displayBus),railSignature=JSON.stringify(rail);
-    if(busSignature!==lastBusSourceSignature){map.getSource('transport-bus').setData(featureCollection(displayBus));lastBusSourceSignature=busSignature;}
+    if(busSignature!==lastBusSourceSignature){busArrivalFade.publish(featureCollection(displayBus));lastBusSourceSignature=busSignature;}
     if(railSignature!==lastRailSourceSignature){map.getSource('transport-subway').setData(featureCollection(rail));lastRailSourceSignature=railSignature;}
     const metroSignature=JSON.stringify([railSignature,cityScope(),routeStopCoordinates]);
     if(metroSignature!==lastMetroInputSignature){renderMetroMarkers(rail);lastMetroInputSignature=metroSignature;}
@@ -1982,7 +1984,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const busCount=currentVisibleBusStops.length;
     sourceStatus.textContent=`버스 ${busCount}곳${officialStaticStopCount ? ' (서울시 공식 정류소 정적자료)' : ' (OSM 보완자료)'} · 철도역 ${filtered.length-busCount}곳 · 지도에서 선택`;
   }
-  const stopPublish=coalesceViewportWork(()=>showStops(combineStations()),{delay:350,isMoving:()=>map.isMoving?.()===true});
+  const stopPublish=coalesceViewportWork(()=>showStops(combineStations()),{delay:85,isMoving:()=>map.isMoving?.()===true});
   function refreshStops(){
     // Initial local data remains immediate when stationary. All later asynchronous
     // deliveries are batched and never rebuild icons or placement during gestures.
@@ -2001,11 +2003,11 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       if(!response.ok)throw Error('transit cell '+response.status);
       return response.json();
     },
-    onChange:(rows,{pending,failed})=>{
+    onChange:(rows,{pending,failed,criticalPending=pending})=>{
       streamPending=pending;
       // Keep the last complete viewport visible until every requested cell settles.
       // Never publish partial empty batches during a pan or zoom.
-      if(pending>0)return;
+      if(criticalPending>0)return;
       activeStreamKeys=new Set(requestedStreamKeys);streamReady=true;streamedRows=rows;streamFailed=failed;officialStaticStopCount=rows.filter(p=>p.kind==='bus').length;
       refreshStops();
     }
@@ -2022,9 +2024,11 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const keys=bounds.west<=bounds.east&&bounds.south<=bounds.north?viewportKeys(bounds,zoom,{bus:streamApp?.dataset.baseBus!=='off',rail:city},streamDirection):[];
     // Adjacent safety-map stations have their own curated scope. Do not clip their cells at the district border.
     if(!city&&streamApp?.dataset.baseMetro!=='off')keys.push(...viewportKeys({west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()},zoom,{bus:false,rail:true},streamDirection).filter(k=>officialMetro.some(p=>placeInDisplayScope(p)&&k==='rail_'+cellKey(p.lng,p.lat))));
-    requestedStreamKeys=new Set(keys);cellStream.update(keys);
+    const critical=viewportKeys(bounds,zoom,{bus:streamApp?.dataset.baseBus!=='off',rail:city},streamDirection,0);
+    requestedStreamKeys=new Set(keys);cellStream.update(keys,critical);
   }
-  const streamViewportWork=coalesceViewportWork(refreshTransitViewport,{delay:110,isMoving:()=>map.isMoving?.()===true});
+  const streamViewportWork=coalesceViewportWork(refreshTransitViewport,{delay:140});
+  map.on('move',()=>streamViewportWork.request());
   map.on('moveend',()=>streamViewportWork.request());
   map.on('zoomend',()=>{streamViewportWork.request();if(lastBusGroupingMode!==(map.getZoom()<BUS_GROUP_SPLIT_ZOOM))refreshStops();});
   map.on('resize',()=>streamViewportWork.request());
