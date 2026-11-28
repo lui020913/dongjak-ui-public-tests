@@ -41,7 +41,7 @@ test('mobile and desktop get separate layout, colors and animations',()=>{
   const c=read('src/v800-ui-architecture.css');
   assert.match(c,/@media\(max-width:699px\)/);
   assert.match(c,/@media\(min-width:1080px\)/);
-  assert.match(c,/html\[data-theme="dark"\]/);
+  assert.doesNotMatch(c,/html\[data-theme="dark"\]/);
   assert.match(c,/dj800-sheet-enter/);
   assert.match(c,/--dj800-panel-bottom/);
   assert.match(c,/#dj800-type-trigger/);

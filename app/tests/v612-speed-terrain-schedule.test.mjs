@@ -48,5 +48,5 @@ test('GeoJSON speed overlay loads only real source records and supports filters'
   }
   assert.doesNotMatch(read('index.html'),/id="sangdo-speed-controls"/);
   assert.match(read('src/pri-map.js'),/speedRiskDisplay\(/);
-  assert.match(read('src/speed-ui-and-scrollbar.css'),/scrollbar-color:#43666b #192f34/);
+  assert.match(read('src/speed-ui-and-scrollbar.css'),/scrollbar-color:#7d9b95 transparent/);
 });

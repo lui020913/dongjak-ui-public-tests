@@ -37,9 +37,9 @@ test('v816: facility center is biased above midpoint and mobile pin above label'
   assert.match(src,/offset:\[0,offsetY\],duration:380/);
   assert.match(src,/mobilePin\?-15:-4/);
 });
-test('v816: dark community boxes and metro neighbors have legible theme contrast/size',()=>{
+test('v816: metro neighbors retain legible size and retired community overrides are absent',()=>{
   const css=read('src/v816-panel-weather-font.css');
-  assert.match(css,/community-report-secondary \.report-feature/);
-  assert.match(css,/\.community-report-secondary \.local-only/);
+  assert.doesNotMatch(css,/data-theme="dark"/);
+  assert.match(read('src/mobile-ui/current.css'),/\.community-report-secondary/);
   assert.match(css,/\.metro-rail-previous/);
 });

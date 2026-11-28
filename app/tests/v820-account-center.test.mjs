@@ -40,5 +40,5 @@ test('v8.2.0 account hub has accessible grouped controls and hidden state',()=>{
   assert.match(auth,/aria-label','로그인 방식/);
   assert.match(auth,/aria-label','계정 관리 메뉴/);
   assert.match(css,/\.dj824-account-details \[hidden\]\{display:none!important\}/);
-  assert.match(css,/data-theme="dark"/);
+  assert.doesNotMatch(css,/data-theme="dark"/);
 });

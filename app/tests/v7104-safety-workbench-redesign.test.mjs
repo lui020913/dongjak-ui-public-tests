@@ -86,7 +86,7 @@ test('new workbench stylesheet remains scoped to safety drawer and mobile widths
   assert.match(css,/#app \.dj-safety-group/);
   assert.match(css,/#app \.dj-import-grid button:is\(\[data-dj-import\],\[data-bocha-import\]\)/);
   assert.match(css,/@media\(max-width:700px\)/);
-  assert.match(css,/#app\[data-theme="dark"\] \.dj-import-entry/);
+  assert.doesNotMatch(css,/#app\[data-theme="dark"\] \.dj-import-entry/);
   const entry=source('src/safety-workbench-entry-v7104.js');
   const html=source('index.html');
   assert.ok(entry.includes('installSafetyWorkbenchUI(document)'));

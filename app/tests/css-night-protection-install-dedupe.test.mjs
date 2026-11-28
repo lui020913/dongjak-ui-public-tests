@@ -34,7 +34,7 @@ test('protection and install CSS retain all distinct leaf declarations without i
 test('critical protection sheet and install popup selectors still exist',()=>{
  const expectations=[
   ['protection-zone-map.css','#app .pza-road-sheet[hidden]'],
-  ['browser-install-menu.css','dialog#dj-install-menu .dj-install-info']
+  ['browser-install-menu.css','#dj-install-menu .dj-install-info']
  ];
  for(const [file,selector] of expectations){
   const rules=leafRules(readFileSync(new URL('../src/'+file,import.meta.url),'utf8'));

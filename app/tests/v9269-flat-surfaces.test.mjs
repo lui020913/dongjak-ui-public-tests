@@ -30,7 +30,7 @@ test('onboarding no longer blurs, dims or gradients its backdrop',()=>{
  assert.ok(legacy.includes('-webkit-backdrop-filter:none!important;backdrop-filter:none!important;'));
  assert.ok(legacy.includes('box-shadow:0 7px 22px rgba(8,34,25,.12)!important;'));
  assert.ok(legacy.includes('touch-action:pan-y!important;background:#e9f3ed!important;'));
- assert.ok(legacy.includes('background:#263d39!important;'));
+ assert.ok(!legacy.includes('background:#263d39!important;'));
  for(const old of ['background:rgba(12,30,25,.48)','backdrop-filter:blur(5px)','linear-gradient(145deg,#eef7f1,#e0eee6)','0 22px 72px rgba(8,34,25,.28)']){
   assert.equal(legacy.includes(old),false,'legacy onboarding effect still active: '+old);
  }

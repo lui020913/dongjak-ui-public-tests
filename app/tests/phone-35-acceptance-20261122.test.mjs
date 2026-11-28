@@ -70,7 +70,7 @@ const checks=[
    const s=src('src/theme-contract.css');
    contains(s,'--dj-theme-selected:#e1ecec','--dj-theme-accent:#0d8875');
    contains(src('src/mobile-next.css'),'#route-panel #route-calc:disabled{opacity:.52!important;cursor:not-allowed!important;box-shadow:none!important}');
-   contains(src('src/mobile-ux-energy.css'),'.dj-pri-button:disabled');
+   contains(src('src/pri-map.css'),'.dj-pri-button:disabled{opacity:.5;box-shadow:none}');
  }],
  ['B04','icon-only close controls receive full-size 44px touch and focus targets',()=>{
    const s=src('src/theme-contract.css').split('Shared accessible glass-like icon controls')[1]||'';

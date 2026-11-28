@@ -32,7 +32,7 @@ function leafRules(src){
  return results;
 }
 test('active viewport styles retain unique declarations without byte-identical older copies',()=>{
- const minLeaves=new Map([['v857-requested-ux.css',145],['v800-ui-architecture.css',110],['v854-integrated-ui.css',80]]);
+ const minLeaves=new Map([['v857-requested-ux.css',145],['v800-ui-architecture.css',104],['v854-integrated-ui.css',80]]);
  for(const file of styleFiles){
   const src=readFileSync(new URL('../src/'+file,import.meta.url),'utf8');
   const rules=leafRules(src);

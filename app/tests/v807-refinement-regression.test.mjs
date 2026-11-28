@@ -80,11 +80,10 @@ test('desktop road width panel is content-sized, not stretched to navigation hei
   assert.match(css,/justify-content:flex-start!important/);
 });
 
-test('dark theme empty states and real text use explicit contrasting surfaces',()=>{
-  assert.match(css,/#app#app\[data-theme="dark"\]/);
-  assert.match(css,/#mine-panel \.empty-hint/);
-  assert.match(css,/--dj807-card:#29464b/);
-  assert.match(css,/--dj807-text:#edf8f4/);
+test('empty states retain readable line heights and the light surface',()=>{
+  assert.doesNotMatch(css,/#app#app\[data-theme="dark"\]/);
+  assert.match(css,/:is\(\.empty-hint,\.record-empty,\.records-list \.empty,\.community-feed \.empty,\.community-feed \.empty-hint\)\{line-height:1\.62!important/);
+  assert.match(read('src/style.css'),/\.empty-hint\{[^}]*background:#fff/);
 });
 
 test('mobile nav maps glyphs to consistent 24px vector symbols without editing desktop',()=>{
