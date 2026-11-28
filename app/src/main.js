@@ -1,3 +1,4 @@
+import {installNativeIntegratedPreview} from './native-integrated-preview.mjs';
 import {registerLocalTerrainProtocol,LOCAL_TERRAIN_URL} from './local-terrain-surface.mjs';
 import {registerNativeBuildingProtocol,isolateNativeBuildingTiles} from './native-building-stream.mjs';
 import {BUS_GROUP_EXPAND_ZOOM} from './bus-display-grouping.mjs';
@@ -669,6 +670,7 @@ const map = new maplibregl.Map({
   // Keep multisampling enabled for thin polygon and route edges, even on the reduced DPR profile.
   canvasContextAttributes: { antialias: true }
 });
+installNativeIntegratedPreview({map,app});
 // The extra compact (i) control duplicated the attribution link in Map Options.
 // Keep source credits in '지도 옵션 > 지도 데이터 출처'; do not overlay the map.
 
