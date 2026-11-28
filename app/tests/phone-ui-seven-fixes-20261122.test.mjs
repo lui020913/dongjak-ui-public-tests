@@ -19,8 +19,7 @@ test('light map labels have dark text with a pale halo',()=>{
   const dark=featuredPlaceStyle('dark');
   assert.equal(light.text,'#6d817b');
   assert.equal(light.halo,'#f6f9f7');
-  assert.equal(dark.text,'#cbd6d3');
-  assert.equal(dark.halo,'#172a30');
+  assert.deepEqual(dark,light);
   const theme=read('src/ui-environment.js');
   assert.ok(theme.includes("const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:LABEL_HALO_MAX_PX});"));
   assert.ok(theme.includes('semanticSymbolPattern'));

@@ -51,3 +51,8 @@ test('old theme values cannot select an alternative map palette',()=>{
 test('major shared styles no longer contain positive dark or standalone night selectors',()=>{
  for(const file of ['src/style.css','src/mobile-first-layout.css','src/mobile-first-overhaul.css','src/mobile-ui/current.css','src/button-material.css','platforms/ios-pwa/ios-pwa.css'])assert.doesNotMatch(read(file),/data-theme\s*=\s*["']?dark|data-sangdo-night\s*=\s*["']?on/,file);
 });
+
+test('featured map labels remain light even with obsolete preferences',()=>{
+ assert.doesNotMatch(read('src/featured-place-labels.js'),/theme==='dark'|lastTheme|applyTheme/);
+ assert.equal(existsSync(new URL('../src/theme-state-core.mjs',import.meta.url)),false);
+});
