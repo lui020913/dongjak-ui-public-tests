@@ -68,16 +68,18 @@ export function metroVisibleAtZoom({zoom,bounds,width,height,enabled=true}={}){
  */
 export function installResponsiveMetroVisibility({map,app}={}){
   if(!map?.getZoom||!map?.getContainer)return ()=>{};
-  let disposed=false;
-  const sync=()=>{
+  let disposed=false,cutoff=METRO_OVERVIEW_ABSOLUTE_CUTOFF,lastDecision='',dirty=false;
+  function applyVisibility(){
     if(disposed)return;
-    const container=map.getContainer();
-    const width=container?.clientWidth||container?.getBoundingClientRect?.().width||0;
-    const height=container?.clientHeight||container?.getBoundingClientRect?.().height||0;
     const transitActive=app?.dataset?.djTransitExterior==='true';
     const cityOwns=cityRailOwnsBackground(map,transitActive);
     const enabled=transitActive||app?.dataset?.baseMetro!=='off';
-    const visible=metroVisibleAtZoom({zoom:map.getZoom(),bounds:map.getMaxBounds?.(),width,height,enabled});
+    const visible=enabled&&Number(map.getZoom())>=cutoff;
+    const decision=(cityOwns?'city':'local')+'|'+visible;
+    // A zoom frame within the same visibility band never needs a DOM read
+    // or a per-layer layout lookup. Threshold crossings remain immediate.
+    if(decision===lastDecision)return;
+    lastDecision=decision;
     for(const id of METRO_OVERVIEW_LAYERS){
       const desired=cityOwns&&LOCAL_RAIL_LINE_IDS.includes(id)?'none':visible?'visible':'none';
       if(!map.getLayer?.(id))continue;
@@ -86,18 +88,32 @@ export function installResponsiveMetroVisibility({map,app}={}){
         if(current!==desired)map.setLayoutProperty?.(id,'visibility',desired);
       }catch(error){console.debug('[지하철 광역 가시성]',id,error);}
     }
-  };
+  }
+  function sync(){
+    if(disposed)return;
+    const container=map.getContainer();
+    const width=container?.clientWidth||container?.getBoundingClientRect?.().width||0;
+    const height=container?.clientHeight||container?.getBoundingClientRect?.().height||0;
+    cutoff=responsiveMetroCutoff({bounds:map.getMaxBounds?.(),width,height});
+    lastDecision='';dirty=false;applyVisibility();
+  }
+  const invalidate=()=>{dirty=true;};
+  const reconcile=()=>{if(dirty&&!map.isMoving?.())sync();};
   const syncAfterPreferences=()=>queueMicrotask(sync);
-  map.on?.('zoom',sync);
+  map.on?.('zoom',applyVisibility);
   map.on?.('resize',sync);
   map.on?.('moveend',sync);
+  map.on?.('style.load',sync);
+  map.on?.('styledata',invalidate);
+  map.on?.('idle',reconcile);
   if(typeof document!=='undefined')document.addEventListener('dongjak-base-layer-change',syncAfterPreferences);
   if(typeof window!=='undefined')window.addEventListener('dongjak:transit-stream-scope',syncAfterPreferences);
   sync();
   if(typeof requestAnimationFrame==='function')requestAnimationFrame(sync);
   return ()=>{
     disposed=true;
-    map.off?.('zoom',sync);map.off?.('resize',sync);map.off?.('moveend',sync);
+    map.off?.('zoom',applyVisibility);map.off?.('resize',sync);map.off?.('moveend',sync);
+    map.off?.('style.load',sync);map.off?.('styledata',invalidate);map.off?.('idle',reconcile);
     if(typeof document!=='undefined')document.removeEventListener('dongjak-base-layer-change',syncAfterPreferences);
     if(typeof window!=='undefined')window.removeEventListener('dongjak:transit-stream-scope',syncAfterPreferences);
   };
