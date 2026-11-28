@@ -136,10 +136,8 @@ export function lightMapLandRole(layer = {}) {
   return null;
 }
 
-export function districtExteriorThemePaint(theme='light'){
-  return theme==='dark'
-    ? {'fill-color':'#22272d','fill-opacity':0.34}
-    : {'fill-color':'#d8e0e3','fill-opacity':0.65};
+export function districtExteriorThemePaint(){
+  return {'fill-color':'#d8e0e3','fill-opacity':0.65};
 }
 
 export function initTheme({map,app}){

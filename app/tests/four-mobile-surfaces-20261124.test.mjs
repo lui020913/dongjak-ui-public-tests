@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {vegetationPalette,repaintVegetation} from '../src/map-appearance.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-test('temporary night recolors late forest polygons without mutating road paints',()=>{
+test('stale night preferences cannot recolor forest polygons or mutate road paints',()=>{
  const layers=[{id:'park',type:'fill'},{id:'dongjak-forest-shade-0',type:'fill'},{id:'dj-night-occ-clear',type:'line'}];
  const paint=new Map(),map={getStyle:()=>({layers}),getPaintProperty:id=>paint.get(id),setPaintProperty:(id,key,value)=>paint.set(id,value)};
  const app={dataset:{theme:'light',sangdoNight:'on'}};
- assert.equal(vegetationPalette(app).forest,'#35483f');repaintVegetation(map,app);
- assert.equal(paint.get('park'),'#405248');assert.equal(paint.get('dongjak-forest-shade-0'),'#35483f');assert.equal(paint.has('dj-night-occ-clear'),false);
+ assert.equal(vegetationPalette(app).forest,'#92bd86');repaintVegetation(map,app);
+ assert.equal(paint.get('park'),'#a5ca92');assert.equal(paint.get('dongjak-forest-shade-0'),'#92bd86');assert.equal(paint.has('dj-night-occ-clear'),false);
  app.dataset.sangdoNight='off';repaintVegetation(map,app);assert.equal(paint.get('park'),'#a5ca92');
  assert.match(read('src/ui-environment.js'),/repaintVegetation\(map,app\)/);
 });

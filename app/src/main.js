@@ -520,8 +520,8 @@ function installParkNameLabels(map,boundaryGeometry){
   document.getElementById('theme-toggle')?.addEventListener('click',()=>requestAnimationFrame(()=>{
     if(!map.getLayer('dongjak-park-names'))return;
     try{
-      map.setPaintProperty('dongjak-park-names','text-color',app.dataset.theme==='dark'?'#c8eabf':'#346c45');
-      map.setPaintProperty('dongjak-park-names','text-halo-color',app.dataset.theme==='dark'?'#20392f':'#f1f8eb');
+      map.setPaintProperty('dongjak-park-names','text-color','#346c45');
+      map.setPaintProperty('dongjak-park-names','text-halo-color','#f1f8eb');
     }catch{}
   }));
 }

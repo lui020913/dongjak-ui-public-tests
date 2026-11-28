@@ -4,15 +4,15 @@ import {readFileSync} from 'node:fs';
 import {buildingFootprintPaint,buildingFootprintOutlinePaint,nativeBuildingOutline,installBaseBuildingPalette} from '../src/map-appearance.js';
 const source=path=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
-test('수직 2D: 라이트 면 유지, 다크 건물은 반투명하게 표시하고 외곽선 비활성화',()=>{
+test('수직 2D: 이전 테마 값과 무관하게 라이트 면 유지, 외곽선 비활성화',()=>{
   for(const theme of ['dark','light']){
     const paint=buildingFootprintPaint(theme,0);
-    assert.equal(paint['fill-opacity'],theme==='dark'?0.74:1);
-    assert.equal(paint['fill-antialias'],theme==='light');
+    assert.equal(paint['fill-opacity'],1);
+    assert.equal(paint['fill-antialias'],true);
     if(theme==='light'){assert.equal(paint['fill-color'],'#fafafa');assert.equal(paint['fill-outline-color'],'#e2e2e2');}
     assert.equal(buildingFootprintOutlinePaint(theme,0)['line-opacity'],0);
   }
-  assert.notEqual(buildingFootprintPaint('dark',0)['fill-color'],buildingFootprintPaint('light',0)['fill-color']);
+  assert.deepEqual(buildingFootprintPaint('dark',0),buildingFootprintPaint('light',0));
 });
 
 test('기울인 3D: 2D 건물 면은 계속 흐려지고 3D 레이어는 별도 유지',()=>{

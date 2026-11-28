@@ -121,6 +121,17 @@ jobs:
           # Identify all runtime and regression consumers before deleting night UI modules.
           git grep -n -I -E 'night-visibility-map|night-visibility-panel\.css|night-visibility\.css|v862-night-analysis-session|v7120-night-panel|v913-night-poi-isolation|night-map-roads-gl|night-road-canvas|nightOwnsLayerOrder|installNightVisibility|nightOcclusionBuildingPaint|MOBILE_DARK_BUILDING_PALETTE|vegetationPalette' -- app/src app/tests app/index.html app/platforms app/scripts tests frontend scripts > "$RUNNER_TEMP/retired-theme/module-consumers.txt" || test "$?" -eq 1
           cat "$RUNNER_TEMP/retired-theme/module-consumers.txt" | cut -c1-320
+          git grep -n -I -E 'BUILDING_VISUAL_PALETTE|buildingVisualPalette|buildingFootprintPaint|buildingExtrusionAppearance|busStopLabelPalette|districtExteriorThemePaint|GREEN_PALETTE|vegetationPalette' -- app/src app/tests app/platforms tests frontend scripts > "$RUNNER_TEMP/retired-theme/map-palette-consumers.txt" || test "$?" -eq 1
+          cat "$RUNNER_TEMP/retired-theme/map-palette-consumers.txt" | cut -c1-320
+          git grep -l -I -E 'data-theme[[:space:]]*=[[:space:]]*["'\'']?dark|prefers-color-scheme:[[:space:]]*dark|data-sangdo-night' -- app/src app/platforms | grep -E '\.css
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: retired-theme-references-${{ github.sha }}
+          path: ${{ runner.temp }}/retired-theme
+          if-no-files-found: ignore
+ > "$RUNNER_TEMP/retired-theme/all-css-consumers.txt" || test "$?" -eq 1
+          cat "$RUNNER_TEMP/retired-theme/all-css-consumers.txt"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

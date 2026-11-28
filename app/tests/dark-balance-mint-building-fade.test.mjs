@@ -22,16 +22,16 @@ test('Light palette retains distinct selected/CTA roles and a matching status ed
   assert.doesNotMatch(status,/--dj-pwa-native-edge:#22282e|data-theme=/);
 });
 
-test('Building geometry fades smoothly over two zoom levels, with near-opaque dark mass',()=>{
+test('Building geometry keeps its approved light palette and fades smoothly over two zoom levels',()=>{
   assert.equal(BUILDING_ZOOM_FADE_START,13);
   assert.equal(BUILDING_ZOOM_FADE_END,15);
   assert.deepEqual(buildingZoomOpacityExpression(.58),['interpolate',['linear'],['zoom'],13,0,15,.58]);
   assert.equal(BUILDING_VISUAL_PALETTE.light.nearOpacity,.38);
-  assert.equal(BUILDING_VISUAL_PALETTE.dark.nearOpacity,.94);
-  assert.equal(BUILDING_VISUAL_PALETTE.dark.farOpacity,.89);
-  assert.equal(buildingExtrusionAppearance('dark',10).opacity,.94);
-  assert.equal(buildingExtrusionAppearance('dark',30).opacity,.89);
-  assert.equal(buildingFootprintPaint('dark',0)['fill-opacity'],.74);
+  assert.deepEqual(Object.keys(BUILDING_VISUAL_PALETTE),['light']);
+  assert.equal(BUILDING_VISUAL_PALETTE.light.farOpacity,.22);
+  assert.equal(buildingExtrusionAppearance('dark',10).opacity,.38);
+  assert.equal(buildingExtrusionAppearance('dark',30).opacity,.22);
+  assert.equal(buildingFootprintPaint('dark',0)['fill-opacity'],1);
   const main=read('src/main.js');
   assert.match(main,/fill-extrusion-opacity':buildingZoomOpacityExpression\(buildingStyle.opacity\)/);
   assert.match(main,/fill-extrusion-opacity',buildingZoomOpacityExpression\(opacity\)/);
@@ -66,8 +66,8 @@ test('Native 3D buildings fade on zoom without overriding light styling or unrel
   try{
     globalThis.document={getElementById:()=>null};
     installBaseBuildingPalette({map,app});
-    assert.ok(changed.some(([id,k,v])=>id==='native-building-3d'&&k==='fill-extrusion-opacity'&&JSON.stringify(v)===JSON.stringify(buildingZoomOpacityExpression(.89))));
-    assert.ok(changed.some(([id,k,v])=>id==='native-building'&&k==='fill-opacity'&&JSON.stringify(v)===JSON.stringify(nativeBuildingFootprintPaint('dark')['fill-opacity'])));
+    assert.ok(changed.some(([id,k,v])=>id==='native-building-3d'&&k==='fill-extrusion-opacity'&&v===.92));
+    assert.ok(changed.some(([id,k,v])=>id==='native-building'&&k==='fill-opacity'&&JSON.stringify(v)===JSON.stringify(nativeBuildingFootprintPaint('light')['fill-opacity'])));
     assert.ok(changed.every(([id])=>id!=='dj-night-reach-fill'&&id!=='walking-route-line'));
   }finally{if(previous===undefined)delete globalThis.document;else globalThis.document=previous;}
 });

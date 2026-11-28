@@ -9,7 +9,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {observedFactorScore} from '../src/pri-data.mjs';
-import {buildingExtrusionAppearance,buildingZoomOpacityExpression,nightOcclusionBuildingPaint} from '../src/map-appearance.js';
+import {buildingExtrusionAppearance,buildingZoomOpacityExpression} from '../src/map-appearance.js';
 import {weeklyWeatherUrl} from '../src/v854-weather-desktop.js';
 import {trainLaneOffset} from '../src/features/liveTransit/train-lanes.js';
 import {featuredPlaceStyle} from '../src/featured-place-labels.js';
@@ -112,11 +112,11 @@ const checks=[
    contains(src('src/pri-map.js'),'syncPriHud(Boolean(id))',"node.style.setProperty('display','none','important')");
    contains(src('src/map-scale-docking.js'),"app.dataset.djPriVisible==='true'");
  }],
- ['C07','dark 3D buildings are nearly opaque close-up and fade smoothly at distance',()=>{
+ ['C07','light 3D buildings keep approved opacity and fade smoothly at distance',()=>{
    const near=buildingExtrusionAppearance('dark',10),far=buildingExtrusionAppearance('dark',30);
-   assert.ok(near.opacity>=.9&&far.opacity>=.85);
+   assert.equal(near.opacity,.38);assert.equal(far.opacity,.22);
    assert.deepEqual(buildingZoomOpacityExpression(far.opacity),['interpolate',['linear'],['zoom'],13,0,15,far.opacity]);
-   assert.ok(nightOcclusionBuildingPaint(near,true).opacity>near.opacity);
+   assert.equal(near.color,far.color);
  }],
  ['D01','route compares only computed pedestrian candidates and labels unknown PRI honestly',()=>{
    const s=root('tests/v911-anonymous-ui.spec.mjs');

@@ -39,3 +39,11 @@ test('retired night UI and renderer files are physically absent',()=>{
  for(const file of ['night-visibility-map.js','night-map-roads-gl.js','night-road-canvas.js','v913-night-poi-isolation.js','v7120-night-panel.js','v862-night-analysis-session.js','night-visibility-panel.css','night-visibility.css'])assert.equal(existsSync(new URL('../src/'+file,import.meta.url)),false,file);
  for(const file of ['night-occlusion.js','night-visibility-analysis.js','pri-map.js','pri-data.mjs'])assert.ok(existsSync(new URL('../src/'+file,import.meta.url)),file);
 });
+
+test('old theme values cannot select an alternative map palette',()=>{
+  const map=read('src/map-appearance.js');
+  assert.doesNotMatch(map,/MOBILE_DARK_BUILDING_PALETTE|nightOcclusionBuildingPaint|sangdoNight|theme==='dark'|theme-toggle/);
+  assert.doesNotMatch(read('src/bus-stop-label-theme.js'),/theme==='dark'/);
+  assert.doesNotMatch(read('src/ui-environment.js'),/theme==='dark'/);
+  assert.doesNotMatch(read('src/main.js'),/app\.dataset\.theme==='dark'/);
+});

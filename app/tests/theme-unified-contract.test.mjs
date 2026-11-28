@@ -111,18 +111,14 @@ test('MapLibre labels stay readable in light mode, while PRI TIP is hidden and r
   assert.ok(!html.includes("localStorage.getItem('dongjak_safety_color_theme_v1')"));
 });
 
-test('dark theme buildings are visually solid close-up, and recede smoothly with zoom',async()=>{
+test('light buildings retain their approved near and far opacity and smooth zoom fade',async()=>{
  const {BUILDING_VISUAL_PALETTE,buildingExtrusionAppearance,buildingZoomOpacityExpression}=await import('../src/map-appearance.js');
- assert.ok(BUILDING_VISUAL_PALETTE.dark.nearOpacity>=.9);
- assert.ok(BUILDING_VISUAL_PALETTE.dark.farOpacity>=.85);
- assert.ok(BUILDING_VISUAL_PALETTE.dark.nearOpacity<=1);
- assert.ok(BUILDING_VISUAL_PALETTE.dark.farOpacity<=BUILDING_VISUAL_PALETTE.dark.nearOpacity);
- assert.ok(buildingExtrusionAppearance('dark',10).opacity>=.9);
- assert.ok(buildingExtrusionAppearance('dark',30).opacity>=.85);
- const expression=buildingZoomOpacityExpression(BUILDING_VISUAL_PALETTE.dark.farOpacity);
- assert.equal(expression[0],'interpolate');
- assert.equal(expression[4],0,'remote buildings must fade away');
- assert.ok(expression[6]>=.85,'nearby buildings must become nearly opaque');
+ assert.deepEqual(Object.keys(BUILDING_VISUAL_PALETTE),['light']);
+ assert.equal(BUILDING_VISUAL_PALETTE.light.nearOpacity,.38);
+ assert.equal(BUILDING_VISUAL_PALETTE.light.farOpacity,.22);
+ assert.equal(buildingExtrusionAppearance('dark',10).opacity,.38);
+ assert.equal(buildingExtrusionAppearance('dark',30).opacity,.22);
+ assert.deepEqual(buildingZoomOpacityExpression(.22),['interpolate',['linear'],['zoom'],13,0,15,.22]);
 });
 
 test('native dialog and AI backdrops remain transparent while floating cards keep shadows',()=>{

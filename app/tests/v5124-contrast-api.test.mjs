@@ -5,7 +5,7 @@ import {buildingFootprintPaint,BUILDING_VISUAL_PALETTE,installBaseBuildingPalett
 import {onRequest} from '../functions/api/transport/[[path]].js';
 const read=p=>readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
 
-test('v5.12.4: overhead footprints remain visible and fade substantially at high pitch in both themes',()=>{
+test('v5.12.4: overhead footprints remain visible and fade substantially at high pitch even with stale dark preferences',()=>{
   for(const theme of ['dark','light']){
     const top=buildingFootprintPaint(theme,0);
     const middle=buildingFootprintPaint(theme,10);
@@ -15,7 +15,7 @@ test('v5.12.4: overhead footprints remain visible and fade substantially at high
     assert.ok(top['fill-opacity']>middle['fill-opacity'] && middle['fill-opacity']>tilted['fill-opacity']);
     assert.equal(top['fill-color'],tilted['fill-color']);
   }
-  assert.notEqual(BUILDING_VISUAL_PALETTE.dark.footprint,BUILDING_VISUAL_PALETTE.light.footprint);
+  assert.deepEqual(Object.keys(BUILDING_VISUAL_PALETTE),['light']);
 });
 
 test('v5.12.4: unmatched native footprints remain visible across pitch changes',()=>{
@@ -28,10 +28,10 @@ test('v5.12.4: unmatched native footprints remain visible across pitch changes',
     installBaseBuildingPalette({map,app:{dataset:{theme:'dark'}}});
     pitch=55;handlers.pitch();
   } finally{globalThis.document=previous;}
-  assert.equal(changed.length,3);
+  assert.equal(changed.length,4);
   assert.ok(changed.every(x=>x[0]==='building'));
-  assert.deepEqual(changed[1][2],['interpolate',['linear'],['zoom'],13,0,15,['case',['boolean',['feature-state','djGisCovered'],false],0,.74]]);
-  assert.deepEqual(changed[2],['building','fill-antialias',false]);
+  assert.deepEqual(changed[2][2],['interpolate',['linear'],['zoom'],13,0,15,['case',['boolean',['feature-state','djGisCovered'],false],0,1]]);
+  assert.deepEqual(changed[3],['building','fill-antialias',true]);
 });
 
 test('v5.12.4: map options and version menu button remain in their approved state',()=>{

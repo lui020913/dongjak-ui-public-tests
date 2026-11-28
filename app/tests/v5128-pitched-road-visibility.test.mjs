@@ -6,14 +6,14 @@ import {analyzeOcclusion,occlusionLineFeatures} from '../src/night-occlusion.js'
 
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('light overhead remains opaque, dark footprints translucent; GIS plan switches by extrusion eligibility',()=>{
+test('overhead remains opaque; GIS plan switches by extrusion eligibility',()=>{
   assert.equal(buildingPlanVisibility(0),1);
   assert.equal(buildingPlanVisibility(3),1);
   assert.ok(buildingPlanVisibility(12)<0.26);
   assert.equal(buildingPlanVisibility(19),0);
   assert.equal(buildingPlanVisibility(45),0);
   for(const theme of ['light','dark']){
-    assert.equal(buildingFootprintPaint(theme,0)['fill-opacity'],theme==='dark'?0.74:1);
+    assert.equal(buildingFootprintPaint(theme,0)['fill-opacity'],1);
     assert.equal(buildingFootprintPaint(theme,35)['fill-opacity'],0);
     assert.equal(buildingFootprintOutlinePaint(theme,35)['line-opacity'],0);
   }

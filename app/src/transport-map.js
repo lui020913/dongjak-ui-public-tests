@@ -1207,8 +1207,8 @@ export function installBasemapBusStopFallback(map,districtGeometry=null){
         'text-allow-overlap':false,'text-ignore-placement':false,'text-optional':true,'text-padding':1,
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport',
         'icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport'},
-      paint:{'icon-opacity':1,'text-color':busStopLabelPalette(typeof document!=='undefined'?document.documentElement?.dataset?.theme:'light').text,
-        'text-halo-color':busStopLabelPalette(typeof document!=='undefined'?document.documentElement?.dataset?.theme:'light').halo,'text-halo-width':1.05}};
+      paint:{'icon-opacity':1,'text-color':busStopLabelPalette().text,
+        'text-halo-color':busStopLabelPalette().halo,'text-halo-width':1.05}};
     const before=map.getLayer?.('dj-transport-bus-pictogram')?'dj-transport-bus-pictogram':undefined;
     map.addLayer(layer,before);
     return true;

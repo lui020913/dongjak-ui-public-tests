@@ -27,9 +27,9 @@ test('GIS base and supplement footprints are drawn independently of the 3D pitch
   assert.match(main,/theme-toggle'\)\?\.addEventListener\('click'/);
 });
 
-test('light/dark footprint colors differ and roof edges recede on oblique view',()=>{
+test('stale dark preference does not change footprints; roof edges recede on oblique view',()=>{
   const a=buildingFootprintPaint('light',0),b=buildingFootprintPaint('dark',0);
-  assert.notEqual(a['fill-color'],b['fill-color']);
+  assert.deepEqual(a,b);
   assert.ok(a['fill-opacity']>.7 && b['fill-opacity']>.7);
   for(const theme of ['light','dark']){
     const top=buildingFootprintOutlinePaint(theme,0),tilted=buildingFootprintOutlinePaint(theme,55);

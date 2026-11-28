@@ -7,10 +7,8 @@ export const BUS_LABEL_MIN_ZOOM=18.0;
 export const BUS_LABEL_CLOSE_ZOOM=19.0;
 export const BUS_LABEL_FONT=['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'];
 export const BUS_LABEL_SIZE=['interpolate',['linear'],['zoom'],13.3,10,16,11.6,17.15,11.7,20,11.7];
-export function busStopLabelPalette(theme='light'){
-  return theme==='dark'
-    ? {text:'#EEF7FB',halo:'#10252E',width:1.05}
-    : {text:'#18508E',halo:'#F8FBFD',width:1.05};
+export function busStopLabelPalette(){
+  return {text:'#18508E',halo:'#F8FBFD',width:1.05};
 }
 export function applyBusStopLabelTheme(map,theme='light'){
   const colors=busStopLabelPalette(theme);

@@ -4,9 +4,9 @@ import {readFileSync} from 'node:fs';
 import {BUILDING_VISUAL_PALETTE,buildingFootprintPaint,nativeBuildingFootprint} from '../src/map-appearance.js';
 import {markerBoxHidden} from '../src/map-marker-occlusion.js';
 const read=p=>readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
-test('위에서 본 건물은 어두운 청회색 면을 유지하면서 충분한 대비를 확보',()=>{
-  const p=BUILDING_VISUAL_PALETTE.dark;
-  assert.equal(buildingFootprintPaint('dark')['fill-opacity'],0.74);
+test('위에서 본 건물은 기존 라이트 팔레트와 높이별 투명도를 유지',()=>{
+  const p=BUILDING_VISUAL_PALETTE.light;
+  assert.equal(buildingFootprintPaint('dark')['fill-opacity'],1);
   assert.ok(p.footprintOpacity>0.65);
   assert.notEqual(p.footprint,'#fff');
   assert.ok(p.nearOpacity>p.farOpacity && p.farOpacity>=0.2);
