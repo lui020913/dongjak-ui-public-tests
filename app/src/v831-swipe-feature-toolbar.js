@@ -207,7 +207,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
  const media=win.matchMedia('(min-width: 0px)');
  let row=null,scroller=null,sheet=null,extra=null,drawerObserver=null,sourceObserver=null,appObserver=null,resizeObserver=null;
  let current=null,activeButton=null,scheduled=false,drag=null,sourceNodes=[];
- let weatherSheet=null,nightConfirm=null,primary=loadPrimary(win),featureButtons=new Map(),weatherObserver=null;
+ let weatherSheet=null,primary=loadPrimary(win),featureButtons=new Map(),weatherObserver=null;
  let expandedNative=null,scrollCue=null,edgeBlurLeft=null,edgeBlurRight=null;
  let initialPhonePending=false,initialPhoneObserver=null;
  const find=selector=>doc.querySelector(selector);
@@ -281,7 +281,6 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
  }
  function schedule(){if(scheduled)return;scheduled=true;raf(()=>{scheduled=false;sync();});}
  function closeWeather(){if(weatherSheet)weatherSheet.hidden=true;const b=find('#dj-v794-weather');b?.classList.remove('dj832-expanded');}
- function closeNightConfirm(animate=false){if(!nightConfirm||nightConfirm.hidden)return;const finish=()=>{nightConfirm.hidden=true;};const card=nightConfirm.querySelector('.dj833-night-dialog');if(animate&&win.DongjakWindowMotion)win.DongjakWindowMotion.close(card,finish);else{win.DongjakWindowMotion?.cancel(card);finish();}}
  function closeSheet(){
    if(!sheet||sheet.hidden)return;
    sheet.hidden=true;sheet.style.removeProperty('--dj832-drag');
@@ -299,7 +298,6 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    const weatherWasOpen=native.id==='dj-v794-weather'&&weatherSheet&&!weatherSheet.hidden;
    collapseNative();closeSheet();closeWeather();
    if(native.id==='dj-v794-weather'){if(!weatherWasOpen)openWeather();return;}
-   if(native.id==='dj-v794-night')return;
    if(native.id==='dj800-type-trigger')return;
    if(!same){expandedNative=native;setExpandedWidth(native,native.dataset.dj832Label||native.getAttribute('aria-label')||'기능');native.classList.add('dj832-expanded');
      win.setTimeout?.(()=>{if(expandedNative!==native||!scroller)return;
@@ -342,17 +340,10 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
  function select(feature,button=null){
    // Open the existing PRI modal directly, not another bottom sheet behind its top-layer dialog.
    if(feature[0]==='safe-pri'){
-     closeSheet();closeWeather();closeNightConfirm();hideMore();collapseNative();
+     closeSheet();closeWeather();hideMore();collapseNative();
      const source=find(feature[2]);if(source&&!source.disabled)source.click();schedule();return;
    }
-   // A second night-analysis shortcut cannot bypass the same consent dialog.
-   if(feature[0]==='safe-night-analysis'){
-     closeSheet();closeWeather();hideMore();
-     if(app.dataset.sangdoNight==='on')find('#night-visibility-quick-off')?.click();
-     else {collapseNative();openNightConfirm();}
-     return;
-   }
-   collapseNative();closeWeather();closeNightConfirm();
+   collapseNative();closeWeather();
    const same=current?.[0]===feature[0]&&sheet&&!sheet.hidden;
    const source=find(feature[2]);
    const valid=Boolean(source&&!source.disabled);
@@ -391,7 +382,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    pane.setAttribute('role',role);pane.innerHTML=markup;app.appendChild(pane);return pane;
  }
  function openWeather(){
-   closeSheet();closeNightConfirm();hideMore();
+   closeSheet();hideMore();
    if(!weatherSheet)return;
    weatherSheet.hidden=false;
    const weatherButton=find('#dj-v794-weather');
@@ -421,68 +412,11 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    handle.addEventListener('pointerdown',e=>{start={id:e.pointerId,y:e.clientY};handle.setPointerCapture?.(e.pointerId);});
    handle.addEventListener('pointerup',e=>{if(start?.id===e.pointerId&&e.clientY-start.y>55)closeWeather();start=null;});
  }
- function buildNightConfirm(){
-   nightConfirm=createOverlay('dj833-night-modal',`<div class="dj833-night-dialog" role="dialog" aria-modal="true" aria-labelledby="dj833-night-title">
-   <span class="dj833-kicker">NIGHT VISIBILITY</span><h2 id="dj833-night-title">야간 시야 모드</h2>
-   <p>다크 테마로 전환하고 가로등 시야 분석을 켜시겠습니까?</p>
-   <p class="dj833-night-notice">조명 범위는 분석상 추정치이며 실제 밝기나 안전도를 의미하지 않습니다.</p>
-   <div class="dj833-night-actions"><button type="button" data-choice="no">아니요</button><button type="button" data-choice="yes">예, 시작</button></div></div>`);
-   nightConfirm.querySelector('[data-choice="no"]').addEventListener('click',()=>{
-     closeNightConfirm(true);
-     // On desktop, declining consent must leave the persistent night shortcut
-     // in its inactive "야간 시야" state, not a stale "야간 시야 해제" label.
-     if(win.matchMedia?.('(min-width:1080px)')?.matches){
-       const quickOff=find('#night-visibility-quick-off');
-       if(quickOff){
-         if(app.dataset.sangdoNight==='on'){
-           quickOff.click();
-         }else{
-           quickOff.setAttribute('aria-pressed','false');
-           quickOff.setAttribute('aria-label','야간 시야 켜기');
-           const label=quickOff.querySelector('.dj-night-action-text');
-           if(label)label.textContent='야간 시야';
-           else quickOff.textContent='☾ 야간 시야';
-         }
-       }
-     }
-     collapseNative();
-   });
-   nightConfirm.querySelector('[data-choice="yes"]').addEventListener('click',()=>{
-     closeNightConfirm();const source=find('#night-visibility-quick-off');
-     if(source&&!source.disabled&&app.dataset.sangdoNight!=='on')source.click();
-     collapseNative();schedule();
-   });
-   nightConfirm.addEventListener('click',e=>{if(e.target===nightConfirm)closeNightConfirm(true);});
- }
- function requestSafetyNight(e){
-   if(!win.matchMedia?.('(max-width:699px)')?.matches||!e.target.closest?.('#night-visibility-toggle'))return;
-   requestNight(e);
- }
- function requestNight(e){
-   const inSafety=win.matchMedia?.('(max-width:699px)')?.matches&&e.target.closest?.('#night-visibility-toggle');
-   if(e.target.closest?.('#dj-v794-night')==null&&!inSafety)return;
-   if(inSafety&&app.dataset.sangdoNight==='on')return;
-   // Prevent the legacy proxy from activating the night scene before consent.
-   e.preventDefault();e.stopImmediatePropagation();
-   closeSheet();closeWeather();hideMore();collapseNative();
-   if(app.dataset.sangdoNight==='on'){
-     find('#night-visibility-quick-off')?.click();schedule();return;
-   }
-   openNightConfirm();
- }
- function openNightConfirm(){
-   if(!nightConfirm||!nightConfirm.hidden)return;
-   const card=nightConfirm.querySelector('.dj833-night-dialog');
-   // Cancelling a previous exit is essential when tapping the pill quickly.
-   // A retained WAAPI transform moved the next consent card sideways.
-   if(card){win.DongjakWindowMotion?.cancel?.(card);card.style.removeProperty('transform');card.style.removeProperty('translate');card.style.removeProperty('opacity');}
-   nightConfirm.hidden=false;
- }
  function rebuildFeatureLocations(){
    if(!row||!scroller||!extra)return;
    for(const b of [...row.querySelectorAll('[data-dj831-feature].dj832-feature')])b.remove();
    extra.querySelectorAll('.dj833-feature-group,.dj833-more-edit,.dj834-shortcut-status').forEach(e=>e.remove());
-   const anchor=find('#dj-v794-night');
+   const anchor=find('#dj-v794-safety');
    const next=anchor?.nextSibling||null;
    for(const feature of [featureMap.get('map-dong'),...FEATURES.filter(f=>f[0]!=='map-dong'&&!MORE_ONLY_KEYS.has(f[0])&&isPrimary(f[0]))]){
      const b=featureButtons.get(feature[0])||makeFeature(feature);
@@ -599,16 +533,14 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    // replacing their existing event handlers or altering their aria-pressed data.
    for(const [id,label] of [
      ['dj-v794-map','지도 옵션'],['dj-v794-safety','보행안전'],
-     ['dj-v794-night','야간 시야'],['dj-v794-weather','날씨']]){
+     ['dj-v794-weather','날씨']]){
      const native=find('#'+id);
      if(native&&native.parentElement===scroller){
        native.classList.add('dj832-native');native.dataset.dj832Label=label;
      }
    }
    scroller.addEventListener('click',nativeClicked);
-   scroller.addEventListener('click',requestNight,true);
-   doc.addEventListener('click',requestSafetyNight,true);
-   buildSheet();buildWeather();buildNightConfirm();addMore();
+   buildSheet();buildWeather();addMore();
    // Preserve the branch's structural guard on initial mount as well as on personalized rebuilds.
    enforcePriorityToolbarSingleRow(row,scroller,more);
    scroller.addEventListener('scroll',fade,{passive:true});
@@ -629,24 +561,24 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
      if(e.target!==scroller||!['ArrowLeft','ArrowRight'].includes(e.key))return;
      e.preventDefault();scroller.scrollBy({left:e.key==='ArrowRight'?130:-130,behavior:'smooth'});
    });
-   row.querySelector('#dj-v794-more')?.addEventListener('click',()=>{closeSheet();closeWeather();closeNightConfirm();});
-   doc.addEventListener('dj836:close-overlay-tools',()=>{closeSheet();closeWeather();closeNightConfirm();hideMore();collapseNative();});
+   row.querySelector('#dj-v794-more')?.addEventListener('click',()=>{closeSheet();closeWeather();});
+   doc.addEventListener('dj836:close-overlay-tools',()=>{closeSheet();closeWeather();hideMore();collapseNative();});
    doc.addEventListener('keydown',onKeyDown);
    doc.addEventListener('click',onDocumentClick,true);
    if(typeof win.ResizeObserver==='function'){resizeObserver=new win.ResizeObserver(fade);resizeObserver.observe(scroller);}
    sourceObserver=new MutationObserver(schedule);
    for(const feature of FEATURES){const source=find(feature[2]);if(source&&!sourceNodes.includes(source)){sourceObserver.observe(source,{attributes:true,attributeFilter:['aria-pressed','aria-expanded','class','disabled']});sourceNodes.push(source);}}
-   appObserver=new MutationObserver(()=>{if(app.dataset.tab&&app.dataset.tab!=='map'){closeSheet();closeWeather();closeNightConfirm();}schedule();});
+   appObserver=new MutationObserver(()=>{if(app.dataset.tab&&app.dataset.tab!=='map'){closeSheet();closeWeather();}schedule();});
    appObserver.observe(app,{attributes:true,attributeFilter:['data-tab','data-theme','class']});
    win.addEventListener('resize',schedule,{passive:true});
    schedule();
  }
- function onKeyDown(e){if(e.key==='Escape'){closeSheet();closeWeather();closeNightConfirm();}}
+ function onKeyDown(e){if(e.key==='Escape'){closeSheet();closeWeather();}}
  function onDocumentClick(e){
-   if(e.target.closest?.('#bottom-nav .nav-tab')){closeSheet();closeWeather();closeNightConfirm();collapseNative();}
+   if(e.target.closest?.('#bottom-nav .nav-tab')){closeSheet();closeWeather();collapseNative();}
  }
  function unmount(){
-   if(!row)return;closeSheet();closeWeather();closeNightConfirm();collapseNative();
+   if(!row)return;closeSheet();closeWeather();collapseNative();
    sourceObserver?.disconnect();appObserver?.disconnect();resizeObserver?.disconnect();
    cancelInitialScroll();initialPhoneObserver?.disconnect();initialPhoneObserver=null;
    row.removeEventListener('pointerdown',cancelInitialScroll,true);
@@ -655,9 +587,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    doc.removeEventListener('keydown',onKeyDown);doc.removeEventListener('click',onDocumentClick,true);
    win.removeEventListener('resize',schedule);
    const type=find('#dj800-type-trigger');if(type&&type.parentElement===extra)row.insertBefore(type,find('#dj-v794-more'));
-   weatherObserver?.disconnect();weatherObserver=null;weatherSheet?.remove();weatherSheet=null;nightConfirm?.remove();nightConfirm=null;
-   scroller?.removeEventListener('click',requestNight,true);
-   doc.removeEventListener('click',requestSafetyNight,true);
+   weatherObserver?.disconnect();weatherObserver=null;weatherSheet?.remove();weatherSheet=null;
    extra?.remove();extra=null;sheet?.remove();sheet=null;featureButtons.clear();
    if(scroller?.parentElement===row){
      scroller.removeEventListener('click',nativeClicked);

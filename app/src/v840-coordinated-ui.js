@@ -136,28 +136,6 @@ export function installCoordinatedShell(doc=document,win=window){
  };
  search?.addEventListener('focusin',sync);
  search?.addEventListener('focusout',onSearchFocusOut);
- // Confirm before triggering the actual theme button; no premature loading overlay.
- const dialog=doc.createElement('section');dialog.id='dj840-theme-confirm';dialog.dataset.djDialogFade='true';dialog.hidden=true;
- dialog.innerHTML='<div class="dj840-theme-card" role="dialog" aria-modal="true" aria-labelledby="dj840-theme-title"><h2 id="dj840-theme-title">화면 테마를 전환할까요?</h2><p>지도와 화면의 밝기를 변경합니다.</p><div><button type="button" data-decision="cancel">취소</button><button type="button" data-decision="confirm">전환</button></div></div>';
- app.append(dialog);
- const theme=doc.getElementById('theme-toggle');
- const onTheme=(event)=>{
-   if(!event.target.closest?.('#theme-toggle')||!theme)return;
-   if(theme.dataset.dj840ThemeConfirmed==='1')return;
-   event.preventDefault();event.stopImmediatePropagation();
-   if(!dialog.hidden)return;
-   dialog.hidden=false;win.DongjakWindowMotion?.open(dialog);
- };
- doc.addEventListener('click',onTheme,true);
- const decide=(event)=>{
-   const choice=event.target.closest?.('[data-decision]')?.dataset.decision;
-   if(!choice)return;
-   const finish=()=>{if(disposed)return;dialog.hidden=true;if(choice==='confirm'&&theme){theme.dataset.dj840ThemeConfirmed='1';try{theme.click();}finally{delete theme.dataset.dj840ThemeConfirmed;}}};
-   if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(dialog,finish);else finish();
- };
- dialog.addEventListener('click',decide);
- const escape=(event)=>{if(event.key!=='Escape'||dialog.hidden)return;const finish=()=>{if(!disposed)dialog.hidden=true;};if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(dialog,finish);else finish();};
- doc.addEventListener('keydown',escape);
  sync();
  return ()=>{
    disposed=true;tipTransitionToken++;
@@ -169,15 +147,13 @@ export function installCoordinatedShell(doc=document,win=window){
    app.removeEventListener('animationend',sync,true);
    observers.forEach(o=>o.disconnect());win.clearInterval(interval);
    doc.removeEventListener('click',afterClose);
-   doc.removeEventListener('click',onTheme,true);
-   doc.removeEventListener('keydown',escape);
    mapNavButton?.removeEventListener('click',selectedMap);
    search?.removeEventListener('focusin',sync);
    search?.removeEventListener('focusout',onSearchFocusOut);
    label.removeEventListener('click',openGuideFromTip);
    label.removeEventListener('keydown',onTipKeydown);
    guideToggle.removeEventListener('click',onGuideToggle);
-   dialog.remove();label.remove();tipGuide.remove();
+   label.remove();tipGuide.remove();
    delete app.dataset.dj840Installed;
  };
 }

@@ -89,16 +89,14 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
   });
 }
 
-import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingZoomOpacityExpression,nativeBuildingFootprintPaint,nativeBuildingFootprint,repaintVegetation} from './map-appearance.js';
+import {buildingExtrusionAppearance,buildingZoomOpacityExpression,nativeBuildingFootprintPaint,nativeBuildingFootprint,repaintVegetation} from './map-appearance.js';
 import {applyBusStopLabelTheme,BUS_STOP_LABEL_IDS,BUS_LABEL_FONT,BUS_LABEL_SIZE} from './bus-stop-label-theme.js';
 import {setDistrictOpacity} from './transit-exterior-scope.mjs';
-import {createThemeState} from './theme-state-core.mjs';
 import {scaleMapLabelSize} from './map-label-text-scale.mjs';
 import {LABEL_HALO_MAX_PX} from './map-label-halo.js';
 
 export function getInitialTheme(){
-  // The public app is light-only. Night visibility can still apply a temporary
-  // dark map theme through setTemporaryTheme; no saved theme is restored.
+  // The public application is light-only, including restored installations.
   return 'light';
 }
 export function roadColorRole(layer={}){
@@ -152,15 +150,16 @@ export function initTheme({map,app}){
   // Dynamically injected labels arrive after initial MapLibre load (park names,
   // nearby POIs, bus/rail stops). Preserve original paint for light restoration.
   const supplementalLabelBaseline=new Map();
-  const themeState=createThemeState(getInitialTheme());
-  app.dataset.theme=themeState.value;
-  app.dataset.djPreferredTheme=themeState.preference;
-  document.documentElement.dataset.theme=themeState.value;
+  const theme='light';
+  app.dataset.theme=theme;
+  delete app.dataset.djPreferredTheme;
+  delete app.dataset.djThemeSource;
+  delete app.dataset.sangdoNight;
+  document.documentElement.dataset.theme=theme;
+  document.documentElement.style.colorScheme=theme;
   const browserThemeColor=document.querySelector('meta[name="theme-color"]');
   // Theme updates are repaint-only. Never create a full-screen transition mask.
-  if(browserThemeColor)browserThemeColor.content=themeState.value==='dark'?'#22282e':'#edf3ef';
-  if(toggle)toggle.textContent=themeState.value==='dark'?'라이트 모드':'다크 모드';
-  toggle?.setAttribute('aria-label',themeState.value==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
+  if(browserThemeColor)browserThemeColor.content='#edf3ef';
   // background base style only; dynamically added route, road width and safety layers are not modified.
   function saveBaseLayers(){
     for(const layer of map.getStyle().layers){
@@ -178,7 +177,6 @@ export function initTheme({map,app}){
       });
     }
   }
-  const mapLabelTextPaint=Object.freeze({color:'#f1f4f6',halo:'rgba(18,25,32,0.97)',width:LABEL_HALO_MAX_PX});
   const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:LABEL_HALO_MAX_PX});
   const semanticSymbolPattern=/(?:train[-_]?vehicle|route[-_]?badge|line[-_]?badge|dj-pri-(?:line|point))/i;
   const stationFont=['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'];
@@ -188,7 +186,7 @@ export function initTheme({map,app}){
     if(map.isMoving?.()){scheduleMapLabelContrast();return;}
     const layers=map.getStyle?.()?.layers;
     if(!Array.isArray(layers))return;
-    const signature=themeState.value+'|'+(app.dataset.djSettingsText||'normal')+'|'+layers.filter(l=>l.type==='symbol').map(l=>l.id).sort().join(',');
+    const signature=theme+'|'+(app.dataset.djSettingsText||'normal')+'|'+layers.filter(l=>l.type==='symbol').map(l=>l.id).sort().join(',');
     if(!force&&signature===labelStyleSignature)return;
     labelStyleSignature=signature;
     for(const layer of layers){
@@ -206,9 +204,7 @@ export function initTheme({map,app}){
           });
         }
         const original=supplementalLabelBaseline.get(id);
-        const desired=themeState.value==='dark'
-          ? {'text-color':mapLabelTextPaint.color,'text-halo-color':mapLabelTextPaint.halo,'text-halo-width':mapLabelTextPaint.width}
-          : {'text-color':mapLabelLightPaint.color,'text-halo-color':mapLabelLightPaint.halo,'text-halo-width':mapLabelLightPaint.width};
+        const desired={'text-color':mapLabelLightPaint.color,'text-halo-color':mapLabelLightPaint.halo,'text-halo-width':mapLabelLightPaint.width};
         for(const [key,value] of Object.entries(desired)){
           const current=read(key);
           if(JSON.stringify(current)!==JSON.stringify(value))map.setPaintProperty(id,key,value);
@@ -240,34 +236,20 @@ export function initTheme({map,app}){
       const id=entry.id.toLowerCase();
       const set=(property,value)=>{try{map.setPaintProperty(entry.id,property,value??null);}catch{}};
       if(entry.buildingFootprint){
-        const colors=nativeBuildingFootprintPaint(themeState.value);
+        const colors=nativeBuildingFootprintPaint(theme);
         for(const [property,value] of Object.entries(colors))set(property,value);
         continue;
       }
-      if(themeState.value==='light'){
-        if(entry.type==='background')set('background-color',entry.landRole==='ground'?'#e7e7e5':entry.background);
-        if(entry.type==='fill')set('fill-color',entry.pavedArea?nativePavedAreaPaint(entry.roadRole?(entry.roadRole==='edge'?'#d0d8d3':'#ffffff'):entry.fill):entry.roadRole ? (entry.roadRole==='edge'?'#d0d8d3':'#ffffff') : entry.landRole==='vegetation'?'#a5ca92':entry.landRole==='ground'?'#e7e7e5':entry.fill);
-        if(entry.type==='line')set('line-color',entry.roadRole ? (entry.roadRole==='edge'?'#cbd4d0':'#ffffff') : entry.line);
-        if(entry.type==='symbol') {set('text-color',entry.text);set('text-halo-color',entry.halo);set('text-halo-width',entry.haloWidth);}
-      }else{
-        const water=/water|ocean|river|lake|stream/.test(id);
-        const green=/park|grass|wood|landcover|forest|green|garden/.test(id);
-        const road=/road|motorway|street|transportation|bridge|tunnel|highway/.test(id);
-        // Balanced dark basemap: distinguish ground, roads, parks and water.
-        // Only the original style baseline is recolored: semantic PRI, route
-        // geometry, transit lines and warning layers keep their own colors.
-        if(entry.type==='background')set('background-color','#22272d');
-        if(entry.type==='fill')set('fill-color',water?'#273741':green?'#303c34':entry.roadRole?'#424952':road?'#39434a':'#2b3138');
-        if(entry.type==='line')set('line-color',water?'#425765':entry.roadRole?(entry.roadRole==='edge'?'#333b44':'#4c5864'):road?'#525e68':'#424a53');
-        if(entry.type==='symbol'){
-          set('text-color',mapLabelTextPaint.color);set('text-halo-color',mapLabelTextPaint.halo);set('text-halo-width',mapLabelTextPaint.width);
-        }
-      }
+      if(entry.type==='background')set('background-color',entry.landRole==='ground'?'#e7e7e5':entry.background);
+      if(entry.type==='fill')set('fill-color',entry.pavedArea?nativePavedAreaPaint(entry.roadRole?(entry.roadRole==='edge'?'#d0d8d3':'#ffffff'):entry.fill):entry.roadRole ? (entry.roadRole==='edge'?'#d0d8d3':'#ffffff') : entry.landRole==='vegetation'?'#a5ca92':entry.landRole==='ground'?'#e7e7e5':entry.fill);
+      if(entry.type==='line')set('line-color',entry.roadRole ? (entry.roadRole==='edge'?'#cbd4d0':'#ffffff') : entry.line);
+      if(entry.type==='symbol') {set('text-color',entry.text);set('text-halo-color',entry.halo);set('text-halo-width',entry.haloWidth);}
+
     }
     // 동작구 밖 시각적 마스크는 기본 베이스맵보다 늦게 생성됩니다.
     // 토글할 때마다 현재 존재하는 레이어의 색상과 불투명도를 별도로 갱신합니다.
     if(map.getLayer('district-exterior-fade')){
-      const maskPaint=districtExteriorThemePaint(themeState.value);
+      const maskPaint=districtExteriorThemePaint(theme);
       for(const [key,value] of Object.entries(maskPaint)){
         try{if(key==='fill-opacity')setDistrictOpacity(map,'district-exterior-fade',key,value);else if(map.getPaintProperty('district-exterior-fade',key)!==value)map.setPaintProperty('district-exterior-fade',key,value);}catch(error){console.warn('[외부지역 마스크] 테마 전환 실패:',error);}
       }
@@ -278,12 +260,12 @@ export function initTheme({map,app}){
       if(!map.getLayer(id))continue;
       try{
         // Light map names use dark glyphs with a light halo; dark mode reverses the contrast.
-        map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e9f0f3':mapLabelLightPaint.color);
-        map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(34,39,45,0.95)':mapLabelLightPaint.halo);
+        map.setPaintProperty(id,'text-color',mapLabelLightPaint.color);
+        map.setPaintProperty(id,'text-halo-color',mapLabelLightPaint.halo);
       }catch{}
     }
     // Keep official and fallback bus-stop names readable even in initial night mode.
-    applyBusStopLabelTheme(map,themeState.value);
+    applyBusStopLabelTheme(map,theme);
     repaintVegetation(map,app); // Include forest shade installed after baseline capture.
     repaintSiteLanduse(map,app); // One daytime site palette; night safety analysis keeps its own map.
     syncMapLabelContrast(true); // Base and late map labels share the same theme contrast.
@@ -291,9 +273,7 @@ export function initTheme({map,app}){
     for(const layer of map.getStyle().layers){
       if(layer.id.startsWith('dongjak-buildings-3d-') && layer.type==='fill-extrusion'){
         try{
-          const appearance=nightOcclusionBuildingPaint(
-            buildingExtrusionAppearance(themeState.value,map.getPitch?.()??30),
-            themeState.value==='dark'&&app.dataset.sangdoNight==='on');
+          const appearance=buildingExtrusionAppearance(theme,map.getPitch?.()??30);
           map.setPaintProperty(layer.id,'fill-extrusion-color',appearance.color);
           map.setPaintProperty(layer.id,'fill-extrusion-opacity',buildingZoomOpacityExpression(appearance.opacity));
         }catch{}
@@ -301,37 +281,8 @@ export function initTheme({map,app}){
     }
   }
   map.on('load',()=>{saveBaseLayers();applyTheme();});
-  const displayTheme=({notify=false}={})=>{
-    const next=themeState.value;
-    const changed=app.dataset.theme!==next;
-    app.dataset.theme=next;
-    app.dataset.djPreferredTheme=themeState.preference;
-    app.dataset.djThemeSource=themeState.temporary?'night':'user';
-    document.documentElement.dataset.theme=next;
-    if(browserThemeColor)browserThemeColor.content=next==='dark'?'#22282e':'#edf3ef';
-    if(toggle){
-      if(themeState.temporary){
-        toggle.textContent='야간 시야 중 · 종료 후 '+(themeState.preference==='dark'?'다크':'라이트');
-        toggle.setAttribute('aria-label','야간 시야 종료 후 '+(themeState.preference==='dark'?'다크':'라이트')+' 테마 적용');
-      }else{
-        toggle.textContent=next==='dark'?'라이트 모드':'다크 모드';
-        toggle.setAttribute('aria-label',next==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
-      }
-    }
-    if(changed)applyTheme();
-    if(notify&&typeof window.CustomEvent==='function'){
-      window.dispatchEvent(new CustomEvent('dongjak:manual-theme-change',
-        {detail:{theme:next,preference:themeState.preference}}));
-    }
-  };
-  // Only the night-visibility controller may request a temporary theme.
-  const setTemporaryTheme=next=>{
-    if(!themeState.override(next))return;
-    displayTheme();
-  };
-  return {currentTheme:()=>themeState.value,
-    preferredTheme:()=>themeState.preference,
-    refresh:applyTheme,setTemporaryTheme};
+
+  return {currentTheme:()=>theme,preferredTheme:()=>theme,refresh:applyTheme};
 }
 
 export function keepRegularMapText(map){

@@ -93,7 +93,7 @@ import {nearestBuildingSheets} from './building-prewarm.js';
 import {prepareBuildingChunks,nextBuildingStage,waitForBuildingSource,BUILDING_STAGE_GAP_MS,yieldBuildingFrame,coalesceBuildingOwnership,createBuildingWarmCache} from './progressive-building-stream.mjs';
 import {installSafetyLayers,installBridgeDeck} from './safety-layers.js';
 import {installMapOrientationControls,installNeighborDistrictLabels,installDecorativeParkTrees} from './map-polish.js';
-import {installGrassTexture,installForestShade,installBaseBuildingPalette,nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,buildingFootprintOutlinePaint,buildingPlanVisibility,buildingZoomOpacityExpression,BUILDING_ZOOM_FADE_START,BUILDING_ZOOM_FADE_END} from './map-appearance.js';
+import {installGrassTexture,installForestShade,installBaseBuildingPalette,buildingExtrusionAppearance,buildingFootprintPaint,buildingFootprintOutlinePaint,buildingPlanVisibility,buildingZoomOpacityExpression,BUILDING_ZOOM_FADE_START,BUILDING_ZOOM_FADE_END} from './map-appearance.js';
 import {bufferedDistrictBounds} from './map-scope.js';
 import {fallbackBoundary} from './fixed-rail-data.js';
 import {isRoadDirectionSymbolLayer} from './map-direction.js';
@@ -106,7 +106,6 @@ import {installMapResumeRecovery} from './v875-map-resume.js';
 import {createOutsideDistrictNotifier} from './dongjak-location-alert.js';
 import {installMapImmersive} from './map-immersive.js';
 import {installDistantHaze} from './distant-haze.js';
-import {installNightVisibility,promoteNightAnalysisLayers} from './night-visibility-map.js';
 import {installPriMap} from './pri-map.js';
 import {installSolidMapLines} from './solid-map-lines.js';
 import {installQuietBasemap} from './quiet-basemap.mjs';
@@ -124,9 +123,7 @@ import './bocha-road-layer.css';
 import './pilot-layer-selection.css';
 import {installMapHudCollisionGuard} from './map-hud-collision-guard.js';
 import {createRouteMapPickArbiter} from './route-map-pick-arbiter.js';
-import './night-visibility.css';
 import './safety-workspace.css';
-import './night-visibility-panel.css';
 import './v601-responsive.css';
 import './v602-fixes.css';
 import './v607-mobile-sheet.css';
@@ -559,16 +556,13 @@ document.getElementById('overview-sheet-close')?.addEventListener('click',(event
   overview.hidden=true; // Closing must work even if the sheet was previously expanded.
   if(overviewDrag){overviewDrag=null;overview.classList.remove('dragging');}
 });
-// Never re-open the overview over an active night-visibility analysis.
-// Several independent map navigation callbacks previously set hidden=false.
-// This observer makes the exclusion invariant for ALL entry points.
-function enforceExclusiveNightPanel(){
-  if((app.dataset.sangdoNight==='on' || (!hasSafetyOverviewContent() && !overviewExplicitOpen)) && overview && !overview.hidden) overview.hidden=true;
+// Do not reopen an empty safety overview.
+function enforceSafetyOverviewContent(){
+  if(!hasSafetyOverviewContent()&&!overviewExplicitOpen&&overview&&!overview.hidden)overview.hidden=true;
 }
-const exclusiveNightPanelObserver=new MutationObserver(enforceExclusiveNightPanel);
-exclusiveNightPanelObserver.observe(app,{attributes:true,attributeFilter:['data-sangdo-night']});
-exclusiveNightPanelObserver.observe(overview,{attributes:true,attributeFilter:['hidden']});
-enforceExclusiveNightPanel();
+const safetyOverviewObserver=new MutationObserver(enforceSafetyOverviewContent);
+safetyOverviewObserver.observe(overview,{attributes:true,attributeFilter:['hidden']});
+enforceSafetyOverviewContent();
 installAdaptiveMapActions({app,overview,actions:document.querySelector('.map-actions')});
 requestAnimationFrame(() => applyOverviewSheetState(overviewSheetState));
 const mapToolsToggle=document.getElementById('map-tools-toggle');
@@ -825,9 +819,7 @@ function syncTiltWithBuildings() {
   // Ownership is spatial, so native fallback remains outside the ready GIS sheets.
   buildingCoverage?.setExtruding(false);
   const theme=visualTheme.currentTheme();
-  const appearance=nightOcclusionBuildingPaint(
-    buildingExtrusionAppearance(theme,pitch,PITCH_BUILDING_START,PITCH_BUILDING_FULL),
-    app.dataset.sangdoNight==='on'&&theme==='dark');
+  const appearance=buildingExtrusionAppearance(theme,pitch,PITCH_BUILDING_START,PITCH_BUILDING_FULL);
   const {opacity,color}=appearance;
   // At most one footprint-paint update per ~2 degrees instead of a full
   // setPaintProperty on every mousemove/pitch event for *every* GIS tile.
@@ -878,11 +870,6 @@ function syncTiltWithBuildings() {
   if (message !== lastPitchStatus && boundaryGeometry) { status(message);lastPitchStatus=message; }
 }
 
-// Night analysis changes the 3D building opacity to prevent bright roads
-// showing through translucent roofs. Restore normal opacity when turned off.
-new MutationObserver(()=>{
-  syncTiltWithBuildings();
-}).observe(app,{attributes:true,attributeFilter:['data-sangdo-night']});
 
 function intersects(a,b){return a[0]<=b[2]&&a[2]>=b[0]&&a[1]<=b[3]&&a[3]>=b[1];}
 function getVisibleBBox(){
@@ -958,9 +945,7 @@ async function loadOneBuildingSheet(sheet){
       return;
     }
     map.addSource(sourceId,{type:'geojson',data:collection,tolerance:0.5,maxzoom:19});
-    const buildingStyle=nightOcclusionBuildingPaint(
-      buildingExtrusionAppearance(visualTheme.currentTheme(),map.getPitch()),
-      app.dataset.sangdoNight==='on'&&visualTheme.currentTheme()==='dark');
+    const buildingStyle=buildingExtrusionAppearance(visualTheme.currentTheme(),map.getPitch());
     const footprintStyle=buildingFootprintPaint(visualTheme.currentTheme(),0);
     footprintStyle['fill-opacity']=buildingZoomOpacityExpression(footprintStyle['fill-opacity']); // hidden until sheet owns this area
     const outlineStyle=buildingFootprintOutlinePaint(visualTheme.currentTheme(),map.getPitch());
@@ -983,8 +968,6 @@ async function loadOneBuildingSheet(sheet){
     lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
     building3DLastOpacity=-1;
     syncTiltWithBuildings();
-    // A newly loaded 3D sheet must never cover the active night analysis roads.
-    if(app.dataset.sangdoNight==='on')promoteNightAnalysisLayers(map);
     console.info(`[동작하는 안전지도] ${sheet.sheet}번 도엽: 기본+보완 건물 ${within.length.toLocaleString()}개, 소스 ${successfulSources}/${totalSources}개 로딩`);
   }catch(error){buildingRetryAfter.set(sheet.sheet,Date.now()+15000);console.warn(`[동작하는 안전지도] ${sheet.sheet}번 건물 데이터 오류:`,error);}
   finally{buildingLoading.delete(sheet.sheet);}
@@ -1020,7 +1003,7 @@ function scheduleInitialBuildingWarmup(){
   else setTimeout(()=>void run(),900);
 }
 function djTrimOffscreenBuildings(sheets){
-  if((!djPhone&&!djRenderBudget.isEconomy())||app.dataset.sangdoNight==='on'||map.isMoving?.())return;
+  if((!djPhone&&!djRenderBudget.isEconomy())||map.isMoving?.())return;
   const visible=sheets.map(s=>s.sheet);
   for(const id of offscreenEvictionIds([...loadedBuildingTiles.keys()],visible,djRenderBudget.isEconomy()?2:4)){
     const info=loadedBuildingTiles.get(id),sourceId='dongjak-buildings-data-'+id;
@@ -1664,9 +1647,6 @@ map.on('click',(event)=>{
   if(app.classList.contains('map-safety-open')&&!app.classList.contains('dj-safety-peek'))syncSafetyMenu(false);
   if(document.getElementById('map-gesture-guide')?.hidden===false)
     document.getElementById('map-gesture-guide-close')?.click();
-  const floating=document.getElementById('night-visibility-float');
-  if(floating&&!floating.hidden&&floating.dataset.collapsed!=='true')
-    document.getElementById('night-visibility-float-collapse')?.click();
   // Page overlays do not block map areas outside them: a direct map tap restores the map.
   if(app.dataset.tab!=='map' && !communityPickMode && !routePickMode && !addMode){
     navigate('map');
@@ -1781,7 +1761,7 @@ map.on('load',()=>{
   // Camera-distance haze is active only in the oblique perspective view.
   installDistantHaze({map,app,themeButton:document.getElementById('theme-toggle')});
   // PRI owns the public protection-gap, speed and shared-road analysis.
-  installNightVisibility({map,maplibregl,app,toast,theme:visualTheme});
+  // Standalone night visibility is retired; PRI retains its lighting datasets.
   installNearbyPlaceLabels(map,{maplibregl});
   installHangangBridgeLabels(map,{maplibregl});
   installImportantPlaceClick({map,maplibregl});
@@ -2252,7 +2232,7 @@ for(const b of navButtons)b.addEventListener('click',()=>{
 });
 // Docked safety/map actions persist on desktop even on non-map tabs.
 // Switch to the map first, then allow the ORIGINAL button listener to run.
-for(const id of ['map-tools-toggle','map-safety-toggle','night-visibility-quick-off','toggle-road-width']){
+for(const id of ['map-tools-toggle','map-safety-toggle','toggle-road-width']){
   const action=document.getElementById(id);
   action?.addEventListener('click',()=>{
     if(app.dataset.tab!=='map')navigate('map');
