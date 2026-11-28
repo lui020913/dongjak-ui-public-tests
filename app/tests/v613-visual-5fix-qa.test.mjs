@@ -24,7 +24,9 @@ test('bus fallback preserves OSM source coordinates while native tile pictograms
   const init=code.slice(code.indexOf('export function initTransportMap'),code.indexOf('function combineStations'));
   assert.match(init,/suppressNativeBusStopGlyphs\(map\)/);
   assert.match(code,/map\.querySourceFeatures\(poiLayer\.source,\{sourceLayer:'poi'\}\)/);
-  assert.match(code,/<14\.25\s*\|\|/);
+  const base=code.slice(code.indexOf('function updateBaseTransitFilter()'),code.indexOf('updateBaseTransitFilter();'));
+  assert.match(base,/rules\.push\(\['all',\['!=',\['get','class'\],'bus'\],\['!=',\['get','class'\],'bus_stop'\],\['!=',\['get','class'\],'bus_station'\],\['!=',\['get','subclass'\],'bus_stop'\],\['!=',\['get','subclass'\],'bus_station'\]\]\);/);
+  assert.doesNotMatch(base,/<14\.25\s*\|\|/);
   assert.match(code,/minzoom:15\.5/);
   const map={getZoom:()=>14.5,getCanvas:()=>({clientWidth:800,clientHeight:600}),
     getCenter:()=>({lng:126.95,lat:37.5}),unproject:([x,y])=>({lng:126.949+(x-400)*0.00001,lat:37.5+(y-300)*0.00001})};
