@@ -494,7 +494,7 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
   }
   async function showNearby(useMapCenter=false){
     seq++;const current=seq;
-    showPanel('내 주변 보행정보');
+    showPanel('주변 안전정보');
     panel.dataset.nearbyMode='list';
     width.hidden=true;
     showMessage(useMapCenter?'지도 중심 시설 자료 확인 중…':'위치 권한 확인 중… 내 위치는 서버에 저장하지 않습니다.');

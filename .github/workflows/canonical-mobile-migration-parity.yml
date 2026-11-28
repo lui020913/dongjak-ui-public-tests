@@ -1,0 +1,63 @@
+name: Canonical mobile migration equivalence
+on:
+  push:
+    branches: ['refactor/canonical-mobile-owners-20261128']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Reconstruct baseline and candidate production inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="$RUNNER_TEMP/base"
+          candidate="$RUNNER_TEMP/candidate"
+          mkdir "$base" "$candidate"
+          git archive f0c431c00125226d682860586c20272f0069b0a9 | tar -x -C "$base"
+          git archive HEAD | tar -x -C "$candidate"
+          materialize() {
+            local root="$1"
+            local work="$root/app"
+            cd "$work"
+            git init -q
+            git add -f .
+            cp "$root/frontend/production/mobile-first-overhaul.css" src/mobile-first-overhaul.css
+            git add -N src/mobile-first-overhaul.css
+            node "$root/scripts/apply-mobile-only-gate.mjs" "$work"
+            node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          const path='src/main.js',anchor="import './mobile-ui/current.css';";
+          const source=readFileSync(path,'utf8');
+          if(source.split(anchor).length!==2)throw Error('CSS anchor drift');
+          writeFileSync(path,source.replace(anchor,anchor+String.fromCharCode(10)+"import './mobile-first-overhaul.css';"));
+          NODE
+            node "$root/scripts/apply-mobile-17-followup.mjs" "$work"
+            node "$root/scripts/apply-mobile-next.mjs" "$work"
+            git diff --check
+            actual="$(git diff --name-only | LC_ALL=C sort)"
+            expected="$(node -e 'const s=require("node:fs").readFileSync(process.argv[1],"utf8").split(String.fromCharCode(10)).find(l=>l.startsWith("expected_changes=")); const a=s.indexOf("index.html"),b=s.indexOf(" | LC_ALL=C sort"); if(a<0||b<a)throw Error("allowlist missing"); console.log(s.slice(a,b))' "$root/scripts/build-mobile-first-overhaul.sh")"
+            test "$actual" = "$(printf '%s\n' $expected | LC_ALL=C sort)"
+            rm -rf .git
+            cp "$root/frontend/production/mobile-next-build.test.mjs" tests/mobile-next-build.test.mjs
+            cp "$root/frontend/production/mobile-followup-build.test.mjs" tests/mobile-followup-build.test.mjs
+            node --check src/transport-map.js
+            node --check src/pedestrian-tools.js
+            node --check src/v860-onboarding.js
+          }
+          materialize "$base"
+          materialize "$candidate"
+          diff -qr "$base/app" "$candidate/app"
+          echo 'PASS: complete transformed application trees are byte-identical'
+      - name: Run mobile overlay contracts
+        run: node --test frontend/production/mobile-first-overhaul.test.mjs tests/mobile-only-gate.test.mjs

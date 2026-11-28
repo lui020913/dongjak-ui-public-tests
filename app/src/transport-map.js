@@ -2990,7 +2990,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     // The selected route badge and station name form one centered heading.
     title.classList?.toggle?.('subway-title',place.kind==='subway');
     if(panel.dataset)panel.dataset.kind=place.kind;
-    if(title.dataset){if(place.kind==='bus'&&/^\d{5}$/.test(String(place.arsId||'')))title.dataset.dj912Ars=String(place.arsId);else delete title.dataset.dj912Ars;}
+    if(title.dataset){if(place.kind==='bus'&&/^\d{5}$/.test(String(place.arsId||''))&&!globalThis.window?.matchMedia?.('(max-width:699px)')?.matches)title.dataset.dj912Ars=String(place.arsId);else delete title.dataset.dj912Ars;}
     panel.style?.setProperty?.('--transport-line-color',place.kind==='subway'
       ? subwayLineColor(place.selectedLine||place.lines?.[0]||'') : '#13836b');
     // Do not always reset to realtime when the user explicitly chose the timetable.
@@ -3075,7 +3075,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
 
       if(arrival.arsId && !place.arsId){
         place.arsId=arrival.arsId;
-        if(title.dataset&&place.kind==='bus'&&/^\d{5}$/.test(String(place.arsId)))title.dataset.dj912Ars=String(place.arsId);
+        if(title.dataset&&place.kind==='bus'&&/^\d{5}$/.test(String(place.arsId))&&!globalThis.window?.matchMedia?.('(max-width:699px)')?.matches)title.dataset.dj912Ars=String(place.arsId);
         description.textContent=`ARS 정류소번호 ${place.arsId}`;
         chips.append(el('span','transport-chip muted',`ARS ${place.arsId}`));
         if(place.kind==='bus')void refreshServiceHours(place,thisSeq);
