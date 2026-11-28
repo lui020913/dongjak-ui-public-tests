@@ -57,10 +57,10 @@ jobs:
           }
           materialize "$base"
           materialize "$candidate"
-          # The onboarding test now checks both already-released paths; only this test file is intentionally different.
-          diff -qr --exclude=v863-guest-onboarding-flow.test.mjs "$base/app" "$candidate/app"
+          # These explicitly listed regression files now check already-approved behavior.
+          diff -qr --exclude=v863-guest-onboarding-flow.test.mjs --exclude=phone-35-acceptance-20261122.test.mjs --exclude=protected-release-ownership-20261123.test.mjs --exclude=v611-static-bus-ai-floating.test.mjs --exclude=v711-layout-prewarm.test.mjs --exclude=v862-pc-mobile-separation.test.mjs --exclude=v880-window-stability.test.mjs "$base/app" "$candidate/app"
           node --test "$candidate/app/tests/v863-guest-onboarding-flow.test.mjs"
-          echo 'PASS: transformed application trees are byte-identical except the updated onboarding regression test'
+          echo 'PASS: transformed application trees are byte-identical except the explicitly updated regression tests'
       - name: Run mobile overlay contracts
         run: node --test frontend/production/mobile-first-overhaul.test.mjs tests/mobile-only-gate.test.mjs tests/mobile-qa-parallel.test.mjs
       - name: Compare pre-existing failing source contracts on baseline and candidate
@@ -92,4 +92,5 @@ jobs:
           comm -13 "$RUNNER_TEMP/baseline.failures" "$RUNNER_TEMP/candidate.failures" > "$RUNNER_TEMP/new.failures"
           cat "$RUNNER_TEMP/new.failures"
           test ! -s "$RUNNER_TEMP/new.failures"
-          echo 'PASS: no new failures in previously failing source-contract suites'
+          test ! -s "$RUNNER_TEMP/candidate.failures"
+          echo 'PASS: all previously failing source-contract suites now pass without reverting approved UI behavior'

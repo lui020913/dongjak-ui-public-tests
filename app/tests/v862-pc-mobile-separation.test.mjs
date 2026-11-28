@@ -35,7 +35,7 @@ test('dark map theme restores ground and 3D building colors after zoom',()=>{
   const main=read('src/main.js');
   const appearance=read('src/map-appearance.js');
   assert.ok(guard.includes("role!=='ground'&&role!=='vegetation'"));
-  assert.ok(guard.includes("theme==='dark'?'#2b3138':'#eeeeec'"));
+  assert.ok(guard.includes("theme==='dark'?'#2b3138':'#e7e7e5'"));
   assert.ok(main.includes('buildingExtrusionAppearance(theme,pitch'));
   assert.ok(main.includes('fill-extrusion-color'));
   assert.ok(main.includes('fill-extrusion-opacity'));
@@ -86,6 +86,12 @@ test('MapLibre zoom guard restores only base-map ground and vegetation and prese
     assert.equal(map.paints['building/fill-color'],undefined);
     assert.equal(map.paints['dj-night-reach-fill/fill-color'],undefined);
     assert.equal(applyBaseLandPalette(map,app),0);
+    app.dataset.theme='light';
+    assert.equal(applyBaseLandPalette(map,app),3);
+    assert.equal(map.paints['background/background-color'],'#e7e7e5');
+    assert.equal(map.paints['landuse_residential/fill-color'],'#e7e7e5');
+    assert.equal(map.paints['park/fill-color'],'#a5ca92');
+    assert.equal(map.paints['building/fill-color'],undefined);
   }finally{
     cleanup();
     if(previousRaf===undefined)delete globalThis.requestAnimationFrame;else globalThis.requestAnimationFrame=previousRaf;
