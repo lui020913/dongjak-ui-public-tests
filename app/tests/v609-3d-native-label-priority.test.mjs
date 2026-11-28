@@ -110,3 +110,12 @@ test('no label layout or layer moves during an active gesture, exactly one settl
  for(let i=0;i<50;i++){f.events.get('styledata')();f.events.get('idle')();}
  assert.equal(writes,count);assert.equal(f.moves,moves);dispose();
 });
+
+
+test('late 3D buildings stay below rail lines and favorites share the stable order',()=>{
+ const f=makeMap();f.layers.splice(1,0,{id:'transport-schematic-subway',type:'line'});f.layers.push({id:'dj-saved-place-stars-icon',type:'symbol'});
+ assert.equal(promoteReadable3DLabelLayers(f.map),true);
+ const ids=f.layers.map(x=>x.id);assert.ok(ids.indexOf('dongjak-buildings-3d-42')<ids.indexOf('transport-schematic-subway'));
+ assert.ok(ids.indexOf('dj-saved-place-stars-icon')>ids.indexOf('dongjak-buildings-3d-42'));
+ assert.equal(promoteReadable3DLabelLayers(f.map),false);
+});

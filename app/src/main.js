@@ -750,10 +750,10 @@ const PITCH_BUILDING_START = 10;
 const PITCH_BUILDING_EXIT = 7;
 let buildingPitchActive=false;
 const PITCH_BUILDING_FULL = 30;
-// v6.2: 지형을 기울기에 따라 setTerrain(null)로 해제하면 높이 정보가
-// 평면/입체를 반복하며 사라집니다. 기울기 0°에서도 DEM 소스를 유지합니다.
-// 이전 버전의 화면 경계(한강 인근) 기반 해제도 제거합니다.
-// DEM 오류 시에만 2D 기본지도를 유지하고, 건물 3D는 별도 처리합니다.
+// Temporary stable surface fallback: keep the DEM source and building extrusions,
+// but do not drape the map onto the terrain mesh until riverbank artifacts are verified.
+// A fixed startup choice avoids pitch/viewport-dependent terrain toggling.
+const TERRAIN_SURFACE_ENABLED=false;
 let terrainEnabled = false;
 let terrainErrorNotified = false;
 let lastBuildingOpacity = -1;
@@ -761,7 +761,7 @@ let lastPitchStatus = '';
 let djBuildingBatchBusy=false;
 let lastFootprintPaintKey='';
 function syncAutomaticTerrain(_pitch) {
-  if(!mapReady || !terrainAvailable || terrainEnabled)return;
+  if(!TERRAIN_SURFACE_ENABLED || !mapReady || !terrainAvailable || terrainEnabled)return;
   try {
     map.setTerrain({source:'dongjak-terrain-dem',exaggeration:1.0});
     terrainEnabled=true;

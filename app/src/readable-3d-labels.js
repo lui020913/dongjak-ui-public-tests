@@ -46,9 +46,14 @@ export const FRONT_LABEL_ORDER = Object.freeze([
   'metro-access-stairs',
   'metro-access-exits',
   'metro-access-exit-labels',
+  'dj-metro-station-access-exit-circle',
+  'dj-metro-station-access-exit-label',
+  'dj-saved-place-stars-icon',
   'dj-hangang-bridge-geometry-labels',
   'dj-hangang-bridge-osm-labels'
 ]);
+
+function isRailSurfaceLayer(layer){return layer?.type==='line'&&/^(?:transport-schematic-subway|transport-real-rail-overview|dj-city-transit-rail)(?:-casing)?$/.test(layer.id||'');}
 
 function lastLayersMatch(actual,desired){
   return desired.length===0 || actual.slice(-desired.length).every((id,index)=>id===desired[index]);
@@ -70,7 +75,7 @@ export function promoteReadable3DLabelLayers(map){
 function applyReadableLayerOrder(map){
   const style=map.getStyle();
   const layers=style?.layers||[];
-  const firstTextOrIcon=layers.find(layer=>layer.type==='symbol')?.id;
+  const firstTextOrIcon=layers.find(layer=>layer.type==='symbol'||isRailSurfaceLayer(layer))?.id;
   let moved=false;
   if(firstTextOrIcon){
     const firstIndex=layers.findIndex(layer=>layer.id===firstTextOrIcon);

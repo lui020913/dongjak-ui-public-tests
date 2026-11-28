@@ -5,10 +5,14 @@ import {isScheduleMergedStation} from '../src/metro-schedule-view.js';
 import {speedFeatureFilter,speedGeojsonStats,SPEED_COLORS} from '../src/sangdo-speed-map.js';
 const read=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
 
-test('terrain remains enabled regardless of map pitch or island view bounds',()=>{
+test('stable surface fallback retains DEM source and 3D buildings without toggling terrain during gestures',()=>{
   const main=read('src/main.js');
   const block=main.split('function syncAutomaticTerrain(_pitch) {')[1].split('function visibleBuilding2D(){')[0];
+  assert.match(main,/const TERRAIN_SURFACE_ENABLED=false/);
+  assert.ok(block.includes('if(!TERRAIN_SURFACE_ENABLED || !mapReady'));
   assert.ok(block.includes("map.setTerrain({source:'dongjak-terrain-dem',exaggeration:1.0})"));
+  assert.match(main,/map.addSource\('dongjak-terrain-dem'/);
+  assert.match(main,/type:'fill-extrusion',source:sourceId/);
   assert.ok(!block.includes('pitch >')&&!block.includes('pitch <'));
   assert.ok(!block.includes('map.getBounds'));
   assert.ok(!block.includes('setTerrain(null)'));

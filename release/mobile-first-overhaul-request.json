@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.260",
+  "application_version": "9.2.261",
   "public_work_branch": "main",
-  "purpose": "Restore boundary bus stops with 350m safety context and exact Seoul transit scope; atomic settled viewport cell publication, stable bus display coordinates, remove idle favorite-layer reorder race; repair line 2 circular gap and preserve line 9 display continuity from v9.2.259. Direct visual protected production.",
-  "attempt": 502,
+  "purpose": "Temporary stable flat surface fallback for suspected DEM draping artifacts at Han river and pitched rail views; preserve DEM source, 3D building geometry, pitch, existing navigation, road and safety layers; keep late 3D buildings below rail lines and favorites in shared stable layer order. Retain v9.2.260 border bus and rail fixes. Direct visual protected production.",
+  "attempt": 503,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
