@@ -7,7 +7,7 @@ import {LABEL_HALO_MAX_PX} from '../src/map-label-halo.js';
 const src=name=>readFileSync(new URL('../src/'+name,import.meta.url),'utf8');
 test('theme and idle halo cap use the same value rather than oscillating',()=>{
  assert.equal(LABEL_HALO_MAX_PX,1.1);
- assert.equal((src('ui-environment.js').match(/width:LABEL_HALO_MAX_PX/g)||[]).length,2);
+ assert.equal((src('ui-environment.js').match(/width:LABEL_HALO_MAX_PX/g)||[]).length,1);
 });
 test('facility reconciliation is dirty-driven, deferred, and cancels pending work during gestures',()=>{
  const s=src('civic-facility-layer.js');

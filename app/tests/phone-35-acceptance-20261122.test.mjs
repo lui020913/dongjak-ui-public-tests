@@ -24,12 +24,12 @@ const checks=[
    contains(src('src/bottom-tab-navigation.js'),'start(button)','page.hidden=true','clearEntrance()');
    contains(src('src/mobile-ux-energy.css'),'visibility:hidden!important','background-color:var(--dj-primary-page-bg');
  }],
- ['A02','public light-only UI has no active manual theme refresh, night visibility remains temporary',()=>{
+ ['A02','public light-only UI has no active manual or temporary theme refresh',()=>{
    const html=src('index.html'),theme=src('src/ui-environment.js');
    contains(html,"var displayTheme='light'");
    assert.doesNotMatch(html,/id="theme-toggle"/);
    assert.doesNotMatch(theme,/requestIosThemeRefresh\(/);
-   contains(theme,'themeState.override(next)');
+   contains(theme,"const theme='light'");assert.doesNotMatch(theme,/setTemporaryTheme/);
  }],
  ['A03','closing another sheet cannot reopen the AI modal accidentally',()=>{
    contains(src('src/v880-supabase-safety-ai.js'),'transportDismissedAt','guardTransportDismiss','pointerStart','onExplicitEntryClick','event.isTrusted');
@@ -59,9 +59,9 @@ const checks=[
    contains(s,'--dj-pwa-status-color','const onboarding=visible','themeMeta.setAttribute');
    contains(src('src/mobile-pwa-status-tone-v793.css'),'#dj-ios-pwa-status-sample');
  }],
- ['B02','all map labels have dark text bright halo in light and vice versa',()=>{
+ ['B02','all ordinary map labels retain dark text and bright halo',()=>{
    const s=src('src/ui-environment.js');
-   contains(s,"mapLabelTextPaint=Object.freeze({color:'#f1f4f6',halo:'rgba(18,25,32,0.97)'","mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)'");
+   contains(s,"mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)'");
    assert.equal(featuredPlaceStyle('light').text,'#6d817b');
    assert.equal(featuredPlaceStyle('dark').text,'#cbd6d3');
  }],

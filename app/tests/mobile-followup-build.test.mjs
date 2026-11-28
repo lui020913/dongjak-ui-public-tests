@@ -16,11 +16,8 @@ test('Approved charcoal map keeps opaque dark 3D buildings and smooth zoom fade'
  assert.equal(BUILDING_VISUAL_PALETTE.light.footprintOpacity,1);
 });
 
-test('Safety night consent extends the existing shortcut without replacing its capture lifecycle',async()=>{
+test('Retired night consent has no live toolbar capture handler',async()=>{
  const {readFileSync}=await import('node:fs');
  const src=readFileSync(new URL('../src/v831-swipe-feature-toolbar.js',import.meta.url),'utf8');
- assert.match(src,/scroller\.addEventListener\('click',requestNight,true\)/);
- assert.match(src,/doc\.addEventListener\('click',requestSafetyNight,true\)/);
- assert.match(src,/doc\.removeEventListener\('click',requestSafetyNight,true\)/);
- assert.match(src,/function requestSafetyNight\(e\)\{[\s\S]*?closest\?\.\('#night-visibility-toggle'\)[\s\S]*?requestNight\(e\);/);
+ assert.doesNotMatch(src,/requestNight|requestSafetyNight|buildNightConfirm/);
 });

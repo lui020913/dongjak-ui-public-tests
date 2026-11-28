@@ -71,12 +71,12 @@ test('Native 3D buildings fade on zoom without overriding light styling or unrel
   }finally{if(previous===undefined)delete globalThis.document;else globalThis.document=previous;}
 });
 
-test('Dark map land palette is muted with a mild district mask, without recoloring PRI or metro lines',()=>{
+test('Light map land palette and district mask preserve PRI and metro semantics',()=>{
   const src=read('src/ui-environment.js');
   const zoom=read('src/v862-map-theme-zoom-guard-core.js');
-  assert.deepEqual(districtExteriorThemePaint('dark'),{'fill-color':'#22272d','fill-opacity':.34});
-  assert.match(src,/set\('background-color','#22272d'\)/);
-  assert.match(src,/water\?'#273741':green\?'#303c34'/);
+  assert.deepEqual(districtExteriorThemePaint('light'),{'fill-color':'#d8e0e3','fill-opacity':.65});
+  assert.match(src,/set\('background-color',entry.landRole==='ground'\?'#e7e7e5'/);
+  assert.doesNotMatch(src,/water\?'#273741':green\?'#303c34'/);
   assert.match(zoom,/role!=='ground'&&role!=='vegetation'/);
   assert.match(zoom,/\(theme==='dark'\?'#2b3138':'#e7e7e5'\)/);
   assert.match(read('src/theme-contract.css'),/never paint route-line, warning, PRI or transport/);

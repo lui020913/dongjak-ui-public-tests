@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 const read=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
 
-test('one theme stylesheet with light-only normal UI and temporary night contrast',()=>{
+test('one theme stylesheet with light-only public UI',()=>{
   const html=read('index.html');
   const main=read('src/main.js');
   const env=read('src/ui-environment.js');
@@ -21,23 +21,23 @@ test('one theme stylesheet with light-only normal UI and temporary night contras
   assert.match(html,/var displayTheme='light'/);
   assert.doesNotMatch(html,/id="theme-toggle"/);
   assert.match(html,/\.map-startup-overlay\{display:none!important;\}/);
-  assert.match(env,/const setTemporaryTheme=next/);
-  assert.ok(env.includes('createThemeState(getInitialTheme())'));
+  assert.doesNotMatch(env,/setTemporaryTheme/);
+  assert.ok(env.includes("const theme='light'"));
   assert.doesNotMatch(env,/suppressPreferenceSave|showThemeTransition|themeFlash/);
-  assert.ok(env.includes('const changed=app.dataset.theme!==next'));
+  assert.ok(env.includes('app.dataset.theme=theme'));
   const clickBlock=env.split("toggle?.addEventListener('click',()=>{")[1]?.split('const setTemporaryTheme=')[0]||'';
   assert.doesNotMatch(clickBlock,/map\.(?:jumpTo|flyTo|setStyle|setCenter)|location\.reload|new maplibregl\.Map/);
   assert.equal(existsSync(new URL('../src/theme-contract-v9275.js',import.meta.url)),false);
 });
 
-test('night mode does not click theme button or override saved manual choice',()=>{
+test('retired night mode cannot be activated from the public theme controller',()=>{
   const night=read('src/night-visibility-map.js');
   const env=read('src/ui-environment.js');
   assert.doesNotMatch(night,/themeBeforeNight/);
   assert.match(night,/applyTemporaryTheme\('dark'\)/);
   assert.match(night,/applyTemporaryTheme\(null\)/);
   assert.doesNotMatch(night,/themeToggle\.click\(/);
-  assert.match(env,/themeState\.override\(next\)/);
+  assert.doesNotMatch(env,/themeState\.override|setTemporaryTheme/);
   assert.match(env,/return 'light';/);
   assert.doesNotMatch(env,/safeStorageSet\(THEME_KEY/);
 });
@@ -92,20 +92,20 @@ test('dark phone actions use readable selected text and route disabled colors',(
  assert.match(contract,/color:#17232c!important/);
 });
 
-test('MapLibre labels stay readable in dark mode, while PRI TIP is hidden and route footer hugs dock',()=>{
+test('MapLibre labels stay readable in light mode, while PRI TIP is hidden and route footer hugs dock',()=>{
   const env=read('src/ui-environment.js');
   const pri=read('src/pri-map.js');
   const contract=read('src/theme-contract.css');
   const isolated=new URL('../src/mobile-next.css',import.meta.url);
   const ui=readFileSync(isolated,'utf8');
   const html=read('index.html');
-  assert.match(env,/mapLabelTextPaint=Object\.freeze/);
-  assert.ok(env.includes("color:'#f1f4f6'"));
-  assert.ok(env.includes("halo:'rgba(18,25,32,0.97)'"));
+  assert.match(env,/mapLabelLightPaint=Object\.freeze/);
+  assert.ok(env.includes("color:'#26352f'"));
+  assert.ok(env.includes("halo:'rgba(255,255,255,0.97)'"));
   assert.ok(env.includes("map.on('styledata',scheduleMapLabelContrast)"));
   assert.ok(env.includes("supplementalLabelBaseline"));
-  assert.ok(env.includes("'text-halo-width':mapLabelTextPaint.width"));
-  assert.ok(env.includes("themeState.value==='dark'"));
+  assert.ok(env.includes("'text-halo-width':mapLabelLightPaint.width"));
+  assert.doesNotMatch(env,/themeState\.value/);
   assert.ok(pri.includes("doc.documentElement.dataset.djPriActive=id?'true':'false'"));
   assert.ok(ui.includes('html[data-dj-pri-active="true"]'));
   assert.ok(ui.includes("padding-bottom:var(--dj910-dock-bottom"));

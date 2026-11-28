@@ -14,7 +14,7 @@ test('one map/walking settings screen replaces duplicate layer toggles and fills
   assert.match(css,/#app #dj-map-settings \.dj-map-settings-card \{display:flex!important;flex-direction:column!important;width:100%!important;height:100%!important/);
 });
 
-test('light map labels have dark text with a pale halo, dark theme is reversed',()=>{
+test('light map labels have dark text with a pale halo',()=>{
   const light=featuredPlaceStyle('light');
   const dark=featuredPlaceStyle('dark');
   assert.equal(light.text,'#6d817b');
@@ -24,11 +24,11 @@ test('light map labels have dark text with a pale halo, dark theme is reversed',
   const theme=read('src/ui-environment.js');
   assert.ok(theme.includes("const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:LABEL_HALO_MAX_PX});"));
   assert.ok(theme.includes('semanticSymbolPattern'));
-  assert.ok(theme.includes('themeState.value===\'dark\''));
+  assert.doesNotMatch(theme,/themeState\.value/);
   assert.ok(theme.includes("'text-color':mapLabelLightPaint.color"));
   assert.ok(theme.includes("'text-halo-color':mapLabelLightPaint.halo"));
-  assert.ok(theme.includes("map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e9f0f3':mapLabelLightPaint.color)"));
-  assert.ok(theme.includes("map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(34,39,45,0.95)':mapLabelLightPaint.halo)"));
+  assert.ok(theme.includes("map.setPaintProperty(id,'text-color',mapLabelLightPaint.color)"));
+  assert.ok(theme.includes("map.setPaintProperty(id,'text-halo-color',mapLabelLightPaint.halo)"));
 });
 test('popup dim/blur is removed, but existing top-toolbar blur is preserved',()=>{
   const theme=read('src/theme-contract.css');

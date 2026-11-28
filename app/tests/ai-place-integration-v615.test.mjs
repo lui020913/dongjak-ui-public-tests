@@ -59,11 +59,11 @@ test('safety and crossing source POIs carry fact fields into shared AI details U
  assert.match(src('src/safety-layers.js'),/openPlaceDetails/);
  assert.match(src('vite.config.js'),/onRequestGet/);
 });
-test('fresh visitors start in the only ordinary light theme while night visibility remains temporary',()=>{
+test('fresh visitors start in the only public light theme',()=>{
  assert.match(src('index.html'),/var displayTheme='light';/);
  assert.match(src('src/ui-environment.js'),/export function getInitialTheme\(\)\{[\s\S]*?return 'light';/);
  assert.doesNotMatch(src('src/ui-environment.js'),/requestIosThemeRefresh\(/);
- assert.match(src('src/ui-environment.js'),/themeState\.override\(next\)/);
+ assert.doesNotMatch(src('src/ui-environment.js'),/themeState\.override|setTemporaryTheme/);
 });
 
 test('Empty primary model switches to a distinct Gemma 4 model with thinking disabled',async()=>{

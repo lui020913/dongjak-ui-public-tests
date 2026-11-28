@@ -4,16 +4,16 @@ import {readFileSync} from 'node:fs';
 import {phoneProfile,installPhoneRenderBudget} from '../src/adaptive-phone-map-budget.mjs';
 import {TEAM_FACTORS,validateBundle,parseImport,displayFeatures,segmentScore,summarize} from '../src/pri-data.mjs';
 
-test('normal iPhone app remains light while night visibility keeps isolated dark override',()=>{
+test('iPhone app remains light with no temporary dark override',()=>{
   const src=readFileSync(new URL('../src/ui-environment.js',import.meta.url),'utf8');
   assert.doesNotMatch(src,/requestIosThemeRefresh\(/);
-  assert.match(src,/themeState\.override\(next\)/);
+  assert.doesNotMatch(src,/themeState\.override\(next\)/);
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.match(html,/var displayTheme='light'/);
   assert.doesNotMatch(html,/id="theme-toggle"/);
   const tour=readFileSync(new URL('../src/v860-onboarding.js',import.meta.url),'utf8');
   assert.match(tour,/seenInMemory=isNativeThemeRefresh/);
-  assert.match(src,/const setTemporaryTheme=next/);
+  assert.doesNotMatch(src,/setTemporaryTheme/);
   const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
   assert.match(main,/mobile-ux-energy\.css/);
   const css=readFileSync(new URL('../src/mobile-ux-energy.css',import.meta.url),'utf8');
@@ -97,7 +97,7 @@ test('nonselected accident areas render gray, not as measured safe 100',()=>{
   assert.equal(summarize(merged,'accidents').observedM,0);
 });
 
-test('the coordinated mobile shell releases listeners, timers and stale confirmations on disposal',()=>{
+test('the coordinated mobile shell releases listeners and timers on disposal',()=>{
  const src=readFileSync(new URL('../src/v840-coordinated-ui.js',import.meta.url),'utf8');
  for(const signature of [
   "mapNavButton?.removeEventListener('click',selectedMap)",
@@ -107,7 +107,6 @@ test('the coordinated mobile shell releases listeners, timers and stale confirma
   "guideToggle.removeEventListener('click',onGuideToggle)",
   "win.clearTimeout(tipFadeTimer)",
   "win.clearTimeout(searchFocusTimer)",
-  "disposed=true;tipTransitionToken++",
-  "const finish=()=>{if(disposed)return;dialog.hidden=true"
+  "disposed=true;tipTransitionToken++"
  ])assert.ok(src.includes(signature),'missing teardown guard: '+signature);
 });

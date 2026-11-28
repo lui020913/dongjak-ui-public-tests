@@ -7,7 +7,7 @@ test('visible sheets protected',()=>{assert.deepEqual(offscreenEvictionIds(['a',
 test('viewport events coalesce',()=>{let cb,moving=true,calls=[];const w=coalesceViewportWork(f=>calls.push(f),{isMoving:()=>moving,setTimer:f=>(cb=f,1),clearTimer:()=>{cb=null;}});w.request();w.request(true);w.request();cb();assert.deepEqual(calls,[]);moving=false;cb();assert.deepEqual(calls,[true]);w.cancel();});
 test('resolution changes only at gesture end',()=>{const handlers=new Map(),ratios=[];let t=0;const map={on:(k,v)=>handlers.set(k,v),off:k=>handlers.delete(k),setPixelRatio:r=>ratios.push(r),getPixelRatio:()=>1.5};const app={dataset:{},classList:{toggle(){},remove(){}}};const b=installPhoneRenderBudget({map,app,normalRatio:3,now:()=>t});handlers.get('movestart')();for(let i=0;i<12;i++){t+=40;handlers.get('render')();}assert.deepEqual(ratios,[]);handlers.get('moveend')();assert.deepEqual(ratios,[2.5]);assert.equal(b.stats().profile,'economy');b.destroy();assert.equal(handlers.size,0);});
 
-test('primary style, elevation, night building occlusion and emergency status remain distinct',async()=>{
+test('primary style, elevation, light-only buildings and emergency status remain distinct',async()=>{
  const {readFileSync}=await import('node:fs');
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  assert.match(main,/style: 'https:\/\/tiles\.openfreemap\.org\/styles\/bright'/);
@@ -16,8 +16,8 @@ test('primary style, elevation, night building occlusion and emergency status re
  assert.match(main,/if\(mapStyleRecovered\)toast\(/);
  assert.doesNotMatch(main,/movementIsSlow|interactiveMoving|slowSamples/);
  assert.match(main,/nextBuildingPitchMode\(buildingPitchActive,pitch,PITCH_BUILDING_START,PITCH_BUILDING_EXIT\)/);
- assert.match(main,/nightOcclusionBuildingPaint\(/);
- assert.match(main,/attributeFilter:\['data-sangdo-night'\]/);
+ assert.doesNotMatch(main,/nightOcclusionBuildingPaint\(/);
+ assert.doesNotMatch(main,/attributeFilter:\['data-sangdo-night'\]/);
 });
 
 test('HUD scale docking never fights the active phone renderer for MapLibre DPR',async()=>{

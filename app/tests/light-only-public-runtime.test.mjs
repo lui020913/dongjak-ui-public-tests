@@ -14,6 +14,6 @@ test('standalone night scene is not mounted and public palette is light-only',()
 });
 test('lighting PRI factor remains registered with its original data',()=>{
  const manifest=JSON.parse(read('public/data/pri/manifest.json'));
- assert.ok(manifest.patches.includes('/data/pri/lighting_segments.json'));
+ assert.ok(manifest.bundle==='/data/pri/lighting_segments.json');
  assert.ok(JSON.parse(read('public/data/pri/lighting_segments.json')));
 });

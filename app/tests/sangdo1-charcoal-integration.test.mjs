@@ -11,7 +11,7 @@ test('native vulnerability PRI retains 2-factor gap; duplicate research overlay 
  assert.doesNotMatch(main,/installPolicyGapThreeSourceMap\(/);
  assert.ok(!pri.includes('installPolicyGapThreeSourceMap'));
  assert.ok(!manifest.patches.some(p=>p.includes('3source')));
- assert.ok(main.includes('installNightVisibility'));
+ assert.doesNotMatch(main,/installNightVisibility/);
  assert.ok(html.includes('theme-contract.js'));
  assert.ok(!html.includes('id="protection-zone-controls"'));
  assert.ok(!html.includes('walking-vulnerability-layer-group'));
