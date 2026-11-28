@@ -62,15 +62,25 @@ export function createPrimarySurfaceTransition({doc,win,app,replay,reduced}){
   // WebGL renderer can skip a wall-clock CSS transition entirely; advance
   // by at most 32ms per rendered frame, never skip the visible dissolve.
   // The prior live surface and destination stay mounted until completion.
-  let previousFrame=null,elapsed=0;
-  // Preserve the delivered-frame dissolve, but enforce a fixed lifetime.
-  // Repeated sparse frames must never extend an outgoing panel indefinitely.
-  const armWatchdog=()=>{timer=win.setTimeout(cleanup,4000);};
+  let previousFrame=null,elapsed=0,lastFrameGap=0;
+  // Keep the normal absolute watchdog. If the browser event loop itself was
+  // suspended past its deadline, allow exactly one short recovery window so
+  // the next delivered frames can finish the actual dissolve. Repeated sparse
+  // frames and background tabs never renew the watchdog.
+  const clock=()=>win.performance?.now?.();
+  const deadline=(clock()??0)+4000;
+  const stillCurrent=()=>app.dataset.tab===destination&&!app.inert&&!(app.dataset.communityFeedLocked==='true'&&previousTab==='participate')&&doc.getElementById('dj-community-editor-portal')?.hidden!==false;
+  const armWatchdog=()=>{timer=win.setTimeout(()=>{
+   const now=clock();
+   const stalled=Number.isFinite(now)&&now-deadline>=1000&&(previousFrame===null||now-previousFrame>=1000||lastFrameGap>=1000);
+   if(stalled&&!doc.hidden&&stillCurrent()&&elapsed<300){timer=win.setTimeout(cleanup,1500);return;}
+   cleanup();
+  },4000);};
   const paint=now=>{
    if(finished)return;
    // A programmatic navigation or a newly opened modal must win over a
    // stale presentation. Never resurrect an already dismissed destination.
-   if(app.dataset.tab!==destination||app.inert||(app.dataset.communityFeedLocked==='true'&&previousTab==='participate')||doc.getElementById('dj-community-editor-portal')?.hidden===false){cleanup();return;}
+   if(!stillCurrent()){cleanup();return;}
    // The logical destination has not changed. Reconcile stale hidden writes
    // from legacy observers without opening an explicitly dismissed modal.
    if(incoming&&incoming.hidden)incoming.hidden=false;
@@ -79,7 +89,7 @@ export function createPrimarySurfaceTransition({doc,win,app,replay,reduced}){
    if(previous&&previous.hidden)previous.hidden=false;
    if(previous)write(previous,{display:'flex',visibility:'visible','pointer-events':'none',...(directPair?{opacity:'1','z-index':'7000',animation:'none',transition:'none'}:{})});
    if(directPair)write(incoming,{display:'flex',visibility:'visible','z-index':'7001',animation:'none',transition:'none'});
-   if(previousFrame!==null)elapsed+=Math.min(32,Math.max(0,now-previousFrame));
+   if(previousFrame!==null){lastFrameGap=Math.max(0,now-previousFrame);elapsed+=Math.min(32,lastFrameGap);}
    previousFrame=now;
    const progress=Math.min(1,elapsed/300),alpha=progress*progress*(3-2*progress);
    write(fade,{opacity:String(revealIncoming?alpha:1-alpha)});
