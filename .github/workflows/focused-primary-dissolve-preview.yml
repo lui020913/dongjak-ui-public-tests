@@ -1,0 +1,46 @@
+name: Focused deployed primary dissolve diagnosis
+on:
+  push:
+    branches: [audit/focused-primary-dissolve-preview-20261128]
+permissions:
+  contents: read
+jobs:
+  primary-dissolve:
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    timeout-minutes: 25
+    env:
+      DONGJAK_TARGET_URL: https://34622161.dongjak-walk-safety-preview.pages.dev/
+      DONGJAK_EXPECTED_SOURCE_SHA: 507adc6ceecdd625f16e1046c4f83bde91d907f7
+      DONGJAK_EXPECTED_VERSION: 9.2.296
+      DONGJAK_FAST_MOBILE_QA: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Playwright
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: npm install --no-audit --no-fund --prefer-offline
+      - name: Verify exact deployed candidate before test
+        run: |
+          node --input-type=module -e 'const r=await fetch(process.env.DONGJAK_TARGET_URL+"release-source.json?focus="+process.env.GITHUB_RUN_ID);const d=await r.json();if(d.source_commit!==process.env.DONGJAK_EXPECTED_SOURCE_SHA||d.application_version!=="9.2.296"||d.release_status!=="CANDIDATE_PREVIEW_NOT_PRODUCTION"||String(d.build_run)!=="46154506643")throw Error("Preview identity mismatch");console.log("Exact candidate verified",d.source_commit)'
+      - name: Reproduce only failed primary tab case with unmodified assertions
+        run: npx playwright test --config=playwright.v911-remote.config.mjs --project=mobile390 --workers=1 --grep 'primary tabs reveal content' --repeat-each=3
+      - name: Verify exact deployed candidate after test
+        if: always()
+        run: |
+          node --input-type=module -e 'const r=await fetch(process.env.DONGJAK_TARGET_URL+"release-source.json?focus="+process.env.GITHUB_RUN_ID);const d=await r.json();if(d.source_commit!==process.env.DONGJAK_EXPECTED_SOURCE_SHA||d.application_version!=="9.2.296"||d.release_status!=="CANDIDATE_PREVIEW_NOT_PRODUCTION"||String(d.build_run)!=="46154506643")throw Error("Preview identity changed")'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: focused-primary-dissolve
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 3

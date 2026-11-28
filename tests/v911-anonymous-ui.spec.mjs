@@ -111,7 +111,7 @@ async function enter(page,id,key){
    expect(frames.every(f=>f.rootOpacity>=0&&f.rootOpacity<=1)).toBe(true);
    await expect(page.locator('[data-dj-tab-outgoing="true"]')).toHaveCount(0);
    expect(frames.every(f=>Math.abs(f.y-frames[0].y)<1)).toBe(true);
- }catch(error){console.log('PRIMARY_PAINT_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>({frames:window.__auditFrames.slice(-120),tab:document.getElementById('app').dataset.tab,owned:[...document.querySelectorAll('[data-dj-primary-transition]')].map(n=>({id:n.id,phase:n.dataset.djPrimaryTransition,style:n.getAttribute('style')}))}))));throw error;}finally{await page.evaluate(()=>window.__auditStop?.());}
+ }catch(error){console.log('PRIMARY_PAINT_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>({frameCount:window.__auditFrames.length,first:window.__auditFrames.slice(0,20),active:window.__auditFrames.filter(f=>f.owner).slice(0,60),gaps:window.__auditFrames.map((f,i,a)=>({i,gap:i?f.t-a[i-1].t:0,before:a[i-1],after:f})).sort((a,b)=>b.gap-a.gap).slice(0,6),frames:window.__auditFrames.slice(-12),tab:document.getElementById('app').dataset.tab,owned:[...document.querySelectorAll('[data-dj-primary-transition]')].map(n=>({id:n.id,phase:n.dataset.djPrimaryTransition,style:n.getAttribute('style')}))}))));throw error;}finally{await page.evaluate(()=>window.__auditStop?.());}
  await geometry(page,'#'+id);
 }
 test.afterEach(async({page},info)=>{
