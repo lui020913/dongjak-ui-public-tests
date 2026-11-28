@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.277",
+  "application_version": "9.2.278",
   "public_work_branch": "main",
-  "purpose": "Repair syntax corruption in civic landuse v276; preserve bus typography and opacity fixes. On mobile separate native building geometry from the shared vector source into an independent building-only PBF source with one tile request per stage and 65ms gap; keep original tile geometries, styles, IDs, district ownership and roads/POIs independent. Fall back to original source if separation fails. Direct visual protected production.",
-  "attempt": 519,
+  "purpose": "Fix undefined publicSuffix runtime reference left in civic parcel POI and official data callbacks after v277 syntax repair. Use existing civic name/category helpers and complete source geometry, preserve civic overlay paint across theme repaint. Add integration regression with nonempty POI and official events, not empty mocks. Direct visual protected production.",
+  "attempt": 520,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

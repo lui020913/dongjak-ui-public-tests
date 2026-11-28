@@ -55,3 +55,19 @@ test('civic overlay is independent of tile IDs, lies beneath roads and does not 
  assert.ok(sources.has(CIVIC_PARCEL_SOURCE));assert.equal(map.getLayer(CIVIC_PARCEL_LAYER).paint['fill-color'],'#d1d1cd');assert.ok(layers.findIndex(l=>l.id===CIVIC_PARCEL_LAYER)<layers.findIndex(l=>l.id==='roads'));
  handlers.idle();handlers.moveend();handlers.idle();assert.equal(writes.length,1);
 });
+
+test('realistic POI source and official facility event do not interrupt civic parcel repaint',()=>{
+ const rect=(x,y)=>({type:'Polygon',coordinates:[[[x,y],[x+.001,y],[x+.001,y+.001],[x,y+.001],[x,y]]]});
+ const hall={properties:{class:'commercial'},geometry:rect(126.94,37.504)};
+ const office={properties:{class:'commercial'},geometry:rect(126.945,37.501)};
+ const library={properties:{class:'commercial'},geometry:rect(126.946,37.502)};
+ const poi=[{properties:{class:'cafe',name:'일반 카페'},geometry:{type:'Point',coordinates:[126.943,37.503]}},{properties:{class:'office',name:'서울지방병무청'},geometry:{type:'Point',coordinates:[126.9455,37.5015]}}];
+ const layers=[{id:'landuse',type:'fill',source:'base','source-layer':'landuse'},{id:'roads',type:'line','source-layer':'transportation'}],sources=new Map(),handlers={},events={},writes=[];
+ const map={getStyle:()=>({layers}),getLayer:id=>layers.find(l=>l.id===id),addLayer:(l,before)=>{const i=layers.findIndex(x=>x.id===before);layers.splice(i<0?layers.length:i,0,l);},addSource:(id,v)=>sources.set(id,{setData:d=>writes.push(d)}),getSource:id=>sources.get(id),on:(n,f)=>handlers[n]=f,project:()=>({x:50,y:50}),getCanvas:()=>({clientWidth:100,clientHeight:100}),getZoom:()=>17,isMoving:()=>false,queryRenderedFeatures:()=>[],querySourceFeatures:(id,o)=>o.sourceLayer==='landuse'?[hall,office,library]:poi};
+ installSiteLanduse({map,app:{dataset:{},addEventListener:(n,f)=>events[n]=f}});
+ assert.deepEqual(writes.at(-1).features.map(f=>f.properties.name).sort(),['동작구청','서울지방병무청'].sort());
+ events['dongjak:official-facilities-ready']({detail:[{category:'도서관',name:'동작작은도서관',lng:126.9465,lat:37.5025}]});
+ assert.equal(writes.at(-1).features.length,3);
+ assert.equal(map.getLayer(CIVIC_PARCEL_LAYER).paint['fill-color'],'#d1d1cd');
+ handlers.moveend();handlers.idle();assert.equal(writes.length,2);
+});

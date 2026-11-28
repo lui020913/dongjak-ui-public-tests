@@ -76,7 +76,7 @@ export function civicParcelCandidate(features,place){
  const hasPoint=Number.isFinite(place.lng)&&Number.isFinite(place.lat);
  const candidates=(features||[]).filter(f=>{
   const p=f.properties||{},name=featureName(p),area=polygonArea(f.geometry);
-  const typeMatch=['class','subclass','landuse','amenity','office','type'].some(k=>genericClasses.has(p[k])||civicClasses.has(p[k]));
+  const typeMatch=['class','subclass','landuse','amenity','office','type'].some(k=>genericClasses.has(p[k])||civicClasses.has(p[k]))||(Boolean(name)&&matchingCivicName(name,place)&&isNamedCivic(name));
   return (hasPoint?containsAnchor(f.geometry,place):f.id!=null)&&typeMatch&&(!name||matchingCivicName(name,place))&&area>=200&&area<=60000;
  }).sort((a,b)=>Number(matchingCivicName(featureName(b.properties||{}),place))-Number(matchingCivicName(featureName(a.properties||{}),place))||polygonArea(a.geometry)-polygonArea(b.geometry));
  return candidates[0]||null;
@@ -100,7 +100,7 @@ function installCivicSiteIdentity(map,app,ids,sources,before){
   const poi=[];
   for(const src of sources)try{poi.push(...(map.querySourceFeatures?.(src.source,{sourceLayer:'poi'})||[]));}catch{}
   const anchors=[...IMPORTANT_PLACES.filter(p=>p.type==='공공기관'),...official.values(),...poi.flatMap(f=>{
-   const p=f.properties||{},name=featureName(p);if(f.geometry?.type!=='Point'||!publicSuffix.test(norm(name))||!['class','subclass','amenity','office'].some(k=>civicClasses.has(p[k])))return [];
+   const p=f.properties||{},name=featureName(p);if(f.geometry?.type!=='Point'||!name||(!isNamedCivic(name)&&!['class','subclass','amenity','office'].some(k=>civicClasses.has(p[k]))))return [];
    const [lng,lat]=f.geometry.coordinates;return [{name,lng,lat}];
   })];
   const anchorKeys=new Set();
@@ -112,20 +112,24 @@ function installCivicSiteIdentity(map,app,ids,sources,before){
     let f=civicParcelCandidate(map.queryRenderedFeatures(point,{layers:ids.filter(id=>map.getLayer(id))}),place);
     // Some landuse tiles do not expose a rendered feature ID or are covered
     // by a building; use their unchanged source geometry as a fallback.
-    if(!f){if(raw===null){raw=[];for(const src of sources)try{raw.push(...(map.querySourceFeatures?.(src.source,{sourceLayer:src['source-layer']})||[]));}catch{}}f=civicParcelCandidate(raw,place);}
+    if(raw===null){raw=[];for(const src of sources)try{raw.push(...(map.querySourceFeatures?.(src.source,{sourceLayer:src['source-layer']})||[]));}catch{}}
+    const full=civicParcelCandidate(raw,place);
+    if(!f||(full&&polygonArea(full.geometry)>polygonArea(f.geometry)))f=full;
     const next=civicParcelFeature(f,place);if(!next)continue;
     const old=cached.get(key);if(!old||polygonArea(next.geometry)>polygonArea(old.geometry)*1.05)cached.set(key,next);
    }catch(error){console.debug('[공공시설 부지]',error?.message);}
   }
   const features=[...new Map([...cached.values()].map(f=>[JSON.stringify(f.geometry),f])).values()];
   const signature=JSON.stringify(features);if(signature!==last){map.getSource(CIVIC_PARCEL_SOURCE)?.setData({type:'FeatureCollection',features});last=signature;}
+  // Protect the overlay from the generic theme repaint. No recurring writes.
+  if(map.getPaintProperty&&map.setPaintProperty&&map.getPaintProperty(CIVIC_PARCEL_LAYER,'fill-color')!==SITE_LANDUSE_PALETTE.light.public)map.setPaintProperty(CIVIC_PARCEL_LAYER,'fill-color',SITE_LANDUSE_PALETTE.light.public);
  }
  map.on('moveend',()=>{dirty=true;});
  map.on('sourcedata',e=>{if(e.sourceId!==CIVIC_PARCEL_SOURCE&&sources.some(s=>s.source===e.sourceId)&&e.isSourceLoaded)dirty=true;});
  map.on('idle',refresh);
  map.on('style.load',()=>{last='';dirty=true;});
  app?.addEventListener?.('dongjak:official-facilities-ready',event=>{
-  for(const p of event.detail||[])if(['공공기관','공공시설','경찰서','소방서','도서관','우체국','주민시설','복지시설'].includes(p.category)&&publicSuffix.test(norm(p.name)))official.set(norm(p.name),p);
+  for(const p of event.detail||[])if(civicCategories.has(p.category)&&p.name)official.set(norm(p.name),p);
   dirty=true;if(!map.isMoving?.())refresh();
  });
  refresh();
