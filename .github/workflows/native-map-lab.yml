@@ -1,0 +1,57 @@
+name: Isolated Android native map renderer lab APK
+on:
+  push:
+    branches: [experiment/maplibre-native-renderer-20261129]
+permissions:
+  contents: read
+jobs:
+  build-lab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14.3'
+      - name: Install matching WebGL comparison assets
+        run: |
+          npm --prefix app ci --no-audit --no-fund
+          node -e 'if(require("./app/node_modules/maplibre-gl/package.json").version!=="6.16.0")process.exit(1)'
+          # GL JS 6.x is ESM; bundle the lab against the pinned app package,
+          # instead of assuming the removed legacy UMD distribution exists.
+          mkdir -p app/.native-lab-web
+          python - <<'PY'
+          from pathlib import Path
+          src=Path('experiments/native-map-lab/app/src/main/assets/web.html').read_text()
+          src=src.replace('<link rel="stylesheet" href="./maplibre-gl.css">','')
+          old='<script src="./maplibre-gl.js"></script><script>'
+          assert src.count(old)==1
+          src=src.replace(old,'<script type="module">\nimport * as maplibregl from "maplibre-gl";\nimport "maplibre-gl/dist/maplibre-gl.css";\n')
+          Path('app/.native-lab-web/index.html').write_text(src)
+          Path('app/.native-lab-web/vite.config.mjs').write_text('export default {base:"./",build:{target:"es2022"}};')
+          PY
+          (cd app && npx vite build .native-lab-web --config .native-lab-web/vite.config.mjs --outDir "$GITHUB_WORKSPACE/experiments/native-map-lab/app/src/main/assets" --emptyOutDir)
+          test -s experiments/native-map-lab/app/src/main/assets/index.html
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
+      - name: Build isolated debug APK
+        run: |
+          test -f "$ANDROID_HOME/platforms/android-36/android.jar"
+          test -x "$ANDROID_HOME/build-tools/36.0.0/aapt2"
+          gradle -p experiments/native-map-lab/ :app:assembleDebug --no-daemon --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-native-map-lab-debug
+          path: experiments/native-map-lab/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14

@@ -1,6 +1,6 @@
 {
-  "appId": "kr.dongjak.safetyapp",
-  "appName": "동작하는 안전지도",
+  "appId": "kr.dongjak.nativepreview",
+  "appName": "동작 안전지도 Native 실험",
   "webDir": "build/android",
   "plugins": {
     "CapacitorHttp": {

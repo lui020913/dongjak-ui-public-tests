@@ -1,0 +1,47 @@
+name: Integrated native map compatibility preview APK
+on:
+  push:
+    branches: [experiment/native-integrated-preview-20261129]
+permissions:
+  contents: read
+jobs:
+  build-integrated-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14.3'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
+      - name: Build existing safety map UI and full data
+        working-directory: app
+        run: |
+          npm ci --no-audit --no-fund
+          node --test tests/native-integrated-preview.test.mjs
+          npm run build:android
+          npx --no-install cap sync android
+      - name: Compile isolated Android app
+        working-directory: app/android
+        run: |
+          gradle :app:assembleDebug --no-daemon --stacktrace
+          apk=app/build/outputs/apk/debug/app-debug.apk
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$apk" | grep -F "package: name='kr.dongjak.nativepreview'"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "$apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-native-integrated-preview-debug
+          path: app/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
