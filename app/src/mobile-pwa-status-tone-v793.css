@@ -10,11 +10,6 @@
     --dj-pwa-native-edge:#eef3ef;
     background-color:var(--dj-pwa-land-tone)!important;
   }
-  html.dj-ios-home-pwa[data-theme="dark"] {
-    --dj-pwa-land-tone:#22282e;
-    --dj-pwa-land-tone-rgb:34,40,46;
-    --dj-pwa-native-edge:#22282e;
-  }
   html.dj-ios-home-pwa body,
   html.dj-ios-home-pwa body #app {
     background-color:var(--dj-pwa-land-tone)!important;
@@ -52,15 +47,10 @@
     filter:none!important;-webkit-filter:none!important;
     backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
   }
-  html.dj-ios-home-pwa body #app:not([data-theme="dark"]) .topbar>.map-quick-search .map-quick-search-form {
+  html.dj-ios-home-pwa body #app .topbar>.map-quick-search .map-quick-search-form {
     background:#ffffff!important;
     background-image:none!important;
     border-color:#d7e6de!important;
-  }
-  html.dj-ios-home-pwa body #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form {
-    background:#2c343d!important;
-    background-image:none!important;
-    border-color:#4d5b65!important;
   }
   html.dj-ios-home-pwa body #app .topbar #map-quick-search-query {
     opacity:1!important;
@@ -103,7 +93,6 @@ html.dj-ios-home-pwa body #dj-ai-search-modal[open]::backdrop{
   background-repeat:no-repeat!important;
   background-position:top center!important;
 }
-html.dj-ios-home-pwa[data-theme="dark"] body #dj-ai-search-modal[open]::backdrop{--dj-pwa-status-color:#191b1f}
 }
 @media(prefers-reduced-motion:reduce){html.dj-ios-home-pwa body #app > #dj-ios-pwa-status-bridge{transition:none!important}}
 
@@ -123,7 +112,7 @@ html.dj-ios-home-pwa body > #dj-ios-pwa-status-sample{
 /* 2026-11-21: Native iOS status fill and map-edge gradient share exactly
    the same base color. The transition stays behind the opaque search form. */
 @media(max-width:699px){
- html.dj-ios-home-pwa:not([data-theme="dark"]){
+ html.dj-ios-home-pwa{
    --dj-pwa-land-tone:#edf3ef;
    --dj-pwa-native-edge:#edf3ef;
  }

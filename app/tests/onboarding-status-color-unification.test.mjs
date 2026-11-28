@@ -58,17 +58,20 @@ test('onboarding phone canvas is painted inline-important before first visible f
     assert.deepEqual(node.properties.get('background-color'),{value:'#edf3ef',priority:'important'});
   }
   app.dataset.theme='dark';
-  assert.equal(syncOnboardingStatusSurface({app,doc,win,overlay}),ONBOARDING_STATUS_TONE.dark);
+  doc.documentElement.dataset.theme='dark';
+  assert.equal(syncOnboardingStatusSurface({app,doc,win,overlay}),ONBOARDING_STATUS_TONE.light);
+  assert.equal(Object.hasOwn(ONBOARDING_STATUS_TONE,'dark'),false);
   for(const node of [overlay,...nodes]){
-    assert.deepEqual(node.properties.get('background'),{value:'#22282e',priority:'important'});
+    assert.deepEqual(node.properties.get('background'),{value:'#edf3ef',priority:'important'});
   }
   assert.equal(syncOnboardingStatusSurface({app,doc,win:{matchMedia:()=>({matches:false})},overlay}),null);
   for(const node of [overlay,...nodes])assert.equal(node.properties.has('background'),false);
 });
 
-test('onboarding sets background before hidden=false and tracks theme changes',()=>{
+test('onboarding sets background before hidden=false and tracks phone viewport changes',()=>{
   const source=read('v860-onboarding.js');
-  assert.ok(source.includes('surfaceObserver.observe(app,'));
-  assert.ok(source.includes("attributeFilter:['data-theme']"));
+  assert.ok(source.includes("surfaceMedia?.addEventListener?.('change',syncSurface)"));
+  assert.ok(source.includes("surfaceMedia?.removeEventListener?.('change',syncSurface)"));
+  assert.doesNotMatch(source,/surfaceObserver\.observe|dongjak:manual-theme-change/);
   assert.match(source,/syncSurface\(\);\s*overlay\.hidden=false/);
 });

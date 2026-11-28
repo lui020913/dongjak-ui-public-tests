@@ -28,4 +28,6 @@ test('public artwork, iOS status bar and land palette do not react to old dark s
  assert.doesNotMatch(status,/sangdoNight|nightActive/);
  assert.doesNotMatch(guard,/theme==='dark'/);
  assert.doesNotMatch(read('index.html'),/dongjak-dark-|v862-night-analysis-session\.js/);
+ assert.doesNotMatch(read('src/mobile-pwa-status-tone-v793.css'),/data-theme=|#22282e|#191b1f/);
+ assert.doesNotMatch(read('src/onboarding-status-surface.js'),/appTheme|rootTheme|#22282e/);
 });

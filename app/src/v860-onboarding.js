@@ -187,12 +187,10 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
   // Explicitly paint the five shell surfaces, not the illustration.
   // An inline important declaration wins over older layered CSS that was
   // still painting the onboarding header/content/footer white on iPhone.
-  const syncSurface=()=>syncOnboardingStatusSurface({app,doc,win,overlay});
-  const surfaceObserver=new MutationObserver(syncSurface);
-  surfaceObserver.observe(app,{attributes:true,attributeFilter:['data-theme']});
-  if(doc.documentElement)surfaceObserver.observe(doc.documentElement,{attributes:true,attributeFilter:['data-theme']});
-  win.addEventListener?.('dongjak:manual-theme-change',syncSurface);
-  cleanups.push(()=>{surfaceObserver.disconnect();win.removeEventListener?.('dongjak:manual-theme-change',syncSurface);});
+  const syncSurface=()=>syncOnboardingStatusSurface({win,overlay});
+  const surfaceMedia=win.matchMedia?.('(max-width: 699px)');
+  surfaceMedia?.addEventListener?.('change',syncSurface);
+  cleanups.push(()=>surfaceMedia?.removeEventListener?.('change',syncSurface));
 
 
   ONBOARDING_SLIDES.forEach((slide,i)=>{

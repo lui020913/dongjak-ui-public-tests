@@ -3,7 +3,7 @@
  * obsolete white --dj800-surface on the iOS full-screen tour after deploy.
  * Use inline important declarations for the PAGE, never for image or buttons.
  */
-export const ONBOARDING_STATUS_TONE=Object.freeze({light:'#edf3ef',dark:'#22282e'});
+export const ONBOARDING_STATUS_TONE=Object.freeze({light:'#edf3ef'});
 export const ONBOARDING_SURFACE_SELECTORS=Object.freeze([
   ':scope > .dj860-card',
   ':scope > .dj860-card > .dj860-head',
@@ -11,7 +11,7 @@ export const ONBOARDING_SURFACE_SELECTORS=Object.freeze([
   ':scope > .dj860-card > .dj860-footer'
 ]);
 
-export function syncOnboardingStatusSurface({app,doc,win,overlay}={}){
+export function syncOnboardingStatusSurface({win,overlay}={}){
   if(!overlay)return null;
   const phone=win?.matchMedia?.('(max-width: 699px)')?.matches ?? true;
   const targets=[overlay,...ONBOARDING_SURFACE_SELECTORS.map(selector=>overlay.querySelector?.(selector))].filter(Boolean);
@@ -23,10 +23,7 @@ export function syncOnboardingStatusSurface({app,doc,win,overlay}={}){
     }
     return null;
   }
-  const appTheme=app?.dataset?.theme;
-  const rootTheme=doc?.documentElement?.dataset?.theme;
-  const theme=appTheme==='light'||appTheme==='dark'?appTheme:rootTheme==='dark'?'dark':'light';
-  const color=ONBOARDING_STATUS_TONE[theme];
+  const color=ONBOARDING_STATUS_TONE.light;
   for(const target of targets){
     target.style?.setProperty?.('background',color,'important');
     target.style?.setProperty?.('background-color',color,'important');
