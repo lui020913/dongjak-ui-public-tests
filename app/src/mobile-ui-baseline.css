@@ -64,14 +64,14 @@
     visibility:hidden!important;pointer-events:none!important;
   }
   /* The top search must be opaque and sharp, including the upper border on iOS. */
-  #app .topbar,#app[data-theme="dark"] .topbar{
+  #app .topbar{
     background:#ffffff!important;background-image:none!important;
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
     -webkit-mask-image:none!important;mask-image:none!important;
     opacity:1!important;filter:none!important;
     border-bottom:1px solid #dce8e3!important;
   }
-  #app[data-theme="dark"] .topbar{background:#192d31!important;border-bottom-color:#435e5f!important;}
+  
   #app .topbar>.map-quick-search,
   #app .topbar>.map-quick-search .map-quick-search-form{
     background-image:none!important;
@@ -82,9 +82,7 @@
     background:#fff!important;border:1px solid #bdcfc8!important;
     border-radius:12px!important;box-shadow:none!important;
   }
-  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
-    background:#223a40!important;border-color:#557574!important;
-  }
+  
   #app .topbar .map-quick-search-submit{
     display:flex!important;align-items:center!important;justify-content:center!important;
     border-radius:9px!important;background:#118874!important;
@@ -109,12 +107,8 @@
 #app #transport-sheet[data-kind="subway"] .metro-nine-service-heading.express{
   background:#fff4df;color:#8c5810;border-color:#f0dfbd;
 }
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-nine-service-heading{
-  background:#29404b;color:#d3e8ed;border-color:#3d5661;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-nine-service-heading.express{
-  background:#483b29;color:#f4d399;border-color:#766041;
-}
+
+
 /* Make the secondary '계획 시간표' banner disappear; source is kept on cards. */
 #app #transport-sheet[data-kind="subway"] .metro-scheduled-banner{display:none!important;}
 /* Unified map-action visual rhythm. Text labels are controlled by JS. */
@@ -159,7 +153,7 @@
     box-shadow:none!important;line-height:1!important;
   }
   #app .topbar .theme-toggle::after{font-size:18px!important;line-height:1!important;}
-  #app[data-theme="dark"] .topbar .theme-toggle{border-color:#4a6968!important;}
+  
 }
 @media(max-width:699px){
   #app #map-tools-toggle,#app #map-safety-toggle,#app #night-visibility-quick-off{
@@ -270,13 +264,8 @@
   border-color:var(--transport-line-color,#13836b)!important;
   box-shadow:0 2px 7px color-mix(in srgb,var(--transport-line-color,#13836b) 24%,transparent)!important;
 }
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-mode-tabs{
-  background:color-mix(in srgb,var(--transport-line-color,#13836b) 20%,#1b3035)!important;
-  border-color:color-mix(in srgb,var(--transport-line-color,#13836b) 45%,#405b58)!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-mode-tabs button[aria-pressed="true"]{
-  color:#fff!important;
-}
+
+
 
 /* Keep the two origin/destination actions centered instead of right aligned. */
 #app #transport-sheet .transport-selection-box{
@@ -304,10 +293,8 @@
 }
 #app #transport-sheet .metro-last-train-passed strong{font-size:16px;font-weight:850;color:#126b54;}
 #app #transport-sheet .metro-last-train-passed span{font-size:12px;line-height:1.55;color:#52766a;}
-#app[data-theme="dark"] #transport-sheet .metro-last-train-passed{
-  background:#203d37;border-color:#4a7667;color:#e5f6ee;
-}
-#app[data-theme="dark"] #transport-sheet .metro-last-train-passed :is(strong,span){color:#e5f6ee;}
+
+
 
 /* Facility popups are draggable without a map-pin pointer; route actions are available in every facility detail. */
 #app .dj-place-detail-popup .maplibregl-popup-tip{display:none!important;}
@@ -325,12 +312,8 @@
   background:#13836b;border-color:#13836b;color:#fff;
 }
 #app .dj-place-route-button:focus-visible{outline:3px solid #d8b45b;outline-offset:2px;}
-#app[data-theme="dark"] .dj-place-route-button{
-  background:#243f3c;border-color:#4b7568;color:#dff5eb;
-}
-#app[data-theme="dark"] .dj-place-route-button.dj-place-route-end{
-  background:#14765f;border-color:#48a88b;color:#fff;
-}
+
+
 
 /* Overview card: add breathing room between title, status, boundary selector and note. */
 #app #overview-sheet .sheet-top{gap:15px!important;margin-bottom:13px!important;}
@@ -377,10 +360,7 @@
     box-shadow:0 8px 26px rgba(23,44,34,.12)!important;
   }
 }
-#app[data-theme="dark"] #bottom-nav,
-#app[data-theme="dark"] .page-panel{
-  background:#1b3034!important;border-color:#3d5a57!important;
-}
+
 
 /* Give the map-options close action room on the right edge and between controls. */
 @media(max-width:1079px){
@@ -395,8 +375,8 @@
 /* Compass uses Dongjak green; pressing it while already north-up confirms with a brief shake. */
 #app #map-compass .compass-direction svg{fill:#13836b!important;stroke:#165b4c!important;}
 #app #map-compass .compass-n{color:#13836b!important;}
-#app[data-theme="dark"] #map-compass .compass-direction svg{fill:#52b99a!important;stroke:#d4f2e6!important;}
-#app[data-theme="dark"] #map-compass .compass-n{color:#70d1b0!important;}
+
+
 #app #map-compass.north-up-feedback .compass-direction{animation:dj-compass-north-feedback .46s ease-in-out;}
 @keyframes dj-compass-north-feedback{
   0%,100%{transform:rotate(0)}
@@ -538,10 +518,8 @@
 }
 #app #map-tools-toggle{white-space:nowrap!important;}
 #app.map-controls-open #map-tools-toggle{color:inherit!important;}
-#app[data-theme="dark"] .map-options-desktop-close{
-  background:#263f3d!important;border-color:#49665d!important;color:#e3f4eb!important;
-}
-#app[data-theme="dark"] .map-options-desktop-close:hover{background:#31544a!important;}
+
+
 
 @media(prefers-reduced-motion:reduce){
   #app .map-options-desktop-close{transition:none!important;}
@@ -836,20 +814,9 @@
   color:#fff!important;
   font-size:clamp(10px,1.2vw,12px)!important;
 }
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-neighbor-row {
-  background:color-mix(in srgb,var(--dj-metro-route-color,#425766) 20%,#1b3035)!important;
-  border-color:color-mix(in srgb,var(--dj-metro-route-color,#425766) 58%,#405b58)!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-neighbor-row :is(.metro-rail-previous,.metro-rail-next) {
-  background:#20383d!important;
-  border-color:#4b6660!important;
-  color:#e6f4ed!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-neighbor-row .metro-rail-current {
-  background:var(--dj-metro-route-color,#425766)!important;
-  border-color:var(--dj-metro-route-color,#425766)!important;
-  color:#fff!important;
-}
+
+
+
 
 /* END LEGACY v704-user-request-fixes.css */
 
@@ -878,10 +845,7 @@
 #app .page-dismiss:focus-visible,#app #news-close-to-map:focus-visible{
   outline:3px solid #e8bd47!important;outline-offset:2px!important;
 }
-#app[data-theme="dark"] .page-dismiss,
-#app[data-theme="dark"] #news-close-to-map{
-  background:#284640!important;color:#e0f4e8!important;border-color:#507a68!important;
-}
+
 /* Existing X close controls remain usable at narrow sizes. */
 #app :is(#transport-close,#close-detail,#cancel-add,#ped-tools-close,#map-safety-close,
   #map-options-mobile-close,#map-options-desktop-close,#version-history-close){
@@ -906,17 +870,17 @@
   #app .topbar>.map-quick-search .map-quick-search-submit{
     min-height:32px!important;padding:6px 9px!important;
   }
-  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{background:#213b3f!important;}
+  
 }
 @media(max-width:1079px){
-  #app .topbar,#app[data-theme="dark"] .topbar{
+  #app .topbar{
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
     -webkit-mask-image:none!important;mask-image:none!important;
     filter:none!important;opacity:1!important;
   }
   /* The vignette stays at the bottom/side, not under the search field. */
   #app #map::after{background:linear-gradient(0deg,rgba(244,248,246,.35),transparent 9%)!important;}
-  #app[data-theme="dark"] #map::after{background:linear-gradient(0deg,rgba(26,38,35,.40),transparent 9%)!important;}
+  
   /* Flush lower navigation to all map/page surfaces without transparent rounded gaps. */
   #app #bottom-nav{border-radius:0!important;border-top:0!important;
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;}
@@ -968,9 +932,7 @@
   color:#165f4c!important;font:800 13px/1.3 system-ui,sans-serif!important;cursor:pointer!important;
 }
 #app .v705-history-top-link:hover{background:#d5efdf!important;}
-#app[data-theme="dark"] .v705-history-top-link{
-  background:#2a4843!important;border-color:#527c6a!important;color:#daf8e9!important;
-}
+
 #app .bus-service-status{font-weight:750;line-height:1.45;}
 @media(max-width:430px){
   #app .v705-history-top-links{gap:6px!important;}
@@ -984,7 +946,7 @@
   border:1px solid #c9dfd3!important;border-radius:10px!important;background:#ecf6f0!important;
   color:#235644!important;font:600 23px/1 system-ui,sans-serif!important;cursor:pointer!important;
 }
-#app[data-theme="dark"] #overview-sheet-close{background:#284640!important;color:#e0f4e8!important;border-color:#507a68!important;}
+
 
 /* END LEGACY v705-integrated-ui.css */
 
@@ -995,8 +957,8 @@
 #app #nav-live-card .nav-live-options button[aria-pressed="true"]{background:#e0f4e9;border-color:#62a98f;color:#0c7155;}
 #app #nav-live-card #nav-mode-tag{font-size:12px;letter-spacing:-.01em;}
 #app #nav-live-card #nav-warning{min-height:18px;}
-#app[data-theme="dark"] #nav-live-card .nav-live-options button{background:#263b3a;color:#d3e7de;border-color:#4a6962;}
-#app[data-theme="dark"] #nav-live-card .nav-live-options button[aria-pressed="true"]{background:#135342;color:#f0fff8;border-color:#2b9376;}
+
+
 @media(max-width:390px){#app #nav-live-card .nav-live-options button{font-size:11px;min-height:35px;padding:8px 5px;}}
 
 /* More room for voice/direction buttons so map controls stay accessible. */
@@ -1125,33 +1087,14 @@
   display:block;padding:6px 2px;font-size:11px;color:#667a70;line-height:1.4;
 }
 /* Night contrast */
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-mode-tabs{
-  background:#28453f!important;border-color:#436c5d!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-mode-tabs button{
-  color:#b1d2c5!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-mode-tabs button[aria-pressed="true"]{
-  background:#1f886d!important;color:#fff!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-info-line-card,
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-direction-heading,
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-direction-heading.down{
-  background:#233a39!important;color:#daf1e6!important;border-color:#405e56!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-neighbor-row .metro-rail-previous,
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-neighbor-row .metro-rail-next{
-  background:#2e4645!important;color:#d3e9df!important;border-color:#4a6961!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group,
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .transport-arrival-row{
-  background:#1f3538!important;border-color:#415b59!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .metro-arrival-next{
-  background:#28433e!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-countdown,
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-next .metro-arrival-countdown{color:#8ae4c1!important;}
+
+
+
+
+
+
+
+
 
 /* Version timeline and actual provenance side by side on roomy screens. */
 #app .version-history-dialog{width:min(1040px,calc(100vw - 34px))!important;max-height:min(94dvh,950px)!important;}
@@ -1180,13 +1123,12 @@
 #app .v707-release-items li{margin:0 0 7px;}
 #app .v707-history-sources .v7-history-sources-title{margin:3px 0 6px;}
 #app .v707-history-sources .v7-history-source-group{margin:10px 0;}
-#app[data-theme="dark"] .v707-history-timeline,
-#app[data-theme="dark"] .v707-history-sources{background:#203738;border-color:#426055;}
-#app[data-theme="dark"] .v707-release{border-color:#426055;}
-#app[data-theme="dark"] .v707-release-head h4{color:#a4e8c8;}
-#app[data-theme="dark"] .v707-release-items{color:#d9ebe2;}
-#app[data-theme="dark"] .v707-history-switch-button{background:#284842;color:#d7f5e4;border-color:#426e5e;}
-#app[data-theme="dark"] .v707-history-switch-button[aria-pressed="true"]{background:#186b57;color:white;}
+
+
+
+
+
+
 
 /* Universal option/night/safety button geometry; preserve established stacking order. */
 #app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
@@ -1220,7 +1162,7 @@
   /* Compact two-line chrome: brand & theme in header, search below, controls below search.
      The device status bar / home-indicator safe area is preserved, never cropped. */
   #app{--dj-header-h:calc(46px + env(safe-area-inset-top))!important;--dj-mobile-nav-h:64px!important;}
-  #app .topbar,#app[data-theme="dark"] .topbar{
+  #app .topbar{
     grid-template-areas:'brand tools'!important;
     grid-template-columns:minmax(0,1fr) 38px!important;
     height:var(--dj-header-h)!important;min-height:var(--dj-header-h)!important;
@@ -1272,7 +1214,7 @@
     overflow:visible!important;
   }
   #app #bottom-nav .nav-tab{min-height:51px!important;height:51px!important;border-radius:15px!important;}
-  #app[data-theme="dark"] #bottom-nav{background:rgba(27,48,51,.96)!important;border-color:#44605a!important;}
+  
   #app .sheet.overview-sheet{
     position:absolute!important;
     left:12px!important;right:12px!important;bottom:calc(80px + env(safe-area-inset-bottom))!important;
@@ -1333,8 +1275,7 @@
 /* v7.0.8: One floating search/identity control; every page retains search access.
    This file follows v7.0.7 in main.js so old flush-edge rules cannot undo it. */
 #app .topbar,
-#app[data-tab]:not([data-tab="map"]) .topbar,
-#app[data-theme="dark"] .topbar{
+#app[data-tab]:not([data-tab="map"]) .topbar{
   box-sizing:border-box!important;position:absolute!important;
   top:calc(10px + env(safe-area-inset-top))!important;left:14px!important;right:14px!important;bottom:auto!important;
   width:calc(100% - 28px)!important;max-width:none!important;
@@ -1353,8 +1294,7 @@
   margin:0!important;padding:0!important;transform:none!important;pointer-events:auto!important;
   z-index:2!important;
 }
-#app .topbar>.map-quick-search .map-quick-search-form,
-#app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
+#app .topbar>.map-quick-search .map-quick-search-form{
   display:flex!important;align-items:center!important;box-sizing:border-box!important;
   gap:9px!important;width:100%!important;height:56px!important;min-height:56px!important;
   padding:6px 7px 6px 9px!important;border:1px solid #cfe3d9!important;
@@ -1362,16 +1302,14 @@
   box-shadow:0 7px 24px rgba(12,50,37,.14)!important;overflow:hidden!important;
   -webkit-backdrop-filter:blur(12px)!important;backdrop-filter:blur(12px)!important;
 }
-#app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
-  background:rgba(29,51,52,.96)!important;border-color:#507267!important;
-}
+
 #app .topbar .map-quick-search-form>.brand{
   flex:0 0 auto!important;display:flex!important;align-items:center!important;
   gap:8px!important;margin:0!important;padding:0 11px 0 0!important;min-width:0!important;
   width:auto!important;max-width:50%!important;border-right:1px solid #dceae3!important;
   pointer-events:none!important;white-space:nowrap!important;
 }
-#app[data-theme="dark"] .topbar .map-quick-search-form>.brand{border-right-color:#4a6a62!important;}
+
 #app .topbar .map-quick-search-form>.brand .eyebrow{display:none!important;}
 #app .topbar .map-quick-search-form>.brand .brand-name{
   font-size:14px!important;font-weight:850!important;line-height:1.25!important;
@@ -1446,7 +1384,7 @@
 
 /* The mobile shell floats ON the map. Nothing is clipped against an edge. */
 @media(max-width:1079px){
-  #app .topbar,#app[data-tab]:not([data-tab="map"]) .topbar,#app[data-theme="dark"] .topbar{
+  #app .topbar,#app[data-tab]:not([data-tab="map"]) .topbar{
     top:calc(8px + env(safe-area-inset-top))!important;
     left:12px!important;right:12px!important;width:calc(100% - 24px)!important;
     height:52px!important;min-height:52px!important;gap:8px!important;
@@ -1456,8 +1394,7 @@
     width:auto!important;max-width:none!important;flex:1 1 auto!important;
     margin:0!important;transform:none!important;
   }
-  #app .topbar>.map-quick-search .map-quick-search-form,
-  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
+  #app .topbar>.map-quick-search .map-quick-search-form{
     height:52px!important;min-height:52px!important;padding:5px 6px!important;
     border-radius:22px!important;
   }
@@ -1667,19 +1604,8 @@
   position:absolute!important;
 }
 /* Unified color in the active dark theme, including on-map night summary. */
-#app[data-theme="dark"] :is(
-  #map-quick-search-close,#version-history-close,#map-safety-close,
-  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
-  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
-  #transport-close,#overview-sheet-close,#admin-dong-close,
-  #close-detail,#cancel-add,#route-search-close,
-  #community-compose-close,#pza-road-close,.page-dismiss){
-  background:#284741!important;border:1px solid #50786d!important;
-  color:#e4f4ec!important;box-shadow:none!important;
-}
-#app[data-theme="dark"] #night-visibility-float .night-visibility-float-actions #night-visibility-float-stop{
-  background:#284741!important;border-color:#668c7c!important;color:#effff5!important;
-}
+
+
 #app #night-visibility-float-stop{
   flex:none!important;position:relative!important;
   width:34px!important;height:34px!important;min-width:34px!important;
@@ -1776,8 +1702,7 @@
 /* BEGIN LEGACY v710-exclusive-panels.css */
 /* v7.0.10: one open sheet at a time, consistent card geometry and one X icon.
    Deliberately imported after v7.0.9 rules to remove older contradictory overrides. */
-#app[data-sangdo-night="on"] #overview-sheet,
-#app[data-sangdo-night="on"] #overview-sheet:not([hidden]),
+
 #app #overview-sheet[hidden] {display:none!important;visibility:hidden!important;pointer-events:none!important;}
 
 /* Draw ONE cross, and stop the v7.0.9 double-pseudo cross from stacking.
@@ -1878,7 +1803,7 @@
   }
 }
 @media(max-width:1079px){
-  #app .topbar,#app[data-theme="dark"] .topbar,
+  #app .topbar,
   #app[data-tab]:not([data-tab="map"]) .topbar{
     top:calc(3px + env(safe-area-inset-top))!important;
   }
@@ -2153,11 +2078,8 @@
   }
   #app #dj-desktop-safety-rail #night-visibility-quick-off[hidden]{display:none!important;}
   #app #dj-desktop-safety-rail #map-tools-toggle{font-size:11.5px!important;}
-  #app[data-theme="dark"] #bottom-nav{
-    background:rgba(22,45,45,.97)!important;
-    border-color:rgba(105,151,138,.38)!important;
-  }
-  #app[data-theme="dark"] #dj-desktop-safety-rail::before{color:#acccc0;}
+  
+  
 }
 
 /* Tablet/mobile: a compact map-first composition with no extra permanent sheet. */
@@ -2207,7 +2129,7 @@
     right:12px!important;
   }
   #app .maplibregl-ctrl-attrib{font-size:9px!important;max-width:50vw!important;}
-  #app[data-theme="dark"] #bottom-nav{background:rgba(21,42,42,.97)!important;}
+  
 }
 @media(max-width:699px){
   #app #bottom-nav{height:67px!important;min-height:67px!important;max-height:67px!important;}
@@ -2237,23 +2159,16 @@
 #app[data-tab="map"] #night-visibility-quick-off[aria-pressed="true"] .dj-night-action-text,
 #app #dj-desktop-safety-rail #night-visibility-quick-off[aria-pressed="true"] .dj-night-action-text{color:inherit!important;}
 #app[data-tab="map"] #map-safety-toggle{background:#fbfdfc!important;color:#23483d!important;}
-#app[data-theme="dark"] #dj-desktop-safety-rail :is(#map-tools-toggle,#night-visibility-quick-off,#map-safety-toggle),
-#app[data-theme="dark"][data-tab="map"] :is(#map-tools-toggle,#night-visibility-quick-off,#map-safety-toggle){
-  background:#1c3436!important;color:#e1f2e9!important;
-  border-color:#45665e!important;box-shadow:0 3px 12px rgba(0,0,0,.13)!important;
-}
-#app[data-theme="dark"][data-tab="map"] #night-visibility-quick-off[aria-pressed="true"]:not([hidden]){
-  background:#24453f!important;color:#e1f2e9!important;border-color:#85b9a6!important;
-}
+
+
 /* A fully opaque search field: old blur overrides caused an unintended halo. */
-#app .topbar>.map-quick-search .map-quick-search-form,
-#app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
+#app .topbar>.map-quick-search .map-quick-search-form{
   -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
   -webkit-mask-image:none!important;mask-image:none!important;
   filter:none!important;
 }
 #app .topbar>.map-quick-search .map-quick-search-form{background:#fff!important;}
-#app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{background:#21383d!important;}
+
 #app[data-search-open="true"] .topbar>.map-quick-search{z-index:30!important;}
 #app[data-search-open="true"] .topbar>.header-tools{z-index:1!important;}
 #app .topbar>.map-quick-search .map-quick-search-dropdown{
@@ -2308,8 +2223,7 @@
    viewport. CSS cannot draw in that region. Keep only our own chrome crisp. */
 @media (max-width:1079px){
   #app .topbar,
-  #app[data-tab]:not([data-tab="map"]) .topbar,
-  #app[data-theme="dark"] .topbar{
+  #app[data-tab]:not([data-tab="map"]) .topbar{
     background:transparent!important;background-image:none!important;
     border:0!important;box-shadow:none!important;
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
@@ -2326,23 +2240,21 @@
     background:#fff!important;box-shadow:0 3px 10px rgba(15,41,33,.10)!important;
     border-color:#d1e3da!important;
   }
-  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
-    background:#20383d!important;box-shadow:0 3px 10px rgba(0,0,0,.2)!important;
-  }
+  
   #app #bottom-nav{
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
     background:#fff!important;box-shadow:0 4px 15px rgba(15,41,33,.12)!important;
   }
-  #app[data-theme="dark"] #bottom-nav{background:#1d3336!important;}
+  
 }
 /* A solid light button with white text was making '야간 시야' invisible.
    The label and symbol must share the same text contrast in every state. */
 #app #night-visibility-quick-off .dj-night-action-text{color:#23483d!important;}
-#app[data-theme="dark"] #night-visibility-quick-off .dj-night-action-text{color:#e1f2e9!important;}
+
 #app #dj-desktop-safety-rail #night-visibility-quick-off .dj-night-action-text{
   color:#23483d!important;font-size:11.5px!important;white-space:nowrap!important;
 }
-#app[data-theme="dark"] #dj-desktop-safety-rail #night-visibility-quick-off .dj-night-action-text{color:#e1f2e9!important;}
+
 /* Standalone home-screen apps: lower the floating nav by using only part of the
    bottom safe area. Its clickable icons still sit above the home gesture area.
    Do not lower Safari's ordinary browser UI under its bottom toolbar. */
@@ -2393,7 +2305,7 @@
 /* Selection remains available even when the zero-records overview is hidden. */
 #app .dj-admin-map-shortcut{display:block;width:100%;box-sizing:border-box;border:1px solid #bdd7cd;border-radius:12px;background:#f6fbf8;color:#126955;font-weight:800;font-size:12px;min-height:42px;margin:9px 0 5px;padding:9px 12px;text-align:center;}
 #app .dj-admin-map-shortcut:hover{background:#e8f5ef;}
-#app[data-theme='dark'] .dj-admin-map-shortcut{background:#1e3b38;color:#e4f7ef;border-color:#476e62;}
+
 /* Compact MapLibre attribution remains accessible via its info control.
    It must never sit underneath the floating navigation or the overview card. */
 #app .maplibregl-ctrl-bottom-right{right:12px!important;bottom:18px!important;z-index:805!important;}
@@ -2419,11 +2331,7 @@
   background:#e4f2eb!important;border-color:#4a9b81!important;
   color:#174e3e!important;box-shadow:inset 0 0 0 1px #4a9b81!important;
 }
-#app[data-theme="dark"][data-tab="map"] #night-visibility-quick-off[aria-pressed="true"]:not([hidden]),
-#app[data-theme="dark"] #dj-desktop-safety-rail #night-visibility-quick-off[aria-pressed="true"]:not([hidden]){
-  background:#29483f!important;border-color:#78b29b!important;
-  color:#edfdf4!important;box-shadow:inset 0 0 0 1px #568b75!important;
-}
+
 #app[data-tab="map"] #night-visibility-quick-off[aria-pressed="true"] .dj-night-action-text,
 #app #dj-desktop-safety-rail #night-visibility-quick-off[aria-pressed="true"] .dj-night-action-text{
   color:inherit!important;opacity:1!important;
@@ -2455,19 +2363,17 @@
 }
 #app .dj-map-attribution-details summary{font-weight:800;cursor:pointer;}
 #app .dj-map-attribution-details a{color:#15755f;text-decoration:underline;}
-#app[data-theme="dark"] .dj-map-attribution-details a{color:#9addc7;}
+
 
 @media(max-width:1079px){
   /* No screen-space milky overlay above the mobile map. iOS-controlled status
      bar space may still exist outside the web viewport. */
   #app #map.dj-far-haze-active::before,
-  #app #map::before,#app #map::after,
-  #app[data-theme="dark"] #map::before,#app[data-theme="dark"] #map::after{
+  #app #map::before,#app #map::after{
     content:none!important;display:none!important;opacity:0!important;
     filter:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;
   }
-  #app .topbar,
-  #app[data-theme="dark"] .topbar{
+  #app .topbar{
     background:transparent!important;background-image:none!important;
     filter:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;
     -webkit-mask-image:none!important;mask-image:none!important;
@@ -2479,7 +2385,7 @@
     -webkit-mask-image:none!important;mask-image:none!important;
   }
   #app .topbar>.map-quick-search .map-quick-search-form{background:#fff!important;}
-  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{background:#20383d!important;}
+  
 
   /* The requested, taller half-moon theme action. Keep original JS handler. */
   #app .topbar>.header-tools{
@@ -2536,9 +2442,7 @@
     background:#21403c!important;color:#f0fff9!important;
     padding:12px 14px!important;
   }
-  #app[data-theme="dark"][data-tab="map"] #night-visibility-float .night-visibility-float-head{
-    background:#243f40!important;color:#edf7f1!important;
-  }
+  
   #app[data-tab="map"] #night-visibility-float .night-visibility-float-actions button{
     background:#315950!important;color:#f0fff9!important;
     border-color:#5d917f!important;
@@ -2674,11 +2578,10 @@
     -webkit-mask-image:none!important;mask-image:none!important;
   }
   #app #map::before,#app #map::after,
-  #app #map.dj-far-haze-active::before,
-  #app[data-theme="dark"] #map::before,#app[data-theme="dark"] #map::after{
+  #app #map.dj-far-haze-active::before{
     content:none!important;display:none!important;opacity:0!important;
   }
-  #app .topbar,#app[data-theme="dark"] .topbar{
+  #app .topbar{
     background:transparent!important;background-image:none!important;
     border:0!important;box-shadow:none!important;
   }
@@ -2689,9 +2592,7 @@
   #app .topbar>.map-quick-search .map-quick-search-form{
     background:#fff!important;box-shadow:0 2px 6px rgba(21,49,42,.07)!important;
   }
-  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
-    background:#20383d!important;box-shadow:0 2px 6px rgba(0,0,0,.14)!important;
-  }
+  
   /* One geometry for mobile floating tabs and all opened panels. */
   #app{
     --dj-v720-nav-bottom:calc(8px + env(safe-area-inset-bottom,0px));
@@ -2799,7 +2700,6 @@
   /* No blur/compositing on the mobile header or its children. Crucially the
      search bar is solid, not glass; native iOS statusbar is outside this CSS. */
   #app .topbar,
-  #app[data-theme="dark"] .topbar,
   #app .topbar>.map-quick-search,
   #app .topbar>.map-quick-search .map-quick-search-form,
   #app .topbar>.map-quick-search .map-quick-search-form>*{
@@ -2812,8 +2712,7 @@
     text-shadow:none!important;
     opacity:1!important;
   }
-  #app .topbar,
-  #app[data-theme="dark"] .topbar{
+  #app .topbar{
     background:transparent!important;
     background-image:none!important;
     box-shadow:none!important;
@@ -2827,10 +2726,7 @@
     transform:none!important;
     will-change:auto!important;
   }
-  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
-    background:#20373b!important;
-    box-shadow:0 1px 5px rgba(0,0,0,.18)!important;
-  }
+  
   #app .topbar>.map-quick-search .map-quick-search-form input,
   #app .topbar>.map-quick-search .map-quick-search-form input::placeholder{
     text-shadow:none!important;
@@ -2838,9 +2734,7 @@
   }
   /* Nothing is rendered over top map pixels as a CSS haze or scrim. */
   #app #map::before,#app #map::after,
-  #app #map.dj-far-haze-active::before,
-  #app[data-theme="dark"] #map::before,
-  #app[data-theme="dark"] #map::after{
+  #app #map.dj-far-haze-active::before{
     content:none!important;display:none!important;
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
   }
@@ -2948,7 +2842,7 @@
     pointer-events:none!important;
     z-index:1300!important;
   }
-  #app[data-theme="dark"]::before{background:#182c30!important;}
+  
 }
 
 @media (max-width:699px){
@@ -3020,7 +2914,7 @@
   /* Keep the actual map/search scene visible. Prior versions painted a light
      opaque strip behind the header, visually continuing the native status bar. */
   #app::before{display:none!important;content:none!important;}
-  #app .topbar,#app[data-theme="dark"] .topbar{
+  #app .topbar{
     background:transparent!important;background-image:none!important;
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
     border:0!important;box-shadow:none!important;
@@ -3156,11 +3050,7 @@
   background:#fff!important;border:1px solid #dae7df!important;color:#244d40!important;
   border-radius:14px!important;box-shadow:0 2px 8px rgba(23,43,38,.07)!important;
 }
-#app[data-theme="dark"] .topbar .weather-widget,
-#app[data-theme="dark"] .topbar #version-history-trigger,
-#app[data-theme="dark"] .topbar #theme-toggle{
-  background:#21383b!important;border-color:#49625d!important;color:#e9f5ef!important;
-}
+
 #app #toast{font-size:14px!important;line-height:1.5!important;}
 
 @media(min-width:1080px){
@@ -3257,7 +3147,7 @@
     max-height:min(53dvh,540px)!important;min-height:0!important;height:auto!important;
     overflow-y:auto!important;padding-bottom:16px!important;
   }
-  #app .topbar,#app[data-theme="dark"] .topbar{
+  #app .topbar{
     background:transparent!important;background-image:none!important;
     border:0!important;box-shadow:none!important;
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
@@ -3311,7 +3201,7 @@
   /* iOS Home Screen has system-owned status bar pixels. Avoid adding another
      white layer over the map; the map occupies all web-controlled pixels. */
   html,body,#app{background-color:#d9e5df!important;}
-  #app[data-theme="dark"]{background-color:#182b2c!important;}
+  
   #app .topbar .header-tools>.theme-toggle{
     width:48px!important;min-width:48px!important;height:48px!important;min-height:48px!important;
   }
@@ -3384,19 +3274,10 @@
   /* Respect the hidden attribute, even with the universal toolbar rule. */
   #app[data-tab] #night-visibility-quick-off[hidden]{display:none!important;}
 
-  #app[data-theme="dark"][data-tab] :is(#map-tools-toggle,#night-visibility-quick-off,#map-safety-toggle){
-    background:#20383b!important;color:#e6f5ed!important;
-    border-color:#4d6c61!important;box-shadow:0 3px 12px rgba(0,0,0,.22)!important;
-  }
-  #app[data-theme="dark"][data-tab] :is(#map-tools-toggle,#map-safety-toggle)[aria-expanded="true"]{
-    background:#285347!important;color:#f1fff7!important;border-color:#70aa96!important;
-  }
-  #app[data-theme="dark"][data-tab] #night-visibility-quick-off[aria-pressed="true"]:not([hidden]){
-    background:#193c36!important;color:#fff!important;border-color:#82b6a2!important;
-  }
-  #app[data-theme="dark"][data-tab] #night-visibility-quick-off[aria-pressed="true"] .dj-night-action-text{
-    color:#fff!important;
-  }
+  
+  
+  
+  
   /* Consistent safety-state mark on every tab; avoid old exaggerated glow. */
   #app[data-tab] #map-safety-toggle::after{
     box-shadow:none!important;opacity:.85!important;
@@ -3421,11 +3302,10 @@
       --dj-ios-edge-clearance:16px;
       --dj-header-h:calc(64px + env(safe-area-inset-top,0px) + var(--dj-ios-edge-clearance))!important;
     }
-    #app::before,
-    #app[data-theme="dark"]::before{
+    #app::before{
       content:none!important;display:none!important;
     }
-    #app .topbar,#app[data-theme="dark"] .topbar{
+    #app .topbar{
       height:var(--dj-header-h)!important;min-height:var(--dj-header-h)!important;
       padding-top:calc(9px + env(safe-area-inset-top,0px) + var(--dj-ios-edge-clearance))!important;
       background:transparent!important;background-image:none!important;
@@ -3489,7 +3369,7 @@
 
 /* No map-panel backplate should be drawn over the floating search pill. */
 @media(max-width:1079px){
-  #app .topbar,#app[data-theme="dark"] .topbar,
+  #app .topbar,
   #app .topbar::before,#app .topbar::after,
   #app .map-quick-search::before,#app .map-quick-search::after{
     background:transparent!important;background-image:none!important;
@@ -3504,7 +3384,7 @@
     top:var(--dj-header-h,80px)!important;bottom:0!important;
   }
   /* Reposition all header subcontrols with the same numbers on EVERY tab. */
-  #app[data-tab] .topbar,#app[data-theme="dark"][data-tab] .topbar{top:0!important;}
+  #app[data-tab] .topbar{top:0!important;}
   #app .topbar .header-tools>.theme-toggle{
     display:flex!important;align-items:center!important;justify-content:center!important;
     place-items:center!important;line-height:1!important;
@@ -3530,8 +3410,7 @@
     border-radius:24px!important;
   }
   /* Do not force the night overlay/theme to recolor the search pill's exterior. */
-  #app[data-sangdo-night="on"] .topbar::before,
-  #app[data-sangdo-night="on"] .topbar::after{display:none!important;content:none!important;}
+  
 }
 
 @media(max-width:699px){
@@ -3539,7 +3418,7 @@
      button coordinates on tab switches. Restore one safe-area-aware frame.
      No programmatic page scrolling: it would interfere with map gestures. */
   #app{--dj-ios-edge-clearance:0px!important;}
-  #app[data-tab] .topbar,#app[data-theme="dark"][data-tab] .topbar{
+  #app[data-tab] .topbar{
     top:0!important;left:0!important;right:0!important;
     height:calc(64px + env(safe-area-inset-top,0px))!important;
     min-height:calc(64px + env(safe-area-inset-top,0px))!important;
@@ -3556,8 +3435,8 @@
   #app .topbar .header-tools>.theme-toggle{align-self:center!important;}
   /* iOS owns the status bar material; keep our own surfaces optically clear. */
   html,body,#app{background-color:transparent!important;}
-  #app[data-theme="dark"]{background-color:transparent!important;}
-  #app::before,#app[data-theme="dark"]::before{display:none!important;content:none!important;}
+  
+  #app::before{display:none!important;content:none!important;}
   #app #map{inset:0!important;}
   #app[data-tab="map"].map-controls-open #map-advanced-controls{
     max-height:min(53dvh,calc(100dvh - var(--dj-header-h) - var(--dj-v724-panel-bottom,85px) - 15px))!important;
@@ -3610,7 +3489,7 @@
   #app #road-width-legend p,#app #road-width-legend small{
     color:var(--dj-ui-subtext,#69817b)!important;font-size:12px!important;line-height:1.65!important;
   }
-  #app[data-theme="dark"] #road-width-legend{background:#1c3135!important;color:#e7f6ef!important;border-color:#46645e!important;}
+  
 }
 @media(prefers-reduced-motion:reduce){
   #app .topbar,#app .map-actions{transition:none!important;}

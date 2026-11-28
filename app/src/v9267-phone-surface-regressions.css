@@ -116,14 +116,8 @@
     width:22px!important;height:22px!important;
     stroke-width:1.9!important;
   }
-  html body #app#app#app#app#app[data-theme="dark"] #mine-panel :is(.dj834-profile-card,.dj834-settings-group) {
-    background:var(--dj-theme-surface,#23262c)!important;
-    border-color:var(--dj-theme-line,#424952)!important;
-    color:var(--dj-theme-ink,#f2f4f7)!important;
-  }
-  html body #app#app#app#app#app[data-theme="dark"] #mine-panel :is(.dj834-setting-icon,.dj834-user-avatar) {
-    background:var(--dj-theme-selected,#39434e)!important;color:#bdcbd9!important;
-  }
+  
+  
 
   /* The original fullscreen shim reserved ~100 px on the outer panel even
      though the floating dock already has its own safe-area clearance. That
@@ -154,21 +148,17 @@
 
   /* Night mode does not change the pill geometry, only its active state.
      Native original click/consent handlers remain the event owners. */
-  html body #app#app#app#app#app[data-sangdo-night="on"] #dj-v794-night,
+  
   html body #app#app#app#app#app #dj-v794-night[aria-pressed="true"] {
     background:var(--mf-accent-soft,#deefe8)!important;
     border-color:var(--mf-accent,#0d8670)!important;
     color:var(--mf-accent,#0d8670)!important;
   }
-  html body #app#app#app#app#app[data-sangdo-night="on"] #dj-v794-toolbar {
-    opacity:1!important;visibility:visible!important;
-  }
+  
   html body #app#app#app#app#app #dj-v794-night {
     transition:background-color .18s ease,border-color .18s ease,color .18s ease!important;
   }
-  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-night[aria-pressed="true"] {
-    background:#353b44!important;border-color:#8797a9!important;color:#f2f4f7!important;
-  }
+  
 }
 }
 /* The consent dialog must not inherit bottom-sheet translation or lateral

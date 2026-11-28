@@ -19,7 +19,7 @@ test('standalone-status safe-area cover is opaque, noninteractive, theme aware a
   assert.match(css,/#app::before/);
   assert.match(css,/height:calc\(max\(38px,env\(safe-area-inset-top,0px\)\) \+ 12px\)/);
   assert.match(css,/background:#f7faf8!important/);
-  assert.match(css,/#app\[data-theme="dark"\]::before/);
+  assert.doesNotMatch(css,/#app\[data-theme="dark"\]::before/);
   assert.match(css,/pointer-events:none!important/);
   assert.doesNotMatch(legacyCssSegment('v722-bottom-panels-ios-header.css'),/backdrop-filter:blur\(/);
 });

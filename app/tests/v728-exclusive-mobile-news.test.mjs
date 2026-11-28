@@ -31,7 +31,7 @@ test('mobile no fake page scroll and restores 16px offset, stable across five ta
   assert.match(css,/--dj-ios-edge-clearance:0px!important/);
   assert.match(css,/#app\[data-tab\] \.topbar/);
   assert.doesNotMatch(css,/scrollTo\(|scrollBy\(/);
-  assert.match(css,/#app::before,#app\[data-theme="dark"\]::before/);
+  assert.match(css,/#app::before/);
 });
 test('search placeholder cycles without PC-only condition and preserves typing',()=>{
   const s=read('src/map-quick-search.js');

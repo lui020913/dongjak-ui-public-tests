@@ -9,14 +9,7 @@
     --dj-mobile-panel-border:#d8e8df;
     --dj-mobile-panel-accent:#197d64;
   }
-  html body #app[data-theme="dark"] {
-    --dj-mobile-panel-bg:#1c3035;
-    --dj-mobile-panel-text:#eaf5ef;
-    --dj-mobile-panel-muted:#b5cbc2;
-    --dj-mobile-panel-field:#294348;
-    --dj-mobile-panel-border:#46615e;
-    --dj-mobile-panel-accent:#8fe2c4;
-  }
+  
   html body #app #route-panel.dj-mobile-panel-split.page-panel:not([hidden]),
   html body #app #participation-panel.dj-mobile-panel-split.page-panel:not([hidden]),
   html body #app #news-panel.dj-mobile-panel-split.page-panel:not([hidden]),
@@ -173,19 +166,14 @@
   html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="light"] body #app {
     background-color:#e5ece8!important;
   }
-  html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="dark"],
-  html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="dark"] body,
-  html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="dark"] body #app {
-    background-color:#192d32!important;
-  }
+  
 }
 
 /* v7.10.2: mobile iOS/Android theme switch while map finishes rendering. */
 @media (max-width:699px) {
   html[data-theme="light"], html[data-theme="light"] body,
   html[data-theme="light"] body #app {color-scheme:light;}
-  html[data-theme="dark"], html[data-theme="dark"] body,
-  html[data-theme="dark"] body #app {color-scheme:dark;}
+  
   html body #app#app#app .dj-theme-switch-flash:not([hidden]) {
     position:fixed!important;inset:0!important;z-index:3900!important;
     display:flex!important;align-items:center!important;justify-content:center!important;

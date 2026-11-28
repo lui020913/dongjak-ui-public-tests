@@ -3,13 +3,13 @@
 .map-safety-backdrop[hidden]{display:none!important}
 @media (max-width:1079px){
   /* Mobile Safari/PWA top header: an opaque surface, never a frosted layer. */
-  #app .topbar,#app[data-theme="dark"] .topbar{
+  #app .topbar{
     background:#fcfefd!important;
     filter:none!important;
     -webkit-backdrop-filter:none!important;
     backdrop-filter:none!important;
   }
-  #app[data-theme="dark"] .topbar{background:#192d31!important}
+  
   /* v6.0.11: the full-height (58%) near-white haze was washing out the
      entire upper phone map, directly below the search bar. Mobile gets a
      short, gently graded distant horizon starting BELOW the opaque header;
@@ -28,11 +28,7 @@
     -webkit-mask-image:none!important;
     mask-image:none!important;
   }
-  #app[data-theme="dark"] #map.dj-far-haze-active::before{
-    background:linear-gradient(to bottom,
-      rgba(22,37,39,.26) 0%,rgba(22,37,39,.07) 63%,
-      rgba(22,37,39,0) 100%)!important;
-  }
+  
   /* Hide every floating map control which could overlap the safety drawer.
      Use display, not just visibility, so inert controls cannot take focus. */
   #app[data-tab="map"].map-safety-open :is(
@@ -102,5 +98,5 @@
 }
 @media (max-width:1079px) and (display-mode:standalone){
   html,body{background:#fcfefd!important}
-  html[data-theme="dark"],html[data-theme="dark"] body{background:#192d31!important}
+  
 }

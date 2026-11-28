@@ -38,7 +38,7 @@ test('decorative canopy layers never install or fetch, vegetation fills remain',
 test('logo is not replaced and left header has no stray white tab or shadow',()=>{
   assert.match(read('index.html'),/img class="dj-app-artwork" src="\/icons\/dongjak-light-192\.png"/);
   const s=read('src/layout-core.css');
-  assert.match(s,/#app \.topbar,#app\[data-theme='dark'\] \.topbar\{[\s\S]*?box-shadow:none!important/);
+  assert.match(s,/#app \.topbar\{[\s\S]*?box-shadow:none!important/);
   assert.match(s,/#app \.topbar::before,#app \.topbar::after\{content:none!important/);
   assert.match(s,/#app:not\(\.map-controls-open\) \.map-advanced-controls/);
 });
