@@ -28,7 +28,7 @@ import {fixedRailCollection,fixedMetroStations} from './fixed-rail-lines.js';
 import {metroMarkerGeojson, makeMetroDisplayScope, METRO_MARKER_MIN_ZOOM, METRO_PLATFORM_SPLIT_ZOOM as METRO_PLATFORM_SPLIT_ZOOM_DATA} from './metro-marker-geodata.js';
 import {installResponsiveMetroVisibility} from './metro-overview-visibility.js';
 import {railGeojson,stationsGeojson} from './fixed-rail-data.js';
-import {fetchOfficialRailPaths,mergeOfficialRail,withMappedLine4} from './rail-official-shapes.js';
+import {fetchOfficialRailPaths,withMappedLine4} from './rail-official-shapes.js';
 import {setDisplayedRailPaths} from './features/liveTransit/geometry.js';
 import {isMedianBusStopName,medianStopBaseName,busStopDisplayName} from './median-bus-stops.js';
 import {busCoverageSamples} from './bus-coverage-grid.js';
@@ -665,6 +665,7 @@ export function metroLineMarkerPlacements(name,lines,lng,lat,renderedRailPaths=n
       source:reference?.properties?.source||'station-center',screenOffset:[0,0]};
   });
   for(const p of placements){
+    if(p.source==='station-center')continue; // citywide stations must not snap to a distant local schematic
     const nearby=placements.filter(other=>metroPointDistanceMeters([p.lng,p.lat],[other.lng,other.lat])<PLATFORM_MERGE_DISTANCE_METERS);
     if(nearby.length>1){
       const sameLineGroup=[...nearby].sort((a,b)=>String(a.line).localeCompare(String(b.line),'ko'));
@@ -1854,10 +1855,11 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   let lastMetroGeoSignature='';
   function renderMetroMarkers(items){
     lastMetroMarkerItems=items;
+    const activeRailPaths=cityScope()&&cityRail.getCollection()?indexRenderedMetroRail(cityRail.getCollection()):renderedRailPaths;
     const geo=metroMarkerGeojson(items,{
       canonicalStations:officialMetro.filter(p=>inActiveCell(p)&&placeInDisplayScope(p)),
       normalizeName:normalizeStationQueryName,normalizeLine:normalizeLineName,
-      placements:(name,lines,lng,lat)=>metroLineMarkerPlacements(name,lines,lng,lat,cityScope()&&cityRail.getCollection()?indexRenderedMetroRail(cityRail.getCollection()):renderedRailPaths),
+      placements:(name,lines,lng,lat)=>metroLineMarkerPlacements(name,lines,lng,lat,activeRailPaths),
       colors:SUBWAY_LINE_COLORS,
       radiusPredicate:(lng,lat)=>cityScope()?inSeoul(lng,lat):withinMetroRadius(lng,lat),
       isDistrict:scopeContains,

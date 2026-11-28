@@ -1642,7 +1642,7 @@ map.on('click',(event)=>{
     // Collapse white panels only when tapping non-interactive map space.
     // Station, entrance and field-report markers must keep their click handlers.
     const clickable=['transport-subway-station','transport-subway-names','transport-bus-stop',
-      'transport-bus-names','poi_transit','registered-points-click',
+      'transport-bus-names','poi_transit','registered-points-click','dj-saved-place-stars-icon',
       'dj-metro-summary-icon','dj-metro-summary-name','dj-metro-detail-icon','dj-metro-detail-name','metro-access-exits',
       'metro-access-exit-labels','metro-access-elevator','metro-access-escalator','metro-access-stairs',
       'pza-child-fill','pza-senior-fill','pza-child-point','pza-senior-point',

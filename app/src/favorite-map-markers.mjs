@@ -28,6 +28,7 @@ export function installFavoriteMapMarkers({map,getPlaces,onOpen,canOpen=()=>true
  function click(e){if(!canOpen())return;const p=lookup.get(e.features?.[0]?.properties?.key);if(!p)return;e.originalEvent?.stopPropagation?.();onOpen(p);}
  map.on('click',FAVORITE_LAYER,click);
  map.on('load',refresh);map.on('style.load',refresh);
+ map.on('idle',()=>{const layers=map.getStyle?.()?.layers;if(layers?.length&&map.getLayer(FAVORITE_LAYER)&&layers.at(-1)?.id!==FAVORITE_LAYER)map.moveLayer?.(FAVORITE_LAYER);});
  events?.addEventListener('dongjak:saved-places-change',refresh);
  events?.addEventListener('storage',refresh);
  refresh();
