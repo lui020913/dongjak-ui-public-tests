@@ -1,0 +1,77 @@
+name: Compare baseline and candidate phone failures
+on:
+  push:
+    branches: ['audit/phone-baseline-regression-20261128']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [baseline, candidate]
+        scenario: ['same mobile-first app shell is used at every viewport', 'night consent has one centered fade and tab handoff keeps the dock fixed', 'merged route search returns to AI keyboard without a background seam']
+    env:
+      VITE_SUPABASE_URL: https://placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Reconstruct the prior released app while retaining the same browser tests
+        if: matrix.variant == 'baseline'
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/baseline"
+          mkdir "$root"
+          git -c safe.directory="$GITHUB_WORKSPACE" archive f0c431c00125226d682860586c20272f0069b0a9 | tar -x -C "$root"
+          cd "$root/app"
+          git init -q
+          git add -f .
+          cp "$root/frontend/production/mobile-first-overhaul.css" src/mobile-first-overhaul.css
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          const file='src/main.js',anchor="import './mobile-ui/current.css';";
+          const original=readFileSync(file,'utf8');
+          if(original.split(anchor).length!==2)throw Error('CSS anchor drift');
+          writeFileSync(file,original.replace(anchor,anchor+String.fromCharCode(10)+"import './mobile-first-overhaul.css';"));
+          NODE
+          node "$root/scripts/apply-mobile-only-gate.mjs" "$PWD"
+          node "$root/scripts/apply-mobile-17-followup.mjs" "$PWD"
+          node "$root/scripts/apply-mobile-next.mjs" "$PWD"
+          rm -rf .git
+          cd "$GITHUB_WORKSPACE"
+          mv app "$RUNNER_TEMP/candidate-app"
+          mv "$root/app" app
+      - name: Build app and install pinned test runner
+        shell: bash
+        run: |
+          npm ci --prefix app --no-audit --no-fund
+          npm --prefix app run build
+          npm install --no-audit --no-fund
+      - name: Run the identical real browser assertion
+        env:
+          CASE: ${{ matrix.scenario }}
+        run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile390 --workers=1 --grep "$CASE"
+      - name: Preserve failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phone-audit-${{ matrix.variant }}-${{ strategy.job-index }}
+          path: |
+            playwright-report-mobile-first/
+            test-results-mobile-first/
+          if-no-files-found: ignore
+          retention-days: 7
