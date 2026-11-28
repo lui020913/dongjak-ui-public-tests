@@ -110,3 +110,9 @@ export function busFilterNearDistrict(filter,geometry){
  if(!['Polygon','MultiPolygon'].includes(geometry?.type)||!Array.isArray(geometry.coordinates))return ['==',1,0];
  return ['all',filter,['any',['within',{type:geometry.type,coordinates:geometry.coordinates}],['<=',['distance',{type:geometry.type,coordinates:geometry.coordinates}],BUS_BORDER_BUFFER_METERS]]];
 }
+
+// Raw tile symbols are a startup/failure safety net, never a second renderer
+// over the canonical GeoJSON inventory. The latter also receives unmatched POIs.
+export function nativeBusFallbackNeeded({cityScope=false,nearbyReady=false,streamReady=false,streamFailed=0,busCells=false}={}){
+ return !(!cityScope&&nearbyReady||streamReady&&streamFailed===0&&busCells);
+}

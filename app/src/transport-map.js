@@ -32,7 +32,7 @@ import {fetchOfficialRailPaths,withMappedLine4} from './rail-official-shapes.js'
 import {setDisplayedRailPaths} from './features/liveTransit/geometry.js';
 import {isMedianBusStopName,medianStopBaseName,busStopDisplayName} from './median-bus-stops.js';
 import {busCoverageSamples} from './bus-coverage-grid.js';
-import {deduplicateBusStops,representedNativeBusStops,busTileFallbackFilter,busFilterInsideDistrict,busFilterNearDistrict,BUS_BORDER_BUFFER_METERS} from './bus-stop-dedup.js';
+import {deduplicateBusStops,representedNativeBusStops,nativeBusFallbackNeeded,busTileFallbackFilter,busFilterInsideDistrict,busFilterNearDistrict,BUS_BORDER_BUFFER_METERS} from './bus-stop-dedup.js';
 import {busDisplayGrouping,BUS_GROUP_SPLIT_ZOOM,BUS_GROUP_EXPAND_ZOOM} from './bus-display-grouping.mjs';
 import {createStreamArrivalFade,streamOpacity} from './map-stream-arrivals.mjs';
 import {officialStaticBusPlaces} from './static-bus-stops.js';
@@ -1937,6 +1937,16 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   function updateTileBusFallbackFilter(){
     if(!map.getLayer?.('dj-basemap-bus-pictogram')||!map.setFilter)return;
     if(map.isMoving?.()||map.isSourceLoaded?.('transport-bus')===false)return;
+    const fallbackNeeded=nativeBusFallbackNeeded({cityScope:cityScope(),nearbyReady:nearbyBusReady,streamReady,streamFailed,busCells:[...activeStreamKeys].some(k=>k.startsWith('bus_'))});
+    if(!fallbackNeeded){
+      // Never display the native POI and its imported GeoJSON copy together,
+      // even when the tile has no feature ID or its position has shifted.
+      const hidden=['==',1,0],signature=JSON.stringify(hidden);
+      if(lastTileFallbackFilter!==signature||JSON.stringify(map.getFilter?.('dj-basemap-bus-pictogram'))!==signature){
+        try{map.setFilter('dj-basemap-bus-pictogram',hidden);lastTileFallbackFilter=signature;lastFallbackInventory='';}catch(error){console.debug('[정류장 단일 표시]',error?.message||error);}
+      }
+      return;
+    }
     const boundary=cityScope()?getSeoulBoundary():getDistrictGeometry();
     const native=representedNativeBusStops(osmTransport.filter(p=>p.kind==='bus'&&p.source==='basemap-poi'),currentVisibleBusStops);
     const nativeIds=[...new Set(native.map(p=>p.nativeFeatureId).filter(Boolean))].sort();
@@ -2285,12 +2295,15 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
         .finally(()=>{medianInFlight--;});
     }
   }
-  let fallbackScans=0;
+  let fallbackScans=0,nativeBusScanPending=true;
+  // Later tile arrivals must be imported into the single canonical source too,
+  // not only the first few idle events after app startup.
+  map.on('sourcedata',e=>{if(e.sourceId==='openmaptiles'&&e.sourceDataType==='content')nativeBusScanPending=true;});
   const viewportEnrichment=coalesceViewportWork(scan=>{
     if(scan&&fallbackScans<20){fallbackScans++;augmentWithBasemapStations();}
     enrichNearbyBusStops();enrichMedianStops();enrichViewportBusStops();void fillHighZoomOSMBusStops();
   },{delay:200,isMoving:()=>map.isMoving?.()===true});
-  map.on('idle',()=>{viewportEnrichment.request(fallbackScans<8);if(busRoadIndex&&!busRoadIndex.size&&map.getZoom?.()>=15.5)stopPublish.request();});
+  map.on('idle',()=>{if(nativeBusScanPending&&(map.getZoom?.()??0)>=15.5){nativeBusScanPending=false;augmentWithBasemapStations();}updateTileBusFallbackFilter();viewportEnrichment.request(fallbackScans<8);if(busRoadIndex&&!busRoadIndex.size&&map.getZoom?.()>=15.5)stopPublish.request();});
   map.on('moveend',()=>{if((map.getZoom?.()??0)>=15.5)augmentWithBasemapStations();viewportEnrichment.request(fallbackScans<20);});
   map.on('zoomend',()=>viewportEnrichment.request());
   function fetchAndShow(){
