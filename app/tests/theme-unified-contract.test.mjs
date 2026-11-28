@@ -70,7 +70,7 @@ test('iOS PWA status controller owns the status-area meta rather than two writer
   assert.ok(controller.includes('isIosHomeScreenPhone(win)'));
   assert.ok(controller.includes('!isIosHomeScreenPhone(win)'));
   assert.ok(ios.includes("themeMeta.setAttribute('content',color)"));
-  assert.equal(JSON.parse(read('public/manifest-dark.webmanifest')).theme_color,'#22282e');
+  assert.equal(existsSync(new URL('../public/manifest-dark.webmanifest',import.meta.url)),false);
   assert.equal(JSON.parse(read('public/manifest-light.webmanifest')).theme_color,'#edf3ef');
 });
 

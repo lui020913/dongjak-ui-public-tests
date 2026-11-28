@@ -21,8 +21,11 @@ test('transit title is reflowed without removing event handlers and bus explanat
   assert.match(css,/#transport-sheet\[data-kind="bus"\] \.dj-v724-bus-label/);
   assert.match(css,/height:max-content!important/);
 });
-test('user-supplied dark app icon is actually included at all sizes',()=>{
-  for(const s of [180,192,512,1024])assert.ok(existsSync(new URL('../public/icons/dongjak-dark-'+s+'.png',import.meta.url)));
+test('user-supplied light app icon is included at all sizes and retired dark artwork is absent',()=>{
+  for(const s of [180,192,512,1024]){
+    assert.ok(existsSync(new URL('../public/icons/dongjak-light-'+s+'.png',import.meta.url)));
+    assert.ok(!existsSync(new URL('../public/icons/dongjak-dark-'+s+'.png',import.meta.url)));
+  }
 });
 test('phone motion respects accessibility and roadwidth animates',()=>{
   assert.match(js,/prefers-reduced-motion: reduce/);

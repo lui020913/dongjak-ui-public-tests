@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import vm from 'node:vm';
 
@@ -16,16 +16,14 @@ function pngMeta(rel){
   return {data,width:data.readUInt32BE(16),height:data.readUInt32BE(20),hasAlpha:data[25]===6};
 }
 
-test('iPhone Home Screen icon is its own alpha PNG, not the light or dark theme icon',()=>{
+test('iPhone Home Screen icon is its own alpha PNG, not the light theme icon',()=>{
   assert.match(index,/rel="apple-touch-icon"[^>]*href="\/icons\/dongjak-ios-home-180\.png"/);
   for(const s of [180,192,512]){
     const ios=pngMeta(`public/icons/dongjak-ios-home-${s}.png`);
     assert.equal(ios.width,s);assert.equal(ios.height,s);assert.ok(ios.hasAlpha);
     const light=read(`public/icons/dongjak-light-${s}.png`);
-    const dark=read(`public/icons/dongjak-dark-${s}.png`);
     assert.notEqual(sha(ios.data),sha(light));
-    assert.notEqual(sha(ios.data),sha(dark));
-    assert.notEqual(sha(light),sha(dark));
+    assert.equal(existsSync(new URL(`public/icons/dongjak-dark-${s}.png`,root)),false);
   }
 });
 
@@ -39,10 +37,9 @@ test('v8.0.3 existing light theme icons have been restored byte-for-byte',()=>{
 test('theme artwork module does not rewrite the iOS Home Screen icon',()=>{
   assert.doesNotMatch(artwork,/getElementById\('dj-apple-touch-icon'\)/);
   assert.match(artwork,/dongjak-light-/); assert.doesNotMatch(artwork,/dataset\.theme|manifest-\$\{mode\}/);
-  for(const mode of ['light','dark']){
-    const manifest=JSON.parse(read(`public/manifest-${mode}.webmanifest`).toString('utf8'));
-    assert.ok(manifest.icons.every(icon=>icon.src.includes(`dongjak-${mode}-`)));
-  }
+  const manifest=JSON.parse(read('public/manifest-light.webmanifest').toString('utf8'));
+  assert.ok(manifest.icons.every(icon=>icon.src.includes('dongjak-light-')));
+  assert.equal(existsSync(new URL('public/manifest-dark.webmanifest',root)),false);
 });
 
 test('light-only prepaint ignores old dark preferences and keeps iOS icon and manifest stable',()=>{

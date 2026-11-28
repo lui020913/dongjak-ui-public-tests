@@ -6,7 +6,6 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "public/icons/dongjak-light-1024.png"
-DARK_SOURCE = ROOT / "public/icons/dongjak-dark-1024.png"
 RES = ROOT / "android/app/src/main/res"
 IOS = ROOT / "ios/App/App/Assets.xcassets/AppIcon.appiconset"
 SIZES = {"mdpi": 48, "hdpi": 72, "xhdpi": 96, "xxhdpi": 144, "xxxhdpi": 192}
@@ -37,26 +36,24 @@ def android(image):
     background = RES / "values/ic_launcher_background.xml"
     if "#FFFFFF" not in background.read_text(encoding="utf-8"):
         raise ValueError("Expected white adaptive launcher background")
-    dark = artwork(DARK_SOURCE)
-    night = RES / "values-night/ic_launcher_background.xml"
-    night.parent.mkdir(parents=True, exist_ok=True)
-    night.write_text(background.read_text(encoding="utf-8").replace("#FFFFFF", "#192D32"), encoding="utf-8")
-    night_adaptive = RES / "mipmap-night-anydpi-v26"
-    night_adaptive.mkdir(parents=True, exist_ok=True)
+    # Remove only legacy launcher overrides produced by older runs; Android
+    # now uses the approved default artwork in either system appearance.
+    (RES / "values-night/ic_launcher_background.xml").unlink(missing_ok=True)
     for name in ("ic_launcher.xml", "ic_launcher_round.xml"):
-        (night_adaptive / name).write_bytes((RES / "mipmap-anydpi-v26" / name).read_bytes())
-    for mode, art, bg in (("", image, "white"), ("-night", dark, "#192D32")):
-        for density, legacy in SIZES.items():
-            folder = RES / f"mipmap{mode}-{density}"
-            fixed = white_canvas(art, legacy, bg)
-            for name in ("ic_launcher.png", "ic_launcher_round.png"):
-                save_checked(fixed, folder / name, legacy, "RGB")
-            adaptive = legacy * 108 // 48
-            safe = round(adaptive * 66 / 108)
-            foreground = Image.new("RGBA", (adaptive, adaptive), (0, 0, 0, 0))
-            foreground.alpha_composite(art.resize((safe, safe), RESAMPLE),
-                                       ((adaptive - safe) // 2, (adaptive - safe) // 2))
-            save_checked(foreground, folder / "ic_launcher_foreground.png", adaptive, "RGBA")
+        (RES / "mipmap-night-anydpi-v26" / name).unlink(missing_ok=True)
+    for density, legacy in SIZES.items():
+        for name in ("ic_launcher.png", "ic_launcher_round.png", "ic_launcher_foreground.png"):
+            (RES / f"mipmap-night-{density}" / name).unlink(missing_ok=True)
+        folder = RES / f"mipmap-{density}"
+        fixed = white_canvas(image, legacy)
+        for name in ("ic_launcher.png", "ic_launcher_round.png"):
+            save_checked(fixed, folder / name, legacy, "RGB")
+        adaptive = legacy * 108 // 48
+        safe = round(adaptive * 66 / 108)
+        foreground = Image.new("RGBA", (adaptive, adaptive), (0, 0, 0, 0))
+        foreground.alpha_composite(image.resize((safe, safe), RESAMPLE),
+                                   ((adaptive - safe) // 2, (adaptive - safe) // 2))
+        save_checked(foreground, folder / "ic_launcher_foreground.png", adaptive, "RGBA")
 
 def ios(image):
     if not IOS.is_dir():
