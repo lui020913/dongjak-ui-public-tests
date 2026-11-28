@@ -28,8 +28,8 @@ node --check src/mobile-next.js
 node --check src/main.js
 node --check src/workers/dongjak-walk-worker.mjs
 node --check src/lib/dongjakWalkSlopeRouter.mjs
-cp "$GITHUB_WORKSPACE/frontend/production/mobile-next-build.test.mjs" tests/mobile-next-build.test.mjs
-cp "$GITHUB_WORKSPACE/frontend/production/mobile-followup-build.test.mjs" tests/mobile-followup-build.test.mjs
+test -s tests/mobile-next-build.test.mjs
+test -s tests/mobile-followup-build.test.mjs
 git diff --check
 echo "CHECKPOINT: whitespace check passed"
 expected_changes="$(printf '%s\n' index.html | LC_ALL=C sort)"

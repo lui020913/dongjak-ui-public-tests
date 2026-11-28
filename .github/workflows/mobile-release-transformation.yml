@@ -29,8 +29,8 @@ jobs:
           node "$GITHUB_WORKSPACE/scripts/apply-mobile-next.mjs" "$work"
           node --check src/main.js
           node --check src/mobile-next.js
-          cp "$GITHUB_WORKSPACE/frontend/production/mobile-next-build.test.mjs" tests/mobile-next-build.test.mjs
-          cp "$GITHUB_WORKSPACE/frontend/production/mobile-followup-build.test.mjs" tests/mobile-followup-build.test.mjs
+          test -s tests/mobile-next-build.test.mjs
+          test -s tests/mobile-followup-build.test.mjs
           npm ci
           node --test tests/mobile-next-build.test.mjs tests/mobile-followup-build.test.mjs
           npm run build
