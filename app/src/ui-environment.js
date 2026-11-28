@@ -90,7 +90,7 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
 }
 
 import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingZoomOpacityExpression,nativeBuildingFootprintPaint,nativeBuildingFootprint,repaintVegetation} from './map-appearance.js';
-import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
+import {applyBusStopLabelTheme,BUS_STOP_LABEL_IDS,BUS_LABEL_FONT,BUS_LABEL_SIZE} from './bus-stop-label-theme.js';
 import {setDistrictOpacity} from './transit-exterior-scope.mjs';
 import {createThemeState} from './theme-state-core.mjs';
 import {scaleMapLabelSize} from './map-label-text-scale.mjs';
@@ -214,9 +214,11 @@ export function initTheme({map,app}){
           if(JSON.stringify(current)!==JSON.stringify(value))map.setPaintProperty(id,key,value);
         }
         if(typeof map.getLayoutProperty==='function'&&typeof map.setLayoutProperty==='function'&&original.size!=null){
-          const named=/(name|label|poi|place|district|admin|school|station|bus|civic|bridge|featured|park|neighbor|dong)/i.test(id)&&!/(exit|badge|vehicle|number|shield|arrow|pictogram)/i.test(id)&&(!layer.layout?.['symbol-placement']||layer.layout['symbol-placement']==='point');
-          if(named&&JSON.stringify(map.getLayoutProperty(id,'text-font'))!==JSON.stringify(stationFont))map.setLayoutProperty(id,'text-font',stationFont);
-          const textSize=scaleMapLabelSize(named?stationSize:original.size,app.dataset.djSettingsText||'normal');
+          const busLabel=BUS_STOP_LABEL_IDS.includes(id);
+          const named=busLabel||/(name|label|poi|place|district|admin|school|station|bus|civic|bridge|featured|park|neighbor|dong)/i.test(id)&&!/(exit|badge|vehicle|number|shield|arrow|pictogram)/i.test(id)&&(!layer.layout?.['symbol-placement']||layer.layout['symbol-placement']==='point');
+          const font=busLabel?BUS_LABEL_FONT:stationFont;
+          if(named&&JSON.stringify(map.getLayoutProperty(id,'text-font'))!==JSON.stringify(font))map.setLayoutProperty(id,'text-font',font);
+          const textSize=scaleMapLabelSize(busLabel?BUS_LABEL_SIZE:named?stationSize:original.size,app.dataset.djSettingsText||'normal');
           if(JSON.stringify(map.getLayoutProperty(id,'text-size'))!==JSON.stringify(textSize))map.setLayoutProperty(id,'text-size',textSize);
         }
       }catch{/* A style reload can temporarily remove an individual label layer. */}

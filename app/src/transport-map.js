@@ -23,7 +23,7 @@ import {formatMetroArrivalCard} from './metro-arrival-display.js';
 import {metroTerminalLabel} from './metro-status-view.js';
 import {guardSubwayProxyArrival} from './transport-freshness.js';
 import {permitsSubwayBulkRecovery,seoulSubwayIdForLine} from './subway-source-recovery.js';
-import {applyBusStopLabelTheme,busStopLabelPalette} from './bus-stop-label-theme.js';
+import {applyBusStopLabelTheme,busStopLabelPalette,BUS_LABEL_FONT,BUS_LABEL_SIZE} from './bus-stop-label-theme.js';
 import {fixedRailCollection,fixedMetroStations} from './fixed-rail-lines.js';
 import {metroMarkerGeojson, makeMetroDisplayScope, METRO_MARKER_MIN_ZOOM, METRO_PLATFORM_SPLIT_ZOOM as METRO_PLATFORM_SPLIT_ZOOM_DATA} from './metro-marker-geodata.js';
 import {installResponsiveMetroVisibility} from './metro-overview-visibility.js';
@@ -1202,8 +1202,8 @@ export function installBasemapBusStopFallback(map,districtGeometry=null){
         'icon-size':['interpolate',['linear'],['zoom'],16.4,0.262,18.2,0.331,20,0.393],
         'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-padding':1,
         'text-field':['step',['zoom'],'',16.0,['coalesce',['get','name:nonlatin'],['get','name:ko'],['get','name_ko'],['get','name'],'']],
-        'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':['interpolate',['linear'],['zoom'],17.75,10.2,20,12.1],
-        'text-anchor':'top','text-offset':[0,1.4],'text-max-width':13,
+        'text-font':BUS_LABEL_FONT,'text-size':BUS_LABEL_SIZE,
+        'text-anchor':'top','text-offset':[0,1.4],'text-max-width':14,
         'text-allow-overlap':true,'text-ignore-placement':true,'text-optional':true,
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport',
         'icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport'},
@@ -1275,9 +1275,9 @@ function labelVisibility(map){
       paint:{'text-color':['coalesce',['get','lineColor'],DEFAULT_SUBWAY_LINE_COLOR],'text-halo-color':'rgba(255,255,255,0.98)','text-halo-width':2.1}},
     {id:'transport-bus-names',type:'symbol',source:'transport-bus',minzoom:16.0,maxzoom:17.8,
       filter:['all',['!=',['get','label'],'정류장명 미등록'],['!=',['get','label'],'이름 미등록']],
-      layout:{'text-field':['get','label'],'text-font':['Noto Sans Regular','Open Sans Regular'],
-        'text-size':['interpolate',['linear'],['zoom'],17.75,10.0,19,11.5],
-        'text-offset':[0,1.4],'text-max-width':18,'text-optional':true,
+      layout:{'text-field':['get','label'],'text-font':BUS_LABEL_FONT,
+        'text-size':BUS_LABEL_SIZE,
+        'text-offset':[0,1.4],'text-max-width':14,'text-optional':true,
         'text-anchor':'top',
         'text-allow-overlap':false,'text-ignore-placement':false,'text-padding':1,'text-variable-anchor':['top','bottom','left','right']},
       paint:{'text-color':'#18508e','text-halo-color':'#fff','text-halo-width':1.05}},
@@ -1286,8 +1286,8 @@ function labelVisibility(map){
     {id:'transport-bus-names-close',type:'symbol',source:'transport-bus',minzoom:17.8,
       filter:['all',['!=',['get','label'],'정류장명 미등록'],['!=',['get','label'],'이름 미등록'],
         ['!=',['get','label'],'']],
-      layout:{'text-field':['get','label'],'text-font':['Noto Sans Regular','Open Sans Regular'],
-        'text-size':['interpolate',['linear'],['zoom'],18.4,10.7,20,12.2],
+      layout:{'text-field':['get','label'],'text-font':BUS_LABEL_FONT,
+        'text-size':BUS_LABEL_SIZE,
         'text-offset':[0,1.4],'text-anchor':'top','text-max-width':14,
         'text-allow-overlap':true,'text-ignore-placement':true,'text-optional':true,
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},

@@ -26,7 +26,7 @@ test('healthcare and civic polygons get distinct colors ahead of generic site cl
    [{amenity:'hospital',landuse:'residential'},'hospital'],[{class:'public'},'public'],
    [{class:'commercial',office:'government'},'public'],[{amenity:'police'},'public'],
    [{amenity:'fire_station'},'public'],[{amenity:'townhall'},'public'],[{class:'town_hall'},'public'],[{class:'commercial',name:'동작구청'},'public'],[{class:'commercial',state:{verifiedCivicSite:true}},'public'],[{class:'commercial',name:'동작구정신건강복지센터'},'public'],
-   [{class:'school'},'education'],[{class:'retail'},'commercial'],
+   [{class:'commercial',name:'서울지방병무청'},'public'],[{class:'commercial',name:'상도1동주민센터'},'public'],[{class:'commercial',name:'동작세무서'},'public'],[{class:'public_library'},'public'],[{class:'school'},'education'],[{class:'retail'},'commercial'],
    [{class:'residential',subclass:'apartments'},'residential'],[{class:'industrial'},'industrial']
   ])assert.equal(evaluate(e,tags),p[kind],JSON.stringify(tags));
   assert.equal(evaluate(e,{class:'park'}),'rgba(0,0,0,0)');

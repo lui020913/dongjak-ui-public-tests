@@ -3,6 +3,8 @@ export const BUS_STOP_LABEL_IDS=Object.freeze([
   'transport-bus-names','transport-bus-names-close',
   'dj-basemap-bus-pictogram','dongjak-zoom-busstop-names'
 ]);
+export const BUS_LABEL_FONT=['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'];
+export const BUS_LABEL_SIZE=['interpolate',['linear'],['zoom'],13.3,10,16,11.6,17.15,11.7,20,11.7];
 export function busStopLabelPalette(theme='light'){
   return theme==='dark'
     ? {text:'#EEF7FB',halo:'#10252E',width:1.05}
@@ -20,6 +22,7 @@ export function applyBusStopLabelTheme(map,theme='light'){
   for(const id of BUS_STOP_LABEL_IDS){
     if(!map?.getLayer?.(id))continue;
     try{
+      if(map.setLayoutProperty&&map.getLayoutProperty){for(const [key,value] of [['text-font',BUS_LABEL_FONT],['text-size',BUS_LABEL_SIZE],['text-offset',[0,1.4]],['text-anchor','top'],['text-max-width',14]])if(JSON.stringify(map.getLayoutProperty(id,key))!==JSON.stringify(value))map.setLayoutProperty(id,key,value);}
       map.setPaintProperty(id,'text-color',colors.text);
       map.setPaintProperty(id,'text-halo-color',colors.halo);
       map.setPaintProperty(id,'text-halo-width',colors.width);
