@@ -800,6 +800,9 @@ function visibleBuilding3D(){
 let lastBuildingOwnershipKey=null;
 function syncBuildingSheetOwnership(){
   if(!districtBuildingScope)return;
+  // A completed sheet stays hidden behind native coverage until a settled
+  // camera can commit both ownership and GIS visibility together.
+  if(djPhone&&map.isMoving?.())return;
   let changed=false;
   const owned=[];
   for(const [id,info] of loadedBuildingTiles){
@@ -1792,8 +1795,9 @@ map.on('load',()=>{
   exteriorRoadScope=installExteriorRoadScope(map);
   buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers);
   buildingCoverage.setExtruding(false);
-  const ownershipWork=coalesceBuildingOwnership(syncBuildingSheetOwnership);
+  const ownershipWork=coalesceBuildingOwnership(syncBuildingSheetOwnership,{canFlush:()=>!djPhone||!map.isMoving?.()});
   map.on('sourcedata',event=>{if(event.isSourceLoaded&&event.sourceId?.startsWith('dongjak-buildings-data-'))ownershipWork.request();});
+  map.on('moveend',ownershipWork.flush);
   map.on('idle',ownershipWork.flush);
   status('지도 준비 완료 · 동작구 경계 불러오는 중');
   // 공개 Terrarium DEM: API 키 없이 지형을 표시합니다. 지형 데이터의 상세도는 지역별로 다릅니다.

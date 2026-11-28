@@ -29,9 +29,9 @@ export function waitForBuildingSource(map,id,{timeout=1200}={}){
 /** Same-turn source notifications share a single ownership reconciliation.
  * Idle flushes pending work immediately without leaving a redundant microtask.
  */
-export function coalesceBuildingOwnership(run,{enqueue=queueMicrotask}={}){
+export function coalesceBuildingOwnership(run,{enqueue=queueMicrotask,canFlush=()=>true}={}){
  let pending=false,version=0;
- function flush(){pending=false;version++;run();}
+ function flush(){if(!canFlush()){pending=true;return;}pending=false;version++;run();}
  return {request(){if(pending)return;pending=true;const token=++version;enqueue(()=>{if(pending&&version===token)flush();});},flush};
 }
 /** Bound parsed sheets and never let a stale failed request evict a newer one. */
