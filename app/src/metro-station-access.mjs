@@ -69,13 +69,13 @@ export function registerExitBadge(map,number,color,doc=globalThis.document){
  const n=String(number||'').trim();
  if(!/^[0-9]{1,2}[A-Za-z]?(?:[-·][0-9A-Za-z]+)?$/.test(n))return null;
  const stroke=/^#[0-9a-f]{6}$/i.test(color||'')?color:'#718b7b';
- const id='dj-exit-badge-white-'+stroke.slice(1).toLowerCase()+'-'+n;
+ const id='dj-exit-badge-white-v2-'+stroke.slice(1).toLowerCase()+'-'+n;
  if(map.hasImage?.(id))return id;
  try{
   const c=doc?.createElement('canvas');if(!c)return null;c.width=c.height=64;
   const ctx=c.getContext('2d');if(!ctx)return null;
   ctx.beginPath();ctx.arc(32,32,28,0,Math.PI*2);ctx.fillStyle='#ffffff';ctx.fill();
-  ctx.strokeStyle=stroke;ctx.lineWidth=5;ctx.stroke();
+  ctx.strokeStyle=stroke;ctx.lineWidth=6;ctx.stroke();
   ctx.fillStyle='#534d31';ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.font='700 '+(n.length>2?23:34)+'px Arial, sans-serif';
   ctx.fillText(n,32,33,47);

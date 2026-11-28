@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.294",
+  "application_version": "9.2.295",
   "public_work_branch": "main",
-  "purpose": "Replace all screenshot-derived exit coordinates with 89 published WGS84 map-link coordinates across 16 stations; retain unmatched MOIS exit records, source provenance and existing display scope, preserve safety pictograms and prior building/bus fixes.; Render all numbered subway entrances as atomic cached circle+number images, no independently missing glyphs or unnumbered empty circles, preserve all exit coordinates.; Use pure white interior for every numbered metro exit badge, preserve line border and number, version the image cache key.",
-  "attempt": 536,
+  "purpose": "Replace all screenshot-derived exit coordinates with 89 published WGS84 map-link coordinates across 16 stations; retain unmatched MOIS exit records, source provenance and existing display scope, preserve safety pictograms and prior building/bus fixes.; Render all numbered subway entrances as atomic cached circle+number images, no independently missing glyphs or unnumbered empty circles, preserve all exit coordinates.; Use pure white interior for every numbered metro exit badge, preserve line border and number, version the image cache key.; Increase numbered metro exit badge stroke from 5 to 6 source pixels only; retain pure white interior, line colors, geometry and zoom; version image cache.",
+  "attempt": 537,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
