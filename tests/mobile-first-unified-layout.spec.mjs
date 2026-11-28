@@ -21,14 +21,14 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
     await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();
   }
   await page.waitForSelector('#app');
-  await page.waitForSelector('#dj-v794-toolbar',{timeout:15000});
+  await page.waitForSelector(page.viewportSize().width<700?'#djNext-toolbar':'#dj-v794-toolbar',{timeout:15000});
   await page.waitForTimeout(900);
 
   const metrics=await page.evaluate(()=>{
     const rect=el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,top:r.top,right:r.right,bottom:r.bottom};};
     const style=el=>{const s=getComputedStyle(el);return {position:s.position,display:s.display,gridTemplateColumns:s.gridTemplateColumns,flexDirection:s.flexDirection,visibility:s.visibility};};
     const topbar=document.querySelector('#app > .topbar');
-    const toolbar=document.querySelector('#app > #dj-v794-toolbar');
+    const toolbar=document.querySelector(innerWidth<700?'#app > #djNext-toolbar':'#app > #dj-v794-toolbar');
     const nav=document.querySelector('#app > #bottom-nav');
     const actions=document.querySelector('#app .map-actions');
     return {

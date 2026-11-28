@@ -892,7 +892,7 @@ function getVisibleBBox(){
 }
 // Bounded warm cache for parsed GIS sheets: network/worker work during motion,
 // source ownership and map writes remain deferred until the camera settles.
-const warmBuildingSheets=createBuildingWarmCache(loadBuildingTileFeatures,{limit:4});let warmBuildingBusy=false,lastBuildingWarmAt=0;
+const warmBuildingSheets=createBuildingWarmCache(sheet=>loadBuildingTileFeatures(sheet),{limit:4});let warmBuildingBusy=false,lastBuildingWarmAt=0;
 function warmBuildingSheet(sheet){return warmBuildingSheets.load(sheet);}
 async function prefetchMovingBuilding(){
  if(!djPhone||djRenderBudget.isEconomy()||!mapReady||!boundaryGeometry||!baseBuildingsVisible||map.getZoom()<BUILDING_ZOOM_MIN||djBuildingBatchBusy||warmBuildingBusy||Date.now()-lastBuildingWarmAt<350)return;

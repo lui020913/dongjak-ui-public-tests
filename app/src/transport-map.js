@@ -2046,7 +2046,10 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const zoom=map.getZoom(),city=cityScope();
     const keys=bounds.west<=bounds.east&&bounds.south<=bounds.north?viewportKeys(bounds,zoom,{bus:streamApp?.dataset.baseBus!=='off',rail:city},streamDirection):[];
     // Adjacent safety-map stations have their own curated scope. Do not clip their cells at the district border.
-    if(!city&&streamApp?.dataset.baseMetro!=='off')keys.push(...viewportKeys({west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()},zoom,{bus:false,rail:true},streamDirection).filter(k=>officialMetro.some(p=>placeInDisplayScope(p)&&k==='rail_'+cellKey(p.lng,p.lat))));
+    if(!city&&streamApp?.dataset.baseMetro!=='off'){
+      const adjacentRailCells=new Set(officialMetro.filter(placeInDisplayScope).map(p=>'rail_'+cellKey(p.lng,p.lat)));
+      keys.push(...viewportKeys({west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()},zoom,{bus:false,rail:true},streamDirection).filter(k=>adjacentRailCells.has(k)));
+    }
     const critical=viewportKeys(bounds,zoom,{bus:streamApp?.dataset.baseBus!=='off',rail:city},streamDirection,0);
     requestedStreamKeys=new Set(keys);cellStream.update(keys,critical);
   }
