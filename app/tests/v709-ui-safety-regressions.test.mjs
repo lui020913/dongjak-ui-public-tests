@@ -13,7 +13,7 @@ test('new overrides load after old floating CSS, preserving button and X centeri
     '#overview-sheet-close','#news-close-to-map','#night-visibility-float-stop'])assert.ok(css.includes(item),item);
   assert.match(css,/translate:-50% -50%/);
   assert.match(css,/night-visibility-float:not\(\.dj-float-user-positioned\)/);
-  assert.match(css,/#app\[data-theme="dark"\]/);
+  assert.doesNotMatch(css,/#app\[data-theme="dark"\]/);
 });
 
 test('mobile scale is located above active floating surfaces or suppressed when no room',()=>{

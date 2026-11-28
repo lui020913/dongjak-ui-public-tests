@@ -17,6 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Prepare remaining dark-only CSS changes (read-only)
+        run: node scripts/retire-dark-css.mjs --prepare
       - name: Reconstruct baseline and candidate production inputs
         shell: bash
         run: |
