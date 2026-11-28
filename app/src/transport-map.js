@@ -1961,7 +1961,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   function showStops(items){
     if(map.isMoving?.()){stopPublish.request();return;}
     const filtered=roadsideBusPlaces(items.filter(x=>placeInDisplayScope(x)&&inActiveCell(x)).sort((a,b)=>String(a.id).localeCompare(String(b.id))));
-    const grouped=map.getZoom()<BUS_GROUP_SPLIT_ZOOM;
+    const grouped=(map.getZoom?.()??19)<BUS_GROUP_SPLIT_ZOOM;
     const signature=JSON.stringify([filtered,grouped]);
     lastBusGroupingMode=grouped;
     if(signature===lastStopDataSignature){updateTileBusFallbackFilter();return;}
@@ -1970,7 +1970,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     cachedTransportPlaces=filtered;
     const bus=filtered.filter(x=>x.kind==='bus'&&!overlapsRouteStop(x.lng,x.lat,'bus'));
     const rail=filtered.filter(x=>x.kind==='subway');
-    const displayBus=busDisplayGrouping(bus,map.getZoom());
+    const displayBus=busDisplayGrouping(bus,map.getZoom?.()??19);
     displayBusGroups=new Map(displayBus.filter(p=>p.groupCount>1).map(p=>[p.id,p]));
     const busSignature=JSON.stringify(displayBus),railSignature=JSON.stringify(rail);
     if(busSignature!==lastBusSourceSignature){map.getSource('transport-bus').setData(featureCollection(displayBus));lastBusSourceSignature=busSignature;}
