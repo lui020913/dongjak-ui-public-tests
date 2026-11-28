@@ -117,7 +117,7 @@ import {prepareTransitRoadPlan,isTransitAccessWalkValid} from './transit-road-ma
 const transitRoadMatchOptions=signal=>({signal,apiBase:Capacitor.isNativePlatform()?'https://dongjak-walk-safety-preview.pages.dev':''});
 import {installRoutePriPreferences} from './route-pri-preferences.js';
 import './v841-route-and-tips.css';
-import {slimMapTextHalos} from './map-label-halo.js';
+import {installMapTextHaloMaintenance} from './map-label-halo.js';
 import {installSupabaseSafetyAi} from './v880-supabase-safety-ai.js';
 import './bocha-road-layer.css';
 import './pilot-layer-selection.css';
@@ -1823,10 +1823,8 @@ map.on('load',()=>{
   keepMapLabelsUpright();
   thinNativeOnewayArrows();
   keepRegularMapText(map);
-  slimMapTextHalos(map);
-  // The installed symbol layers arrive asynchronously after initial style load.
-  // This only updates labels whose halo still exceeds the cap.
-  map.on('idle',()=>slimMapTextHalos(map));
+  // Recheck asynchronous label styles, not every camera/tile idle event.
+  installMapTextHaloMaintenance(map);
   // 일반 상업시설/생활시설 POI는 분류 태그를 기준으로 표시를 제한합니다.
   filterCommercialPOI(map);
   // 원본 지도에서 외국어만 있는 시설·정류장 이름은 숨기고 한국어 표기가 있으면 우선합니다.

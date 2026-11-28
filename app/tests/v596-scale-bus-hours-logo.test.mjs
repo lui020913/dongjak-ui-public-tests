@@ -28,7 +28,9 @@ test('bus stop names are requested for the visible viewport independent of OSM p
   assert.match(text('src/bus-coverage-grid.js'),/map\.unproject\(/);
   assert.match(code,/bus\/stops-nearby\?/);
   assert.match(code,/const viewportEnrichment=coalesceViewportWork\(scan=>\{[\s\S]*?enrichViewportBusStops\(\)/);
-  assert.match(code,/map\.on\('moveend',\(\)=>\{[^}\n]*augmentWithBasemapStations\(\);viewportEnrichment\.request\(/);
+  // The move-end owner queues a scan rather than repeating it before the coalescer.
+  assert.match(code,/map\.on\('moveend',\(\)=>\{[^}\n]*nativeBusScanPending=true;viewportEnrichment\.request\(/);
+  assert.match(code,/const viewportEnrichment=coalesceViewportWork\(scan=>\{[\s\S]*?if\(nativeScan\|\|fallbackScan\)augmentWithBasemapStations\(\)/);
   assert.match(code,/map\.on\('zoomend',\(\)=>viewportEnrichment\.request\(/);
   assert.match(code,/transport-bus-names',type:'symbol',source:'transport-bus',minzoom:18\.0/);
 });

@@ -20,3 +20,21 @@ export function slimMapTextHalos(map,{maxWidth=LABEL_HALO_MAX_PX}={}){
   }
   return updated;
 }
+
+/** Tile/camera idle alone cannot change authored halo paint. Recheck only
+ * after an actual style event, including asynchronous layer additions and
+ * full style replacement. Keep changes at idle, outside active gestures. */
+export function installMapTextHaloMaintenance(map){
+  let dirty=true;
+  const invalidate=()=>{dirty=true;};
+  const flush=()=>{
+    if(!dirty||map.isMoving?.())return 0;
+    dirty=false;
+    return slimMapTextHalos(map);
+  };
+  map.on('styledata',invalidate);
+  map.on('style.load',invalidate);
+  map.on('idle',flush);
+  flush();
+  return ()=>{map.off('styledata',invalidate);map.off('style.load',invalidate);map.off('idle',flush);};
+}
