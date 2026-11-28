@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.262",
+  "application_version": "9.2.263",
   "public_work_branch": "main",
-  "purpose": "Restore full original DEM terrain relief; reject global flattening as a fix for local artifacts. Retain v9.2.261 rail layer ordering, shared favorite ordering, v9.2.260 border bus and continuity fixes. Local DEM anomaly still requires targeted validation. Direct visual protected production.",
-  "attempt": 504,
+  "purpose": "Correct all five Sangdo subway exit display positions with independently checked OSM-attributed coordinates; retain MOIS raw snapshot and exits-only display. Prefer Yangnyeong-ro through-road roadside placement specifically for ARS 20890, 20158, 20159; preserve raw bus points, directions and other stops. Preserve full terrain and previous fixes. Direct visual protected production.",
+  "attempt": 505,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

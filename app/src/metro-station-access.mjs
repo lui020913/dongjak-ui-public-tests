@@ -20,7 +20,19 @@ const ids=[SOURCE+'-exit-circle',SOURCE+'-exit-label'];
 const empty=()=>({type:'FeatureCollection',features:[]});
 const valid=p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite);
 const distance=(a,b)=>Math.hypot((a[0]-b[0])*X,(a[1]-b[1])*Y);
-const pointOf=e=>[Number(e.lon??e.center?.lon),Number(e.lat??e.center?.lat)];
+// Reviewed display-only OSM entrance coordinates, independently compared with
+// K-SUB's OSM-attributed per-exit links (https://www.k-sub.com/en/stations/sangdo).
+// Keep the MOIS source snapshot unchanged. © OpenStreetMap contributors, ODbL.
+export const SANGDO_EXIT_DISPLAY=Object.freeze({
+ '1':Object.freeze([126.947697,37.502860]),
+ '2':Object.freeze([126.947444,37.503267]),
+ '3':Object.freeze([126.947814,37.503441]),
+ '4':Object.freeze([126.948174,37.503582]),
+ '5':Object.freeze([126.948128,37.503019])
+});
+const rawPoint=e=>[Number(e.lon??e.center?.lon),Number(e.lat??e.center?.lat)];
+const reviewedExit=e=>normalizeExitStation(e.tags?.station||e.tags?.['station:name'])==='상도'?SANGDO_EXIT_DISPLAY[String(e.tags?.ref||'')]:null;
+const pointOf=e=>reviewedExit(e)||rawPoint(e);
 const coordinates=e=>(e.geometry||[]).map(p=>[Number(p.lon),Number(p.lat)]).filter(valid);
 export function normalizeExitStation(s){const plain=String(s||'').normalize('NFKC').replace(/\s*\([^)]*\)\s*/g,'').replace(/\s|역$/g,'');return plain==='총신대입구'?'이수':plain;}
 const normalized=normalizeExitStation;
@@ -50,7 +62,7 @@ export function buildStationAccess(elements,stations,colors,railPaths=new Map(),
   const line=String(t.station||'').match(/\((\d+호선)\)/)?.[1];
   const station=named||(isOfficial?{name:officialName,lng:p[0],lat:p[1],lines:line?[line]:[]}:stationAt(p,stations));if(!station)continue;
   const n=number(t),key=normalized(station.name)+'|'+(n||e.id)+'|'+p.map(v=>v.toFixed(5)).join(',');if(seen.has(key))continue;seen.add(key);
-  const props={kind:'exit',station:station.name,number:n,label:n||'출입구',color:colors[line]||lineColor(station,colors),quality:'mapped',source:t.source||'OpenStreetMap'};
+  const props={kind:'exit',station:station.name,number:n,label:n||'출입구',color:colors[line]||lineColor(station,colors),quality:'mapped',source:reviewedExit(e)?'OpenStreetMap_ODbL (K-SUB exit coordinates)':t.source||'OpenStreetMap'};
   result.push(feature('Point',p,props));
  }
  return {type:'FeatureCollection',features:result};
