@@ -1,7 +1,7 @@
 import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 
-const css=readFileSync(new URL('../production/mobile-first-overhaul.css',import.meta.url),'utf8');
+const css=readFileSync(new URL('../../app/src/mobile-first-overhaul.css',import.meta.url),'utf8');
 const pin=JSON.parse(readFileSync(new URL('../../release/mobile-first-overhaul-source.json',import.meta.url),'utf8'));
 
 // v9.2.75: reviewed phone weather, 7-day forecast, PRI disclosure and iOS state CSS increased the exact

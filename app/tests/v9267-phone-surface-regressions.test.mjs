@@ -23,7 +23,7 @@ test('recording mode cannot push the independent AI action down',()=>{
 });
 test('full-screen tabs switch immediately without a white WebGL snapshot or opaque curtain',()=>{
  const local=new URL('../src/mobile-next.css',import.meta.url);
- const material=readFileSync(existsSync(local)?local:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+ const material=readFileSync(local,'utf8');
  assert.match(tab,/if\(!replay\(button\)\)\{[^}]*return;/);
  assert.match(tab,/clearEntrance\(\)/);
  assert.match(tab,/panel\.classList\.add\('dj-tab-content-enter'\)/);

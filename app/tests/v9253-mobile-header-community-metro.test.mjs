@@ -5,8 +5,7 @@ const read=file=>readFileSync(new URL('../'+file,import.meta.url),'utf8');
 // Public CI reads the canonical stylesheet, while the protected release
 // archive includes a generated copy under src/mobile-next.css.
 const copy=new URL('../src/mobile-next.css',import.meta.url);
-const canonical=new URL('../../frontend/production/mobile-next.css',import.meta.url);
-const mobileCss=readFileSync(existsSync(copy)?copy:canonical,'utf8');
+const mobileCss=readFileSync(copy,'utf8');
 
 test('community categories lead the page before sort/search controls',()=>{
  const panel=read('index.html').split('<main id="participation-panel"')[1]?.split('</main>')[0];

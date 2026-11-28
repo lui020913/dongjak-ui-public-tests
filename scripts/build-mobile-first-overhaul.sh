@@ -18,24 +18,9 @@ test -f wrangler.toml
 grep -Fq "import './mobile-ui/current.css';" src/main.js
 grep -Fq "import './public-ui-production-overlay.css';" src/main.js
 grep -Fq "public-ui-mobile-surface-coordinator.js" src/main.js
-cp "$GITHUB_WORKSPACE/frontend/production/mobile-first-overhaul.css" src/mobile-first-overhaul.css
-# The old app/src/mobile-first-overhaul.css was archived as unused runtime CSS.
-# The production overlay remains generated on demand from frontend/production.
-# Mark this new build-time asset intent-to-add so the strict changed-file allowlist
-# still sees it in git diff --name-only (without staging its contents).
-git add -N src/mobile-first-overhaul.css
+# All mobile UI source and its imports are now canonical in app/.
 node "$GITHUB_WORKSPACE/scripts/apply-mobile-only-gate.mjs" "$work"
 echo "CHECKPOINT: mobile-only visual gate applied"
-node --input-type=module <<'NODE'
-import {readFileSync,writeFileSync} from 'node:fs';
-const path='src/main.js';
-const source=readFileSync(path,'utf8');
-const anchor="import './mobile-ui/current.css';";
-if(source.split(anchor).length!==2) throw new Error('Expected exactly one final mobile CSS import anchor');
-if(source.includes("import './mobile-first-overhaul.css';")) throw new Error('Mobile overhaul already injected');
-writeFileSync(path,source.replace(anchor,anchor+String.fromCharCode(10)+"import './mobile-first-overhaul.css';"));
-NODE
-echo "CHECKPOINT: mobile CSS import injected"
 node "$GITHUB_WORKSPACE/scripts/apply-mobile-17-followup.mjs" "$work"
 node --check src/mobile-17-followup.js
 node "$GITHUB_WORKSPACE/scripts/apply-mobile-next.mjs" "$work"
@@ -47,7 +32,7 @@ cp "$GITHUB_WORKSPACE/frontend/production/mobile-next-build.test.mjs" tests/mobi
 cp "$GITHUB_WORKSPACE/frontend/production/mobile-followup-build.test.mjs" tests/mobile-followup-build.test.mjs
 git diff --check
 echo "CHECKPOINT: whitespace check passed"
-expected_changes="$(printf '%s\n' index.html src/main.js src/mobile-first-overhaul.css | LC_ALL=C sort)"
+expected_changes="$(printf '%s\n' index.html | LC_ALL=C sort)"
 actual_changes="$(git diff --name-only | LC_ALL=C sort)"
 echo "Expected changed files: $expected_changes"
 echo "Actual changed files: $actual_changes"
@@ -277,7 +262,7 @@ run_private "Application build" npm run build
 run_private "Release consistency" npm run check:release
 test -s dist/index.html
 jq -e --arg version "$APP_VERSION" '.version==$version' dist/version.json >/dev/null
-CSS_SHA="$(cat "$GITHUB_WORKSPACE/frontend/production/mobile-first-overhaul.css" "$GITHUB_WORKSPACE/frontend/production/mobile-17-followup.css" "$GITHUB_WORKSPACE/frontend/production/mobile-next.css" | sha256sum | cut -d' ' -f1)"
+CSS_SHA="$(cat "$GITHUB_WORKSPACE/app/src/mobile-first-overhaul.css" "$GITHUB_WORKSPACE/app/src/mobile-17-followup.css" "$GITHUB_WORKSPACE/app/src/mobile-next.css" | sha256sum | cut -d' ' -f1)"
 jq -n --arg source "$SOURCE_SHA" --arg public "$GITHUB_SHA" --arg css "$CSS_SHA" --arg version "$APP_VERSION" --arg build "$GITHUB_RUN_ID" --argjson beta "$(jq -er '.beta_number' "$REQUEST")" '{release_channel:"developer-beta",beta_number:$beta,source_commit:$source,public_ui_source_commit:$public,public_ui_overlay_sha256:$css,application_version:$version,build_run:$build,release_status:"CANDIDATE_PREVIEW_NOT_PRODUCTION"}' > dist/release-source.json
 umask 077
 tar -C "$RUNNER_TEMP/public-application" -czf "$RUNNER_TEMP/mobile-overhaul.tar.gz" dist functions server src package.json package-lock.json wrangler.toml

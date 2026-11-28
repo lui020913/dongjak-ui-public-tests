@@ -165,6 +165,11 @@ import './v889-mobile-visual-polish.css';
 
 import './public-ui-production-overlay.css';
 import './mobile-ui/current.css';
+import './mobile-first-overhaul.css';
+import './mobile-17-followup.css';
+import {installMobileFollowup} from './mobile-17-followup.js';
+import './mobile-next.css';
+import {installPhoneToolbar,installPhonePermissions,installPhoneRouteComparison,installV9272PhoneExperience} from './mobile-next.js';
 import './mobile-first-layout.css';
 import './mobile-compact-transport-sheet.js';
 import { installMobileSurfaceCoordinator } from './public-ui-mobile-surface-coordinator.js';
@@ -1768,6 +1773,11 @@ document.getElementById('remove-photo').addEventListener('click',()=>{
 });
 // 지도 로드 후 건물·지점·동작구 경계 및 바깥쪽 밝은 표시를 구성합니다.
 installMobileMapControls({app,map});
+installMobileFollowup({app,map,maplibregl});
+installPhoneToolbar({app});
+installPhonePermissions({app});
+installPhoneRouteComparison({app});
+installV9272PhoneExperience({app});
 map.on('load',()=>{
   // Camera-distance haze is active only in the oblique perspective view.
   installDistantHaze({map,app,themeButton:document.getElementById('theme-toggle')});

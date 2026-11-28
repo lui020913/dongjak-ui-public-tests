@@ -25,7 +25,7 @@ test('metro keeps destination suffix and route shadow buttons use pill radius',(
 
 test('phone layout aligns metro arrival times horizontally and shrinks the nearby safety text',()=>{
  const generated=new URL('../src/mobile-next.css',import.meta.url);
- const css=readFileSync(existsSync(generated)?generated:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+ const css=readFileSync(generated,'utf8');
  const compact=css.split('\n').filter(line=>line.includes('[data-dj-transport-layout="compact-v2"][data-kind="subway"]'));
  const row=compact.find(line=>line.includes('.metro-arrival-direction-group .transport-arrival-row{'));
  const eta=compact.find(line=>line.includes('.metro-arrival-time-block{'));
