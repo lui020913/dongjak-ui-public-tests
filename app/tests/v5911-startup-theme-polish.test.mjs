@@ -34,9 +34,9 @@ test('logo is real transparent RGBA with no white card at loader',()=>{
   assert.match(html,/class="map-startup-logo"[^>]*><img class="dj-app-artwork" src="\/icons\/dongjak-light-512\.png"/);
   assert.match(html,/\.map-startup-logo\{[^}]*background:transparent!important/);
 });
-test('minimal progress bar and both theme backdrops exist before application CSS',()=>{
+test('minimal progress bar and the light backdrop exist before application CSS',()=>{
   assert.match(html,/class="map-startup-progress"/);
-  assert.match(html,/html\[data-theme="dark"\] \.map-startup-overlay/);
+  assert.doesNotMatch(html,/html\[data-theme="dark"\] \.map-startup-overlay/);
   assert.match(read('src/style.css'),/#app \.map-startup-logo\{[\s\S]*?background:transparent!important/);
   assert.match(html,/prefers-reduced-motion:reduce/);
   assert.match(html,/기본 지도 먼저 보기/);

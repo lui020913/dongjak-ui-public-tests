@@ -64,7 +64,7 @@ const checks=[
    const s=src('src/ui-environment.js');
    contains(s,"mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)'");
    assert.equal(featuredPlaceStyle('light').text,'#6d817b');
-   assert.equal(featuredPlaceStyle('dark').text,'#cbd6d3');
+   assert.deepEqual(featuredPlaceStyle('dark'),featuredPlaceStyle('light'));
  }],
  ['B03','active and disabled buttons retain distinct surface, text and border colors',()=>{
    const s=src('src/theme-contract.css');

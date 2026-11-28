@@ -56,3 +56,9 @@ test('featured map labels remain light even with obsolete preferences',()=>{
  assert.doesNotMatch(read('src/featured-place-labels.js'),/theme==='dark'|lastTheme|applyTheme/);
  assert.equal(existsSync(new URL('../src/theme-state-core.mjs',import.meta.url)),false);
 });
+
+test('critical inline startup styles cannot restore a retired dark surface',()=>{
+ const html=read('index.html');
+ assert.doesNotMatch(html,/data-theme="dark"|--start-bg:#22282e/);
+ assert.match(html,/html\.dj-ios-home-pwa\[data-theme="light"\] body #app \.map-startup-overlay\{/);
+});

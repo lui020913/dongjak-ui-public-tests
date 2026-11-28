@@ -135,7 +135,7 @@ html.dj-ios-home-pwa body #app > #dj-ios-pwa-map-seam{
    status strip before allowing a soft wash below the top edge. The normal
    startup radial-gradient must never override this standalone treatment. */
 @media (max-width:699px) {
-  html.dj-ios-home-pwa:not([data-theme="dark"]) body #app #map-startup-overlay:not([hidden]) {
+  html.dj-ios-home-pwa[data-theme="light"] body #app #map-startup-overlay:not([hidden]) {
     --start-bg:#edf3ef;
     background:var(--start-bg)!important;
   }

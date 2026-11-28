@@ -32,7 +32,7 @@ test('canonical compass bearing and artwork are mirrored onto the mobile proxy',
 test('first paint defaults to light without reload splash',()=>{
   const h=read('index.html');
   assert.ok(h.includes('/* Critical first paint:'));
-  assert.ok(h.includes('--start-bg:#22282e'));
+  assert.ok(!h.includes('--start-bg:#22282e'));
   assert.ok(h.includes('background:var(--start-bg)!important'));
   assert.doesNotMatch(h,/data-dj-reload-splash|dj-pwa-transition-v7104/);
   assert.match(h,/var displayTheme='light'/);
