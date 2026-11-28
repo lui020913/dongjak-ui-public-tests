@@ -45,10 +45,10 @@ test('버스 아이콘과 이름은 도로 상세 확대에서만 등장하고 �
   const js=read('src/transport-map.js');
   const fallback=js.slice(js.indexOf('export function installBasemapBusStopFallback'),js.indexOf('const BUS_NAME_FILTERS'));
   assert.match(fallback,/minzoom:15\.5/);
-  assert.match(fallback,/'text-field':\['step',\['zoom'\],'',16\.0/);
+  assert.match(fallback,/'text-field':\['step',\['zoom'\],'',18\.0/);
   assert.match(js,/source:'transport-bus',minzoom:15\.5/);
-  assert.match(js,/source:'transport-bus',minzoom:16\.0/);
-  assert.match(js,/source:'transport-bus',minzoom:17\.8/);
+  assert.match(js,/source:'transport-bus',minzoom:18\.0/);
+  assert.match(js,/source:'transport-bus',minzoom:19\.0/);
   assert.match(js,/'icon-size':\['interpolate',\['linear'\],\['zoom'\],16\.4,0\.262/);
   assert.doesNotMatch(fallback,/maxzoom:/);
 });

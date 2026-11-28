@@ -79,10 +79,11 @@ function ringAroundStop(stop,radiusMeters=16){
  * Nearby unmatched tile stops remain visible if the official API is missing.
  * The small exclusion radius protects opposite-side boarding platforms.
  */
-export function busTileFallbackFilter(stops=[],center=null,{limit=100,radiusMeters=16}={}){
-  if(!center||!Number.isFinite(center.lng)||!Number.isFinite(center.lat))return BASEMAP_BUS_FILTER;
-  const selected=stops.filter(p=>p?.kind==='bus'&&Number.isFinite(p.lng)&&Number.isFinite(p.lat))
-    .map(p=>({p,d:busStopMeters(p,center)})).filter(x=>x.d<1250)
+export function busTileFallbackFilter(stops=[],center=null,{limit=100,radiusMeters=16,allScoped=false}={}){
+  if(!allScoped&&(!center||!Number.isFinite(center.lng)||!Number.isFinite(center.lat)))return BASEMAP_BUS_FILTER;
+  const valid=stops.filter(p=>p?.kind==='bus'&&Number.isFinite(p.lng)&&Number.isFinite(p.lat));
+  // Scoped inventory is stable across camera movement.
+  const selected=allScoped?valid.sort((a,b)=>String(a.id).localeCompare(String(b.id))):valid.map(p=>({p,d:busStopMeters(p,center)})).filter(x=>x.d<1250)
     .sort((a,b)=>a.d-b.d).slice(0,limit).map(x=>x.p);
   if(!selected.length)return BASEMAP_BUS_FILTER;
   return ['all',BASEMAP_BUS_FILTER,['!', ['within',{

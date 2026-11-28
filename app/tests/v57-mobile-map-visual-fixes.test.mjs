@@ -28,7 +28,7 @@ test('7호선 안내선은 구 내부에서 페이드로 흐려지지 않도록 
 });
 test('버스정류장 라벨은 골목 상세 확대에서 이름을 우선 표시한다',()=>{
   const source=readFileSync(new URL('../src/transport-map.js',import.meta.url),'utf8');
-  assert.match(source,/transport-bus-names',type:'symbol',source:'transport-bus',minzoom:16\.0/);
+  assert.match(source,/transport-bus-names',type:'symbol',source:'transport-bus',minzoom:18\.0/);
   assert.match(source,/'text-allow-overlap':false/);
   assert.match(source,/정류장명 미등록/);
 });

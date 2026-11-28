@@ -39,5 +39,5 @@ test('same normalized facility nearby from different sources appears once withou
 test('complete official registry excludes native marker copies while fallback remains available',()=>{
  const src=readFileSync(new URL('../src/transport-map.js',import.meta.url),'utf8');
  assert.match(src,/officialIds\.has\(String\(p\.arsId/);
- assert.match(src,/const base=busTileFallbackFilter\(currentVisibleBusStops,center\)/);
+ assert.match(src,/const base=busTileFallbackFilter\(currentVisibleBusStops,null,\{allScoped:true\}\)/);
 });

@@ -1201,10 +1201,10 @@ export function installBasemapBusStopFallback(map,districtGeometry=null){
       layout:{'icon-image':'dj-bus-blue-marker',
         'icon-size':['interpolate',['linear'],['zoom'],16.4,0.262,18.2,0.331,20,0.393],
         'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-padding':1,
-        'text-field':['step',['zoom'],'',16.0,['coalesce',['get','name:nonlatin'],['get','name:ko'],['get','name_ko'],['get','name'],'']],
+        'text-field':['step',['zoom'],'',18.0,['coalesce',['get','name:nonlatin'],['get','name:ko'],['get','name_ko'],['get','name'],'']],
         'text-font':BUS_LABEL_FONT,'text-size':BUS_LABEL_SIZE,
         'text-anchor':'top','text-offset':[0,1.4],'text-max-width':14,
-        'text-allow-overlap':true,'text-ignore-placement':true,'text-optional':true,
+        'text-allow-overlap':false,'text-ignore-placement':false,'text-optional':true,'text-padding':1,
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport',
         'icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport'},
       paint:{'icon-opacity':1,'text-color':busStopLabelPalette(typeof document!=='undefined'?document.documentElement?.dataset?.theme:'light').text,
@@ -1273,7 +1273,7 @@ function labelVisibility(map){
     {id:'transport-subway-names',type:'symbol',source:'transport-subway',minzoom:11.6,
       layout:{'text-field':['get','name'],'text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'],'text-size':['interpolate',['linear'],['zoom'],11.6,12.5,16,14.5],'text-offset':[0,1.35],'text-optional':true},
       paint:{'text-color':['coalesce',['get','lineColor'],DEFAULT_SUBWAY_LINE_COLOR],'text-halo-color':'rgba(255,255,255,0.98)','text-halo-width':2.1}},
-    {id:'transport-bus-names',type:'symbol',source:'transport-bus',minzoom:16.0,maxzoom:17.8,
+    {id:'transport-bus-names',type:'symbol',source:'transport-bus',minzoom:18.0,maxzoom:19.0,
       filter:['all',['!=',['get','label'],'정류장명 미등록'],['!=',['get','label'],'이름 미등록']],
       layout:{'text-field':['get','label'],'text-font':BUS_LABEL_FONT,
         'text-size':BUS_LABEL_SIZE,
@@ -1283,13 +1283,13 @@ function labelVisibility(map){
       paint:{'text-color':'#18508e','text-halo-color':'#fff','text-halo-width':1.05}},
     // Once a user zooms in to street level, prioritize actual bus-stop names over
     // background label collisions. Only supplied OSM/Seoul names can appear.
-    {id:'transport-bus-names-close',type:'symbol',source:'transport-bus',minzoom:17.8,
+    {id:'transport-bus-names-close',type:'symbol',source:'transport-bus',minzoom:19.0,
       filter:['all',['!=',['get','label'],'정류장명 미등록'],['!=',['get','label'],'이름 미등록'],
         ['!=',['get','label'],'']],
       layout:{'text-field':['get','label'],'text-font':BUS_LABEL_FONT,
         'text-size':BUS_LABEL_SIZE,
         'text-offset':[0,1.4],'text-anchor':'top','text-max-width':14,
-        'text-allow-overlap':true,'text-ignore-placement':true,'text-optional':true,
+        'text-allow-overlap':false,'text-ignore-placement':false,'text-optional':true,'text-padding':1,
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},
       paint:{'text-color':'#18508e','text-halo-color':'rgba(255,255,255,0.97)','text-halo-width':1.05}}
   ];
@@ -1932,18 +1932,22 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     }
     return [...buses,...stations.values()];
   }
-  let lastTileFallbackFilter='';
+  let lastTileFallbackFilter='',lastFallbackInventory='';
   let currentVisibleBusStops=[];
   function updateTileBusFallbackFilter(){
     if(!map.getLayer?.('dj-basemap-bus-pictogram')||!map.setFilter)return;
-    const center=map.getCenter?.();
-    const base=busTileFallbackFilter(currentVisibleBusStops,center);
-    const filter=cityScope()?busFilterInsideDistrict(base,getSeoulBoundary()):busFilterNearDistrict(base,getDistrictGeometry());
+    if(map.isMoving?.()||map.isSourceLoaded?.('transport-bus')===false)return;
+    const boundary=cityScope()?getSeoulBoundary():getDistrictGeometry();
+    const inventory=JSON.stringify([cityScope(),boundary,currentVisibleBusStops.map(p=>[p.id,p.lng,p.lat])]);
+    if(inventory===lastFallbackInventory)return;
+    const base=busTileFallbackFilter(currentVisibleBusStops,null,{allScoped:true});
+    const filter=cityScope()?busFilterInsideDistrict(base,boundary):busFilterNearDistrict(base,boundary);
     const signature=JSON.stringify(filter);
-    if(lastTileFallbackFilter===signature)return;
-    try{map.setFilter('dj-basemap-bus-pictogram',filter);lastTileFallbackFilter=signature;}
+    if(lastTileFallbackFilter===signature){lastFallbackInventory=inventory;return;}
+    try{map.setFilter('dj-basemap-bus-pictogram',filter);lastTileFallbackFilter=signature;lastFallbackInventory=inventory;}
     catch(error){console.debug('[정류장 예비 레이어 중복 필터]',error?.message||error);}
   }
+  map.on('sourcedata',e=>{if(e.sourceId==='transport-bus'&&e.isSourceLoaded)updateTileBusFallbackFilter();});
   let lastStopDataSignature='',lastBusSourceSignature='',lastRailSourceSignature='',lastMetroInputSignature='';
   let busRoadIndex=null,busRoadViewKey='';
   const stableBusDisplayCoords=new Map();
@@ -1955,7 +1959,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     return items.map(p=>{
       if(p.kind!=='bus')return p;
       const id=String(p.id)+'|'+p.lng+'|'+p.lat;
-      if(!stableBusDisplayCoords.has(id)&&busRoadIndex.size){const coord=busRoadIndex.place(p);if(coord[0]!==p.lng||coord[1]!==p.lat)stableBusDisplayCoords.set(id,coord);}
+      if(!stableBusDisplayCoords.has(id)&&busRoadIndex.size){const coord=busRoadIndex.place(p);if(coord[0]!==p.lng||coord[1]!==p.lat||b?.contains?.([p.lng,p.lat]))stableBusDisplayCoords.set(id,coord);}
       if(stableBusDisplayCoords.size>2000)stableBusDisplayCoords.delete(stableBusDisplayCoords.keys().next().value);
       return {...p,displayCoords:stableBusDisplayCoords.get(id)||[p.lng,p.lat]};
     });
@@ -1974,8 +1978,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const rail=filtered.filter(x=>x.kind==='subway');
     const displayBus=busDisplayGrouping(bus,map.getZoom?.()??19);
     displayBusGroups=new Map(displayBus.filter(p=>p.groupCount>1).map(p=>[p.id,p]));
-    const busSignature=JSON.stringify(displayBus),railSignature=JSON.stringify(rail);
-    if(busSignature!==lastBusSourceSignature){busArrivalFade.publish(featureCollection(displayBus));lastBusSourceSignature=busSignature;}
+    const busFeatures=featureCollection(displayBus);
+    const busSignature=JSON.stringify(busFeatures),railSignature=JSON.stringify(rail);
+    if(busSignature!==lastBusSourceSignature){busArrivalFade.publish(busFeatures);lastBusSourceSignature=busSignature;}
     if(railSignature!==lastRailSourceSignature){map.getSource('transport-subway').setData(featureCollection(rail));lastRailSourceSignature=railSignature;}
     const metroSignature=JSON.stringify([railSignature,cityScope(),routeStopCoordinates]);
     if(metroSignature!==lastMetroInputSignature){renderMetroMarkers(rail);lastMetroInputSignature=metroSignature;}

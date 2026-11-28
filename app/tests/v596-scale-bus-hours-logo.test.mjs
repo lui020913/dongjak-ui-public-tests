@@ -30,7 +30,7 @@ test('bus stop names are requested for the visible viewport independent of OSM p
   assert.match(code,/const viewportEnrichment=coalesceViewportWork\(scan=>\{[\s\S]*?enrichViewportBusStops\(\)/);
   assert.match(code,/map\.on\('moveend',\(\)=>viewportEnrichment\.request\(/);
   assert.match(code,/map\.on\('zoomend',\(\)=>viewportEnrichment\.request\(/);
-  assert.match(code,/transport-bus-names',type:'symbol',source:'transport-bus',minzoom:16\.0/);
+  assert.match(code,/transport-bus-names',type:'symbol',source:'transport-bus',minzoom:18\.0/);
 });
 test('TCP HTTP reader handles UTF-8 JSON with chunked transfer framing',()=>{
   const payload=JSON.stringify({status:'ok',name:'노량진역'});

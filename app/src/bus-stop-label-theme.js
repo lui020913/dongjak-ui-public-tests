@@ -3,6 +3,8 @@ export const BUS_STOP_LABEL_IDS=Object.freeze([
   'transport-bus-names','transport-bus-names-close',
   'dj-basemap-bus-pictogram','dongjak-zoom-busstop-names'
 ]);
+export const BUS_LABEL_MIN_ZOOM=18.0;
+export const BUS_LABEL_CLOSE_ZOOM=19.0;
 export const BUS_LABEL_FONT=['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'];
 export const BUS_LABEL_SIZE=['interpolate',['linear'],['zoom'],13.3,10,16,11.6,17.15,11.7,20,11.7];
 export function busStopLabelPalette(theme='light'){
@@ -16,7 +18,7 @@ export function applyBusStopLabelTheme(map,theme='light'){
   // roughly the same street-level scale, with MapLibre collision detection.
   // Missing/older styles simply ignore this optional zoom-range adjustment.
   if(map?.getLayer?.('transport-bus-names') && typeof map.setLayerZoomRange==='function'){
-    try{map.setLayerZoomRange('transport-bus-names',16.0,17.8);}catch{}
+    try{map.setLayerZoomRange('transport-bus-names',18.0,19.0);}catch{}
   }
   let updated=0;
   for(const id of BUS_STOP_LABEL_IDS){

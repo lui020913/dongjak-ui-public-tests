@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.278",
+  "application_version": "9.2.279",
   "public_work_branch": "main",
-  "purpose": "Fix undefined publicSuffix runtime reference left in civic parcel POI and official data callbacks after v277 syntax repair. Use existing civic name/category helpers and complete source geometry, preserve civic overlay paint across theme repaint. Add integration regression with nonempty POI and official events, not empty mocks. Direct visual protected production.",
-  "attempt": 520,
+  "purpose": "Separate bus label LOD from icon LOD: icons at 15.5 unchanged, all stop names from 18.0, close labels from 19.0, collision avoidance. Stop center-driven fallback ownership churn with deterministic scoped inventory, delay fallback suppression until official source is loaded, preserve stable display coordinates. Incremental GeoJSON feature diffs, no identical writes, fade only first-seen IDs. Add regression checks. Direct visual protected production.",
+  "attempt": 521,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

@@ -46,7 +46,7 @@ test('Bus name labels appear alongside icons from street zoom with normal collis
   const m={getLayer:id=>id==='transport-bus-names'?{}:null,
     setLayerZoomRange:(...args)=>calls.push(args),setPaintProperty:()=>{}};
   applyBusStopLabelTheme(m,'dark');
-  assert.deepEqual(calls,[['transport-bus-names',16.0,17.8]]);
+  assert.deepEqual(calls,[['transport-bus-names',18.0,19.0]]);
 });
 test('Mobile sheets are compact and zoom lock only concerns the page, not map gestures',()=>{
   const css=read('src/v811-mobile-experience.css');
