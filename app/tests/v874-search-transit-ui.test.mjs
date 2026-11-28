@@ -46,7 +46,7 @@ test('v874 source contains stable in-place metro line change and distinct mobile
  const transport=read('src/transport-map.js');
  const css=read('src/v874-comprehensive-ui.css');
  assert.match(transport,/sameStationLineChange/);
- assert.match(transport,/if\(!sameStationLineChange\)\{onOpen\(\);panel\.hidden=false;\}/);
+ assert.match(transport,/if\(!sameStationLineChange\)\{onOpen\(\);panel\.style\.removeProperty\('display'\);panel\.hidden=false;\}/);
  assert.match(transport,/if\(!sameStationLineChange\)selectionMarker=/);
  assert.match(css,/@media\(max-width:699px\)/);
  assert.match(css,/metro-neighbor-row/);
