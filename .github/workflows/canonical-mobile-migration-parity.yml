@@ -58,7 +58,7 @@ jobs:
           materialize "$base"
           materialize "$candidate"
           # These explicitly listed regression files now check already-approved behavior.
-          diff -qr --exclude=v863-guest-onboarding-flow.test.mjs --exclude=phone-35-acceptance-20261122.test.mjs --exclude=protected-release-ownership-20261123.test.mjs --exclude=v611-static-bus-ai-floating.test.mjs --exclude=v711-layout-prewarm.test.mjs --exclude=v862-pc-mobile-separation.test.mjs --exclude=v880-window-stability.test.mjs "$base/app" "$candidate/app"
+          diff -qr --exclude=route-experience-20261123.test.mjs --exclude=v863-guest-onboarding-flow.test.mjs --exclude=phone-35-acceptance-20261122.test.mjs --exclude=protected-release-ownership-20261123.test.mjs --exclude=v611-static-bus-ai-floating.test.mjs --exclude=v711-layout-prewarm.test.mjs --exclude=v862-pc-mobile-separation.test.mjs --exclude=v880-window-stability.test.mjs "$base/app" "$candidate/app"
           node --test "$candidate/app/tests/v863-guest-onboarding-flow.test.mjs"
           echo 'PASS: transformed application trees are byte-identical except the explicitly updated regression tests'
       - name: Run mobile overlay contracts
@@ -72,7 +72,7 @@ jobs:
           git archive f0c431c00125226d682860586c20272f0069b0a9 | tar -x -C "$baseline"
           npm ci --prefix app --no-audit --no-fund --prefer-offline
           ln -s "$GITHUB_WORKSPACE/app/node_modules" "$baseline/app/node_modules"
-          files=(phone-35-acceptance-20261122 protected-release-ownership-20261123 v611-static-bus-ai-floating v711-layout-prewarm v862-pc-mobile-separation v863-guest-onboarding-flow v880-window-stability)
+          files=(phone-35-acceptance-20261122 protected-release-ownership-20261123 v611-static-bus-ai-floating v711-layout-prewarm v862-pc-mobile-separation v863-guest-onboarding-flow v880-window-stability route-experience-20261123)
           collect() {
             local root="$1" name="$2"
             cd "$root/app"
@@ -94,3 +94,7 @@ jobs:
           test ! -s "$RUNNER_TEMP/new.failures"
           test ! -s "$RUNNER_TEMP/candidate.failures"
           echo 'PASS: all previously failing source-contract suites now pass without reverting approved UI behavior'
+      - name: Inventory remaining release asset references
+        shell: bash
+        run: |
+          git grep -n -I -E 'mobile-first-overhaul\.css|mobile-17-followup\.(js|css)|mobile-next\.(js|css)|apply-mobile-(17-followup|next)\.mjs' -- ':!app/package-lock.json' ':!app/public/data' ':!app/public/buildings' ':!app/src/app-version.js' ':!docs' | cut -c1-350 || true
