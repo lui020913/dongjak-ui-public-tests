@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.257",
+  "application_version": "9.2.258",
   "public_work_branch": "main",
-  "purpose": "Use packaged mapped single rail alignments on all supported local lines where coverage passes, preserve real track curves and marker anchoring; only numbered station exit display (no passage/platform geometry), civic site #D1D1CD, personal saved-place blue star map source with live save/remove/cloud sync. Preserve existing ownership, safety, routing guards, and direct visual protected production workflow.",
-  "attempt": 499,
+  "purpose": "Change only saved-place star marker from blue to the existing map brand teal #0D8875; retain white star, outline, sizes, click behavior, sync, and all previous map fixes. Existing direct-visual protected release.",
+  "attempt": 500,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

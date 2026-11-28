@@ -1,6 +1,7 @@
 import {placeKey} from './v815-place-store.js';
 export const FAVORITE_SOURCE='dj-saved-place-stars',FAVORITE_LAYER=FAVORITE_SOURCE+'-icon';
-const IMAGE='dj-favorite-star-blue';
+export const FAVORITE_MARKER_COLOR='#0D8875';
+const IMAGE='dj-favorite-star-teal';
 export function favoriteMapGeojson(places=[]){
  const seen=new Set(),features=[];
  for(const p of places){const key=placeKey(p);if(!key||seen.has(key))continue;seen.add(key);
@@ -10,7 +11,7 @@ export function favoriteMapGeojson(places=[]){
 }
 function starImage(){
  const canvas=document.createElement('canvas');canvas.width=80;canvas.height=80;const c=canvas.getContext('2d');
- c.beginPath();c.arc(40,40,35,0,Math.PI*2);c.fillStyle='#46A9F4';c.fill();c.strokeStyle='#fff';c.lineWidth=6;c.stroke();
+ c.beginPath();c.arc(40,40,35,0,Math.PI*2);c.fillStyle=FAVORITE_MARKER_COLOR;c.fill();c.strokeStyle='#fff';c.lineWidth=6;c.stroke();
  c.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?10:21,x=40+Math.cos(a)*r,y=40+Math.sin(a)*r;i?c.lineTo(x,y):c.moveTo(x,y);}c.closePath();c.fillStyle='#fff';c.fill();
  return c.getImageData(0,0,80,80);
 }
