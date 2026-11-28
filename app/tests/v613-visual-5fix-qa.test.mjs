@@ -25,7 +25,7 @@ test('bus fallback preserves OSM source coordinates while native tile pictograms
   assert.match(init,/suppressNativeBusStopGlyphs\(map\)/);
   assert.match(code,/map\.querySourceFeatures\(poiLayer\.source,\{sourceLayer:'poi'\}\)/);
   assert.match(code,/<14\.25\s*\|\|/);
-  assert.match(code,/minzoom:16\.4/);
+  assert.match(code,/minzoom:15\.5/);
   const map={getZoom:()=>14.5,getCanvas:()=>({clientWidth:800,clientHeight:600}),
     getCenter:()=>({lng:126.95,lat:37.5}),unproject:([x,y])=>({lng:126.949+(x-400)*0.00001,lat:37.5+(y-300)*0.00001})};
   assert.ok(busCoverageSamples(map).length>0);

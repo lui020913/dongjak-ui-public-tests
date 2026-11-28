@@ -71,7 +71,7 @@ test('전체폭 화면에서는 조작 버튼을 안내 패널보다 위로 올�
 test('전용 시설·버스 축척 설정 및 회색 철도 강조 레이어 제거',async()=>{
   const t=await readFile(new URL('../src/transport-map.js',import.meta.url),'utf8');
   const h=await readFile(new URL('../index.html',import.meta.url),'utf8');
-  assert.match(t,/source:'transport-bus',minzoom:16.4/);
+  assert.match(t,/source:'transport-bus',minzoom:15.5/);
   assert.doesNotMatch(t,/id:'transport-rail-base'/);
   assert.match(h,/id="toggle-public-facilities"/);
 });

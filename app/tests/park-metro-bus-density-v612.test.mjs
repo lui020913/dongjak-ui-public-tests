@@ -44,11 +44,11 @@ test('1호선과 신림선은 다른 호선 및 같은 이름 환승역과 정�
 test('버스 아이콘과 이름은 도로 상세 확대에서만 등장하고 최대 확대 상한 없음',()=>{
   const js=read('src/transport-map.js');
   const fallback=js.slice(js.indexOf('export function installBasemapBusStopFallback'),js.indexOf('const BUS_NAME_FILTERS'));
-  assert.match(fallback,/minzoom:16\.4/);
-  assert.match(fallback,/'text-field':\['step',\['zoom'\],'',17\.75/);
-  assert.match(js,/source:'transport-bus',minzoom:16\.4/);
-  assert.match(js,/source:'transport-bus',minzoom:17\.75/);
-  assert.match(js,/source:'transport-bus',minzoom:18\.4/);
+  assert.match(fallback,/minzoom:15\.5/);
+  assert.match(fallback,/'text-field':\['step',\['zoom'\],'',16\.0/);
+  assert.match(js,/source:'transport-bus',minzoom:15\.5/);
+  assert.match(js,/source:'transport-bus',minzoom:16\.0/);
+  assert.match(js,/source:'transport-bus',minzoom:17\.8/);
   assert.match(js,/'icon-size':\['interpolate',\['linear'\],\['zoom'\],16\.4,0\.262/);
   assert.doesNotMatch(fallback,/maxzoom:/);
 });

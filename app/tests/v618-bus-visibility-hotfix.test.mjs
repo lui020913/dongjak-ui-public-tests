@@ -18,7 +18,7 @@ test('bus POI fallback exists even when official stop GeoJSON has zero features'
   assert.equal(fallback.source,'openfreemap');
   assert.equal(fallback['source-layer'],'poi');
   assert.equal(fallback.layout['icon-image'],'dj-bus-blue-marker');
-  assert.equal(fallback.minzoom,16.4);
+  assert.equal(fallback.minzoom,15.5);
   assert.equal(fallback.filter[0],'all');
   assert.equal(fallback.filter[2][0],'within');
   assert.equal(layers.indexOf(fallback)<layers.findIndex(x=>x.id==='dj-transport-bus-pictogram'),true);

@@ -56,7 +56,7 @@ test('native named facilities replace duplicated floating logo markers',()=>{
 test('close-up bus labels show known names from the transport GeoJSON, with OSM vector fallback',()=>{
   const map=read('src/transport-map.js');
   const ui=read('src/ui-environment.js');
-  assert.match(map,/id:'transport-bus-names-close'.*minzoom:18\.4/);
+  assert.match(map,/id:'transport-bus-names-close'.*minzoom:17\.8/);
   assert.match(map,/'text-allow-overlap':true/);
   assert.match(ui,/\['get','subclass'\]/);
   assert.match(ui,/\['get','name:nonlatin'\]/);
