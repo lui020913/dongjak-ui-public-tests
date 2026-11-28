@@ -1,0 +1,68 @@
+name: Read-only map runtime CPU and API cost profile
+on:
+  push:
+    branches: [audit/map-runtime-cost-20261129]
+permissions:
+  contents: read
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VITE_SUPABASE_URL: https://placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Expose map only in temporary diagnostic checkout
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('app/src/main.js')
+          s=p.read_text()
+          marker='installSolidMapLines(map);'
+          assert s.count(marker)==1
+          p.write_text(s.replace(marker,'globalThis.__qaMap=map;\n'+marker))
+          PY
+      - name: Build diagnostic version with readable functions
+        run: |
+          npm --prefix app ci --no-audit --no-fund
+          npm --prefix app run build -- --minify=false --sourcemap
+      - name: Resolve sampled bundle locations to original source code
+        run: |
+          set -euo pipefail
+          bundle=app/dist/assets/index-BkLxUUIj.js
+          test -f "$bundle" || { echo 'Exact prior profile bundle not reproduced'; ls app/dist/assets/index-*.js; exit 1; }
+          for line in 18265 29576 25666 24863 32216 25617 41989; do
+            echo "PROFILE_BUNDLE_LOCATION $line"
+            sed -n "$((line-8)),$((line+22))p" "$bundle"
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('app/dist/assets/index-BkLxUUIj.js.map')
+          m=json.loads(p.read_text())
+          alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+          def decode(segment):
+              vals=[];v=shift=0
+              for char in segment:
+                  x=alphabet.index(char);v+=(x&31)<<shift
+                  if x&32:shift+=5;continue
+                  vals.append(-(v>>1) if v&1 else v>>1);v=shift=0
+              return vals
+          source=origline=origcol=name=0
+          wanted={18265,29576,25666,24863,32216,25617,41989}
+          for idx,line in enumerate(m['mappings'].split(';'),1):
+              gen=0; hits=[]
+              for segment in filter(None,line.split(',')):
+                  values=decode(segment);gen+=values[0]
+                  if len(values)>=4:
+                      source+=values[1];origline+=values[2];origcol+=values[3]
+                      if len(values)==5:name+=values[4]
+                      if idx in wanted:hits.append((gen,m['sources'][source],origline+1,origcol))
+              if idx in wanted:print('PROFILE_ORIGINAL',idx,hits[:12])
+          PY
