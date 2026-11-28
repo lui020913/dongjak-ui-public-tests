@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import {transitStreamAssetsPlugin} from './scripts/transit-stream-assets.mjs';
+import {buildingVectorAssetsPlugin} from './scripts/building-vector-assets.mjs';
 import {statSync} from 'node:fs';
 import {onRequestGet,onRequestPost} from './functions/api/place-insight.js';
 import {serveDistrictRoadTile} from './server/district-road-tile.mjs';
@@ -34,7 +35,7 @@ return ({
   define:{__DJ_PLATFORM_BUILD__:JSON.stringify(target),__DJ_GUIDEBOOK_BYTES__:JSON.stringify(statSync(new URL('./public/dongjak-guidebook.pdf',import.meta.url)).size)},
   build:{outDir:outputs[target]||'dist',emptyOutDir:true},
 
-  plugins:[transitStreamAssetsPlugin(),{name:'district-road-data',configureServer:districtTileMiddleware,configurePreviewServer:districtTileMiddleware},{name:'dongjak-platform-html',enforce:'pre',transformIndexHtml(html){return platformHtml(html,target);}},
+  plugins:[transitStreamAssetsPlugin(),buildingVectorAssetsPlugin(),{name:'district-road-data',configureServer:districtTileMiddleware,configurePreviewServer:districtTileMiddleware},{name:'dongjak-platform-html',enforce:'pre',transformIndexHtml(html){return platformHtml(html,target);}},
     {name:'dongjak-ui-only-transport-fallback',configureServer(server){
       if(!uiOnly)return;
       server.middlewares.use('/api/transport',(req,res)=>{

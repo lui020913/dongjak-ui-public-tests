@@ -80,8 +80,8 @@ test('transit teardown removes owned map layers before sources and defers tile w
  assert.ok(clear.indexOf('map.removeLayer')<clear.indexOf('map.removeSource'));
  assert.match(clear,/-focus-casing/);
  const trim=main.split('function djTrimOffscreenBuildings(sheets){')[1].split('async function loadVisibleBuildingSheets')[0];
- assert.match(trim,/if\(!djRenderBudget.isEconomy\(\)\|\|/,'normal-quality phones must retain the original cache');
- assert.match(trim,/offscreenEvictionIds\(\[\.\.\.loadedBuildingTiles.keys\(\)\],visible,2\)/,'economy profile retains its bounded cache');
+ assert.match(trim,/if\(\(!djPhone&&!djRenderBudget.isEconomy\(\)\)\|\|/,'normal-quality phones must retain the original cache');
+ assert.match(trim,/offscreenEvictionIds\(\[\.\.\.loadedBuildingTiles.keys\(\)\],visible,djRenderBudget.isEconomy\(\)\?2:4\)/,'economy profile retains its bounded cache');
 });
 
 test('transit mode changes only district display and camera extent, not shared basemap filters or buildings',async()=>{

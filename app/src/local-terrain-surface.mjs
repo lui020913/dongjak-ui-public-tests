@@ -1,5 +1,9 @@
 // Presentation-only localized DEM repair; retain raw elevations outside masks.
 const X=88300,Y=111320;
+const DEM_CACHE='dj-corrected-terrain-v1';
+const correctedMemory=new Map();
+async function correctedCache(){try{return await globalThis.caches?.open(DEM_CACHE);}catch{return null;}}
+function rememberTile(key,bytes){correctedMemory.set(key,bytes.slice(0));while(correctedMemory.size>12)correctedMemory.delete(correctedMemory.keys().next().value);}
 export const LOCAL_TERRAIN_URL='dj-local-terrain://{z}/{x}/{y}.png';
 export const STATION_AREAS=[
  {center:[126.926382,37.513342],along:350,across:135,angle:-17,level:10,blend:110},
@@ -22,7 +26,9 @@ function islandWeight(lng,lat){
 export function correctElevation(lng,lat,h){
  let weight=0,target=h;
  for(const a of STATION_AREAS){
-  const dx=(lng-a.center[0])*X,dy=(lat-a.center[1])*Y,t=a.angle*Math.PI/180;
+  const dx=(lng-a.center[0])*X,dy=(lat-a.center[1])*Y,r=Math.max(a.along,a.across)+a.blend;
+  if(Math.abs(dx)>r||Math.abs(dy)>r)continue;
+  const t=a.angle*Math.PI/180;
   const u=dx*Math.cos(t)+dy*Math.sin(t),v=-dx*Math.sin(t)+dy*Math.cos(t);
   const inner=Math.hypot(u/a.along,v/a.across),outer=Math.hypot(u/(a.along+a.blend),v/(a.across+a.blend));
   const w=inner<=1?1:outer>=1?0:smooth((1-outer)/(inner-outer));
@@ -73,10 +79,15 @@ export function registerLocalTerrainProtocol(maplibre){
  maplibre.addProtocol('dj-local-terrain',async(request,controller)=>{
   const m=/^dj-local-terrain:\/\/(\d+)\/(\d+)\/(\d+)\.png$/.exec(request.url);if(!m)throw Error('invalid DEM tile');
   const [z,x,y]=m.slice(1).map(Number),signal=controller?.signal;
-  const response=await fetch('https://s3.amazonaws.com/elevation-tiles-prod/terrarium/'+z+'/'+x+'/'+y+'.png',{signal,cache:'force-cache'});
+  const url='https://s3.amazonaws.com/elevation-tiles-prod/terrarium/'+z+'/'+x+'/'+y+'.png',affected=affectedTile(z,x,y);
+  const key=url+'?dongjak-terrain-correction=v1';
+  if(affected&&correctedMemory.has(key))return {data:correctedMemory.get(key).slice(0)};
+  const cache=affected?await correctedCache():null;
+  if(cache)try{const hit=await cache.match(key);if(hit){const data=await hit.arrayBuffer();rememberTile(key,data);return {data};}}catch{}
+  const response=await fetch(url,{signal,cache:'force-cache'});
   if(!response.ok)throw Error('DEM HTTP '+response.status);const original=await response.arrayBuffer();
-  if(!affectedTile(z,x,y))return {data:original};
-  try{const data=await correctPng(original,z,x,y);if(signal?.aborted)throw new DOMException('Aborted','AbortError');return {data};}
+  if(!affected)return {data:original};
+  try{const data=await correctPng(original,z,x,y);if(signal?.aborted)throw new DOMException('Aborted','AbortError');rememberTile(key,data);if(cache)void cache.put(key,new Response(data.slice(0),{headers:{'content-type':'image/png'}})).catch(()=>{});return {data};}
   catch(e){if(signal?.aborted)throw e;console.warn('[국소 지형 보정] 원본 유지',e?.message);return {data:original};}
  });registered=true;
 }

@@ -21,7 +21,7 @@ test('route candidate confirmation suppresses the picker hint and normal-profile
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  assert.match(main,/panel.hidden=false;\s*document.getElementById\('route-pick-hint'\).hidden=true/);
  assert.doesNotMatch(main,/building-tile-worker/);
- assert.match(main,/function djTrimOffscreenBuildings\(sheets\)\{\s*if\(!djRenderBudget.isEconomy\(\)/);
+ assert.match(main,/function djTrimOffscreenBuildings\(sheets\)\{\s*if\(\(!djPhone&&!djRenderBudget.isEconomy\(\)\)/);
  const civic=readFileSync(new URL('../src/civic-facility-layer.js',import.meta.url),'utf8');
  assert.match(civic,/map.on\('moveend',scheduleReconcile\)/);
  assert.match(civic,/const matches=new Set\(matchedIds\)/);

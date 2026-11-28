@@ -89,7 +89,7 @@ import {createBuildingCoverage,uniqueHighRiseFootprints,buildingModeVisibility,n
 import {isDisplayBuilding,partitionDisplayBuildings} from './building-display-detail.js';
 import {greenBuildingFilterEnabled,partitionGreenReview} from './green-building-filter.js';
 import {nearestBuildingSheets} from './building-prewarm.js';
-import {prepareBuildingChunks,nextBuildingStage,waitForBuildingSource,BUILDING_STAGE_GAP_MS} from './progressive-building-stream.mjs';
+import {prepareBuildingChunks,nextBuildingStage,waitForBuildingSource,BUILDING_STAGE_GAP_MS,yieldBuildingFrame} from './progressive-building-stream.mjs';
 import {installSafetyLayers,installBridgeDeck} from './safety-layers.js';
 import {installMapOrientationControls,installNeighborDistrictLabels,installDecorativeParkTrees} from './map-polish.js';
 import {installGrassTexture,installForestShade,installBaseBuildingPalette,nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,buildingFootprintOutlinePaint,buildingPlanVisibility,buildingZoomOpacityExpression,BUILDING_ZOOM_FADE_START,BUILDING_ZOOM_FADE_END} from './map-appearance.js';
@@ -795,13 +795,14 @@ function visibleBuilding3D(){
 }
 // Source ownership is committed only when a full GIS sheet has loaded.
 // Until then the native map is the sole visible owner. Never switch on pan frames.
+let lastBuildingOwnershipCount=-1;
 function syncBuildingSheetOwnership(){
   if(!districtBuildingScope)return;
   let changed=false;
   for(const [id,info] of loadedBuildingTiles){
     if(!info.owned&&info.complete&&info.count>0&&map.getSource('dongjak-buildings-data-'+id)&&map.isSourceLoaded('dongjak-buildings-data-'+id)){info.owned=true;changed=true;}
   }
-  districtBuildingScope.setCoveredSheets([...loadedBuildingTiles.values()].filter(info=>info.owned).map(info=>info.bbox));
+  if(changed||lastBuildingOwnershipCount!==[...loadedBuildingTiles.values()].filter(info=>info.owned).length){const owned=[...loadedBuildingTiles.values()].filter(info=>info.owned);lastBuildingOwnershipCount=owned.length;districtBuildingScope.setCoveredSheets(owned.map(info=>info.bbox));}
   if(changed){lastFootprintPaintKey='';for(const info of loadedBuildingTiles.values())info.lastOpacity=-1;syncTiltWithBuildings();}
 }
 function syncTiltWithBuildings() {
@@ -929,8 +930,11 @@ async function loadOneBuildingSheet(sheet){
     const current=()=>visibleBuilding2D()&&map.getZoom()>=BUILDING_ZOOM_MIN&&(!djPhone||(!map.isMoving?.()&&intersects(sheet.bbox,getVisibleBBox())));
     const districtBuildings=await prepareBuildingChunks(features,f=>Number.isFinite(f.properties?.x)&&Number.isFinite(f.properties?.y)&&isDongjak(f.properties.x,f.properties.y)===true&&['Polygon','MultiPolygon'].includes(f.geometry?.type)&&!confirmedDevelopmentDisplay?.contains(f.properties.x,f.properties.y)?f:null,{canContinue:current});
     if(!districtBuildings)return;
-    const {visible:eligible,excluded}=partitionDisplayBuildings(districtBuildings);
+    const eligible=[],excluded=[];
+    const partitioned=await prepareBuildingChunks(districtBuildings,f=>{(isDisplayBuilding(f)?eligible:excluded).push(f);return null;},{canContinue:current});
+    if(!partitioned)return;
     const {visible:reviewedVisible,reviewExcluded}=partitionGreenReview(eligible,reviewCandidates,greenBuildingFilterEnabled(globalThis.location?.search));
+    await yieldBuildingFrame();if(!current())return;
     const visible=uniqueHighRiseFootprints(reviewedVisible);
     const within=await prepareBuildingChunks(visible,f=>({...f,geometry:displayGeometries.get(f)||f.geometry,properties:{...f.properties,_render3d:true}}),{canContinue:current});
     if(!within)return;
@@ -1009,9 +1013,9 @@ function scheduleInitialBuildingWarmup(){
   else setTimeout(()=>void run(),900);
 }
 function djTrimOffscreenBuildings(sheets){
-  if(!djRenderBudget.isEconomy()||app.dataset.sangdoNight==='on'||map.isMoving?.())return;
+  if((!djPhone&&!djRenderBudget.isEconomy())||app.dataset.sangdoNight==='on'||map.isMoving?.())return;
   const visible=sheets.map(s=>s.sheet);
-  for(const id of offscreenEvictionIds([...loadedBuildingTiles.keys()],visible,2)){
+  for(const id of offscreenEvictionIds([...loadedBuildingTiles.keys()],visible,djRenderBudget.isEconomy()?2:4)){
     const info=loadedBuildingTiles.get(id),sourceId='dongjak-buildings-data-'+id;
     if(!info||buildingLoading.has(id))continue;
     const owned=[info.footprintFillId,info.footprintLineId,info.layerId];
@@ -1915,7 +1919,7 @@ map.on('load',()=>{
       boundaryGeometry=feature.geometry;
       districtBuildingScope?.update(boundaryGeometry);
       boundaryBounds=computeBounds(boundaryGeometry);
-      if(changed){for(const info of loadedBuildingTiles.values()){info.complete=false;info.owned=false;info.lastOpacity=-1;}lastFootprintPaintKey='';syncBuildingSheetOwnership();syncTiltWithBuildings();scheduleBuildingLoad();}
+      if(changed){lastBuildingOwnershipCount=-1;for(const info of loadedBuildingTiles.values()){info.complete=false;info.owned=false;info.lastOpacity=-1;}lastFootprintPaintKey='';syncBuildingSheetOwnership();syncTiltWithBuildings();scheduleBuildingLoad();}
       if(gpsLastPosition)outsideDistrictAlert.check(...gpsLastPosition,boundaryGeometry,gpsLastAccuracy);
       syncTransitExterior(true);
       // Reclip bus tile fallback against the updated SGIS district polygon.

@@ -11,7 +11,7 @@ test('one display policy for small buildings, thin shapes and named real buildin
  assert.deepEqual(partitionDisplayBuildings([small,normal,narrow,named,green]),{visible:[normal,named,green],excluded:[small,narrow]});
  assert.equal(isDisplayBuilding({geometry:{type:'Point',coordinates:[0,0]}}),false);
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
- assert.match(main,/const within=visible.map/);assert.match(main,/data:collection,tolerance:0.5,maxzoom:19/);
+ assert.match(main,/const within=await prepareBuildingChunks\(visible/);assert.match(main,/data:collection,tolerance:0.5,maxzoom:19/);
 });
 test('only independently matched small native buildings are suppressed; nearby real or unknown buildings stay',()=>{
  const small=feature(3,4),large=feature(6,6),unmatched=feature(3,4,{},126.951),named=feature(3,4,{name:'관리실'});

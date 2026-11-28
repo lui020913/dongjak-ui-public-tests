@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.274",
+  "application_version": "9.2.275",
   "public_work_branch": "main",
-  "purpose": "Progressive building streaming: native fallback first; one nearest visible complete GIS sheet per stage, 384-feature preparation chunks with browser yields and camera interruption, source-ready handoff before next stage, limited startup warmup and no competing moving prefetch. Preserve full-sheet exclusive ownership, original geometry and prior civic/bus fixes. Direct visual protected production.",
-  "attempt": 516,
+  "purpose": "Conservative rendering performance: chunk district building partition, bounded offscreen mobile cache, avoid redundant ownership updates, cache corrected DEM tiles without changing elevations. Fix previous progressive building test assertion. Add explicit experimental MVT build pipeline with 8192 extent, 0.5 tolerance, full reviewed geometry filtering and feature-ID coverage audit; production retains GeoJSON until MVT visual parity is verified. Preserve DPI, 3D heights, colors and safety overlays. Direct visual protected production.",
+  "attempt": 517,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
