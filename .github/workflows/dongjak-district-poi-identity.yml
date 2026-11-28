@@ -1,0 +1,33 @@
+name: Dongjak district POI identity audit
+on:
+  push:
+    branches: [audit/district-poi-identity-20261126]
+    paths:
+      - 'scripts/research/dongjak_district_poi_identity.py'
+      - '.github/workflows/dongjak-district-poi-identity.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2 mapbox-vector-tile==2.2.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-reaudited-road-display-assets
+          run-id: 45786891095
+          github-token: ${{ github.token }}
+          path: assets
+      - run: python scripts/research/dongjak_district_poi_identity.py assets output
+      - uses: actions/upload-artifact@v4
+        with:
+          name: district-poi-identity-audit
+          path: output/
+          retention-days: 14
+          if-no-files-found: error
