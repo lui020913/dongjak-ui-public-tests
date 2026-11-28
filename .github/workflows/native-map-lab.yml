@@ -42,9 +42,12 @@ jobs:
           (cd app && npx vite build .native-lab-web --config .native-lab-web/vite.config.mjs --outDir "$GITHUB_WORKSPACE/experiments/native-map-lab/app/src/main/assets" --emptyOutDir)
           test -s experiments/native-map-lab/app/src/main/assets/index.html
       - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
       - name: Build isolated debug APK
         run: |
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+          test -f "$ANDROID_HOME/platforms/android-36/android.jar"
+          test -x "$ANDROID_HOME/build-tools/36.0.0/aapt2"
           gradle -p experiments/native-map-lab/ :app:assembleDebug --no-daemon --stacktrace
       - uses: actions/upload-artifact@v4
         with:
