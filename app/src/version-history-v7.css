@@ -35,24 +35,24 @@
 #app .v7-history-item-version{color:#397c68;font-weight:800;font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums;padding-top:2px;}
 #app .v7-history-item-text{color:#334c42;word-break:keep-all;overflow-wrap:anywhere;}
 #app .v7-history-end{font-size:11px;line-height:1.7;color:#728579;padding:4px 0 12px;margin:0;}
-#app[data-theme="dark"] .version-history-dialog{background:#182c30;color:#e7f2ed;}
-#app[data-theme="dark"] .version-history-list{scrollbar-color:#57756d transparent;}
-#app[data-theme="dark"] .v7-history-summary-heading{color:#d9f8e7;}
-#app[data-theme="dark"] .v7-history-eyebrow,#app[data-theme="dark"] .v7-history-stat strong{color:#86dbb7;}
-#app[data-theme="dark"] .v7-history-summary-copy,#app[data-theme="dark"] .v7-history-major-title p,#app[data-theme="dark"] .v7-history-end{color:#b6cdc3;}
-#app[data-theme="dark"] .v7-history-stat,#app[data-theme="dark"] .v7-history-topic{background:#20383a;border-color:#395851;}
-#app[data-theme="dark"] .v7-history-stat span,#app[data-theme="dark"] .v7-history-topic-head span{color:#accbbd;}
-#app[data-theme="dark"] .v7-history-nav-heading,#app[data-theme="dark"] .v7-history-topic-head h4{color:#def4e9;}
-#app[data-theme="dark"] .v7-history-nav-button{background:#233c3d;border-color:#436259;color:#cbefdc;}
-#app[data-theme="dark"] .v7-history-nav-button:hover,#app[data-theme="dark"] .v7-history-nav-button:focus-visible{background:#2d514b;}
-#app[data-theme="dark"] .v7-history-major{border-color:#43625a;}
-#app[data-theme="dark"] .v7-history-major-index{background:#275248;color:#c9f3d9;}
-#app[data-theme="dark"] .v7-history-major-title h3{color:#99e5be;}
-#app[data-theme="dark"] .v7-history-major-count{background:#26453f;color:#c5e2d4;}
-#app[data-theme="dark"] .v7-history-topic-head{background:#294444;border-color:#42625a;}
-#app[data-theme="dark"] .v7-history-item{border-color:#38514c;}
-#app[data-theme="dark"] .v7-history-item-version{color:#8fdcc0;}
-#app[data-theme="dark"] .v7-history-item-text{color:#e1ede6;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @media(max-width:580px){
   #app .version-history-dialog{width:calc(100vw - 16px);max-height:94dvh;border-radius:15px;}
   #app .version-history-head{padding:14px 16px 12px;}
@@ -75,7 +75,7 @@
 #app .version-history-mobile-trigger{display:none;}
 @media(max-width:1079px){
   #app .version-history-mobile-trigger{display:block;width:100%;min-height:38px;margin:9px 0 12px;padding:9px 12px;border:1px solid #9acabc;border-radius:9px;background:#eaf8f1;color:#19664e;font-size:12px;font-weight:800;text-align:left;cursor:pointer;}
-  #app[data-theme="dark"] .version-history-mobile-trigger{background:#234c45;border-color:#5d9d85;color:#d3f7e5;}
+  
 }
 
 /* v7.0.1: source register is kept in the update-history appendix, not in every tool panel. */
@@ -93,15 +93,15 @@
 #app .v7-history-source-link,#app .v7-history-source-local{flex:none;font-size:10px;font-weight:800;color:#14785f;text-decoration:underline;text-underline-offset:2px;}
 #app .v7-history-source-local{color:#72877d;text-decoration:none;}
 #app .v7-history-source-note{margin:5px 0 0;font-size:10px;line-height:1.6;color:#83948b;}
-#app[data-theme="dark"] .v7-history-sources{border-color:#43625a;}
-#app[data-theme="dark"] .v7-history-sources-title{color:#99e5be;}
-#app[data-theme="dark"] .v7-history-sources-copy{color:#b6cdc3;}
-#app[data-theme="dark"] .v7-history-source-group{background:#20383a;border-color:#395851;}
-#app[data-theme="dark"] .v7-history-source-group>h4{background:#294444;border-color:#42625a;color:#def4e9;}
-#app[data-theme="dark"] .v7-history-source-item{border-color:#38514c;}
-#app[data-theme="dark"] .v7-history-source-head strong{color:#e1ede6;}
-#app[data-theme="dark"] .v7-history-source-head>span,#app[data-theme="dark"] .v7-history-source-note{color:#b6cdc3;}
-#app[data-theme="dark"] .v7-history-source-link{color:#8fdcc0;}
+
+
+
+
+
+
+
+
+
 @media(max-width:580px){
   #app .v7-history-sources{padding-top:18px;}
   #app .v7-history-source-group>h4{padding:10px 12px;font-size:12px;}
@@ -115,8 +115,8 @@
 #app .v707-release-head .dj-semver-size{display:inline-flex;align-items:center;justify-content:center;padding:3px 7px;border:1px solid #d4e4db;border-radius:6px;font-size:10px;font-weight:750;white-space:nowrap;color:#496e5f;background:#f2f8f5;}
 #app .v707-release[data-release-type=major] .dj-semver-size{border-color:#a4d2bf;color:#12674f;background:#e9f5ee;}
 #app .v707-release[data-release-type=minor] .dj-semver-size{border-color:#b4d3ea;color:#285f7b;background:#eef7fc;}
-#app[data-theme=dark] .dj-semver-explanation{color:#b6cdc3;}
-#app[data-theme=dark] .v707-release-head .dj-semver-size{background:#28433d;border-color:#436257;color:#d7eee0;}
+
+
 @media(max-width:580px){#app .dj-semver-explanation{margin:-8px 0 12px;font-size:10px;}}
 
 /* Historical two-part edition headings; exact original records expand on demand. */
@@ -173,4 +173,4 @@ html body #app#app #version-history-list .dj-edition-history .v707-release-items
 #app #version-history-list .dj-history-section-title{margin:8px 2px 10px;font-size:15px;font-weight:750;line-height:1.45;color:inherit}
 #app #version-history-list .dj-history-highlights{margin:2px 0 10px;padding-inline-start:22px;padding-inline-end:6px;font-size:13px;line-height:1.65;color:inherit;overflow-wrap:anywhere}
 #app #version-history-list .dj-history-highlights li{margin:0 0 7px}
-#app[data-theme="dark"] #version-history-list .dj-history-latest{background:var(--dj-theme-surface,#2c343d);color:var(--dj-theme-ink,#f1f4f6);border-color:var(--dj-theme-line,#424952)}
+

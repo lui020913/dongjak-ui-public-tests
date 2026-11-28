@@ -213,16 +213,8 @@
 
 /* Match theme contrast without changing original mode behavior. */
 @media (max-width:699px) {
-  html body #app[data-theme="dark"] #dj-v794-toolbar > .dj-v794-tool:not([data-active="true"]) {
-    color:var(--dj881-text)!important;
-    background:var(--dj881-subtle)!important;
-    border-color:var(--dj881-line)!important;
-  }
-  html body #app[data-theme="dark"] #dj-v794-toolbar > .dj-v794-tool[data-active="true"] {
-    color:#e3faef!important;
-    background:#31574e!important;
-    border-color:#66bfa3!important;
-  }
+  
+  
 }
 
 /* Actual 390px safety drawer capture: floating TIP overlaps safety controls

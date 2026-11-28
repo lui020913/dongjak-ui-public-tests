@@ -14,7 +14,8 @@ import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 if(process.argv[1]&&pathToFileURL(process.argv[1]).href===import.meta.url){
- if(process.argv[2]!=='--prepare')throw Error('Use --prepare for a read-only batch');
+ if(!['--prepare','--check'].includes(process.argv[2]))throw Error('Use --check or --prepare');
+ const prepare=process.argv[2]==='--prepare';
  const paths=execFileSync('git',['ls-files','-z','--','app/src','app/platforms'],{encoding:'utf8'}).split('\0').filter(p=>p.endsWith('.css'));
  let changed=0,rules=0,selectors=0;
  for(const path of paths){
@@ -25,8 +26,9 @@ if(process.argv[1]&&pathToFileURL(process.argv[1]).href===import.meta.url){
   const data=Buffer.from(next.content,'utf8').toString('base64');
   const total=Math.ceil(data.length/6000),sha=createHash('sha256').update(next.content).digest('hex');
   console.log('CSS_RETIRE_FILE '+JSON.stringify({path,sha,parts:total,rules:next.removed,selectors:next.trimmed,bytes:Buffer.byteLength(next.content)}));
-  for(let i=0;i<total;i++)console.log('CSS_RETIRE_PART '+JSON.stringify({path,i,data:data.slice(i*6000,(i+1)*6000)}));
+  if(prepare)for(let i=0;i<total;i++)console.log('CSS_RETIRE_PART '+JSON.stringify({path,i,data:data.slice(i*6000,(i+1)*6000)}));
   changed++;rules+=next.removed;selectors+=next.trimmed;
  }
  console.log('CSS_RETIRE_SUMMARY '+JSON.stringify({changed,rules,selectors,scanned:paths.length}));
+ if(!prepare&&changed)process.exitCode=1;
 }

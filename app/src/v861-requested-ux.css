@@ -132,8 +132,4 @@ html body #app#app#app#app #transport-sheet.dj-news-transit-fixed .dj824-transpo
     font-size:25px!important;
   }
 }
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-quick-button,
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-share,
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-bookmark {
-  color:#e6f2ec!important;background:#263c3b!important;border-color:#4b6760!important;
-}
+

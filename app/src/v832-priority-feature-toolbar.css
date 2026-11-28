@@ -140,7 +140,7 @@
   html body #app#app#app#app#app #dj832-data-sheet .dj832-state-text {font-weight:650!important;text-align:right!important;}
   html body #app#app#app#app#app #dj832-data-sheet .dj832-sheet-body h3 {margin:10px 0 4px!important;font-size:12px!important;font-weight:700!important;}
   html body #app#app#app#app#app #dj832-data-sheet .dj832-sheet-body p {margin:0!important;font-size:12px!important;font-weight:450!important;line-height:1.55!important;overflow-wrap:anywhere!important;}
-  html body #app#app#app#app#app[data-theme="dark"] #dj832-data-sheet {background:var(--dj800-surface,#1c3437)!important;color:var(--dj800-text,#e7f5ed)!important;border-color:var(--dj800-border,#47645d)!important;}
+  
 }
 @media(max-width:359px){
  html body #app#app#app#app#app#app .topbar > #dj-settings-mobile {width:44px!important;min-width:44px!important;max-width:44px!important;}

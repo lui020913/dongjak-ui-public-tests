@@ -20,19 +20,7 @@ html body #app#app{
   --dj800-logo-size:56px;
   --dj800-rail-width:164px;
 }
-html[data-theme="dark"] body #app#app,
-html body #app#app[data-theme="dark"]{
-  --dj800-canvas:#14292d;
-  --dj800-surface:#1e3539;
-  --dj800-secondary:#294348;
-  --dj800-elevated:#305149;
-  --dj800-border:#4b6b64;
-  --dj800-text:#e8f7ef;
-  --dj800-muted:#b1c9be;
-  --dj800-accent:#80e3b9;
-  --dj800-hover:#2e5049;
-  --dj800-shadow:0 19px 52px rgba(0,13,15,.48);
-}
+
 /* Existing panel classes and event handlers are retained; this layer only
  * normalizes visible surface positioning, typography, contrast and motion. */
 html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#overview-sheet,#admin-dong-picker,#transport-sheet,#detail-sheet,#entry-sheet,#pza-road-sheet,#night-visibility-float,#map-advanced-controls,#map-safety-controls){
@@ -46,16 +34,14 @@ html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel
 html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#overview-sheet,#admin-dong-picker,#transport-sheet,#detail-sheet,#entry-sheet,#pza-road-sheet,#night-visibility-float,#map-advanced-controls,#map-safety-controls) :is(p,small,.page-note,.local-only,.transport-note){color:var(--dj800-muted)!important;}
 html body #app#app :is(.stat-grid>div,.records-list .record-item,.records-list>.empty,.route-card,.route-location-row,.route-search-item,.transport-arrival-row,.metro-arrival-direction-group,.transport-selection-box,.dj-safety-group,.dj-import-entry,.metro-info-line-card,.metro-neighbor-row,.route-place-search-item){border-color:var(--dj800-border)!important;}
 /* Dark theme must not inherit light cards, inputs or empty states. */
-html[data-theme="dark"] body #app#app :is(.stat-grid>div,.record-item,.records-list>div,.transport-arrival-row,.transport-official-time-card,.transport-timetable-route-panel,.transport-selection-box,.metro-info-line-card,.transport-chip,.route-card,.route-location-row,.route-search-item,.community-note,.community-feed>article,.dongjak-news-card,.dongjak-news-item,.dj-night-group,.dj-import-entry){
-  color:var(--dj800-text)!important;background-color:var(--dj800-secondary)!important;border-color:var(--dj800-border)!important;
-}
-html[data-theme="dark"] body #app#app :is(.records-list,.route-card,.stat-grid,.metro-direction-grid) :is(strong,b,button,span){color:var(--dj800-text);}
-html[data-theme="dark"] body #app#app :is(#mine-panel,#news-panel,#participation-panel) :is(p,small,.page-note,.records-list .empty,.records-list .record-item){color:var(--dj800-muted)!important;}
+
+
+
 /* Light/dark cards use separate surfaces and not a forced universal green. */
 html body #app#app :is(#my-count,#my-saved-count,#my-note-count){color:var(--dj800-accent)!important;font-variant-numeric:tabular-nums!important;}
 html body #app#app :is(#transport-tab-live,#transport-tab-hours){border-radius:12px!important;}
 html body #app#app :is(#transport-tab-live,#transport-tab-hours)[aria-pressed="true"]{background:var(--dj800-accent)!important;color:var(--dj800-canvas)!important;}
-html[data-theme="dark"] body #app#app :is(#transport-tab-live,#transport-tab-hours)[aria-pressed="true"]{background:#347f68!important;color:#f1fff8!important;}
+
 html body #app#app #transport-sheet .dj-metro-line-selector{
   background:transparent!important;border:1px solid transparent!important;box-shadow:none!important;
   padding:3px!important;border-radius:12px!important;transform:none!important;
@@ -85,24 +71,16 @@ html body #app#app #transport-sheet .metro-neighbor-row .metro-rail-current{
   padding:10px 5px!important;border-radius:11px!important;
   background:var(--dj-metro-route-color,#24679b)!important;color:#fff!important;
 }
-html[data-theme="dark"] body #app#app #transport-sheet .metro-neighbor-row :is(.metro-rail-previous,.metro-rail-next){
-  background:#2c484d!important;border-color:#56716f!important;color:#e5f7ee!important;
-}
+
 html body #app#app #transport-sheet .metro-arrival-direction-group.up{
   background:#eaf5fb!important;border-color:#bcd6e6!important;
 }
 html body #app#app #transport-sheet .metro-arrival-direction-group.down{
   background:#fff6e7!important;border-color:#eddaa9!important;
 }
-html[data-theme="dark"] body #app#app #transport-sheet .metro-arrival-direction-group.up{
-  background:#1d394a!important;border-color:#496c86!important;
-}
-html[data-theme="dark"] body #app#app #transport-sheet .metro-arrival-direction-group.down{
-  background:#3e3429!important;border-color:#886f4c!important;
-}
-html[data-theme="dark"] body #app#app #transport-sheet .metro-arrival-direction-group .transport-arrival-row{
-  background:#29464b!important;color:#e9f5ef!important;border-color:#516c68!important;
-}
+
+
+
 /* One active panel at a time. These rules are a safety net for older CSS that
  * uses display:block!important even after the hidden attribute changes. */
 html body #app#app :is(#overview-sheet,#admin-dong-picker,#transport-sheet,#route-panel,#participation-panel,#news-panel,#mine-panel,#detail-sheet,#entry-sheet,#pza-road-sheet,#night-visibility-float,#dj800-type-panel)[hidden]{display:none!important;}
@@ -136,9 +114,7 @@ html body #app#app :is(#map-options-mobile-close,#map-options-desktop-close,#map
 }
 html body #app#app :is(#map-options-mobile-close,#map-options-desktop-close,#map-safety-close,#transport-close,#admin-dong-close,#overview-sheet-close)::before{inset:auto!important;margin:auto!important;translate:0 0!important;transform:none!important;}
 /* Dark cards/labels remain legible: old light-only whites can no longer win. */
-html[data-theme="dark"] body #app#app :is(#mine-panel,#news-panel) :is(.records-list .record-item,.records-list>div,.stat-grid>div,.dongjak-news-list>article,.dongjak-news-card,.record-empty){
-  background:var(--dj800-secondary)!important;border-color:var(--dj800-border)!important;color:var(--dj800-text)!important;
-}
+
 /* Mobile: an actual independent readability control, proxying existing events. */
 @media(max-width:699px){
   html body #app#app #dj-type-settings{display:none!important;}

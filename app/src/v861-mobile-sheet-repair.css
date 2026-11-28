@@ -224,13 +224,8 @@
     pointer-events:auto!important;
     touch-action:manipulation!important;
   }
-  html body #app[data-theme="dark"] #dj-mobile-utilities>.dj854-more-head {
-    background:var(--dj800-surface,#192e31)!important;
-    border-bottom-color:var(--dj800-border,#49625d)!important;
-  }
-  html body #app[data-theme="dark"] #dj-mobile-utilities .dj-mobile-utility-heading {
-    color:var(--dj800-text,#e6f5ed)!important;
-  }
+  
+  
 
   /* The first-use map guide is a centered dialog, not a left/right drawer.
      This also corrects stale anchor coordinates left by earlier guide code. */

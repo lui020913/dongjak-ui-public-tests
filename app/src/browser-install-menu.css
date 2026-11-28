@@ -21,10 +21,10 @@ dialog#dj-install-menu::backdrop{background:#fff}
 #dj-install-menu .dj-install-prompt{justify-content:center;margin-top:10px}
 
 .dj-install-qr{display:block;width:112px;height:112px;margin:20px auto 0;image-rendering:pixelated}
-html[data-theme=dark] dialog#dj-install-menu{background:#191b1f;color:#f1f4f2}
-html[data-theme=dark] dialog#dj-install-menu::backdrop{background:#191b1f}
-html[data-theme=dark] dialog#dj-install-menu .dj-install-choice,html[data-theme=dark] dialog#dj-install-menu .dj-install-prompt{background:#24282c;border-color:#414849}
-html[data-theme=dark] dialog#dj-install-menu :is(.dj-install-subtitle,.dj-install-status,.dj-install-chevron){color:#b4bfba}
+
+
+
+
 
 /* Desktop/tablet keep the phone-only gate; the selector belongs to the page, not a second card. */
 #dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-message>h1,#dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-message>p{display:none!important}
@@ -92,12 +92,12 @@ html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen:has(.dj-install-menu)
 #dj-mobile-only-screen #dj-install-menu .dj-install-guide-steps li{font-size:clamp(16px,1.4vw,18px)}
 #dj-mobile-only-screen #dj-install-menu .dj-install-qr{width:168px;height:168px}
 @media (hover:hover) and (pointer:fine){
- html[data-theme=dark] dialog#dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):hover{background-color:#38443f}
+ 
  #dj-install-menu [data-android-guide] .dj-install-prompt:not(.dj-install-guide-web):not(:disabled):hover{background-color:#10624f}
 }
-html[data-theme=dark] dialog#dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):active{background-color:#46564e}
-html[data-theme=dark] dialog#dj-install-menu .dj-install-info{background:#293632;color:#e2f0e7}
-html[data-theme=dark] dialog#dj-install-menu .dj-install-guide-notice{background:#202a25;color:#e2f0e7;border-color:#53665a}
+
+
+
 #dj-install-menu [data-android-guide] .dj-install-prompt:not(.dj-install-guide-web):not(:disabled):active{background-color:#0b5141}
 
 
@@ -133,21 +133,9 @@ html[data-theme=dark] dialog#dj-install-menu .dj-install-guide-notice{background
  #dj-install-menu .dj-install-choice[aria-pressed="true"]:not(:disabled):hover{background:#dcebe3}
 }
 #dj-install-menu .dj-install-choice[aria-pressed="true"]:not(:disabled):active{background:#d2e5da;box-shadow:0 0 0 2px #16836b20,var(--djNext-tool-pressed)}
-html[data-theme=dark] #dj-install-menu .dj-install-choice[aria-pressed="true"]{
- background:#1f493d;
- border-color:#62c4a3;
- color:#effaf5;
-}
-html[data-theme=dark] #dj-install-menu .dj-install-guide-notice{
- background:#3b3020;
- border-color:#8d7442;
- color:#f5e8cc;
-}
-html[data-theme=dark] #dj-install-menu .dj-install-guide-unavailable{
- background:#222d28;
- border-color:#53665a;
- color:#e2f0e7;
-}
+
+
+
 @media(max-width:480px){
  #dj-install-menu .dj-install-choice[aria-pressed="true"]{padding:11px 15px}
 }
@@ -159,7 +147,7 @@ html[data-theme=dark] #dj-install-menu .dj-install-guide-unavailable{
 #dj-install-menu .dj-install-performance-device{display:flex;flex-direction:column;gap:4px;min-width:0;overflow-wrap:anywhere;white-space:normal;font-size:13px;line-height:1.4}
 #dj-install-menu .dj-install-performance-device strong{font-size:14px}
 #dj-install-menu .dj-install-performance p{font-size:12px;line-height:1.5;margin:8px 0 0;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;min-width:0;max-width:100%;color:inherit}
-html[data-theme=dark] #dj-install-menu .dj-install-performance{background:#293632;border-color:#53665a;color:#e2f0e7}
+
 
 /* Concise Android install guidance; full instructions remain accessible. */
 #dj-install-menu [data-android-guide] .dj-install-guide-intro{font-weight:500!important;line-height:1.5!important;margin:4px 0!important}
@@ -175,4 +163,4 @@ html[data-theme=dark] #dj-install-menu .dj-install-performance{background:#29363
 #dj-install-menu .dj-install-guide-security h4{font-size:14px;font-weight:700;margin:0 0 5px;line-height:1.5}
 #dj-install-menu .dj-install-guide-security p{font-weight:400;line-height:1.55!important;margin:5px 0!important}
 #dj-install-menu .dj-install-apk-meta{text-align:center;font-weight:500;opacity:.85;overflow-wrap:anywhere}
-html[data-theme=dark] #dj-install-menu .dj-install-guide-security{background:#26332d;border-color:#53665a}
+

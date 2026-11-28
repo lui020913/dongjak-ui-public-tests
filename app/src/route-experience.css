@@ -12,11 +12,7 @@
     --walk-primary:#137e65;
     --walk-soft:#eaf5ef;
   }
-  #app[data-theme="dark"] {
-    --walk-bg:#23272d;--walk-paper:#2d3339;--walk-muted:#b7c3c0;
-    --walk-text:#ecf4f1;--walk-border:#45524f;--walk-primary:#72b99c;
-    --walk-soft:#34453f;
-  }
+  
   #app #route-panel .dj-page-intro {display:none!important}
   #app #route-panel #dj-walk-fields {
     position:relative;display:flex;flex-direction:column;width:100%;min-width:0;

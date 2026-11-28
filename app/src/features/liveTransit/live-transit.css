@@ -16,9 +16,7 @@ html body #app#app#app#app#app#app#app#app#app .dj-live-vehicle-popup .maplibreg
   min-width:0!important;padding:13px 13px 11px!important;border-radius:16px!important;
   background:#fff!important;color:#203c33!important;box-shadow:0 7px 23px #163b3340!important;
 }
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] .dj-live-vehicle-popup .maplibregl-popup-content{
-  background:#191b1f!important;color:#edf4f1!important;border-color:#41494a!important;box-shadow:0 7px 23px #0008!important;
-}
+
 html body #app#app#app#app#app#app#app#app#app .dj-live-vehicle-popup .dj-live-train-card{
   color:inherit!important;min-width:0!important;max-width:none!important;width:100%!important;
   box-sizing:border-box!important;font-size:12px!important;line-height:1.45!important;

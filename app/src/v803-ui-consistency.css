@@ -4,10 +4,7 @@ html body #app#app{
   --dj803-card:#f2f8f4;--dj803-border:#d9e7dd;--dj803-accent:#0b826a;
   --dj803-text-delta:0px;
 }
-html body #app#app[data-theme="dark"]{
-  --dj803-ink:#e9f6ef;--dj803-mute:#bdd7cb;--dj803-surface:#20363a;
-  --dj803-card:#294640;--dj803-border:#4e7268;--dj803-accent:#8ee4c4;
-}
+
 html body #app#app[data-dj-settings-text="small"]{--dj803-text-delta:-2px;}
 html body #app#app[data-dj-settings-text="large"]{--dj803-text-delta:3px;}
 /* Selection theme is explicit. Text preferences also adjust controls with their
@@ -60,13 +57,9 @@ html body #app#app :is(#map-options-mobile-close,#map-options-desktop-close,#map
 html body #app#app :is(#map-options-mobile-close,#map-options-desktop-close,#map-safety-close)::before{rotate:45deg!important;}
 html body #app#app :is(#map-options-mobile-close,#map-options-desktop-close,#map-safety-close)::after{rotate:-45deg!important;}
 /* Strong dark palettes independent of the light page rules. */
-html body #app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#map-advanced-controls,#map-safety-controls) :is(h2,h3,strong,.page-heading,.page-heading h2,.page-heading strong){
-  color:#f0fbf5!important;
-}
-html body #app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel) :is(.record-empty,.records-list>div,.empty-state,.records-list .record-item){
-  color:#e6f5ed!important;background:#29443f!important;border-color:#54756c!important;
-}
-html body #app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel) :is(.records-list>div,.record-empty,.empty-state) :is(p,small,span){color:#d6ece2!important;}
+
+
+
 /* On deliberate iOS theme reload only, do not reveal the initial brand splash
    at any intermediary map state. The dedicated transition covers it until map
    restoration has genuinely completed. Cold opens still show startup artwork. */
@@ -84,9 +77,7 @@ html #dj-full-transition:not([hidden]){
   -webkit-backdrop-filter:blur(19px) saturate(.75)!important;
   backdrop-filter:blur(19px) saturate(.75)!important;
 }
-html[data-theme="dark"] #dj-full-transition:not([hidden]){
-  background:rgba(17,40,43,.92)!important;
-}
+
 #dj-app-about .dj803-about-credit{
   margin:11px 5px 0!important;text-align:center!important;font-size:12px!important;
   line-height:1.5!important;color:var(--dj803-mute)!important;font-weight:750!important;
@@ -160,9 +151,7 @@ html[data-theme="dark"] #dj-full-transition:not([hidden]){
   html body #app#app #dj800-type-panel .dj800-type-done{
     background:#0d806b!important;color:#fff!important;border-radius:15px!important;
   }
-  html body #app#app[data-theme="dark"] #dj800-type-panel .dj800-type-done{
-    background:#7bddb7!important;color:#123a31!important;
-  }
+  
   /* Preserve map interaction hit-targets. Floating sheet animations use their
      own appearance layer, never moving the search field or bottom nav. */
   html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#transport-sheet,#admin-dong-picker,#overview-sheet,#detail-sheet,#pza-road-sheet,#night-visibility-float):not([hidden]){
@@ -172,10 +161,7 @@ html[data-theme="dark"] #dj-full-transition:not([hidden]){
   html body #app#app #map-safety-controls .map-safety-head{
     background:var(--dj803-surface)!important;color:var(--dj803-ink)!important;
   }
-  html body #app#app[data-theme="dark"] #map-advanced-controls .map-options-mobile-heading,
-  html body #app#app[data-theme="dark"] #map-safety-controls .map-safety-head{
-    background:#20363a!important;color:#e9f6ef!important;
-  }
+  
   html body #app#app :is(#map-options-mobile-close,#map-safety-close){
     width:43px!important;height:43px!important;min-width:43px!important;min-height:43px!important;
     padding:0!important;inset:auto!important;

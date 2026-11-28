@@ -58,10 +58,7 @@
     background:#d9ede4!important;border:1px solid #bbdacb!important;
     color:#087e68!important;font-size:26px!important;line-height:1!important;
   }
-  html body #app#app[data-theme="dark"] #bottom-nav>.nav-tab[data-tab="map"] .nav-icon,
-  html[data-theme="dark"] body #app#app #bottom-nav>.nav-tab[data-tab="map"] .nav-icon{
-    background:#315e55!important;border-color:#5d9785!important;color:#a2edd0!important;
-  }
+  
 }
 
 @media (max-width:699px) {

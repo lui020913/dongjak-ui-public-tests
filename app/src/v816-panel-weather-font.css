@@ -19,19 +19,10 @@ html body #app#app.dj-hide-weather .weather-widget{
 }
 
 /* Community: the report box used a pale local-only surface even in dark mode. */
-html body #app#app[data-theme="dark"] #participation-panel .community-report-secondary,
-html body #app#app[data-theme="dark"] #participation-panel .community-report-secondary .report-feature,
-html body #app#app[data-theme="dark"] #participation-panel .community-report-secondary .feature-card{
-  background:#29464a!important;color:#eefbf5!important;
-  border-color:#4d746b!important;
-}
-html body #app#app[data-theme="dark"] #participation-panel .community-report-secondary :is(summary,p,strong,span,small){color:#e2f4ee!important;opacity:1!important;}
-html body #app#app[data-theme="dark"] #participation-panel .community-report-secondary .local-only{
-  background:#223c40!important;color:#d4e9df!important;border:1px solid #527469!important;
-}
-html body #app#app[data-theme="dark"] #participation-panel .community-report-secondary .inline-action{
-  background:#126e60!important;color:#f4fff9!important;border:1px solid #76b9a6!important;
-}
+
+
+
+
 
 /* Slightly larger station prev/next chevrons without enlarging the names. */
 html body #app#app #transport-sheet .metro-neighbor-row .metro-rail-previous,

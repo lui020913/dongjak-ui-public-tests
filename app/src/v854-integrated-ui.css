@@ -257,9 +257,7 @@ html body #app#app #map-quick-search-dropdown .dj854-search-empty{
     animation:dj854-tip-marquee var(--dj854-tip-duration,9s) ease-in-out infinite alternate!important;
   }
   @keyframes dj854-tip-marquee{0%,10%{transform:translateX(0)}90%,100%{transform:translateX(var(--dj854-tip-overflow,0px))}}
-  html body #app#app[data-theme="dark"] #dj-mobile-utilities .dj854-more-head{
-    background:var(--dj800-surface,#192e31)!important;border-bottom-color:var(--dj800-border,#49625d)!important;
-  }
+  
 }
 
 /* The hidden preference select owns persistence; the visible language row
@@ -277,9 +275,7 @@ html body #app#app #map-quick-search-dropdown .dj854-search-empty{
   min-width:0;flex:1;font-size:15px;font-weight:550;color:var(--dj-theme-ink,#21483b);
 }
 #app #mine-panel .dj854-language-section > select{display:none!important;}
-#app[data-theme="dark"] #mine-panel .dj854-language-section .dj854-language-icon{
-  color:var(--dj-theme-ink,#f1f4f6);background:var(--dj-theme-selected,#31535b);
-}
+
 
 /* Desktop weather: compact icon + temperature only; details open in a sheet. */
 @media(min-width:700px){
@@ -329,6 +325,4 @@ html body #app#app #map .dj-place-detail-popup .dj815-place-actions button.dj854
 html body #app#app #map .dj-place-detail-popup .dj815-place-actions button.dj854-place-favorite[data-error="true"]{
   border-color:#d6a34d!important;
 }
-html body #app#app[data-theme="dark"] #map .dj-place-detail-popup .dj815-place-actions button.dj854-place-favorite{
-  background:#294449!important;border-color:#4a6860!important;
-}
+

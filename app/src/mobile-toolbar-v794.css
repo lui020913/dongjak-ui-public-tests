@@ -50,12 +50,8 @@
   html body #app #dj-v794-toolbar > .dj-v794-tool[data-active="true"] .dj-v794-caption{
     display:inline!important;font-size:clamp(10px,2.9vw,12px)!important;
   }
-  html body #app[data-theme="dark"] #dj-v794-toolbar > .dj-v794-tool {
-    background:#21383b!important;color:#e9f5ef!important;border-color:#49625d!important;
-  }
-  html body #app[data-theme="dark"] #dj-v794-toolbar > .dj-v794-tool[data-active="true"]{
-    background:#31574e!important;color:#f3fff9!important;border-color:#6eac91!important;
-  }
+  
+  
   html body #app.map-immersive #dj-v794-toolbar{display:none!important;}
 }
 @media (max-width:359px){

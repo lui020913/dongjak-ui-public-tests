@@ -13,7 +13,7 @@
 #app #nav-live-card .dj816-voice-status{margin:1px 0;font-size:11px;line-height:1.5}
 #app #nav-live-card .dj816-voice-note{margin:0;color:var(--dj-route-muted,#63756e);font-size:10px;line-height:1.5}
 #app #nav-live-card:has(.dj816-voice-box[open]){max-height:calc(100dvh - 112px);overflow-y:auto;overscroll-behavior:contain}
-#app[data-theme="dark"] #nav-live-card .dj816-voice-box{background:#263b3a;border-color:#4a6962;color:#e7f5ef}
-#app[data-theme="dark"] #nav-live-card .dj816-voice-content select{background:#1b302f;color:#e7f5ef;border-color:#57766d}
-#app[data-theme="dark"] #nav-live-card .dj816-voice-actions button{background:#164f42;border-color:#438d78;color:#e6fff2}
+
+
+
 @media(max-width:390px){#app #nav-live-card .dj816-voice-box summary{min-height:33px;padding:7px 9px;font-size:11px}#app #nav-live-card .dj816-voice-content{padding:7px 9px 9px}}

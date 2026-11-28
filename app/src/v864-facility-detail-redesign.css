@@ -216,6 +216,4 @@
 }
 
 /* Night analysis owns a clear map view: never apply the perspective screen blur while active. */
-html body #app[data-sangdo-night="on"] #map.dj-far-haze-active::before{
-  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
-}
+

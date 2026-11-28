@@ -47,20 +47,20 @@
 .dj-gps-loading,.dj-gps-failure{font-size:14px;line-height:1.65;padding:30px 10px;text-align:center;color:var(--gps-muted);font-weight:500}
 .dj-gps-handle{display:none}
 .dj-gps-item-sep{color:var(--gps-muted)}
-html[data-theme='dark'] .dj-gps-popup{--gps-surface:#172b2e;--gps-ink:#eaf6f0;--gps-muted:#b0cbc1;--gps-line:#38534e;--gps-tint:#203b37;--gps-accent:#7ce0be;box-shadow:0 18px 60px rgba(0,0,0,.35)}
-html[data-theme='dark'] .dj-gps-status{background:#253a38;border-color:#44635b}
-html[data-theme='dark'] .dj-gps-status-risk{background:#48302f;border-color:#80544b}
-html[data-theme='dark'] .dj-gps-status-caution{background:#483c2d;border-color:#746047}
-html[data-theme='dark'] .dj-gps-status-near{background:#1e423a;border-color:#346e5a}
-html[data-theme='dark'] .dj-gps-status h3{color:#f1fbf6}
-html[data-theme='dark'] .dj-gps-status p{color:#d6e5db}
-html[data-theme='dark'] .dj-gps-warning{background:#40382b;color:#ffe5b6}
-html[data-theme='dark'] .dj-gps-night{background:linear-gradient(135deg,#24394c,#203c37)}
-html[data-theme='dark'] .dj-gps-pill{background:#34524b;color:#e2f9ed}
-html[data-theme='dark'] .dj-gps-pill.dj-gps-risk{background:#733e39;color:#ffe2dc}
-html[data-theme='dark'] .dj-gps-pill.dj-gps-caution{background:#67502f;color:#ffe4b6}
-html[data-theme='dark'] .dj-gps-pill.dj-gps-near{background:#265b49;color:#ccffe5}
-html[data-theme='dark'] .dj-gps-footer button{color:#102a22}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @media(max-width:699px){
  .dj-gps-popup{top:auto!important;right:10px!important;left:10px!important;bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;
   width:auto!important;max-height:min(43dvh,390px)!important;border-radius:23px 23px 19px 19px;}
@@ -140,8 +140,8 @@ html[data-theme='dark'] .dj-gps-footer button{color:#102a22}
 .dj-gps-footer button{font-size:calc(13px + var(--dj-gps-text-delta));font-weight:630;min-height:42px}
 .dj-gps-footer span{font-size:calc(11px + var(--dj-gps-text-delta));font-weight:450}
 .dj-gps-loading,.dj-gps-failure{font-size:calc(14px + var(--dj-gps-text-delta))}
-html[data-theme='dark'] .dj-gps-popup{--gps-ink:#e9f6f0;--gps-muted:#a6c1b5;--gps-tint:#203a35;--gps-accent:#8ae4c7}
-html[data-theme='dark'] .dj-gps-meta b{color:#ffb890}
+
+
 @media(max-width:699px){
  .dj-gps-popup{bottom:var(--dj-gps-bottom-offset,calc(84px + env(safe-area-inset-bottom,0px)))!important;
    max-height:min(43dvh,390px)!important;max-height:min(43svh,390px)!important;

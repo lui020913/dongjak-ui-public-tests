@@ -32,11 +32,8 @@
   letter-spacing:-.02em;white-space:nowrap;cursor:pointer;
   box-shadow:0 2px 7px rgba(18,50,48,.16);}
 .dj-priority-label.dj-island-name{color:#225f65;font-size:12.5px;}
-#app[data-theme="dark"] .dj-priority-label{background:#203840;color:#e4f1ee;border-color:#45606a;}
-#app[data-theme="dark"] .dongjak-education-marker .dongjak-education-name,
-#app[data-theme="dark"] .dongjak-landmark .dongjak-landmark-name{
-  background:#203740!important;color:#edf6f1!important;
-}
+
+
 .dj-place-detail{width:min(305px,calc(100vw - 80px));padding:4px 1px 2px;color:#193a34;}
 .dj-place-kicker{display:block;color:#21846e;font-size:11px;font-weight:800;margin-bottom:5px;}
 .dj-place-detail h3{font-size:17px!important;letter-spacing:-.03em;line-height:1.35;margin:0 0 12px!important;color:inherit;}
@@ -50,7 +47,7 @@
 .dj-place-action[aria-disabled="true"]{opacity:.5;pointer-events:none;}
 .dj-place-action:disabled{opacity:.55;cursor:wait;}
 .dj-place-ai-response{margin-top:10px;padding:10px;border-radius:9px;background:#f1f6f3;color:#294f44;font-size:12px;line-height:1.65;white-space:pre-wrap;}
-#app[data-theme="dark"] .dj-place-detail{color:#e5f1ec;}
-#app[data-theme="dark"] .dj-place-row strong{color:#ecf3f0;}
-#app[data-theme="dark"] .dj-place-meta{border-color:#3d5a58;}
-#app[data-theme="dark"] .dj-place-ai-response{background:#24433f;color:#e5f3eb;}
+
+
+
+

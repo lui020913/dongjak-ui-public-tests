@@ -4,10 +4,7 @@ html body #app#app{
   --dj802-desktop-header:56px;
   --dj802-reading-weight:680;
 }
-html[data-theme="dark"] body #app#app,
-html body #app#app[data-theme="dark"]{
-  --dj802-reading-weight:725;
-}
+
 /* Strong headings, without treating informational body text as a heading. */
 html body #app#app :is(.page-panel,#transport-sheet,#overview-sheet,#map-advanced-controls,#map-safety-controls,#dj-map-settings,#dj-app-about)
  :is(h1,h2,h3,.page-heading strong,.section-title,.transport-section-title){
@@ -20,21 +17,10 @@ html body #app#app :is(.page-panel,#transport-sheet,#map-advanced-controls,#map-
 html body #app#app :is(.page-panel,#transport-sheet) :is(button,[role="tab"]){font-weight:790!important;}
 /* Distinct dark palette: light empty-state cards used to have near-white type
    on a pale surface. Maintain strong contrast for both panel and card ink. */
-html[data-theme="dark"] body #app#app,
-html body #app#app[data-theme="dark"]{
-  --dj800-text:#f2fff9;--dj800-muted:#c1ded1;
-  --dj800-secondary:#29413f;--dj800-border:#54756d;
-}
-html[data-theme="dark"] body #app#app :is(#mine-panel,#participation-panel,#news-panel)
- :is(.records-list>div,.records-list .record-item,.record-empty,.stat-grid>div,.community-feed>article,.empty-state){
-  color:#f2fff9!important;background:#29413f!important;
-  border-color:#5a7c70!important;
-}
-html[data-theme="dark"] body #app#app :is(#mine-panel,#participation-panel,#news-panel)
- :is(.records-list>div,.records-list .record-item,.record-empty,.stat-grid>div,.community-feed>article,.empty-state)
- :is(p,small,span){color:#e1f0e7!important;}
-html[data-theme="dark"] body #app#app :is(#mine-panel,#participation-panel,#news-panel)
- :is(h1,h2,h3,h4,strong,.stat-grid b){color:#f5fff9!important;font-weight:850!important;}
+
+
+
+
 /* Standalone app-about dialog uses exactly the same click path in both
    themes. Do not show a release-history drawer on logo press. */
 html body #app#app #dj-app-about .dj-about-card{
@@ -164,12 +150,6 @@ html body #app#app.dj-reduced-animation :is(#dj-app-about,.page-panel,#transport
 html body #app#app.dj-reduced-animation #dj-app-about:not([hidden]) .dj-about-card{animation:none!important;filter:none!important;}
 
 /* Also honor app-local theme switches before the document theme dataset has synchronized. */
-html body #app#app[data-theme="dark"] :is(#mine-panel,#participation-panel,#news-panel)
- :is(.records-list>div,.records-list .record-item,.record-empty,.stat-grid>div,.community-feed>article,.empty-state){
-  color:#f2fff9!important;background:#29413f!important;border-color:#5a7c70!important;
-}
-html body #app#app[data-theme="dark"] :is(#mine-panel,#participation-panel,#news-panel)
- :is(.records-list>div,.records-list .record-item,.record-empty,.stat-grid>div,.community-feed>article,.empty-state)
- :is(p,small,span){color:#e1f0e7!important;}
-html body #app#app[data-theme="dark"] :is(#mine-panel,#participation-panel,#news-panel)
- :is(h1,h2,h3,h4,strong,.stat-grid b){color:#f5fff9!important;font-weight:850!important;}
+
+
+

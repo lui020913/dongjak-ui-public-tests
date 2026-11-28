@@ -16,9 +16,7 @@
     padding:2px 0 12px!important;margin:0 0 8px!important;
     background:var(--dj800-surface,#fff)!important;
   }
-  html body #app#app#app#app#app[data-theme="dark"] #map-advanced-controls > .map-options-mobile-heading{
-    background:var(--dj800-surface,#20383d)!important;
-  }
+  
   html body #app#app#app#app#app #map-advanced-controls :is(.map-options-group,.data-layer-controls,.base-layer-controls){
     box-sizing:border-box!important;position:relative!important;inset:auto!important;
     z-index:auto!important;min-width:0!important;max-width:100%!important;width:100%!important;

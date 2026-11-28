@@ -26,7 +26,7 @@ test('distant overlay is foreground-safe and theme aware',()=>{
   assert.match(s,/backdrop-filter:blur\(2\.2px\)/);
   assert.match(s,/pointer-events:none!important/);
   assert.doesNotMatch(s,/#app\[data-theme='dark'\] #map\.dj-far-haze-active::before/);
-  assert.match(s,/#app #map::after,[^\n]*\{content:none!important/);
+  assert.match(s,/#app #map::after(?:,[^\n]*)?\s*\{content:none!important/);
   assert.ok(farHazeOpacity(36,12)>0);
   assert.equal(farHazeOpacity(0,11),0);
 });

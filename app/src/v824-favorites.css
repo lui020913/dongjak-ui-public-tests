@@ -30,13 +30,10 @@
 }
 #app #transport-sheet .dj824-transport-favorites button{color:#147c67!important;background:#e8f5ef!important;cursor:pointer}
 #app #transport-sheet .dj824-transport-favorites select:disabled{opacity:.55}
-#app[data-theme=dark] :is(.dj824-group-input,.dj824-folder-select,.dj824-login-form input),
-html[data-theme=dark] #app :is(.dj824-group-input,.dj824-folder-select,.dj824-login-form input){background:#294144;color:#e4f3ec;border-color:#4b6968}
-#app[data-theme=dark] .dj824-account,html[data-theme=dark] #app .dj824-account{background:rgba(67,158,137,.1)}
-#app[data-theme=dark] #transport-sheet .dj824-transport-favorites button,
-html[data-theme=dark] #app #transport-sheet .dj824-transport-favorites button{background:#26463c!important;color:#a5e9cf!important;border-color:#416d5d}
-#app[data-theme=dark] #transport-sheet .dj824-transport-favorites select,
-html[data-theme=dark] #app #transport-sheet .dj824-transport-favorites select{background:#294144;color:#e4f3ec;border-color:#4b6968}
+
+
+
+
 @media(max-width:699px){
  #app .dj824-saved-row{grid-template-columns:minmax(0,1fr);gap:3px}
  #app .dj824-row-actions{justify-content:flex-start;flex-wrap:wrap}
@@ -57,7 +54,7 @@ html[data-theme=dark] #app #transport-sheet .dj824-transport-favorites select{ba
 #app .dj824-account-details{margin-top:10px;min-width:0}
 #app .dj824-account-instructions{margin:0 0 7px!important}
 #app .dj824-account-details[hidden],#app .dj824-account-details [hidden]{display:none!important}
-#app[data-theme="dark"] .dj824-account-toggle,html[data-theme="dark"] #app#app #dj824-account .dj824-account-toggle{background:#238a77;color:#fff;border-color:#67aa94}
+
 @media(max-width:699px){
   #app .dj824-account{padding:11px 12px}
   #app#app #dj824-account .dj824-account-toggle{min-height:40px;padding:8px 15px}

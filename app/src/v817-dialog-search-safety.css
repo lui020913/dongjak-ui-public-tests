@@ -39,22 +39,10 @@ html body #app#app #map-quick-search-dropdown #map-quick-search-close{
   position:relative!important;inset:auto!important;transform:none!important;
 }
 /* Admin selector must not inherit an old light surface in dark mode. */
-html body #app#app[data-theme="dark"] #admin-dong-picker,
-html[data-theme="dark"] body #app#app #admin-dong-picker{
-  background:#1a3135!important;background-color:#1a3135!important;
-  border:1px solid #4b6d64!important;color:#e9f6f0!important;
-  box-shadow:0 18px 45px rgba(0,0,0,.36)!important;
-}
-html body #app#app[data-theme="dark"] #admin-dong-picker :is(.admin-dong-heading,.admin-dong-list),
-html body #app#app[data-theme="dark"] #admin-dong-picker :is(strong,p){
-  background:transparent!important;color:#e5f4ed!important;
-}
-html body #app#app[data-theme="dark"] #admin-dong-picker :is(.admin-dong-choice,.admin-dong-clear){
-  background:#294448!important;border:1px solid #516e67!important;color:#e7f5ed!important;
-}
-html body #app#app[data-theme="dark"] #admin-dong-picker .admin-dong-choice:is(:hover,.active,[aria-pressed="true"]){
-  background:#34645a!important;color:#f2fff9!important;
-}
+
+
+
+
 /* All platforms: remove the second redundant collapsible source block in the
    update dialog, while retaining the existing '데이터 출처' view switch. */
 html body #app#app #version-history-modal>.version-history-dialog>.dj-map-attribution-details{display:none!important;}

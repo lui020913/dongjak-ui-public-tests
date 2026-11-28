@@ -64,4 +64,4 @@
 /* Calm down distant map clutter */
 #app .map-actions{}
 #app[data-tab="map"] .map-actions button{background:rgba(255,255,255,.95)!important;}
-#app[data-theme="dark"][data-tab="map"] .map-actions button{background:#20363c!important;}
+

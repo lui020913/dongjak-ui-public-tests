@@ -31,7 +31,7 @@ test('theme loading uses the existing single overlay but a new glass-card progre
   assert.match(html,/class="dj-transition-card"/);
   assert.match(html,/class="dj-transition-line"/);
   assert.match(css,/dj-polish-track/);
-  assert.match(css,/data-theme="dark"\] #dj-full-transition/);
+  assert.doesNotMatch(css,/data-theme="dark"\] #dj-full-transition/);
   assert.match(read('src/v711-experience.js'),/dj-transition-message/);
 });
 test('original MapLibre entry and walk-safety layer assets remain connected',()=>{

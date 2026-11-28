@@ -14,7 +14,7 @@
 #app .dj-safety-access-popup .dj-access-popup-actions button{border:1px solid #198d82;background:#198d82;color:white;font:inherit;font-weight:750;padding:8px 10px;border-radius:10px;cursor:pointer;touch-action:manipulation;}
 #app .dj-safety-access-popup .dj-access-popup-actions button+button{background:transparent;color:inherit;border-color:rgba(122,150,143,.45);}
 @media(max-width:699px){#app .dj-access-facility-controls .dj-feed-meta{padding-left:11px;}#app .dj-access-caveat{margin-left:3px;margin-right:3px;}}
-html[data-theme="dark"] #app .dj-access-caveat,#app[data-theme="dark"] .dj-access-caveat{color:#b0cfc6;}
+
 @media(prefers-reduced-motion:reduce){#app .dj-safety-access-popup *{animation:none!important;transition:none!important;}}
 
 #app .dj-safety-access-popup .dj-access-popup-actions :is(button,a){display:inline-flex;align-items:center;justify-content:center;min-height:34px;text-decoration:none;font-size:11px;}

@@ -288,18 +288,9 @@ html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="subway"] #t
   html body #app#app #transport-sheet.dj-news-transit-fixed .transport-arrivals-title .transport-auto-refresh-label{display:none!important;}
 }
 /* Native dark theme support without changing the map theme itself. */
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .transport-panel-head,
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed #transport-neighbors,
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .transport-arrivals-title{
-  background:#172831!important;border-color:#3c5751!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-quick-button,
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-bookmark{
-  background:#27473f!important;border-color:#45675c!important;color:#e2f4ea!important;
-}
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed #transport-use-end{
-  background:#168369!important;border-color:#168369!important;color:#fff!important;
-}
+
+
+
 /* Keep the grabber's 24px track stable on the first scroll gesture. */
 html body #app#app #transport-sheet.dj-news-transit-fixed{--dj-news-sticky-top:24px;}
 html body #app#app #transport-sheet.dj-news-transit-fixed .transport-panel-head{
@@ -364,8 +355,8 @@ html body #app#app #transport-sheet.dj-news-transit-fixed .transport-panel-head:
   transform:translateX(-50%)!important;background:#dae5e0!important;
   z-index:1!important;pointer-events:none!important;
 }
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .transport-panel-head::before{background:#172831!important;}
-html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .transport-panel-head::after{background:#567168!important;}
+
+
 /* The panel grabber starts above the sticky title. Mask that complete band
  * so scrollable rows cannot leak above the fixed header. */
 html body #app#app #transport-sheet.dj-news-transit-fixed .transport-panel-head::before{

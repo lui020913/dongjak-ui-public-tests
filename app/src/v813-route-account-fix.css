@@ -61,7 +61,5 @@ html body #app#app#app #route-panel.page-panel > .dj813-route-heading > p{
 #app .dj824-cloud-help,#app .dj824-account-instructions{
   overflow-wrap:anywhere;word-break:keep-all;line-height:1.5;
 }
-#app[data-theme="dark"] .dj824-cloud-setup input{
-  background:#294144;color:#e4f3ec;border-color:#4b6968;
-}
+
 #app #dj824-account .dj824-cloud-setup[hidden]{display:none!important;}

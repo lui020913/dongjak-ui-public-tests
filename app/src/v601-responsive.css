@@ -1,7 +1,7 @@
 /* v6.0.1 last-loaded overrides: avoid old mobile portrait geometry winning in landscape. */
 @media (hover:none) and (orientation:landscape) and (max-height:600px) and (max-width:1079px){
   #app{--dj-header-h:calc(46px + env(safe-area-inset-top));--dj-mobile-nav-h:calc(51px + env(safe-area-inset-bottom));}
-  #app .topbar,#app[data-theme='dark'] .topbar{
+  #app .topbar{
     height:var(--dj-header-h)!important;min-height:var(--dj-header-h)!important;
     grid-template-columns:minmax(128px,170px) minmax(110px,1fr) 42px!important;
     padding:calc(5px + env(safe-area-inset-top)) 9px 5px!important;gap:7px!important;
@@ -44,7 +44,7 @@
   .map-gesture-guide{top:calc(var(--dj-header-h) + 4px);right:55px;max-height:calc(100dvh - var(--dj-header-h) - 10px)}
 }
 /* Ensure every MapLibre popup inherits the active app theme, including overlays added late. */
-#app[data-theme="dark"] .maplibregl-popup-content{background:#1b3033!important;border-color:#45635e!important;color:#eaf7f0!important;}
-#app[data-theme="dark"] .maplibregl-popup-content :is(h2,h3,strong){color:#eaf7f0!important}
-#app[data-theme="dark"] .maplibregl-popup-content :is(p,small,span){color:#c6ddd5}
-#app[data-theme="dark"] .maplibregl-popup-close-button{color:#eaf7f0!important}
+
+
+
+

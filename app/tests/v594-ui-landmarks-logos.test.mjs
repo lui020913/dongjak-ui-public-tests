@@ -11,7 +11,7 @@ test('모바일/PC 검색창은 브랜드와 같은 줄이고 데스크톱 헤�
   assert.match(css,/--dj-header-h:calc\(64px \+ env\(safe-area-inset-top\)\)/);
   assert.match(css,/--dj-header-h:68px/);
   assert.match(css,/#app \.topbar/);
-  assert.match(read('src/map-patch/dongjak-v594-layout-theme.css'),/#app\[data-theme=\"dark\"\] \.version-history-dialog/);
+  assert.doesNotMatch(read('src/map-patch/dongjak-v594-layout-theme.css'),/#app\[data-theme=\"dark\"\] \.version-history-dialog/);
 });
 test('확대한 환승역의 두 호선 모두 역명을 가져야 한다',()=>{
   const data=metroMarkerGeojson([{kind:'subway',name:'노량진',lng:126.94,lat:37.51,lines:['1호선','9호선']}],{

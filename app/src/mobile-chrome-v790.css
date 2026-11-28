@@ -18,15 +18,13 @@
     opacity:1!important;pointer-events:none!important;
     z-index:3000!important;
   }
-  html body #app[data-theme="dark"] #dj-mobile-safe-top {
-    background:#101f25!important;
-  }
+  
   /* Do not re-introduce a fuzzy band via earlier pseudo elements. */
   html body #app::before,html body #app .topbar::before,html body #app .topbar::after,
   html body #app .map-quick-search::before,html body #app .map-quick-search::after {
     content:none!important;display:none!important;
   }
-  html body #app[data-tab] .topbar,html body #app[data-theme="dark"][data-tab] .topbar {
+  html body #app[data-tab] .topbar{
     top:calc(env(safe-area-inset-top,0px) + 8px)!important;left:0!important;right:0!important;
     height:58px!important;min-height:58px!important;
     width:100%!important;box-sizing:border-box!important;
@@ -58,9 +56,7 @@
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
     overflow:hidden!important;
   }
-  html body #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form {
-    background:#20383d!important;border-color:#526e66!important;
-  }
+  
   html body #app .topbar>.map-quick-search .map-quick-search-form>.brand {
     flex:0 0 32px!important;min-width:32px!important;max-width:32px!important;
     width:32px!important;margin:0!important;padding:0!important;
@@ -163,16 +159,13 @@
   html body #app #dj-mobile-more-trigger[aria-expanded="true"] {
     background:#eaf5ef!important;border-color:#86bda8!important;
   }
-  html body #app[data-theme="dark"] :is(#map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off,#dj-mobile-more-trigger){
-    background:#21383b!important;color:#e9f5ef!important;border-color:#49625d!important;
-  }
+  
   html body #app[data-tab]:not([data-tab="map"]) :is(#map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off,#dj-mobile-more-trigger){
     background:rgba(35,55,59,.88)!important;
     color:#edf7f2!important;border-color:rgba(218,235,226,.28)!important;
     box-shadow:0 8px 20px rgba(10,24,20,.14)!important;
   }
-  html body #app[data-tab]:not([data-tab="map"]) #dj-mobile-more-trigger::before,
-  html body #app[data-theme="dark"] #dj-mobile-more-trigger::before {
+  html body #app[data-tab]:not([data-tab="map"]) #dj-mobile-more-trigger::before{
     color:#edf7f2!important;
   }
   html body #app #dj-mobile-utilities {
@@ -212,16 +205,9 @@
     display:block!important;font-size:12px!important;line-height:1.4!important;
     color:#54766b!important;margin-top:4px!important;overflow-wrap:anywhere!important;
   }
-  html body #app[data-theme="dark"] #dj-mobile-utilities {
-    background:#192e31!important;border-color:#49625d!important;
-  }
-  html body #app[data-theme="dark"] #dj-mobile-utilities button {
-    background:#233c40!important;border-color:#466058!important;color:#e6f5ed!important;
-  }
-  html body #app[data-theme="dark"] #dj-mobile-utilities .dj-mobile-weather-detail,
-  html body #app[data-theme="dark"] #dj-mobile-utilities .dj-mobile-utility-heading {
-    color:#bddbd0!important;
-  }
+  
+  
+  
   /* Keep the legacy mobile night button in DOM and reuse it as the third top control. */
   html body #app #map-safety-toggle::after {content:none!important;display:none!important;}
   html body #app #dj-r2-history-shortcut {display:none!important;}
@@ -242,7 +228,7 @@
   }
   /* Stronger navigation labels and aligned icon weight, not a new nav. */
   html body #app #bottom-nav>.nav-tab:not(.active) {color:#5d7169!important;}
-  html body #app[data-theme="dark"] #bottom-nav>.nav-tab:not(.active) {color:#bfd3cb!important;}
+  
   html body #app #bottom-nav>.nav-tab .nav-icon {font-size:20px!important;}
   html body #app .topbar .map-quick-search-dropdown:not([hidden]){
     max-height:min(56dvh,410px)!important;overflow-y:auto!important;
@@ -328,22 +314,13 @@
   }
   html body #app #dj-mobile-weather-trigger[data-has-temp="false"]{font-size:10px!important;}
   html body #app #dj-mobile-more-trigger{margin-left:0!important;}
-  html body #app[data-theme="dark"] #map-tools-toggle::before,
-  html body #app[data-theme="dark"] #map-safety-toggle::before{color:#e9f5ef!important;}
-  html body #app[data-theme="dark"] #map-tools-toggle[aria-expanded="true"],
-  html body #app[data-theme="dark"] #map-safety-toggle[aria-expanded="true"],
-  html body #app[data-theme="dark"] #night-visibility-quick-off[aria-pressed="true"]{
-    color:#e9f5ef!important;background:#294642!important;border-color:#5f8f7c!important;
-  }
-  html body #app[data-theme="dark"] #dj-mobile-weather-trigger{
-    background:#21383b!important;color:#e9f5ef!important;border-color:#49625d!important;
-  }
+  
+  
+  
   html body #app[data-tab]:not([data-tab="map"]):not([data-theme="dark"]) #dj-mobile-weather-trigger{
     background:#fff!important;color:#24483d!important;border-color:#d7e6de!important;box-shadow:0 2px 10px rgba(21,49,39,.08)!important;
   }
-  html body #app[data-tab]:not([data-tab="map"])[data-theme="dark"] #dj-mobile-weather-trigger{
-    background:#21383b!important;color:#e9f5ef!important;border-color:#49625d!important;
-  }
+  
   html body #app #dj-mobile-utilities{top:calc(env(safe-area-inset-top,0px) + 130px)!important;right:12px!important;}
   html body #app.map-immersive #dj-mobile-tool-row{display:none!important;}
 }

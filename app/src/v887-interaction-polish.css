@@ -9,12 +9,7 @@
   --dj887-ink:#24433a;
   --dj887-focus:rgba(18,129,107,.16);
 }
-#app[data-theme="dark"]{
-  --dj887-safety:#6dd2ae;
-  --dj887-night:#a8bce7;
-  --dj887-ink:#e6f6ef;
-  --dj887-focus:rgba(112,213,180,.25);
-}
+
 #app :is(.dj-sheet-chrome-close,#transport-close,#map-options-mobile-close,
   #map-options-desktop-close,#map-safety-close){
   -webkit-tap-highlight-color:transparent;
@@ -64,12 +59,7 @@
     background:#e5eefb!important;
     border-color:#b3c8e6!important;
   }
-  #app[data-theme="dark"] #dj-v794-toolbar
-     #dj-v794-night[data-active="true"]{
-    color:#d4e1fa!important;
-    background:#2c3d58!important;
-    border-color:#829ecb!important;
-  }
+  
   #app #bottom-nav>.nav-tab{
     -webkit-tap-highlight-color:transparent;
   }
@@ -115,9 +105,5 @@
     background:#e5eefb!important;
     color:#345e9b!important;
   }
-  html body #app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"]
-    #dj-v794-toolbar  #dj-v794-night[data-active="true"] {
-    color:#d4e1fa!important;
-    background:#2c3d58!important;
-  }
+  
 }

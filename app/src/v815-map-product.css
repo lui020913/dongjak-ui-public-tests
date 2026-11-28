@@ -43,14 +43,12 @@
 #app .dj815-search-viewport input{accent-color:#168879;width:15px;height:15px;margin:0}
 .dj-place-detail .dj815-place-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0}
 .dj-place-detail .dj815-place-actions button{background:#e9f4ef!important;color:#1b6357!important;border:1px solid #c6e3d6!important}
-#app[data-theme=dark] .dj815-my-places,#app[data-theme=dark] .dj815-route-section,#app[data-theme=dark] .dj815-route-share{background:#203436;color:#e8f3ef;border-color:#435c5f}
-#app[data-theme=dark] .dj815-my-places button,#app[data-theme=dark] .dj815-route-section button,
-#app[data-theme=dark] .dj815-route-share button,#app[data-theme=dark] .dj815-recent button,#app[data-theme=dark] .dj815-search-filters button{
-  background:#294144;color:#e4f3ec;border-color:#4b6968}
-#app[data-theme=dark] .dj815-transit-card{background:#263a3c;border-color:#466362}
-#app[data-theme=dark] .dj815-waypoint-row{background:rgba(48,162,132,.13)}
-#app[data-theme=dark] .dj815-link-button{color:#83d8bc!important}
-#app[data-theme=dark] #dj815-rail-planner>button{color:white;background:#146f65}
+
+
+
+
+
+
 @media(max-width:699px){
  #app .dj815-my-places,#app .dj815-route-section{padding:10px;margin:9px 0}
  #app .dj815-waypoint-row{flex-wrap:wrap}

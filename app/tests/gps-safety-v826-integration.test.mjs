@@ -21,12 +21,12 @@ test('v8.2.6 GPS brief closes on navigation switch, and returns focus on intenti
  assert.match(js,/document\.getElementById\('stop-gps-tracking'\)/);
  assert.match(js,/restoreFocus\.focus\(\{preventScroll:true\}\)/);
 });
-test('v8.2.6 mobile overlay respects nav and dark mode; compact sheet and scroll are deliberate',()=>{
+test('v8.2.6 mobile overlay respects nav and light surfaces; compact sheet and scroll are deliberate',()=>{
  const css=read('src/gps-safety-popup.css');
  assert.match(css,/bottom:var\(--dj-gps-bottom-offset/);
  assert.match(css,/max-height:min\(43svh,390px\)/);
  assert.match(css,/\.dj-gps-content\{[^}]*overflow:auto/);
- assert.match(css,/html\[data-theme='dark'\] \.dj-gps-popup/);
+ assert.doesNotMatch(css,/html\[data-theme='dark'\] \.dj-gps-popup/);
  assert.match(css,/\.dj-gps-close svg\{[^}]*visibility:visible!important/);
 });
 test('v8.2.6 missing GPS accuracy and missing reference boundary cannot certify nearby safety',()=>{

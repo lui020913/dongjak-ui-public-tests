@@ -32,13 +32,12 @@
   margin-top:8px;padding:9px 15px;border:1px solid #b5d7ca;
   background:#eaf6ef;color:#087965;border-radius:10px;font-weight:700;cursor:pointer;
 }
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-status-summary{background:#1c3834;border-color:#3c6056;color:#daede6}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-status-summary strong{color:#9be3cd}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-status-summary small,
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-status-only .metro-report-no-eta{color:#b0c5ca}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-status-only .metro-report-state{color:#d6e2e6}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-stale-notice{background:#243840;border-color:#476169;color:#e1ebed!important}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-open-schedule{background:#1b4d43;color:#d0f2e4;border-color:#45796f}
+
+
+
+
+
+
 @media(max-width:699px){
   #app #transport-sheet[data-kind="subway"] .metro-status-only .metro-direction-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
   #app #transport-sheet[data-kind="subway"] .metro-status-only .metro-arrival-direction-group .transport-arrival-row{padding:8px!important}
@@ -63,11 +62,9 @@
   padding:6px 8px 10px;border-top:1px solid #e4ebea;
 }
 #app #transport-sheet[data-kind="subway"] .metro-reports-collapsible:not([open]) .metro-reports-list{display:none;}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-reports-collapsible{
-  background:#1e3437;border-color:#3b5658;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-reports-toggle{color:#d6e8e6;}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-reports-list{border-color:#3b5658;}
+
+
+
 /* 1호선·신림선: operator timetable countdown shares the same direction-card
    layout as ordinary arrivals.  Distinct provenance prevents false live ETA. */
 #app #transport-sheet[data-kind="subway"] .metro-scheduled-banner {
@@ -79,10 +76,10 @@
 #app #transport-sheet[data-kind="subway"] .metro-scheduled-banner small{font-size:11px;line-height:1.4;color:#46796d}
 #app #transport-sheet[data-kind="subway"] .metro-scheduled-arrival-cards .metro-arrival-countdown{font-size:clamp(14px,3.3vw,21px);white-space:normal;overflow-wrap:anywhere}
 #app #transport-sheet[data-kind="subway"] .metro-scheduled-arrivals + .metro-reports-collapsible{margin-top:11px}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-scheduled-banner {background:#163f35;color:#c9efe0;border-color:#397968}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-scheduled-banner small {color:#accfc1}
+
+
 
 /* Timetable countdown matches realtime card typography, with explicit source below. */
 #app #transport-sheet[data-kind="subway"] .metro-scheduled-arrival-cards .metro-planned-time-meta{font-size:12px;font-weight:600;color:#647a8a;margin-top:2px;}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-scheduled-arrival-cards .metro-planned-time-meta{color:#c0d1df;}
+
 @media(max-width:699px){#app #transport-sheet[data-kind="subway"] .metro-scheduled-arrival-cards .metro-arrival-countdown{font-size:clamp(13px,3.3vw,21px)!important;white-space:normal;word-break:keep-all;}}

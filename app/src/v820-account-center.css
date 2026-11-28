@@ -26,10 +26,10 @@ html body #app#app #dj824-account .dj820-settings-form+.dj820-settings-form{padd
 html body #app#app #dj824-account .dj820-logout{justify-self:start;min-height:38px;padding:7px 15px;border-radius:10px;border:1px solid var(--dj800-border,#d2dfd9);color:var(--dj800-text,#1d3630);background:var(--dj800-surface,#fff);cursor:pointer}
 html body #app#app #dj824-account button:disabled{cursor:wait;opacity:.55}
 html body #app#app #dj824-account :is(button,input):focus-visible{outline:3px solid #29a78e!important;outline-offset:2px!important}
-html body #app#app[data-theme="dark"] #dj824-account :is(.dj820-auth-tabs,.dj820-manage-tabs){background:#294144;border-color:#4d746b}
-html body #app#app[data-theme="dark"] #dj824-account :is(.dj820-auth-tab,.dj820-manage-tab).active{background:#36574c!important;color:#c1f3df!important}
-html body #app#app[data-theme="dark"] #dj824-account :is(.dj820-account-user,.dj820-credentials-form input,.dj820-settings-form input){background:#294144;color:#e4f3ec;border-color:#4d746b}
-html body #app#app[data-theme="dark"] #dj824-account .dj821-kakao-login{background:#FEE500!important;color:#191919!important;border-color:#E8CF00!important}
+
+
+
+
 /* Unified close placement for all four floating pages, including iPhone PWA.
  * The close button belongs to the heading: no left-hand flex/grid reflow. */
 html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading{position:relative!important;box-sizing:border-box!important;min-width:0!important;min-height:55px!important;padding-inline-end:62px!important}

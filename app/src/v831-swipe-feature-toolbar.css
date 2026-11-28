@@ -68,14 +68,8 @@
   html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool:focus-visible{
     outline:2px solid var(--dj800-accent,#118570)!important;outline-offset:-3px!important;
   }
-  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool{
-    background:var(--dj800-surface,#21383b)!important;
-    color:var(--dj800-text,#e9f5ef)!important;border-color:var(--dj800-border,#49625d)!important;
-  }
-  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool[aria-pressed="true"],
-  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool[data-active="true"]{
-    background:var(--dj800-elevated,#31574e)!important;border-color:var(--dj800-accent,#6eac91)!important;
-  }
+  
+  
 }
 @media(max-width:699px) and (prefers-reduced-motion:reduce){
   html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport{scroll-behavior:auto!important;}
@@ -116,13 +110,9 @@
     background:linear-gradient(270deg,rgba(246,250,247,.88) 0%,rgba(246,250,247,.44) 52%,transparent 100%)!important;
   }
   html body #app#app#app#app#app #dj-v794-toolbar > .dj831-edge-blur[hidden] {display:none!important;}
-  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar > .dj831-edge-blur-left {
-    background:linear-gradient(90deg,rgba(17,31,34,.92) 0%,rgba(17,31,34,.48) 52%,transparent 100%)!important;
-  }
-  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar > .dj831-edge-blur-right {
-    background:linear-gradient(270deg,rgba(17,31,34,.92) 0%,rgba(17,31,34,.48) 52%,transparent 100%)!important;
-  }
-  html body #app#app#app#app#app[data-sangdo-night="on"] #dj-v794-toolbar > .dj831-scrollport > .dj912-poi-toolbar-button,
+  
+  
+  
   html body #app#app#app#app#app:not([data-tab="map"]) #dj-v794-toolbar > .dj831-scrollport > .dj912-poi-toolbar-button,
   html body #app#app#app#app#app[data-dj910-sheet-open="true"] #dj-v794-toolbar > .dj831-scrollport > .dj912-poi-toolbar-button,
   html body #app#app#app#app#app[data-search-open="true"] #dj-v794-toolbar > .dj831-scrollport > .dj912-poi-toolbar-button,

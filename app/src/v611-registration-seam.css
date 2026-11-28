@@ -2,8 +2,7 @@
    Imported last to supersede legacy rounded bottom-nav declarations. */
 @media (max-width:1079px) {
   #app #bottom-nav,
-  #app[data-tab="map"] #bottom-nav,
-  #app[data-theme="dark"] #bottom-nav {
+  #app[data-tab="map"] #bottom-nav{
     border-radius:0!important;
     border-top:0!important;
     background:#fff!important;
@@ -19,7 +18,7 @@
     border-bottom-left-radius:0!important;
     border-bottom-right-radius:0!important;
   }
-  #app[data-theme="dark"] #bottom-nav {background:#172831!important;}
+  
 }
 #app .point-attachment-editor,
 #app .point-detail-attachments {
@@ -63,7 +62,7 @@
 }
 #app .point-file-action:focus-visible,
 #app .point-attachment-pick:focus-visible{outline:2px solid #1b8a70;outline-offset:2px;}
-#app[data-theme="dark"] .point-attachment-pick{background:#25433f;color:#e5f6ef;border-color:#53776d;}
+
 @media(max-width:700px){
   #app .point-attachment-editor,#app .point-detail-attachments{margin:10px 0;padding:12px 10px;}
   #app .point-file-action{min-width:40px;min-height:40px;}

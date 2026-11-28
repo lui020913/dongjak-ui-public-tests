@@ -69,8 +69,7 @@
 #app .dongjak-landmark-name{font-size:11px;line-height:1.35;max-width:220px;
   text-align:center;white-space:normal;word-break:keep-all;overflow-wrap:break-word;
   text-shadow:0 1px 1px rgba(255,255,255,.65);}
-#app[data-theme="dark"] .dongjak-education-name,
-#app[data-theme="dark"] .dongjak-landmark-name{text-shadow:0 1px 2px #061923}
+
 
 /* Subway information: the next train and direction are the primary content.
    Travel-origin options and previous/next stations remain available below. */
@@ -230,21 +229,12 @@
 #app #transport-sheet[data-kind="subway"] .transport-service-hours{
   min-width:0;overflow-x:auto;
 }
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-panel-head,
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-arrivals-title,
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-direction-heading{
-  border-color:#425b57!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group{
-  background:#20383b!important;border-color:#41605b!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-next{
-  background:#244b42!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .transport-arrival-row{border-color:#3c5752!important}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-countdown{color:#81e3c4}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-position,
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-route{color:#bacfc9}
+
+
+
+
+
+
 @media (max-width:699px){
   #app #transport-sheet[data-kind="subway"]{
     padding:12px 14px 18px!important;
@@ -480,22 +470,11 @@
   margin-top:15px!important;
   border-radius:16px!important;
 }
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-info-line-card{
-  background:#213743!important;border-color:#405769!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group,
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .transport-arrival-row{
-  background:#1f343a!important;border-color:#43535c!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .metro-arrival-next{
-  background:#263f4b!important;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-mode-tabs{
-  background:#253e48;
-}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-mode-tabs button[aria-pressed="true"]{
-  background:#355c75;color:#e5f7ff;
-}
+
+
+
+
+
 @media(max-width:699px){
   #app #transport-sheet[data-kind="subway"] .metro-direction-grid{
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
