@@ -1595,8 +1595,13 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const wasVisible=!panel.hidden;
     if(wasVisible)markAiSurfaceDismissal();
     cancelSurfaceMotion(panel);
+    globalThis.window?.DongjakWindowMotion?.cancel?.(panel);
     windowState.dismiss();
-    panel.hidden=true;selected=null;resetBusRoutePreview();seq++;syncRoutePresentation();
+    // Hidden is the domain state, but legacy sheet CSS can still force display.
+    // Commit the closed surface after cancelling motion; only an accepted open
+    // may release the inline display lock.
+    panel.hidden=true;panel.style.setProperty('display','none','important');
+    selected=null;resetBusRoutePreview();seq++;syncRoutePresentation();
     selectionMarker?.remove?.();selectionMarker=null;
     document.getElementById('app')?.classList?.remove?.('transport-sheet-open');
     if(wasVisible&&restore)onClose();
@@ -2918,7 +2923,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     serviceHoursEl?.replaceChildren(el('p','transport-hours-notice','계획 운행시간표를 불러오는 중입니다.'));
     timetableExpanded=false;timetableDay=null;timetableLine='all';timetableDirection='all';
     // Switching a transfer-line tab MUST NOT dismiss/reopen the same sheet.
-    if(!sameStationLineChange){onOpen();panel.hidden=false;}
+    if(!sameStationLineChange){onOpen();panel.style.removeProperty('display');panel.hidden=false;}
     syncRoutePresentation();
     panel.classList.toggle('dj874-line-switching',sameStationLineChange);
     document.getElementById('app')?.classList?.add?.('transport-sheet-open');
