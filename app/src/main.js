@@ -750,10 +750,9 @@ const PITCH_BUILDING_START = 10;
 const PITCH_BUILDING_EXIT = 7;
 let buildingPitchActive=false;
 const PITCH_BUILDING_FULL = 30;
-// Temporary stable surface fallback: keep the DEM source and building extrusions,
-// but do not drape the map onto the terrain mesh until riverbank artifacts are verified.
-// A fixed startup choice avoids pitch/viewport-dependent terrain toggling.
-const TERRAIN_SURFACE_ENABLED=false;
+// Keep the original DEM relief throughout the map. Do not flatten the entire
+// district or toggle terrain by pitch/viewport to address a local artifact.
+const TERRAIN_SURFACE_ENABLED=true;
 let terrainEnabled = false;
 let terrainErrorNotified = false;
 let lastBuildingOpacity = -1;
