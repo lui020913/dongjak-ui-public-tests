@@ -495,25 +495,25 @@
 }
 
 /* 다크 테마: CSS 패널과 기존 맵 타일의 색을 함께 전환합니다. */
-#app[data-theme="dark"]{--ui-surface:#172831;--ui-ink:#e8f2ef;--ui-muted:#b2c9bf;--ui-stroke:#3b5455;color:#e8f2ef;background:#102129;}
-#app[data-theme="dark"] #map{background:#11222c;}
-#app[data-theme="dark"] .topbar{background:transparent;}
-#app[data-theme="dark"] .brand-name,#app[data-theme="dark"] .sheet h1,#app[data-theme="dark"] .page-panel h2,#app[data-theme="dark"] .page-panel h3{color:#eff8f3;}
-#app[data-theme="dark"] .eyebrow,#app[data-theme="dark"] .sheet p,#app[data-theme="dark"] .page-heading p{color:#c2d4cc;}
-#app[data-theme="dark"] .sheet,#app[data-theme="dark"] .detail-sheet,#app[data-theme="dark"] .entry-sheet,#app[data-theme="dark"] .transport-sheet,#app[data-theme="dark"] .page-panel,#app[data-theme="dark"] .bottom-nav{background:#172831;border-color:#344f52;color:#ecf6ef;}
-#app[data-theme="dark"] .map-badge,#app[data-theme="dark"] .filter-chip:not(.selected),#app[data-theme="dark"] .map-actions button,#app[data-theme="dark"] .data-layer-controls>button:not([aria-pressed="true"]),#app[data-theme="dark"] .weather-widget,#app[data-theme="dark"] .theme-toggle,#app[data-theme="dark"] .road-width-legend{background:#21363c;color:#e1eee9;border-color:#41605c;}
-#app[data-theme="dark"] .weather-info,#app[data-theme="dark"] #weather-title,#app[data-theme="dark"] .status-tag{color:#e1eee9;}
-#app[data-theme="dark"] #weather-my-location{background:#2b4349;color:#e1eee9;border-color:#456461;}
-#app[data-theme="dark"] .prototype,#app[data-theme="dark"] .status-tag{background:#28483e;}
-#app[data-theme="dark"] .filter-result,#app[data-theme="dark"] #safety-layer-status{background:#20343ceb;color:#e2f3e9;}
-#app[data-theme="dark"] .page-panel .route-card,#app[data-theme="dark"] .feature-card,#app[data-theme="dark"] .community-note,#app[data-theme="dark"] .route-search-item,#app[data-theme="dark"] .route-place-search,#app[data-theme="dark"] .route-search-confirm,#app[data-theme="dark"] .route-summary,#app[data-theme="dark"] .record-item,#app[data-theme="dark"] .transport-arrival-row,#app[data-theme="dark"] .transport-selection-box{background:#233b40;color:#e6f1ed;border-color:#405e5c;}
-#app[data-theme="dark"] .page-panel strong,#app[data-theme="dark"] .route-location-text strong,#app[data-theme="dark"] .route-search-item strong,#app[data-theme="dark"] .transport-sheet strong{color:#e9f4ed;}
-#app[data-theme="dark"] input,#app[data-theme="dark"] select,#app[data-theme="dark"] textarea{background:#20383e;border-color:#46645e;color:#e9f4ed;}
-#app[data-theme="dark"] .detail-close,#app[data-theme="dark"] .sheet-toggle,#app[data-theme="dark"] .route-mini-btn,#app[data-theme="dark"] .transport-section-title button{background:#294840;color:#dff1e9;border-color:#54766a;}
-#app[data-theme="dark"] .map-actions svg{stroke:#e9f5ee;}
-#app[data-theme="dark"] .road-width-legend small,#app[data-theme="dark"] .road-width-legend .roadwidth-note,#app[data-theme="dark"] .footer-note{color:#bed1c9;}
-#app[data-theme="dark"] .detail-photo,#app[data-theme="dark"] .coordinate-note{background:#2a4247;color:#e6f2eb;}
-#app[data-theme="dark"] .page-panel .page-note,#app[data-theme="dark"] .transport-note,#app[data-theme="dark"] .detail-disclaimer{color:#bacdc5;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* 기본으로 접힌 안내 패널 위에 지도 조작 버튼이 가려지지 않도록 위치 보정 */
 @media (orientation:portrait) and (min-height:541px){.map-actions{bottom:calc(env(safe-area-inset-bottom) + 245px);}}
 
@@ -522,10 +522,10 @@
 .compass-direction{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;transition:transform .12s linear;transform-origin:center center;}
 .compass-direction svg{width:21px!important;height:21px!important;stroke:#3c6457!important;stroke-width:1.4!important;fill:#d9554a!important;}
 .compass-n{font-size:9px;font-weight:900;color:#bf4c43;line-height:1.1;}
-#app[data-theme="dark"] .compass-direction svg{fill:#f1806e!important;stroke:#d9ede5!important;}
+
 .maplibregl-ctrl-bottom-left{bottom:calc(82px + env(safe-area-inset-bottom))!important;left:clamp(8px,2vw,30px)!important;z-index:910;pointer-events:none;}
 .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale{border:0;border-bottom:3px solid #244b41;border-left:2px solid #244b41;border-right:2px solid #244b41;background:#fffffff0;color:#143b30;border-radius:0 0 4px 4px;font:bold 11px/1.2 'Pretendard Variable',sans-serif;box-shadow:0 2px 10px #253b3425;padding:2px 6px;}
-#app[data-theme="dark"] .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale{background:#20343deb;color:#e8f5ee;border-color:#e8f5ee;}
+
 #app[data-tab]:not([data-tab="map"]) .maplibregl-ctrl-bottom-left,
 .route-picking .maplibregl-ctrl-bottom-left,.route-guiding .maplibregl-ctrl-bottom-left{display:none!important;}
 /* 호선별 번호 배지: M 한 글자보다 실제 노선 정보를 드러냅니다. */
@@ -533,7 +533,7 @@
 .metro-badges{display:flex;align-items:center;gap:2px;padding:3px 4px;border-radius:999px;border:1.5px solid #eff7f2;background:#ffffffed;box-shadow:0 1px 5px #25373333;}
 .metro-badge-number{color:#fff;font-size:11px;font-weight:900;width:23px;height:23px;border-radius:50%;display:grid;place-items:center;white-space:nowrap;flex:none;text-shadow:0 1px 1px #0003;}
 .metro-station-name{font-size:12px;font-weight:850;white-space:nowrap;background:#ffffffea;color:#234237;border:1px solid #e0e9e3;padding:3px 7px;border-radius:7px;text-shadow:none;}
-#app[data-theme="dark"] .metro-badges,#app[data-theme="dark"] .metro-station-name{background:#243c42f5;color:#e9f6ed;border-color:#50736c;}
+
 .metro-station-marker:hover .metro-badges,.metro-station-marker:focus-visible .metro-badges{outline:2px solid #16886d;outline-offset:2px;}
 .metro-station-marker:focus-visible{outline:0;}
 /* 높은 건물과 지도 아이콘이 시각적으로 부딪히지 않도록 개별 마커는 작고 선명하게 유지합니다. */
@@ -583,7 +583,7 @@
 .site-update-banner{position:absolute;z-index:2100;top:calc(env(safe-area-inset-top) + 70px);left:50%;transform:translateX(-50%);max-width:calc(100vw - 24px);width:fit-content;border:1px solid #a0cabb;background:#f1fff6;color:#134a39;border-radius:14px;padding:11px 12px;box-shadow:0 8px 30px #1b342833;display:flex;gap:12px;align-items:center;font-size:12px;font-weight:700;}
 .site-update-banner[hidden]{display:none!important;}
 .site-update-banner button{white-space:nowrap;border:0;background:#10846c;border-radius:9px;color:white;padding:9px 12px;font-size:12px;font-weight:800;}
-#app[data-theme="dark"] .site-update-banner{background:#1f3b37;color:#e5f6ec;border-color:#537a67;}
+
 
 /* v17.10 · map controls follow the *visible* sheet position, not a fixed pixel offset. */
 #app[data-tab="map"] .map-actions{z-index:990;max-height:calc(100dvh - 88px);}
@@ -654,11 +654,11 @@
 .admin-dong-clear{width:100%;border:1px solid #cadecf;background:white;color:#247660;font-size:12px;
  padding:11px;border-radius:12px;font-weight:800;margin:12px 0}
 .admin-dong-picker small{font-size:10px;color:#7e8c85}
-#app[data-theme="dark"] .admin-dong-picker{background:#22373b;color:#dbeee6;border-color:#3c6258}
-#app[data-theme="dark"] .admin-dong-heading strong{color:#dbeee6}
-#app[data-theme="dark"] .admin-dong-choice{background:#2d4545;color:#dbeee6;border-color:#45615b}
-#app[data-theme="dark"] .admin-dong-choice[aria-pressed="true"]{background:#147e65}
-#app[data-theme="dark"] .map-tools-toggle{background:#243c42;color:#e1f2e9;border-color:#42665c}
+
+
+
+
+
 /* 화면 폭이 작은 경우 버튼들이 겹치지 않게 상세 옵션을 한 곳에 표시 */
 @media(max-width:699px){
   .map-tools-toggle{top:calc(env(safe-area-inset-top) + 135px);left:12px;}
@@ -694,15 +694,15 @@
 .version-legacy-details{margin:16px 0;border:1px solid #d5e2dc;border-radius:12px;overflow:hidden;}
 .version-legacy-details>summary{cursor:pointer;padding:13px 15px;font-weight:700;font-size:13px;line-height:1.5;}
 .version-legacy-list{padding:0 15px 12px;border-top:1px solid #d5e2dc;}
-#app[data-theme="dark"] .version-legacy-details,#app[data-theme="dark"] .version-legacy-list{border-color:#425a56;}
+
 
 .version-entry h3{font-size:14px;color:#11765e;margin:0 0 8px;}
 .version-entry ul{margin:0;padding-left:19px;line-height:1.7;font-size:12px;color:#3a544b;}
-#app[data-theme="dark"] .version-history-dialog{background:#172a30;color:#eaf5ef;}
-#app[data-theme="dark"] .version-history-head,#app[data-theme="dark"] .version-entry{border-color:#425a56;}
-#app[data-theme="dark"] .version-entry ul{color:#c6d9d0;}
-#app[data-theme="dark"] .version-history-head p{color:#b4cdc2;}
-#app[data-theme="dark"] #version-history-close{background:#29483f;color:#e8f8ef;}
+
+
+
+
+
 @media (max-width:420px){.topbar .prototype.version-history-trigger{display:inline-block;font-size:10px;padding:5px 7px;}.version-history-backdrop{padding:12px}.version-history-head{padding:16px}.version-history-list{padding:8px 16px 16px}}
 
 /* v17.17 · 수도권 철도 노선 표기 */
@@ -720,8 +720,8 @@
  font-size:11px;font-weight:800;padding:3px 6px;white-space:nowrap;}
 .dongjak-landmark.landmark-compact .dongjak-landmark-icon{width:27px;height:27px;font-size:14px;}
 .dongjak-landmark.landmark-compact .dongjak-landmark-name{display:none;}
-#app[data-theme='dark'] .dongjak-landmark-name{background:#213a40;color:#e8f4eb;border-color:#52776c;}
-#app[data-theme='dark'] .dongjak-landmark-icon{border-color:#42665c;background:#276c62;}
+
+
 .dongjak-landmark-popup strong{font-size:14px;color:#145d4c;}
 .dongjak-landmark-popup p{font-size:12px;color:#3b5b50;margin:7px 0;}
 .dongjak-landmark-popup small{color:#849a91;font-size:10px;}
@@ -744,9 +744,9 @@
 .metro-badge-number.metro-panel-badge {width:25px;height:25px;font-size:11px;border-radius:50%;flex:none;letter-spacing:-.5px;}
 .metro-badge-number.metro-panel-badge.metro-badge-gyeongui {font-size:6px;letter-spacing:-.8px;padding:1px;}
 .metro-badge-number.metro-panel-badge.metro-badge-shinlim {background-size:cover;}
-#app[data-theme="dark"] .metro-info-line-card{background:#20383d;border-color:#47675f;}
-#app[data-theme="dark"] .metro-info-line-head{color:#e7f6ed;}
-#app[data-theme="dark"] .metro-neighbor-row{color:#c7d7d1;}
+
+
+
 
 /* 멀리서 작고 단정한 역 마커: 역명만 적게 보이고 노선표시는 주요 노선 하나만 */
 .metro-station-marker.metro-overview {gap:2px;filter:drop-shadow(0 1px 2px #263b3540);}
@@ -770,7 +770,7 @@
 .transport-arrivals{gap:12px;}
 .metro-arrival-group{display:flex;flex-direction:column;gap:6px;min-width:0;}
 .metro-arrival-group-heading{display:flex;align-items:center;gap:8px;padding:5px 2px;font-size:12px;}
-#app[data-theme="dark"] .metro-arrival-group-heading{color:#e4f6ec;}
+
 .transport-sheet .subway-title::before{display:none!important;content:none!important;}
 .transport-sheet .subway-title{display:flex;gap:9px;align-items:center;}
 .transport-sheet[data-kind="subway"] #transport-lines{display:none;}
@@ -783,7 +783,7 @@
 .metro-station-marker.metro-mid-zoom .metro-badge-number.metro-badge-gyeongui{width:18px!important;height:18px!important;font-size:4.7px!important;}
 .transport-updated-actions{display:flex;align-items:center;gap:10px;}
 .transport-updated-actions button{border:0;border-radius:10px;padding:8px 10px;background:#e5f3ec;color:#0b785c;font-size:11px;font-weight:800;cursor:pointer;}
-#app[data-theme="dark"] .transport-updated-actions button{background:#345d50;color:#e7fff3;}
+
 
 .transport-sheet .subway-title{flex-direction:row-reverse!important;justify-content:flex-end;}
 
@@ -794,9 +794,9 @@
 .metro-direction-heading.up{color:#145e95;background:#e9f3fa;border-color:#cee3f4;}
 .metro-direction-heading.down{color:#925b14;background:#fff3e4;border-color:#efdfc7;}
 .metro-direction-arrow{font-size:16px;line-height:1;}
-#app[data-theme="dark"] .metro-direction-heading{background:#2b4342;color:#d9f2e3;border-color:#456861;}
-#app[data-theme="dark"] .metro-direction-heading.up{background:#253e55;color:#c2e5ff;border-color:#355d7c;}
-#app[data-theme="dark"] .metro-direction-heading.down{background:#514331;color:#ffe6bd;border-color:#7c623d;}
+
+
+
 .metro-arrival-direction-group .transport-arrival-row{margin:0;}
 
 /* 교육시설 전용 표지: 대학은 전체 지역 뷰에서, 초중고는 동네로 확대할 때 표시 */
@@ -811,7 +811,7 @@
 .dongjak-education-kind{display:none;}
 .dongjak-education-marker.compact .dongjak-education-icon{width:27px;height:27px;font-size:14px;}
 .dongjak-education-marker.compact:not(.university) .dongjak-education-name{display:none;}
-#app[data-theme="dark"] .dongjak-education-name{background:#203c4a;color:#e3effa;border-color:#577991;}
+
 .dongjak-education-popup strong{color:#21547e;font-size:14px;}
 .dongjak-education-popup p{font-size:12px;margin:7px 0;color:#526977;}
 .dongjak-education-popup small{font-size:11px;color:#718896;}
@@ -825,11 +825,11 @@
 .metro-arrival-direction-group{background:#f5f8f6;border:1px solid #e2ebe5;border-radius:16px;padding:10px;}
 .metro-arrival-direction-group.up{background:#f2f8fc;border-color:#d8e8f4;}
 .metro-arrival-direction-group.down{background:#fff8ef;border-color:#efe0c9;}
-#app[data-theme="dark"] .metro-arrival-direction-group{background:#203537;border-color:#3a5856;}
-#app[data-theme="dark"] .metro-arrival-direction-group.up{background:#213649;border-color:#3b607a;}
-#app[data-theme="dark"] .metro-arrival-direction-group.down{background:#473c2e;border-color:#7b623d;}
+
+
+
 .metro-arrival-direction-group .transport-arrival-row{background:rgba(255,255,255,0.72);}
-#app[data-theme="dark"] .metro-arrival-direction-group .transport-arrival-row{background:#233b40;}
+
 .metro-passive-station{cursor:default!important;opacity:.96;}
 .metro-passive-station .metro-station-name{opacity:.88;}
 
@@ -850,17 +850,17 @@
 .route-variant-choice button[aria-pressed="true"]{background:#0f8068;color:white;border-color:#0f8068;}
 .route-variant-choice button:disabled{opacity:.38;cursor:default;}
 .route-variants p{font-size:11px;line-height:1.65;color:#5d7369;margin:9px 0 0;}
-#app[data-theme="dark"] .route-variants{background:#223c38;border-color:#3c6156;}
-#app[data-theme="dark"] .route-variant-choice button{background:#24433e;color:#e6f4ec;border-color:#456a5e;}
-#app[data-theme="dark"] .route-variant-choice button[aria-pressed="true"]{background:#138469;}
-#app[data-theme="dark"] .route-variants p{color:#d4e2dc;}
+
+
+
+
 @media(max-width:460px){.metro-direction-grid{gap:7px;}.metro-arrival-direction-group{padding:7px;}.metro-direction-grid .transport-arrival-row{display:flex;flex-wrap:wrap;align-items:flex-start;}.metro-direction-grid .transport-arrival-time{margin-left:auto;}}
 
 .metro-direction-grid .transport-arrival-row{flex-wrap:wrap;}
 /* v5.2 map refinements: accessibility status stays readable in a narrow map-tools sheet. */
 #metro-access-status{font-size:10px;line-height:1.4;max-width:min(290px,100%);color:#1d604c;
   border-radius:9px;background:#fffffff0;padding:5px 9px;overflow-wrap:break-word;word-break:keep-all;}
-#app[data-theme="dark"] #metro-access-status{background:#20343ceb;color:#d6f1e5;}
+
 /* v5.2: 출구 조회 상태는 메뉴 안에서 길게 잘리지 않게 표시 */
 #metro-access-retry{border:1px solid #b7d8c9;border-radius:9px;background:#e6f4ee;
   color:#225b4b;font-size:11px;padding:6px 9px;cursor:pointer;white-space:nowrap;}
@@ -878,7 +878,7 @@
 #app[data-tab="map"].map-immersive .bottom-nav,
 #app[data-tab="map"].map-immersive .overview-sheet{display:none!important;}
 #app[data-tab="map"].map-immersive .map-actions{bottom:calc(env(safe-area-inset-bottom) + 75px)!important;}
-#app[data-theme="dark"] .map-chrome-restore{background:#213b40;color:#ecf5f2;border-color:#4d7065;}
+
 /* Reading panel: articles are sourced live, never represented as user submissions. */
 .dongjak-news-toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;}
 .dongjak-news-tabs{display:flex;gap:5px;padding:4px;border-radius:12px;background:#e9f2ed;flex:1;}
@@ -897,7 +897,7 @@
 .news-empty{padding:20px 14px;border-radius:13px;border:1px solid #e0eae2;background:#fff;color:#5e7469;font-size:12px;line-height:1.7;}
 .transport-auto-refresh-label{font-size:10px;color:#15765c;white-space:nowrap;}
 /* Dark news palette: see the one shared theme-contract.css owner. */
-#app[data-theme="dark"] .transport-auto-refresh-label{color:#a6dcc9;}
+
 @media(max-width:360px){.nav-tab{font-size:9px;}.nav-icon{font-size:19px;}}
 
 /* 환승역: 11.1~13.05배율은 통합 마커, 13.05 이상은 호선별 승강장 마커. */
@@ -905,7 +905,7 @@
 .metro-platform-detail .metro-badges{padding:3px;border:2px solid #ffffff;box-shadow:0 2px 9px rgba(29,42,52,.2);}
 .metro-platform-detail .metro-badge-number{width:25px;height:25px;font-size:11px;}
 .metro-platform-detail .metro-station-name{font-size:11px!important;line-height:1.2;padding:4px 6px;border:1px solid #d8e2e5;box-shadow:0 2px 6px rgba(12,34,43,.14);}
-#app[data-theme="dark"] .metro-platform-detail .metro-station-name{border-color:#577179;}
+
 
 /* 첫차·막차 안내: 실제 시간표와 실시간 도착정보를 구분합니다. */
 .transport-service-hours{display:grid;gap:8px;font-size:12px;color:var(--text,#284438);margin:7px 0 2px;}
@@ -929,9 +929,9 @@
 .transport-hours-summary-card .transport-hours-times{display:grid;gap:4px;}
 .transport-hours-summary-card--empty{min-height:92px;align-content:center;}
 .transport-hours-panel-note{margin:0;font-size:11px;line-height:1.6;color:#6a8176;}
-#app[data-theme="dark"] .transport-hours-line-panel{background:#233a37;border-color:#406058;}
-#app[data-theme="dark"] .transport-hours-line-title{color:#e8f5ef;}
-#app[data-theme="dark"] .transport-hours-panel-note{color:#b7cdc4;}
+
+
+
 
 .transport-timetable-line-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;min-width:0;}
 .transport-timetable-route-panel{display:grid;gap:12px;padding:12px;border:1px solid #dcebe3;border-radius:16px;background:#f9fcfb;min-width:0;}
@@ -939,13 +939,13 @@
 .transport-timetable-route-title{display:inline-flex;align-items:center;gap:8px;font-size:16px;color:#21493b;font-weight:850;}
 .transport-timetable-route-count{font-size:11px;font-weight:800;color:#5d786d;background:#edf5f1;border-radius:999px;padding:6px 10px;white-space:nowrap;}
 .transport-timetable-service-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0;align-items:start;}
-#app[data-theme="dark"] .transport-timetable-route-panel{background:#233a37;border-color:#406058;}
-#app[data-theme="dark"] .transport-timetable-route-title{color:#e8f5ef;}
-#app[data-theme="dark"] .transport-timetable-route-count{background:#294541;color:#e8f5ef;}
 
-#app[data-theme="dark"] .transport-hours-row{background:#233a37;border-color:#406058;color:#e5f3ee;}
-#app[data-theme="dark"] .transport-hours-times b{color:#dafff0;}
-#app[data-theme="dark"] .transport-hours-alert{color:#ffb392;}
+
+
+
+
+
+
 
 /* 전체 지하철 시간표: 작은 화면에서도 별도 스크롤로 모든 편성을 표시 */
 .transport-timetable-toggle{align-self:flex-start;border:1px solid #9bbdb4;border-radius:11px;background:#e5f3ee;color:#126954;font-weight:850;font-size:13px;padding:10px 14px;cursor:pointer;}
@@ -957,9 +957,9 @@
 .transport-timetable-table th,.transport-timetable-table td{text-align:left;padding:9px 8px;border-bottom:1px solid #e9efeb;white-space:nowrap;}
 .transport-timetable-table th{position:sticky;top:0;background:#e8f3ed;color:#234f41;font-weight:800;z-index:1;}
 .transport-timetable-table td:first-child{font-weight:800;font-variant-numeric:tabular-nums;}
-#app[data-theme="dark"] .transport-timetable-toggle{background:#264e47;color:#e4f5ed;border-color:#628b78;}
-#app[data-theme="dark"] .transport-timetable-table th{background:#304a43;color:#f1fff7;}
-#app[data-theme="dark"] .transport-timetable-table td{border-color:#4b6058;}
+
+
+
 
 
 /* Direction-separated timetable: light, compact, and legible on mobile. */
@@ -1039,24 +1039,23 @@
 .transport-timetable-express{display:inline-flex;align-items:center;padding:3px 6px;
   font-size:10px;font-weight:850;border-radius:6px;background:#fff2df;color:#ad640d;}
 .transport-timetable-no-trains{margin:13px 2px;color:#70857b;font-size:12px;line-height:1.65;}
-#app[data-theme="dark"] .transport-timetable-toggle{background:#254c41;color:#d9f1e6;border-color:#4c8270;}
-#app[data-theme="dark"] .transport-timetable-toggle:hover{background:#315b4e;}
-#app[data-theme="dark"] .transport-timetable-filter-label,#app[data-theme="dark"] .transport-timetable-count{color:#b9cfc7;}
-#app[data-theme="dark"] .transport-timetable-filter select{background:#243c3e;color:#e7f2ec;border-color:#47605b;}
-#app[data-theme="dark"] .transport-timetable-direction-switch{background:#243d3d;border-color:#3e5852;}
-#app[data-theme="dark"] .transport-timetable-direction-button{color:#bfd0c9;}
-#app[data-theme="dark"] .transport-timetable-direction-button[aria-pressed="true"]{background:#345b51;color:#f1fff7;}
-#app[data-theme="dark"] .transport-timetable-pane{background:#243b3e;border-color:#405950;}
-#app[data-theme="dark"] .transport-timetable-pane--up .transport-timetable-pane-header{background:#2a5144;}
-#app[data-theme="dark"] .transport-timetable-pane--down .transport-timetable-pane-header{background:#2d4760;}
-#app[data-theme="dark"] .transport-timetable-pane-title,#app[data-theme="dark"] .transport-timetable-pane--down .transport-timetable-pane-title{color:#e4f5ee;}
-#app[data-theme="dark"] .transport-timetable-pane-count{background:#233b3a;color:#e4f5ee;}
-#app[data-theme="dark"] .transport-timetable-pane-subtitle,#app[data-theme="dark"] .transport-timetable-line-count{color:#b3cbc1;}
-#app[data-theme="dark"] .transport-timetable-line-head{background:#243b3e;}
-#app[data-theme="dark"] .transport-timetable-line-name,#app[data-theme="dark"] .transport-timetable-train-time{color:#eaf6f0;}
-#app[data-theme="dark"] .transport-timetable-line-group + .transport-timetable-line-group,
-#app[data-theme="dark"] .transport-timetable-train{border-color:#425850;}
-#app[data-theme="dark"] .transport-timetable-train-dest{color:#c7e1d5;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @media(max-width:640px){
   .transport-hours-line-grid,.transport-timetable-line-grid,.transport-timetable-service-grid,.transport-hours-summary-grid{grid-template-columns:minmax(0,1fr);}
   .transport-timetable-direction-grid{grid-template-columns:minmax(0,1fr);}
@@ -1088,14 +1087,14 @@
 .transport-timetable-service-group--unknown .transport-timetable-service-head{background:#f4f4f4;}
 .transport-timetable-service-group .transport-timetable-train{padding:10px 12px;}
 .transport-timetable-service-empty{margin:0;padding:12px;font-size:11px;line-height:1.5;color:#72847b;}
-#app[data-theme="dark"] .transport-timetable-service-group{background:#263e3e;border-color:#4a665c;}
-#app[data-theme="dark"] .transport-timetable-service-group--local .transport-timetable-service-head{background:#305246;}
-#app[data-theme="dark"] .transport-timetable-service-group--express{border-color:#8b6e42;}
-#app[data-theme="dark"] .transport-timetable-service-group--express .transport-timetable-service-head{background:#4e4029;}
-#app[data-theme="dark"] .transport-timetable-service-group--unknown .transport-timetable-service-head{background:#394a49;}
-#app[data-theme="dark"] .transport-timetable-service-title{color:#e6f4ec;}
-#app[data-theme="dark"] .transport-timetable-service-group--express .transport-timetable-service-title{color:#ffdb9e;}
-#app[data-theme="dark"] .transport-timetable-service-count,#app[data-theme="dark"] .transport-timetable-service-empty{color:#b8cac0;}
+
+
+
+
+
+
+
+
 
 /* 베이스 지도 레이어 선택: 지도 옵션 내 펼침 메뉴로 표시해 조작 영역 보호 */
 .base-layer-controls{position:relative;z-index:1400;max-width:min(360px,calc(100vw - 32px));font-size:12px;}
@@ -1117,11 +1116,11 @@
 .base-layer-menu>button:focus-visible,.base-layer-controls>summary:focus-visible{outline:3px solid #70bba6;outline-offset:2px;}
 .base-layer-menu>p{grid-column:1/-1;margin:4px 0 0;color:#6d8176;font-size:10px;line-height:1.6;word-break:keep-all;}
 #app[data-base-metro="off"] .metro-station-marker{display:none!important;}
-#app[data-theme="dark"] .base-layer-controls>summary{background:#274a42;border-color:#507c6e;color:#e3f4ea;}
-#app[data-theme="dark"] .base-layer-menu{background:#21383a;border-color:#4c615b;}
-#app[data-theme="dark"] .base-layer-menu>button{background:#2b4544;color:#c4d9d0;border-color:#547067;}
-#app[data-theme="dark"] .base-layer-menu>button[aria-pressed="true"]{background:#185b4c;color:#f0fff7;border-color:#438c75;}
-#app[data-theme="dark"] .base-layer-menu>p{color:#bad1c5;}
+
+
+
+
+
 @media(max-width:380px){.base-layer-menu{grid-template-columns:minmax(0,1fr);}}
 
 /* 2026-11-06: tidy map search and one compact options drawer. */
@@ -1167,10 +1166,10 @@
 #app.map-controls-open .map-advanced-controls .transport-source-status{font-size:11px;line-height:1.5;white-space:normal;background:transparent;}
 #app.map-controls-open .map-advanced-controls .stop-gps-tracking{align-self:flex-start;}
 #app.map-controls-open .map-advanced-controls .add-hint{display:none!important;}
-#app[data-theme="dark"] .map-quick-search-form,#app[data-theme="dark"] .map-quick-search-dropdown,#app[data-theme="dark"].map-controls-open .map-advanced-controls{background:#20383d;color:#eff7f2;border-color:#45625a;}
-#app[data-theme="dark"] .map-quick-search-form input{color:#eff7f2;background:transparent;}
-#app[data-theme="dark"] .map-quick-search-suggestion,#app[data-theme="dark"] .map-quick-search-result,#app[data-theme="dark"] .map-options-group{background:#284640;border-color:#4a655b;color:#ecf6ee;}
-#app[data-theme="dark"] .map-quick-search-result strong,#app[data-theme="dark"] .map-quick-search-dropdown-head,#app[data-theme="dark"] .map-options-heading strong{color:#e5f4e9;}
+
+
+
+
 @media(max-width:699px){
   .map-quick-search{top:calc(env(safe-area-inset-top) + 87px);width:calc(100vw - 24px);}
   .map-tools-toggle{top:calc(env(safe-area-inset-top) + 150px);left:12px;}
@@ -1192,7 +1191,7 @@ html,body,button,input,select,textarea{font-family:'Pretendard Variable',Pretend
 .dongjak-news-thumb-placeholder span:first-child{font-size:19px;line-height:1;}
 .dongjak-news-item-meta,.dongjak-news-item>strong,.dongjak-news-open{min-width:0;}
 .dongjak-news-item>strong{line-height:1.5;overflow-wrap:anywhere;}
-#app[data-theme="dark"] .dongjak-news-thumb-placeholder{background:#294740;color:#cee4da;border-color:#405b55;}
+
 @media (min-width:1000px){
   /* Desktop uses a compact left rail; map stays tappable on the right. */
   .page-panel{left:18px!important;right:auto!important;top:calc(80px + env(safe-area-inset-top));bottom:calc(81px + env(safe-area-inset-bottom));width:clamp(430px,36vw,610px)!important;max-width:calc(100vw - 48px)!important;transform:none!important;border:1px solid #dce9e3;border-radius:20px;box-shadow:0 14px 44px #102e2529;}
@@ -1223,7 +1222,7 @@ html,body,button,input,select,textarea{font-family:'Pretendard Variable',Pretend
 }
 #news-panel .page-heading{position:relative;padding-right:92px;}
 #news-close-to-map{position:absolute;right:0;top:2px;border:1px solid #caddd4;border-radius:11px;background:#eef8f3;color:#16775b;font-size:12px;font-weight:800;padding:9px 11px;}
-#app[data-theme="dark"] #news-close-to-map{background:#2c4b42;color:#d5f2e5;border-color:#456d5c;}
+
 
 
 /* Base map V4: stable ground anchor, non-jumping transfer-line buttons. */
@@ -1594,15 +1593,13 @@ html,body,button,input,select,textarea{font-family:'Pretendard Variable',Pretend
   content:'';position:absolute;inset:0;pointer-events:none;z-index:22;
   background:none;
 }
-#app[data-theme='dark'] #map::after{
-  background:none;
-}
+
 
 /* v5.9.7 school building pictogram (university PNG emblems remain unchanged). */
 .dongjak-education-marker:not(.university) .dongjak-education-icon{background:#4c7e74;color:#fff;}
 .dongjak-school-pictogram{width:23px;height:23px;display:block;flex:none;}
 .dongjak-education-marker.compact .dongjak-school-pictogram{width:20px;height:20px;}
-#app[data-theme="dark"] .dongjak-education-marker:not(.university) .dongjak-education-icon{background:#487b72;}
+
 
 /* v5.9.8 first-load gate: it never blocks access forever on a slow external API. */
 .map-startup-overlay{position:fixed;inset:0;z-index:16000;display:grid;place-items:center;background:#f7faf8;color:#193e34;opacity:1;transition:opacity .3s ease;pointer-events:auto;}
@@ -1616,18 +1613,18 @@ html,body,button,input,select,textarea{font-family:'Pretendard Variable',Pretend
 .map-startup-spinner{height:26px;width:26px;margin:5px 0;border:3px solid #d6e6dc;border-top-color:#13846c;border-radius:50%;animation:dj-start-spin .9s linear infinite;}
 @keyframes dj-start-spin{to{transform:rotate(360deg);}}
 .map-startup-inner button{border:1px solid #b9d8c9;background:#fff;color:#166950;border-radius:12px;padding:11px 16px;font-size:13px;font-weight:750;cursor:pointer;}
-#app[data-theme=dark] .map-startup-overlay{background:#102329;color:#e9f3ef;}
-#app[data-theme=dark] .map-startup-inner #map-startup-note{color:#b6cdc6;}
-#app[data-theme=dark] .map-startup-inner button{background:#1a3739;color:#eaf5ed;border-color:#446c61;}
+
+
+
 @media(prefers-reduced-motion:reduce){.map-startup-spinner{animation:none}.map-startup-overlay{transition:none}}
 
 /* v5.9.9 user-supplied district, memorial and brand marks */
 #app .brand .logo{background:transparent!important;box-shadow:none!important;overflow:hidden!important;}
 #app .brand .logo img{display:block;width:100%;height:100%;object-fit:contain;}
-#app[data-theme="dark"] .brand .logo{background:rgba(255,255,255,.96)!important;}
+
 #app .dongjak-landmark.has-official-logo .dongjak-landmark-icon{background:rgba(255,255,255,.95)!important;border:1px solid #dce6e1!important;overflow:hidden;padding:2px;box-shadow:0 2px 7px rgba(16,38,34,.12)!important;}
 #app .dongjak-landmark.has-official-logo .dongjak-landmark-icon img{display:block;width:100%;height:100%;object-fit:contain;}
-#app[data-theme="dark"] .dongjak-landmark.has-official-logo .dongjak-landmark-icon{background:#f5f7f5!important;}
+
 #app .map-startup-logo{background:#fff;color:#1e5847;overflow:hidden;border:1px solid #d6e5db;}
 #app .map-startup-logo img{width:100%;height:100%;object-fit:contain;display:block;}
 
@@ -1637,11 +1634,7 @@ html,body,button,input,select,textarea{font-family:'Pretendard Variable',Pretend
   background:#f3f7f5!important;
   color:#183b32!important;
 }
-html[data-theme="dark"] #app .map-startup-overlay,
-#app[data-theme="dark"] .map-startup-overlay{
-  background:#101f25!important;
-  color:#edf7f2!important;
-}
+
 #app .map-startup-inner{width:min(340px,calc(100vw - 44px));gap:0;transform:translateY(-3vh);}
 #app .map-startup-logo{
   display:grid;place-items:center;width:110px;height:80px;min-width:110px;min-height:80px;
@@ -1659,14 +1652,10 @@ html[data-theme="dark"] #app .map-startup-overlay,
 #app .map-startup-inner #map-startup-note{color:#688177;font-size:11px;line-height:1.6;margin:6px 0 0;}
 #app .map-startup-inner #map-startup-continue{background:transparent;border:1px solid #dceae3;border-radius:9px;color:#183b32;font-size:12px;margin-top:23px;}
 #app .map-startup-footer{position:absolute;bottom:calc(30px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:#688177;font-size:11px;}
-html[data-theme="dark"] #app .map-startup-eyebrow,#app[data-theme="dark"] .map-startup-eyebrow,
-html[data-theme="dark"] #app .map-startup-subtitle,#app[data-theme="dark"] .map-startup-subtitle,
-html[data-theme="dark"] #app .map-startup-inner #map-startup-note,#app[data-theme="dark"] .map-startup-inner #map-startup-note,
-html[data-theme="dark"] #app .map-startup-footer,#app[data-theme="dark"] .map-startup-footer{color:#a0b9af!important;}
-html[data-theme="dark"] #app .map-startup-title,#app[data-theme="dark"] .map-startup-title,
-html[data-theme="dark"] #app .map-startup-inner #map-startup-message,#app[data-theme="dark"] .map-startup-inner #map-startup-message{color:#edf7f2!important;}
-html[data-theme="dark"] #app .map-startup-progress,#app[data-theme="dark"] .map-startup-progress{background:#28443e!important;}
-html[data-theme="dark"] #app .map-startup-inner #map-startup-continue,#app[data-theme="dark"] .map-startup-inner #map-startup-continue{color:#edf7f2!important;border-color:#28443e!important;background:transparent!important;}
+
+
+
+
 @media(max-width:480px){#app .map-startup-inner{transform:translateY(-1.5vh);}#app .map-startup-logo{width:102px;height:75px;min-width:102px;min-height:75px;max-width:102px;max-height:75px}#app .map-startup-title{font-size:23px}}
 @media(prefers-reduced-motion:reduce){#app .map-startup-progress::before{animation:none!important;transform:none!important;transition:none!important}#app .map-startup-logo img{transition:none}}
 
@@ -1675,7 +1664,7 @@ html[data-theme="dark"] #app .map-startup-inner #map-startup-continue,#app[data-
 #app .overview-boundary-actions #open-admin-dongs{flex:1 1 auto;min-width:0;}
 #app .overview-admin-clear{flex:none;padding:8px 11px;border:1px solid var(--dj-ui-border,#cadcd3);border-radius:12px;background:var(--dj-ui-field,#f1f7f3);color:var(--dj-ui-text,#245a4c);font-size:12px;font-weight:750;cursor:pointer;}
 #app .overview-admin-clear[hidden]{display:none!important;}
-#app[data-theme="dark"] .overview-admin-clear{background:#2c4644;color:#e5f4ee;border-color:#52736b;}
+
 @media (min-width:1080px){
   #app .sheet.overview-sheet[data-sheet-state="expanded"]{display:block!important;max-height:min(470px,calc(100dvh - 120px))!important;}
   #app .sheet.overview-sheet[data-sheet-state="expanded"] .sheet-summary{display:block;}
@@ -1685,7 +1674,7 @@ html[data-theme="dark"] #app .map-startup-inner #map-startup-continue,#app[data-
 @media (max-width:1079px){
   /* When night analysis is active, the bottom-sheet replaces the overview sheet
      rather than stacking two panels over the same mobile map viewport. */
-  #app[data-sangdo-night="on"] .sheet.overview-sheet{display:none!important;}
+  
 }
 
 /* v6.0.1 — map instruction card and mobile browser fullscreen */
@@ -1701,8 +1690,8 @@ html[data-theme="dark"] #app .map-startup-inner #map-startup-continue,#app[data-
 #map-gesture-guide-open{font-size:19px;font-weight:850}
 .mobile-fullscreen-toggle{position:fixed;right:calc(12px + env(safe-area-inset-right));bottom:calc(67px + env(safe-area-inset-bottom));z-index:1800;
   color:#ecfff6;background:#127d69;border:1px solid #87cbb7;border-radius:11px;padding:10px 11px;font-size:12px;font-weight:800;box-shadow:0 2px 10px #0005}
-#app[data-theme="dark"] .map-gesture-guide{background:#192f33;color:#e7f5ef;border-color:#476861}
-#app[data-theme="dark"] .map-gesture-guide dt{color:#89e2c7}
+
+
 /* Popup theme: same palette for registered point, landmark, transit and safety layers */
 #app .maplibregl-popup-content{background:#fcfffd;color:#25493d;border:1px solid #d5e6de;border-radius:14px;
   box-shadow:0 8px 22px #132c2733;padding:14px}
@@ -1710,13 +1699,13 @@ html[data-theme="dark"] #app .map-startup-inner #map-startup-continue,#app[data-
 #app .maplibregl-popup-content :is(p,small,dd,.dj-place-source){color:#4f6b60}
 #app .maplibregl-popup-anchor-bottom .maplibregl-popup-tip{border-top-color:#fcfffd}
 #app .maplibregl-popup-anchor-top .maplibregl-popup-tip{border-bottom-color:#fcfffd}
-#app[data-theme="dark"] .maplibregl-popup-content{background:#1b3033;color:#ebf5f1;border-color:#466662;box-shadow:0 10px 28px #0008}
-#app[data-theme="dark"] .maplibregl-popup-content :is(strong,h3,dt,.safety-popup strong,.dongjak-landmark-popup strong){color:#ecfff5}
-#app[data-theme="dark"] .maplibregl-popup-content :is(p,small,dd,.dj-place-source,.safety-popup small,.dongjak-landmark-popup p,.dongjak-landmark-popup small){color:#bed7d0}
-#app[data-theme="dark"] .maplibregl-popup-anchor-bottom .maplibregl-popup-tip{border-top-color:#1b3033}
-#app[data-theme="dark"] .maplibregl-popup-anchor-top .maplibregl-popup-tip{border-bottom-color:#1b3033}
-#app[data-theme="dark"] .dj-place-detail,#app[data-theme="dark"] .safety-popup{color:#e6f3ef}
-#app[data-theme="dark"] .maplibregl-popup-close-button{color:#e8f4ef}
+
+
+
+
+
+
+
 /* Narrow landscape: let the map remain usable, keep controls above the bottom nav */
 @media (hover:none) and (orientation:landscape) and (max-height:600px){
  #app .topbar{min-height:46px!important;height:46px!important;padding-top:env(safe-area-inset-top)!important}
@@ -1752,15 +1741,15 @@ html[data-theme="dark"] #app .map-startup-inner #map-startup-continue,#app[data-
 .version-release-details{border:1px solid #e1eae6;border-radius:10px;margin:6px 0;background:#f7faf8;}
 .version-release-details>summary{cursor:pointer;padding:10px 12px;font-size:12px;font-weight:700;line-height:1.5;}
 .version-release-details ul{margin:0;padding:0 14px 12px 30px;font-size:12px;line-height:1.65;color:#36574b;}
-#app[data-theme="dark"] .version-major-group{border-color:#425a56;}
-#app[data-theme="dark"] .version-major-group>h3{color:#89e2c4;}
-#app[data-theme="dark"] .version-major-count,#app[data-theme="dark"] .version-archive-note{color:#bacdc7;}
-#app[data-theme="dark"] .version-release-details{background:#20373a;border-color:#3c5750;}
-#app[data-theme="dark"] .version-release-details ul{color:#d6e6df;}
+
+
+
+
+
 
 /* v6.0.5: small consistent location details; the official place logos are map sprites. */
 #app .dj-place-ai-response{margin-top:10px;padding:10px 12px;border:1px solid #d5e6de;border-radius:10px;background:#edf8f3;color:#234b3e;font-size:13px;line-height:1.55;white-space:pre-wrap}
-#app[data-theme="dark"] .dj-place-ai-response{background:#243d3d;border-color:#466e65;color:#e1f6ec}
+
 #app .dj-place-actions{display:flex;align-items:center;gap:8px}
 #app .dj-place-actions .dj-place-ai{background:#137e68;color:#fff;border:0;border-radius:9px;padding:9px 13px;font-weight:700;cursor:pointer}
 #app .dj-place-actions .dj-place-ai:disabled{opacity:.65;cursor:progress}
@@ -1770,11 +1759,11 @@ html[data-theme="dark"] #app .map-startup-inner #map-startup-continue,#app[data-
 
 /* v6.0.19: AI explanation appears automatically, so the main popup has no action button. */
 #app .dj-place-ai-heading{display:block;margin-top:12px;color:#176851;font-size:13px;letter-spacing:.01em;}
-#app[data-theme="dark"] .dj-place-ai-heading{color:#9de4c4;}
+
 #app .dj-place-actions:has(>button[hidden]){display:none;}
 #app .dj-place-actions .dj-place-ai[hidden]{display:none!important;}
 #app .dj-place-meta a{color:#167b69;text-decoration:underline;overflow-wrap:anywhere;}
-#app[data-theme="dark"] .dj-place-meta a{color:#a3e5d0;}
+
 
 
 /* 2026-11-10: actual two-view transport sheet, not a scroll-only toggle. */
@@ -1796,17 +1785,17 @@ html[data-theme="dark"] #app .map-startup-inner #map-startup-continue,#app[data-
 .transport-official-time-link{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:8px 12px;border-radius:9px;color:#fff!important;background:#137d68;text-decoration:none;font-weight:800;font-size:13px;max-width:100%;}
 .transport-official-time-link:focus-visible{outline:3px solid #74bea6;outline-offset:2px;}
 .transport-official-time-notice{font-size:11px;line-height:1.5;color:#647f75;}
-#app[data-theme="dark"] .transport-official-time-sources{background:#203b34;border-color:#42695d;}
-#app[data-theme="dark"] .transport-official-time-heading,#app[data-theme="dark"] .transport-official-time-line{color:#e0f8ef;}
-#app[data-theme="dark"] .transport-official-time-explainer,#app[data-theme="dark"] .transport-official-time-guidance{color:#d4e6df;}
-#app[data-theme="dark"] .transport-official-time-card{background:#1a302c;border-color:#3f5b52;}
-#app[data-theme="dark"] .transport-official-time-notice{color:#bdcfc8;}
-#app[data-theme="dark"] .transport-official-time-link{background:#167e6b;color:white!important;}
+
+
+
+
+
+
 @media(max-width:600px){.transport-official-time-sources{padding:10px;}.transport-official-time-card{padding:10px;}.transport-official-time-link{width:100%;box-sizing:border-box;}}
 
 /* Operator-provided departures shown directly inside the timetable tab. */
 .transport-hours-inline-credit{margin:8px 2px 12px;padding:11px 13px;border:1px solid #b9daca;border-radius:12px;background:#eff9f3;color:#1e654f;font-size:12px;font-weight:680;line-height:1.6;}
-#app[data-theme="dark"] .transport-hours-inline-credit{background:#254139;border-color:#426e5e;color:#d8f5e8;}
+
 @media (max-width:600px){.transport-timetable-direction-grid{grid-template-columns:minmax(0,1fr);}.transport-timetable-pane{max-height:315px;}.transport-timetable-controls{gap:8px;}}
 
 /* Community mobile list + details: scoped, no shared map/dock changes. */
@@ -1865,8 +1854,8 @@ html[data-theme="dark"] #app .map-startup-inner #map-startup-continue,#app[data-
 #app #transport-sheet[data-kind="subway"] .dj-metro-direction-card .metro-arrival-countdown{color:#e23f36!important;font-size:14px!important;white-space:normal!important;overflow-wrap:anywhere}
 #app #transport-sheet[data-kind="subway"] .dj-metro-direction-card .metro-arrival-position{font-size:10px!important}
 #app #transport-sheet[data-kind="subway"] .dj-metro-direction-empty{display:block;padding:10px 0;color:inherit;opacity:.7;font-size:12px}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .dj-metro-direction-card{background:#20302f!important;border-color:#465856!important}
-#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .dj-metro-direction-card .metro-arrival-countdown{color:#ff8178!important}
+
+
 dialog.dj-metro-live{box-sizing:border-box;position:fixed;inset:auto 0 max(0px,env(safe-area-inset-bottom)) 0;margin:0 auto;width:min(calc(100% - 20px),520px);height:min(86dvh,820px);max-height:calc(100dvh - 20px);max-width:none;border:1px solid #d6dfdc;border-radius:24px 24px 16px 16px;background:#fff;color:#20322e;padding:0;overflow:hidden;font:inherit;display:flex;flex-direction:column;box-shadow:0 12px 42px #0004}
 dialog.dj-metro-live:not([open]){display:none}
 dialog.dj-metro-live::backdrop{background:#14282065}
@@ -1902,9 +1891,9 @@ dialog.dj-metro-live::backdrop{background:#14282065}
 .dj-metro-live-footer{border-top:1px solid #e5ebe8;padding-bottom:max(12px,env(safe-area-inset-bottom))}
 .dj-metro-live-refresh{min-height:44px;border-radius:22px;padding:0 14px;font-weight:700!important}
 .dj-metro-live-refresh:disabled{opacity:.5}
-dialog.dj-metro-live[data-theme="dark"]{background:#172725;color:#e3efeb}
-.dj-metro-live[data-theme="dark"] button,.dj-metro-live[data-theme="dark"] .dj-metro-live-tabs,.dj-metro-live[data-theme="dark"] .dj-metro-live-row.current{background:#283c37}
-.dj-metro-live[data-theme="dark"] .dj-metro-live-head,.dj-metro-live[data-theme="dark"] .dj-metro-live-station,.dj-metro-live[data-theme="dark"] .dj-metro-live-footer{border-color:#3b5149}
+
+
+
 .dj-metro-live-train-icon svg{width:19px;height:19px;display:block}
 
 

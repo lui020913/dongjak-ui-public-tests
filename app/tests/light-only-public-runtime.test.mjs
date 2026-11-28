@@ -47,3 +47,7 @@ test('old theme values cannot select an alternative map palette',()=>{
   assert.doesNotMatch(read('src/ui-environment.js'),/theme==='dark'/);
   assert.doesNotMatch(read('src/main.js'),/app\.dataset\.theme==='dark'/);
 });
+
+test('major shared styles no longer contain positive dark or standalone night selectors',()=>{
+ for(const file of ['src/style.css','src/mobile-first-layout.css','src/mobile-first-overhaul.css','src/mobile-ui/current.css','src/button-material.css','platforms/ios-pwa/ios-pwa.css'])assert.doesNotMatch(read(file),/data-theme\s*=\s*["']?dark|data-sangdo-night\s*=\s*["']?on/,file);
+});

@@ -53,10 +53,10 @@ test('shared light color tokens preserve safety semantics',()=>{
   for(const c of ['#edf3ef','#ffffff','#e9f2ed','#20312e','#53675e','#0d8875','#e1ecec'])assert.ok(css.includes(c),c);
   assert.doesNotMatch(css,/data-theme="dark"|color-scheme:dark/);
   for(const token of ['--dj-theme-bg','--dj-theme-surface','--dj-theme-ink','--dj-theme-muted','--dj-theme-line','--dj-theme-accent'])assert.ok(css.includes(token));
-  assert.ok(prod.includes('--dj9272-surface:var(--dj-theme-surface'));
-  assert.ok(prod.includes('--dj-v4-selected:var(--dj-theme-selected'));
-  assert.ok(layout.includes('var(--dj-theme-surface,#2c343d)'));
-  assert.ok(material.includes('--djNext-tool-selected-face:var(--dj-theme-selected'));
+  assert.ok(prod.includes('--dj9272-surface:#f5faf7'));
+  assert.ok(css.includes('--dj-v4-selected:#e1ecec'));
+  assert.ok(layout.includes('--mf-surface: #ffffff'));
+  assert.ok(material.includes('--djNext-tool-selected-face:#dcf3e8'));
   assert.ok(css.includes('never paint route-line, warning, PRI or transport'));
 });
 

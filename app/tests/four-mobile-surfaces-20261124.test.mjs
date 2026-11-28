@@ -19,13 +19,13 @@ test('phone layout isolates nearby scroll and hides terminal without moving stat
  assert.match(css,/\.metro-rail-next\)\[hidden\]\{[\s\S]*?display:none!important/);
  assert.match(css,/\.metro-rail-current\{grid-column:2!important/);
  assert.match(read('src/route-experience.css'),/max-height:min\(44dvh,342px\)/);
- assert.match(css,/data-sangdo-night="on"\]:has\(#night-visibility-float/);
+ assert.doesNotMatch(css,/data-sangdo-night="on"\]:has\(#night-visibility-float/);
 });
 
-test('night panel uses shared surface, raised, border and accent tokens',()=>{
- const css=read('src/mobile-ui/current.css').split('/* Night analysis uses the same surface hierarchy')[1];
- assert.ok(css);for(const token of ['surface','raised','ink','muted','line','accent'])assert.ok(css.includes('--dj-theme-'+token));
- assert.doesNotMatch(css,/\.(?:night-line|night-dot|night-coverage)[:.][^\n]*::before/);
+test('ordinary mobile sheets retain shared light surface tokens',()=>{
+ const css=read('src/mobile-ui/current.css');
+ assert.match(css,/var\(--dj-theme-surface,#fff\)/);
+ assert.doesNotMatch(css,/data-theme="dark"|data-sangdo-night="on"/);
 });
 
 test('preview keeps four pixel minimum bottom clearance above safe area',()=>{

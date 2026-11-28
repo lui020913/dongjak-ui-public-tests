@@ -57,7 +57,7 @@ html body #app#app#app#app#app#app#app #route-map-card:not([hidden]){display:fle
 
 /* Shared mobile surface tokens: do not inherit pale light-mode controls. */
 #app{--djNext-surface:#fff;--djNext-raised:#e5f1eb;--djNext-text:#203d32;--djNext-muted:#62786e;--djNext-border:#d6e4dc;--djNext-active:#087c65;--djNext-tile:#e4efdf;--djNext-tile-ink:#376b57}
-#app[data-theme="dark"]{--djNext-surface:#2c343d;--djNext-raised:#35404a;--djNext-text:#f1f4f6;--djNext-muted:#bec8d2;--djNext-border:#4d5b65;--djNext-active:#79dec5;--djNext-tile:#35404a;--djNext-tile-ink:#a0f0da}
+
 /* Material comes from app/src/button-material.css (shared with dialogs and install gate). */
 html body #app#app#app#app#app#app#app #djNext-rail :is(button.djNext-empty,#djNext-layers){background:var(--djNext-tool-soft-face)!important;border-style:solid!important}
 html body #app#app#app#app#app#app#app #djNext-rail button[aria-pressed="true"]{background:color-mix(in srgb,var(--djNext-tool-selected-face) 86%,transparent)!important;color:var(--djNext-tool-selected-ink)!important;border-color:var(--djNext-active)!important}
@@ -181,12 +181,7 @@ html body #app#app#app#app#app#app#app{
   --dj-elev-dock:0 6px 16px rgba(15,42,33,.25),0 2px 5px rgba(15,42,33,.15);
   --dj-elev-panel:0 9px 24px rgba(15,42,33,.29),0 2px 6px rgba(15,42,33,.15);
 }
-html body #app#app#app#app#app#app#app[data-theme="dark"]{
-  --dj-elev-low:0 2px 4px rgba(0,0,0,.36),0 1px 2px rgba(0,0,0,.20);
-  --dj-elev-map:0 3px 6px rgba(0,0,0,.64),0 1px 2px rgba(0,0,0,.38);
-  --dj-elev-dock:0 6px 16px rgba(0,0,0,.54),0 2px 5px rgba(0,0,0,.30);
-  --dj-elev-panel:0 9px 24px rgba(0,0,0,.60),0 2px 6px rgba(0,0,0,.32);
-}
+
 /* Floating search, AI, four map controls. Keep focused button's native focus ring. */
 html body #app#app#app#app#app#app#app .topbar .map-quick-search-form{box-shadow:var(--dj-elev-map)!important}
 /* One outer dock shadow; no double shadow under each navigation tab. */
@@ -202,22 +197,16 @@ html body #app#app#app#app#app#app#app #djNext-toast:not([hidden]){box-shadow:va
 /* Low elevation for actual action buttons only. No changes to link-style controls,
 
 /* v4: mobile route/community screenshots. One scroll owner and a neutral dark palette. */
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"]{
- --dj-v4-surface:var(--djNext-surface,#2c343d);--dj-v4-card:#35404a;--dj-v4-control:#35404a;
- --dj-v4-border:#4d5b65;--dj-v4-text:#f1f4f6;--dj-v4-muted:#bec8d2;
- --dj-v4-selected:var(--dj-theme-selected,#285b50);--dj-v4-accent:var(--dj-theme-accent,#79dec5);
-}
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(.page-panel,#ped-tools-panel,#dj854-weather-sheet,#transport-sheet,#dj-mobile-utilities,.djNext-modal-body,.dj860-card,.dj-map-settings-card,.dj-about-card,.version-history-dialog){background:var(--dj-v4-surface)!important;color:var(--dj-v4-text)!important;border-color:var(--dj-v4-border)!important}
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(.page-panel > .dj-sheet-chrome,.page-panel > .dj836-sheet-body,#dj910-route-footer,#community-form,.community-form-top,.djNext-form-scroll,.dj854-weather-head,.ped-tools-panel-head,#djNext-layer-panel .djNext-modal-body>header,.dj860-head,.dj860-content,.dj860-footer){background:var(--dj-v4-surface)!important;color:var(--dj-v4-text)!important;border-color:var(--dj-v4-border)!important}
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(.page-panel,#ped-tools-panel,#dj854-weather-sheet) :is(.dj-sheet-chrome-title h2,.community-form-top strong,.route-location-text strong){color:var(--dj-v4-text)!important}
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(.page-panel,#ped-tools-panel,#dj854-weather-sheet) :is(.dj-page-intro,.page-note,.route-location-text>span,.dj815-helper,.community-form-note,.community-post-meta,.empty-hint){color:var(--dj-v4-muted)!important}
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(#route-panel .route-card,#route-panel .route-location-row,#route-panel #dj815-rail-planner,#route-panel #route-place-search,#participation-panel #community-issue-details,#participation-panel .community-post,#participation-panel .community-report-secondary,#participation-panel .empty-hint){background:var(--dj-v4-card)!important;color:var(--dj-v4-text)!important;border-color:var(--dj-v4-border)!important}
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel) :is(input:not([type=file]),textarea,select,.route-mini-btn,.route-gps-btn,.dj832-waypoint-toggle,.community-compose-toggle,.community-attach-action,.community-filter,[data-news-source],#dongjak-news-refresh){background:var(--dj-v4-control)!important;color:var(--dj-v4-text)!important;border-color:var(--dj-v4-border)!important}
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel) :is(.community-filter,[data-news-source],.dj832-waypoint-toggle)[aria-pressed="true"],
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel) :is(.community-filter,[data-news-source]).active,
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] #route-panel .dj832-waypoint-toggle[aria-expanded="true"]{background:var(--dj-v4-selected)!important;color:var(--dj-v4-accent)!important;border-color:var(--dj-v4-accent)!important}
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(.dj-sheet-chrome-close,#community-compose-close,.djNext-close,.dj854-weather-close,#ped-tools-close,#transport-close,#dj-mobile-utilities-close){background:var(--dj-v4-control)!important;color:var(--dj-v4-text)!important;border-color:var(--dj-v4-border)!important}
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel) :is(input:not([type=file]),textarea,select):focus-visible{outline:2px solid var(--dj-v4-accent)!important;outline-offset:1px!important}
+
+
+
+
+
+
+
+
+
+
 /* Leave route data, marker colors, map tiles and route comparison styles alone. */
 html body #app#app#app#app#app#app#app#app#app #route-panel .route-card{height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;padding:10px!important;gap:10px!important}
 html body #app#app#app#app#app#app#app#app#app #route-panel .route-location-row{min-height:0!important;padding:8px 4px!important;gap:8px!important;background:transparent!important}
@@ -225,21 +214,21 @@ html body #app#app#app#app#app#app#app#app#app #route-panel .route-location-text
 html body #app#app#app#app#app#app#app#app#app #route-panel .route-select-actions{display:flex!important;align-items:center!important;gap:5px!important;flex-shrink:0!important;width:auto!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;border-radius:0!important}
 html body #app#app#app#app#app#app#app#app#app #route-panel .route-select-actions::before,html body #app#app#app#app#app#app#app#app#app #route-panel .route-select-actions::after{content:none!important;display:none!important}
 html body #app#app#app#app#app#app#app#app#app #route-panel .route-select-actions>.route-mini-btn{min-width:44px!important;min-height:44px!important;padding:6px 9px!important;border:1px solid var(--djNext-border,#d6e4dc)!important;border-radius:12px!important;white-space:nowrap!important}
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] #route-panel .route-select-actions>.route-mini-btn{border-color:var(--dj-v4-border)!important}
+
 html body #app#app#app#app#app#app#app#app#app #route-panel .route-gps-btn{min-height:44px!important;margin-block:0!important;border-radius:12px!important;padding:8px 10px!important}
 html body #app#app#app#app#app#app#app#app#app #route-panel #dj815-waypoints{margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important}
 html body #app#app#app#app#app#app#app#app#app #route-panel #dj815-waypoints>.dj832-waypoint-toggle{min-height:44px!important;width:100%!important;margin:0!important;border-radius:12px!important}
 html body #app#app#app#app#app#app#app#app#app #route-panel #dj832-waypoint-details:not([hidden]){padding:10px 2px 0!important;min-width:0!important}
 html body #app#app#app#app#app#app#app#app#app #route-panel>.dj836-sheet-body{min-height:0!important;flex:1 1 0%!important;overflow-y:auto!important;overflow-x:hidden!important;padding:12px 14px 22px!important;scroll-padding-bottom:22px!important;overscroll-behavior-y:contain!important}
 html body #app#app#app#app#app#app#app#app#app #route-panel>#dj910-route-footer{position:relative!important;inset:auto!important;flex:0 0 auto!important;padding:10px 14px 12px!important;border-top:1px solid var(--djNext-border,#d6e4dc)!important;box-sizing:border-box!important}
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] #route-panel>#dj910-route-footer{border-color:var(--dj-v4-border)!important}
+
 html body #app#app#app#app#app#app#app#app#app #route-panel #route-calc{min-height:46px!important;width:100%!important;margin:0!important}
 html body #app#app#app#app#app#app#app#app#app #route-panel #route-calc:disabled{opacity:.52!important;cursor:not-allowed!important;box-shadow:none!important}
 /* No map-control button floats across a feature sheet. Map selection remains usable when sheets are hidden. */
 html body #app#app#app#app#app#app#app#app#app:has(:is(.page-panel,#djNext-layer-panel,#djNext-permissions,#dj860-onboarding,#transport-sheet,.dj-place-detail-popup):not([hidden]),:is(#ped-tools-panel,#dj854-weather-sheet).dj871-sheet-expanded:not([hidden])) .map-actions{visibility:hidden!important;opacity:0!important;pointer-events:none!important}
 /* Common header/close metrics; retain native close, drag handles and motion. */
 html body #app#app#app#app#app#app#app#app#app :is(.page-panel>.dj-sheet-chrome,.community-form-top){box-sizing:border-box!important;border-bottom:1px solid var(--djNext-border,#d6e4dc)!important}
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(.page-panel>.dj-sheet-chrome,.community-form-top){border-bottom-color:var(--dj-v4-border)!important}
+
 html body #app#app#app#app#app#app#app#app#app :is(.page-panel .dj-sheet-chrome-close,#community-compose-close,.djNext-close,.dj854-weather-close,#ped-tools-close){width:42px!important;min-width:42px!important;height:42px!important;min-height:42px!important;flex:0 0 42px!important;border-radius:12px!important;display:grid!important;place-items:center!important;box-sizing:border-box!important}
 /* Community list and editor are two states of the same existing sheet. */
 html body #app#app#app#app#app#app#app#app#app #participation-panel>.dj836-sheet-body{font-size:14px;gap:10px!important;padding:12px 14px 8px!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior-y:contain!important;scroll-padding-bottom:12px!important;-webkit-overflow-scrolling:touch;touch-action:pan-y}
@@ -288,11 +277,11 @@ html body #app#app#app#app#app#app#app#app#app #map-gesture-guide :is(.dj8212-io
 html body #app#app#app#app#app#app#app#app#app #map-gesture-guide .dj8212-ios-install-help>summary::after{content:none!important;display:none!important}
 html body #app#app#app#app#app#app#app#app#app #map-gesture-guide .dj860-guide-launch{margin:0!important;min-height:44px!important}
 html body #app#app#app#app#app#app#app#app#app #map-gesture-guide .map-gesture-guide-remember{margin:0!important;min-height:44px!important;padding:0!important;gap:8px!important;align-items:center!important}
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] #map-gesture-guide{background:var(--dj-v4-surface)!important;color:#e6efeb!important}
+
 
 /* 9.1.1 — final mobile visual contracts. Scope to phone; keep the seven top slots unchanged. */
 html body #app#app#app#app#app#app#app#app#app#app {--dj-elev-low:0 1px 2px #17392b12;--dj-elev-map:0 2px 5px #172c2440;--dj-elev-panel:0 7px 22px #172c2438}
-html body #app#app#app#app#app#app#app#app#app#app[data-theme="dark"]{--dj-elev-low:0 1px 2px #0003;--dj-elev-map:0 2px 5px #0006;--dj-elev-panel:0 7px 22px #0007}
+
 html body #app#app#app#app#app#app#app#app#app#app #djNext-permissions .djNext-permission-row{display:block!important;margin:7px 0!important}
 html body #app#app#app#app#app#app#app#app#app#app #djNext-permissions .djNext-permission-row button{width:100%!important;min-height:46px!important;display:flex!important;align-items:center!important;gap:8px!important}
 html body #app#app#app#app#app#app#app#app#app#app #djNext-permissions .djNext-permission-row small{margin-left:auto!important;font-size:11px!important;white-space:nowrap!important;color:var(--djNext-muted)!important}
@@ -324,10 +313,10 @@ html body #app#app#app#app#app#app#app#app#app#app #route-panel #route-calc>:las
 html body #app#app#app#app#app#app#app#app#app#app #news-panel [data-news-source][aria-pressed="true"]{background:var(--djNext-active)!important;color:white!important;border-color:var(--djNext-active)!important}
 html body #app#app#app#app#app#app#app#app#app#app #news-panel .dongjak-news-item{padding:10px 12px!important;gap:6px!important}
 html body #app#app#app#app#app#app#app#app#app#app #news-panel .dongjak-news-open{padding:5px 10px!important;min-height:40px!important;}
-html body #app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-open{background:var(--dj-v4-control)!important;color:var(--dj-v4-accent)!important;border-color:var(--dj-v4-border)!important}
+
 html body #app#app#app#app#app#app#app#app#app#app #mine-panel #dj824-account{padding:10px!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
 html body #app#app#app#app#app#app#app#app#app#app #mine-panel #dj824-account :is(.dj829-signed-summary,.dj829-notice-settings){padding:10px!important;margin:8px 0!important;border:0!important;box-shadow:none!important;background:var(--djNext-raised)!important;color:var(--djNext-text)!important}
-html body #app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #mine-panel #dj824-account :is(.dj829-signed-summary,.dj829-notice-settings){background:var(--dj-v4-card)!important;color:var(--dj-v4-text)!important}
+
 html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj829-notice-toggle{display:flex!important;flex-direction:row-reverse!important;justify-content:space-between!important;align-items:center!important;gap:8px!important}
 html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj829-notice-toggle input{appearance:none!important;-webkit-appearance:none!important;position:relative!important;display:block!important;flex:0 0 44px!important;width:44px!important;min-width:44px!important;height:26px!important;min-height:26px!important;border:0!important;border-radius:999px!important;background:#919d96!important;box-shadow:none!important;margin:0!important}
 html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj829-notice-toggle input::before{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;background:white;border-radius:50%}
@@ -361,7 +350,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app #map .maplibregl-popup:no
 /* 9.1.2 — pill surfaces, accessible depth and stationary scrims. */
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav{border-radius:999px!important;background:color-mix(in srgb,var(--dj9272-surface,var(--mf-surface,#fff)) 84%,transparent)!important;-webkit-backdrop-filter:blur(13px) saturate(1.15)!important;backdrop-filter:blur(13px) saturate(1.15)!important;border:1px solid color-mix(in srgb,var(--djNext-tool-edge) 70%,transparent)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 4px 16px rgba(18,44,35,.12)!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav > .nav-tab{border-radius:999px!important}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #bottom-nav > .nav-tab:is(.active,[aria-current=page]){background:#285b50!important;color:#79dec5!important;box-shadow:0 1px 3px #0005!important}
+
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app :is(.page-panel,#transport-sheet,#ped-tools-panel,#dj854-weather-sheet,#map-gesture-guide,#map-safety-controls,#map-advanced-controls,.djNext-modal-body,.dj-map-settings-card,.dj-about-card,.version-history-dialog,.maplibregl-popup-content) :is(button.primary-btn,button[type=submit],.dj-sheet-chrome-close,.dj-place-header-close,.djNext-close,.djNext-pin,.djNext-continue,.djNext-permission-row button,.community-compose-toggle,.community-filter,.community-attach-action,.route-mini-btn,.route-gps-btn,.dj832-waypoint-toggle,.dongjak-news-open,.v707-history-switch-button,[data-news-source],#transport-close,#map-safety-close,#map-gesture-guide-close,#dj-settings-close,#dj-settings-reset,#dj-settings-done,#dj-settings-theme,#dj-settings-text button,#community-sort,#dongjak-news-refresh,.dj-about-close,.dj-about-done,.dj877-pref-row button):not(:disabled){border-radius:999px!important;}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel :is(#community-sort,#community-compose-toggle){min-height:44px!important;height:44px!important;border-radius:999px!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel #community-compose-toggle{background:var(--djNext-active)!important;color:#fff!important;border-color:transparent!important}
@@ -419,7 +408,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel [data-dj834-action=history]:not(:focus-visible):not(:active){background:transparent!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj17-more-root>summary{min-height:54px!important;padding:8px 12px!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj17-more-root>summary::before{width:34px!important;height:34px!important}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app [data-theme=dark] .dj-sheet-chrome::before{background:#657069!important}
+
 html body #dj-ai-search-modal .dj-ai-search-header{gap:8px;padding:20px 0 12px}
 html body #dj-ai-search-modal .dj-ai-search-names{flex:1}
 html body #dj-ai-search-modal .dj-ai-search-names h2{font-size:18px!important}
@@ -541,8 +530,8 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-shortcut-switch[aria-checked="true"] .djNext-switch-track::after{transform:translateX(14px)}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-shortcut-switch:disabled{opacity:.42!important;cursor:not-allowed;pointer-events:auto!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-shortcut-switch:focus-visible{outline:2px solid var(--djNext-active,#0d806a)!important;outline-offset:-2px!important}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #djNext-layer-panel .djNext-switch-track{background:#53615d}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #djNext-layer-panel .djNext-shortcut-switch[aria-checked="true"] .djNext-switch-track{background:var(--djNext-active,#0d806a)}
+
+
 @media(prefers-reduced-motion:reduce){html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-switch-track,html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-switch-track::after{transition:none!important}}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-gesture-guide :is(.dj8212-ios-install-help,#dj841-guide-tips){padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;overflow:visible!important;box-shadow:none!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-gesture-guide :is(.dj8212-ios-install-help>summary,.dj852-tip-toggle){display:flex!important;align-items:center!important;justify-content:space-between!important;box-sizing:border-box!important;width:100%!important;min-height:42px!important;height:42px!important;max-height:none!important;padding:0 14px!important;margin:0!important;border:1px solid var(--djNext-border)!important;border-radius:999px!important;background:var(--djNext-raised)!important;font-size:13px!important;line-height:1.2!important;gap:8px!important}
@@ -559,7 +548,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 /* Shared interaction feedback; visual-only, preserving native click and scroll. */
 @media(max-width:699px){
   #app #bottom-nav[data-dj-motion-indicator="ready"]>.dj-motion-indicator{display:none!important;visibility:hidden!important;position:absolute;left:0;top:0;z-index:0;pointer-events:none;border-radius:999px;background:transparent!important;box-shadow:none!important;transition:none!important;will-change:auto!important}
-  #app[data-theme=dark] #bottom-nav>.dj-motion-indicator{display:none!important;background:transparent!important;box-shadow:none!important}
+  
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav[data-dj-motion-indicator="ready"]>.nav-tab{background:transparent!important;box-shadow:none!important;z-index:1}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav > .nav-tab:active:not(:disabled){scale:.96!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav > .nav-tab{transition:scale 100ms ease-out!important}
@@ -583,18 +572,18 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 @media(max-width:699px){
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .metro-arrival-direction-group{gap:0!important;row-gap:0!important;margin:0!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .transport-arrival-row{margin:0!important;border-radius:0!important;box-shadow:none!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #transport-sheet[data-kind="subway"]{--dj-metro-card:#24272c;--dj-metro-divider:#3a4147;--dj-metro-up:#9bcdf4;--dj-metro-down:#e8c68d}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group{background:var(--dj-metro-card)!important;border-color:var(--dj-metro-divider)!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .transport-arrival-row{background:var(--dj-metro-card)!important;border-top:1px solid var(--dj-metro-divider)!important;color:#eef1f3!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #transport-sheet[data-kind="subway"] .metro-direction-heading{background:#2d333a!important;color:#eef1f3!important;border-color:var(--dj-metro-divider)!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group.up .metro-direction-heading{color:var(--dj-metro-up)!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group.down .metro-direction-heading{color:var(--dj-metro-down)!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #transport-sheet[data-kind="subway"] .metro-direction-arrow{background:#22272d!important;color:inherit!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #transport-sheet[data-kind="subway"] :is(.metro-arrival-route,.metro-arrival-position,.metro-planned-time-meta){color:#bfc8cf!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #transport-sheet[data-kind="subway"] .metro-arrival-countdown{color:#f0f3f5!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #transport-sheet[data-kind="subway"] :is(.transport-timetable-pane--up,.transport-timetable-pane--down){background:var(--dj-metro-card)!important;border-color:var(--dj-metro-divider)!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #transport-sheet[data-kind="subway"] .metro-planned-notice{background:#2d333a!important;color:#c4ced3!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #transport-sheet[data-kind="subway"] .metro-neighbor-row{background:#252a30!important;border-color:#3a4147!important}
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj854-weather-sheet .dj854-weather-close{border-radius:999px!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj854-weather-sheet .dj854-weather-actions button{border-radius:999px!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj854-weather-sheet .dj854-weather-head{position:relative!important;flex:0 0 auto!important;min-height:74px!important;padding:20px 16px 12px!important;margin:0!important;box-sizing:border-box!important;border-bottom:1px solid var(--djNext-border,#d6e4dc)!important}
@@ -621,19 +610,19 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app #map-quick-search-que
 @media(max-width:699px){
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(#ped-tools-close,.dj854-weather-close,#community-compose-close,#dj-settings-close,.dj832-boundary-x){border-radius:50%!important;aspect-ratio:1!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.dj832-boundary-confirm,.dj854-weather-actions button,#dj-settings-theme,.dj-community-refresh){border-radius:999px!important;}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #dj832-dongjak-boundary .dj832-boundary-card{background:var(--dj-v4-surface,#2c343d)!important;color:var(--dj-v4-text,#edf2ef)!important;border-color:var(--dj-v4-border,#454a52)!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #dj832-dongjak-boundary :is(.dj832-boundary-x){background:var(--dj-v4-control,#303338)!important;color:var(--dj-v4-text,#edf2ef)!important;border-color:var(--dj-v4-border,#454a52)!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #dj832-boundary-body{color:var(--dj-v4-muted,#c3ccd0)!important}
+ 
+ 
+ 
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.version-history-head,.dj-map-settings-head,.ped-tools-panel-head){position:relative!important;touch-action:none!important;cursor:grab!important;user-select:none!important;-webkit-user-select:none!important;padding-top:22px!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.version-history-head,.dj-map-settings-head,.ped-tools-panel-head)::before{content:''!important;position:absolute!important;top:7px!important;left:50%!important;translate:-50% 0!important;width:38px!important;height:4px!important;border-radius:99px!important;background:#a4b4ab!important;pointer-events:none!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(.version-history-head,.dj-map-settings-head,.ped-tools-panel-head,.dj-sheet-chrome)::before{background:#68736f!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .dj-sheet-chrome-grip{background:#68736f!important}
+ 
+ 
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.dj-map-settings-content,.djNext-form-scroll,.version-history-list){scrollbar-width:none!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.dj-map-settings-content,.djNext-form-scroll,.version-history-list)::-webkit-scrollbar{display:none!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj-settings-theme{min-height:44px!important;width:100%!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj-community-feed-status{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;margin:9px 0 10px!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;min-height:34px!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj-community-status-label{font-size:12px!important;line-height:1.35!important;flex:1!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;color:var(--dj9272-muted,#61786e)!important;background:transparent!important;box-shadow:none!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .dj-community-status-label{background:var(--dj-v4-control,#303338)!important;border-color:var(--dj-v4-border,#454a52)!important}
+ 
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj-community-refresh{width:auto!important;min-height:34px!important;flex:none!important;margin:0!important;font-size:12px!important;padding:6px 11px!important;border-radius:11px!important;box-shadow:none!important;background:var(--dj9272-tint,#ebf5ef)!important;color:var(--dj9272-ink,#24443a)!important;border:1px solid var(--dj9272-line,#d6e4dc)!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #community-list{gap:8px!important;padding-top:0!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #community-form .dj-community-consent{display:flex!important;flex-direction:row!important;align-items:center!important;gap:10px!important;padding:10px 12px!important;margin:4px 0!important;border-radius:14px!important;cursor:pointer!important}
@@ -660,8 +649,6 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app #map-quick-search-que
  html body #dj-ai-search-modal .dj-ai-disclaimer{padding-top:8px!important;font-size:11px!important;line-height:1.5!important}
  html body #dj-ai-search-modal .dj-ai-status{padding:9px 12px!important}
  html body #dj-ai-search-modal .dj-ai-search-names p{margin-top:3px!important}
- html body:has(#app[data-theme="dark"]) #dj-ai-search-modal .dj926-ai-glyph{color:#7bd3b9!important}
- html body:has(#app[data-theme="dark"]) #dj-ai-search-modal .dj-ai-submit{background:#10836e!important;color:#fff!important}
 }
 
 /* The dock accepts horizontal swipes but never steals vertical page scrolling. */
@@ -894,12 +881,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
    -webkit-backdrop-filter:blur(9px) saturate(1.25)!important;
    backdrop-filter:blur(9px) saturate(1.25)!important;
   }
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .topbar .map-quick-search-form {
-   background:rgba(35,38,44,.90)!important;
-   background-image:none!important;
-   border-color:rgba(208,230,219,.18)!important;
-   box-shadow:0 5px 16px rgba(0,0,0,.22)!important;
-  }
+  
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .header-tools > #dj890-ai-orb {
    /* Match the base search field, not the expanded voice-feedback panel. */
    box-sizing:border-box!important;
@@ -914,12 +896,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
    -webkit-backdrop-filter:blur(9px) saturate(1.25)!important;
    backdrop-filter:blur(9px) saturate(1.25)!important;
   }
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .topbar .header-tools > #dj890-ai-orb {
-   background:rgba(51,57,67,.94)!important;
-   background-image:none!important;
-   border-color:rgba(207,240,223,.20)!important;
-   box-shadow:0 5px 16px rgba(0,0,0,.25)!important;
-  }
+  
   html.dj-ios-home-pwa body #app#app#app#app#app#app#app#app #dj-ios-pwa-map-seam {
    height:calc(env(safe-area-inset-top,0px) + 68px)!important;
    background:linear-gradient(to bottom,var(--dj-pwa-native-edge) 0%,var(--dj-pwa-native-edge) 54%,transparent 100%)!important;
@@ -936,7 +913,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 @layer request-completion{
  @media(max-width:699px){
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app {--dj9272-surface:#f5faf7;--dj9272-page:#edf3ef;--dj9272-ink:#193c32;--dj9272-muted:#647c73;--dj9272-line:#d2e2da;--dj9272-tint:#e5f3ed;--dj9272-shadow:0 3px 12px rgba(24,58,46,.075)}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] {--dj9272-surface:var(--dj-theme-surface,#2c343d);--dj9272-page:var(--dj-theme-bg,#22282e);--dj9272-ink:var(--dj-theme-ink,#f1f4f6);--dj9272-muted:var(--dj-theme-muted,#bec8d2);--dj9272-line:var(--dj-theme-line,#4d5b65);--dj9272-tint:var(--dj-theme-raised,#2b3037);--dj9272-shadow:0 3px 13px rgba(0,0,0,.25)}
+  
   /* Tour occupies the phone from the native status edge to its home indicator.
      The illustration keeps a bounded aspect ratio and text retains a scroll area. */
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding:not([hidden]){position:fixed!important;inset:0!important;display:grid!important;place-items:stretch!important;box-sizing:border-box!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;margin:0!important;padding:0!important;background:var(--dj9272-page)!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:hidden!important;z-index:24000!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;transition:opacity 270ms ease!important}
@@ -1039,7 +1016,6 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 /* The native AI dialog stays stationary and opaque. Its only motion owner
    is the inner-content fade in v880-supabase-safety-ai.css. */
 @media(max-width:699px){
- html body:has(#app[data-theme="dark"]) #dj-ai-search-modal{color-scheme:dark}
 }
 
 /* Visual order is explicit; the path points and the comparison are both
@@ -1081,9 +1057,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
   html body #app #ped-tools-results button.dj-nearby-map-center:focus-visible {
    outline:3px solid #85cbb7!important;outline-offset:3px!important;
   }
-  html body #app[data-theme='dark'] #ped-tools-results button.dj-nearby-map-center {
-   border-color:#70b7a4!important;background:#326d60!important;color:#f7fffc!important;
-  }
+  
  }
 }
 
@@ -1334,9 +1308,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
     #bottom-nav>.nav-tab:is(.active,[aria-current="page"]) :is(.nav-icon,svg,span:last-child){
     color:inherit!important;-webkit-text-fill-color:currentColor!important;
   }
-  #app[data-theme="dark"] #bottom-nav>.nav-tab:is(.active,[aria-current="page"]){
-    background:transparent!important;color:#a0f0da!important;
-  }
+  
   /* Search/results should begin at the top so long lists remain scrollable. */
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app
     #route-panel .dj836-sheet-body:has(#route-place-search:not([hidden])),

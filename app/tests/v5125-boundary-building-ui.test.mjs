@@ -44,6 +44,6 @@ test('PC overview defaults expanded; clear action is independent',()=>{
   assert.match(main,/overviewWasManuallyToggled=true/);
   assert.match(html,/id="overview-admin-clear"/);
   assert.match(main,/overviewAdminClear\?\.addEventListener/);
-  assert.match(style,/data-sangdo-night="on"/);
+  assert.doesNotMatch(style,/data-sangdo-night="on"/);
   assert.match(style,/data-sheet-state="collapsed"\] \.overview-boundary-actions/);
 });

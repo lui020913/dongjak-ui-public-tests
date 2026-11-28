@@ -46,17 +46,7 @@
     isolation: isolate !important;
   }
 
-  html body #app#app#app#app#app[data-theme="dark"] {
-    --mf-surface: var(--dj-theme-surface,#2c343d);
-    --mf-surface-solid: var(--dj-theme-surface,#2c343d);
-    --mf-ink: var(--dj-theme-ink,#f1f4f6);
-    --mf-muted: var(--dj-theme-muted,#bec8d2);
-    --mf-line: var(--dj-theme-line,#4d5b65);
-    --mf-accent: var(--dj-theme-accent,#79dec5);
-    --mf-accent-soft: var(--dj-theme-selected,#285b50);
-    --mf-shadow: 0 10px 30px rgba(0,0,0,.32);
-    background: var(--dj-theme-bg,#22282e) !important;
-  }
+  
 
   /* The map is always the full-screen base layer. */
   html body #app#app#app#app#app > #map {
@@ -495,13 +485,9 @@
     background: none !important;
   }
 
-  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar .dj831-edge-blur-left {
-    background: none !important;
-  }
+  
 
-  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar .dj831-edge-blur-right {
-    background: none !important;
-  }
+  
 
   /* Map-only controls remain a compact floating stack on the right. */
   html body #app#app#app#app#app .map-actions {
@@ -1230,10 +1216,7 @@
     z-index: 6600 !important;
   }
 
-  html body #app#app#app#app#app[data-theme="dark"] .maplibregl-popup.dj-place-detail-popup .maplibregl-popup-tip {
-    border-top-color: var(--mf-surface-solid) !important;
-    border-bottom-color: var(--mf-surface-solid) !important;
-  }
+  
 }
 
 @layer mobile-first-shell {
@@ -1718,11 +1701,7 @@
       --dj-primary-page-ink:#203e34;
       --dj-primary-page-edge:rgba(47,104,82,.16);
     }
-    html body #app#app#app#app#app[data-theme="dark"] {
-      --dj-primary-page-bg:#22282e;
-      --dj-primary-page-ink:#f1f4f6;
-      --dj-primary-page-edge:rgba(190,200,210,.21);
-    }
+    
     /* Map-origin report composition keeps data-tab="map", but opens the
        community panel full-screen. Apply the same chrome exclusion while
        composing so the map AI orb never intercepts its top-right close. */
@@ -1779,12 +1758,7 @@
     }
 
     /* Preserve the established My Info dark palette and existing theme QA. */
-    html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]),
-    html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body,
-    html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]) > .dj-sheet-chrome {
-      background:var(--dj-primary-page-bg,#22282e)!important;
-      color:var(--dj-primary-page-ink,#f1f4f6)!important;
-    }
+    
 
     html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]):not([data-dj810-animating]):not([data-dj-primary-transition]) {
       /* The resting page is an opaque surface. Fading the entire page reveals map
@@ -2187,9 +2161,9 @@ html body #app #community-list .community-post-detail .community-report-facts+.c
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj-community-location-card .dj-community-location-copy{display:flex!important;flex:1 1 0!important;flex-direction:column!important;min-width:0!important;gap:2px!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj-community-location-card .dj-community-location-copy small{font-size:10px!important;font-weight:650!important;line-height:1.3!important;color:#4d675b!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj-community-location-card .dj-community-location-copy strong{font-size:13px!important;font-weight:750!important;line-height:1.35!important;color:inherit!important;overflow-wrap:anywhere!important;display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;overflow:hidden!important}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(#route-pick-hint,#community-map-hint,#dj-community-location-card):not([hidden]){background:#304943!important;color:#e5f1eb!important;border-color:#47635a!important}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #dj-community-location-card .dj-community-location-copy small{color:#b5c8be!important}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(#route-pick-hint,#community-map-hint,#dj-community-location-card) button:not([hidden]){background:#3d5a50!important;color:#e5f1eb!important;border-color:#587568!important}
+  
+  
+  
   /* One scroll owner: the frame owns the height, fixed header/group never shrink,
      and cards retain their own intrinsic height. No scrollable outer wrapper. */
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map .dj-place-detail-popup:not(.dj871-sheet-expanded):not(.dj871-place-expanded){

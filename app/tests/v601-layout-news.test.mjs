@@ -33,9 +33,9 @@ test('known universities and civic locations are selectable from rendered map fe
   assert.equal(importantPlaceFromFeatures([{properties:{name:'일반도로'}}]),null);
 });
 
-test('popup palette separates light and dark, landscape keeps control access',()=>{
+test('popup palette retains light surfaces, landscape keeps control access',()=>{
   const css=read('src/style.css');
-  assert.match(css,/data-theme="dark"\] \.maplibregl-popup-content/);
+  assert.doesNotMatch(css,/data-theme="dark"\] \.maplibregl-popup-content/);
   assert.match(css,/orientation:landscape/);
   assert.match(css,/mobile-fullscreen-toggle/);
 });

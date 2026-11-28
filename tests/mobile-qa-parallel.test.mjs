@@ -136,7 +136,7 @@ test('released phone buildings retain the approved light palette',()=>{
  assert.ok(!patch.includes('farOpacity:0.96'));
  assert.ok(regression.includes("buildingExtrusionAppearance('dark',10).opacity,0.38"));
  assert.ok(regression.includes("buildingExtrusionAppearance('dark',30).opacity,0.22"));
- assert.ok(next.includes('--djNext-surface:#2c343d'));
+ assert.ok(next.includes('--djNext-surface:#fff'));
 });
 
 test('release workflow Node versions remain valid YAML scalars',()=>{

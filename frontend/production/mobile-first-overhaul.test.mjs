@@ -4,14 +4,13 @@ import {readFileSync} from 'node:fs';
 
 const css=readFileSync(new URL('../../app/src/mobile-first-overhaul.css',import.meta.url),'utf8');
 
-test('mobile-first design tokens and dark theme are defined',()=>{
+test('mobile-first design tokens and light-only theme are defined',()=>{
   for(const token of ['--mf-surface:','--mf-text:','--mf-brand:','--mf-border:','--mf-radius-sheet:','--mf-touch:']) {
     assert.ok(css.includes(token), 'Missing '+token);
   }
-  assert.match(css,/#app(?:#app){0,4}\[data-theme="dark"\]/);
-  assert.match(css,/html\[data-theme="dark"\] #app/);
-  assert.ok(css.includes('--mf-surface: var(--dj-theme-surface,#23262c)'));
-  assert.ok(css.includes('--mf-brand: var(--dj-theme-accent,#b4c8da)'));
+  assert.doesNotMatch(css,/data-theme="dark"/);
+  assert.ok(css.includes('--mf-surface: #ffffff'));
+  assert.ok(css.includes('--mf-brand: #167c60'));
   assert.doesNotMatch(css,/--mf-surface: #192c24|--mf-brand: #65d2a8/);
 });
 

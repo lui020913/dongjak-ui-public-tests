@@ -44,13 +44,13 @@
   #app[data-dj910-sheet-open="true"] #dj-browser-webapp-tip {display:none!important;}
   #app .dj-theme-switch-flash {backdrop-filter:none!important;-webkit-backdrop-filter:none!important;pointer-events:none!important;animation-duration:180ms!important;}
   /* Theme tokens are owned by theme-contract.css; no local dark palette. */
-  #app[data-theme="dark"] :is(.page-panel,.transport-sheet,.dj-place-detail,.dj-place-header,.maplibregl-popup-content,.dj-map-settings-card,.dj-mobile-utilities-body,.dj854-more-head,#bottom-nav,.map-quick-search-form) {background:var(--dj-theme-surface,#2c343d)!important;color:var(--dj-theme-ink,#f1f4f6)!important;border-color:var(--dj-theme-line,#424952)!important;box-shadow:0 8px 28px #0003!important;}
-  #app[data-theme="dark"] :is(.dj834-setting-icon,.dj834-profile-symbol,.dj834-settings-group,.dj834-profile-card,.dj-place-info-card,.dj-place-favorites-section,.dj877-pref-group,.dj-map-settings-group,.route-card,.transport-arrival-row) {background:var(--dj-theme-raised,#35404a)!important;color:var(--dj-theme-ink,#f1f4f6)!important;border-color:var(--dj-theme-line,#424952)!important;}
-  #app[data-theme="dark"] :is(.dj834-setting-icon,.dj834-profile-symbol,.nav-tab,.dj-v794-tool,.dj832-feature) {color:var(--dj-theme-muted,#bec8d2)!important;}
-  #app[data-theme="dark"] #bottom-nav .nav-tab.active {color:#a0f0da!important;background:#285b50!important;}
-  #app[data-theme="dark"] :is(.dj-place-kicker,.dj834-current-theme,.dj834-chevron) {color:var(--dj-theme-muted,#bec8d2)!important;}
-  #app[data-theme="dark"] :is(#dj890-ai-orb,#dj800-ai-search-trigger) {background:var(--dj-theme-raised,#35404a)!important;color:#fff!important;box-shadow:none!important;}
-  html[data-theme="dark"],html[data-theme="dark"] body {background:var(--dj-theme-bg,#22282e)!important;}
+  
+  
+  
+  
+  
+  
+  
   @media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
     #app .topbar {display:flex!important;align-items:center!important;position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 12px)!important;left:12px!important;right:12px!important;width:auto!important;height:50px!important;min-height:50px!important;padding:0!important;gap:8px!important;background:transparent!important;backdrop-filter:none!important;}
     #app .topbar #map-quick-search {display:block!important;flex:1 1 0%!important;min-width:0!important;width:0!important;max-width:none!important;}
@@ -216,13 +216,13 @@
     /* Keep desktop motion on geometric/opacity properties, never the theme
        background. CSS transitions outrank even important theme colors. */
     #app #mine-panel {transition-property:opacity,transform,translate,clip-path!important;}
-    #app[data-theme="dark"] #mine-panel {background:var(--dj-theme-surface,#2c343d)!important;background-color:var(--dj-theme-surface,#2c343d)!important;color:var(--dj-theme-ink,#f1f4f6)!important;}
+    
     #app[data-theme="light"] #mine-panel {background:var(--dj-theme-bg,#edf3ef)!important;background-color:var(--dj-theme-bg,#edf3ef)!important;}
   }
   #app :is(.dj-place-header-close,#transport-close) {background:var(--dj800-elevated,#e8f3ed)!important;border:1px solid var(--dj800-border,#d7e6de)!important;border-radius:14px!important;color:var(--dj800-text,#263a32)!important;box-sizing:border-box!important;}
-  #app[data-theme="dark"] #mine-panel :is(.dj834-profile-card,.dj834-settings-group,.dj834-settings-group>button,.dj834-user-avatar) {background:var(--dj-theme-raised,#35404a)!important;color:var(--dj-theme-ink,#f1f4f6)!important;transition:none!important;}
-  #app[data-theme="dark"] #mine-panel :is(.dj834-profile-name,.dj834-settings-group>button>span) {color:var(--dj-theme-ink,#f1f4f6)!important;-webkit-text-fill-color:var(--dj-theme-ink,#f1f4f6)!important;}
-  #app[data-theme="dark"] #mine-panel :is(.dj834-profile-meta small,.dj834-current-theme,.dj834-chevron) {color:var(--dj-theme-muted,#bec8d2)!important;-webkit-text-fill-color:var(--dj-theme-muted,#bec8d2)!important;}
+  
+  
+  
   @media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
     #app #dj-tablet-utility-group {display:none!important;}
     #app #dj-v794-toolbar .dj832-feature::after,#app #dj-v794-toolbar .dj832-feature::before {content:none!important;display:none!important;}
@@ -243,9 +243,9 @@
     #app #transport-sheet > .handle::before {content:none!important;display:none!important;}
     #app #bottom-nav .nav-tab {border:0!important;box-shadow:none!important;background-image:none!important;}
     #app #bottom-nav .nav-tab::before,#app #bottom-nav .nav-tab::after {content:none!important;display:none!important;}
-    #app[data-theme="dark"] #bottom-nav .nav-tab {background:transparent!important;color:var(--dj-theme-muted,#bec8d2)!important;-webkit-text-fill-color:var(--dj-theme-muted,#bec8d2)!important;}
-    #app[data-theme="dark"] #bottom-nav .nav-tab.active {background:#285b50!important;color:#a0f0da!important;-webkit-text-fill-color:#a0f0da!important;}
-    #app[data-theme="dark"] #bottom-nav .nav-tab :is(span,svg) {color:inherit!important;-webkit-text-fill-color:currentColor!important;}
+    
+    
+    
     #app #dj-v794-weather .dj910-weather-icon {display:grid!important;place-items:center!important;width:25px!important;height:25px!important;min-height:25px!important;flex:0 0 25px!important;font-size:23px!important;line-height:1!important;}
   }
   @media(min-width:700px) and (max-width:1079px) {
@@ -622,12 +622,10 @@
     color:var(--dj800-text,#263a32);background:var(--dj800-elevated,#e8f3ed);
     font-weight:700;font-size:12px;line-height:1.4;
   }
-  #app[data-theme="dark"] :is(.metro-nine-service-heading,.metro-planned-notice) {
-    background:#30343b!important;color:#e5e7eb!important;border-color:#4c535f!important;
-  }
-  #app[data-theme="dark"] .metro-nine-service-heading.express {color:#ffe3a2!important;}
-  #app[data-theme="dark"] .metro-direction-arrow {color:#f2f5f8!important;background:#263848!important;}
-  #app[data-theme="dark"] #transport-arrivals .transport-arrival-time {color:#d4ebe1!important;}
+  
+  
+  
+  
   #app .dj-place-meta .dj-place-row:first-child {border-top:0!important;}
   #app .dj-place-meta .dj-place-row:last-child {border-bottom:0!important;}
   #app .dj860-onboarding .dj860-content {align-items:flex-start!important;padding:16px 20px!important;}
@@ -645,10 +643,8 @@
   #app .dj-about-card {gap:10px!important;}
   #app #mine-panel:has(.dj834-my-detail:not([hidden])) .dj854-language-section {display:none!important;}
   #app .dj-about-card :is(.dj-about-kicker,.dj-about-done) {display:none!important;}
-  html[data-dj-run-mode="browser"] body #app[data-tab="map"][data-theme="dark"] #dj-browser-webapp-tip:not([hidden]) {
-    background:#191b1f!important;border-color:#3a3e45!important;color:#e5e7eb!important;
-  }
-  #app[data-theme="dark"] #dj-browser-webapp-tip :is(.dj-webapp-tip-copy,.dj-webapp-tip-close) {color:#c6cbd2!important;}
+  
+  
  }
 }
 
@@ -744,15 +740,9 @@
   #app#app #news-panel .dongjak-news-item :is(h3,strong) {line-height:1.45!important;overflow-wrap:anywhere!important;}
   #app#app #news-panel .dongjak-news-item a {min-height:40px!important;padding:8px 12px!important;}
   #app#app #participation-panel .community-report-secondary {margin-bottom:4px!important;}
-  #app#app[data-theme="dark"] :is(.version-history-dialog,.version-history-head,.dj860-card,.dj860-head,.dj860-content,.dj860-footer) {
-    background:var(--dj800-surface,#191b1f)!important;color:var(--dj800-text,#e5e7eb)!important;border-color:var(--dj800-border,#3a3e45)!important;
-  }
-  #app#app[data-theme="dark"] :is(.version-history-list,.dongjak-news-item,.dj860-note) {
-    background:var(--dj800-elevated,#25282d)!important;color:var(--dj800-text,#e5e7eb)!important;border-color:var(--dj800-border,#3a3e45)!important;
-  }
-  #app#app[data-theme="dark"] #news-panel .dongjak-news-item a {
-    background:#304741!important;color:#e5f0eb!important;border:1px solid #48635a!important;
-  }
+  
+  
+  
  }
  @media (max-width:399px) {
   #app#app #transport-sheet[data-kind="subway"] #transport-arrivals .metro-direction-grid {
@@ -788,12 +778,8 @@
   html body #app#app#app #dj-v794-toolbar .dj831-edge-blur-right {
     background: none !important;
   }
-  html body #app#app#app[data-theme="dark"] #dj-v794-toolbar .dj831-edge-blur-left {
-    background: none !important;
-  }
-  html body #app#app#app[data-theme="dark"] #dj-v794-toolbar .dj831-edge-blur-right {
-    background: none !important;
-  }
+  
+  
   html body #app#app#app #dj-v794-toolbar .dj912-toolbar-next {
     flex: 0 0 40px !important;
     width: 40px !important;
@@ -818,11 +804,7 @@
     box-shadow: none !important;
     font: 650 10px/1.15 'Pretendard Variable', sans-serif !important;
   }
-  html body #app#app#app[data-theme="dark"] #map .maplibregl-ctrl-scale {
-    background: #1f3335 !important;
-    color: #e8f5ee !important;
-    border-color: #d2e8dc !important;
-  }
+  
 
   /* 3) More sheet: override the later 70px rule without shrinking the drag target. */
   html body #app#app#app #dj-mobile-utilities>.dj854-more-head {
@@ -983,7 +965,7 @@ html body #app#app#app #map-safety-controls #sangdo-bocha-toggle[aria-pressed="t
 }
 html body #app#app#app #map-safety-controls #sangdo-bocha-toggle .dj-feature-state::before {transform:translateX(0)!important;}
 html body #app#app#app #map-safety-controls #sangdo-bocha-toggle[aria-pressed="true"] .dj-feature-state::before {transform:translateX(17px)!important;}
-html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-toggle[aria-pressed="false"] .dj-feature-state {background:#1a3435!important;border-color:#45686a!important;}
+
 }
 
 /* END consolidated v914-mobile-ux-fixes.css */
@@ -1034,9 +1016,7 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
  html body #app#app#app #transport-sheet[data-kind="subway"] #transport-arrivals {
    min-width:0!important;margin:0 0 10px!important;
  }
- html body #app#app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-neighbor-row :is(.metro-rail-previous,.metro-rail-next){
-   background:#323a41!important;color:#e9edf2!important;border-color:#55646e!important;
- }
+ 
  /* Nearby information is a content-sized floating sheet, never a full-height dialog. */
  html body #app#app#app #ped-tools-panel:not([hidden]):not(.dj871-sheet-expanded) {
    box-sizing:border-box!important;display:block!important;
@@ -1403,10 +1383,7 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
   }
   /* Expanded night settings are a reading surface; the map HUD is restored
      automatically when the panel is collapsed or closed. */
-  html body #app#app#app#app#app#app#app#app[data-sangdo-night="on"]:has(#night-visibility-float:not([hidden]):is([data-collapsed="false"],.dj871-sheet-expanded))
-   :is(.topbar,#map-quick-search,#dj-v794-toolbar,#djNext-toolbar,#dj890-ai-orb,.map-actions,#dj912-poi-categories){
-   display:none!important;visibility:hidden!important;pointer-events:none!important;
-  }
+  
   html body #app#app#app#app#app#app#app#app #night-visibility-float:not([hidden]):is([data-collapsed="false"],.dj871-sheet-expanded){
    position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 12px)!important;
    bottom:calc(var(--dj910-dock-bottom,88px) + 8px)!important;
@@ -1426,33 +1403,13 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
 /* Night analysis uses the same surface hierarchy as transport and map sheets.
    Semantic lighting swatches remain untouched. */
 @layer request-completion {
- html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float:not([hidden]),
- html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(.night-visibility-float-head,#night-visibility-float-content){
-  background:var(--dj-theme-surface,#2c343d)!important;
-  color:var(--dj-theme-ink,#f1f4f6)!important;
-  border-color:var(--dj-theme-line,#4d5b65)!important;
- }
- html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(.night-visibility-float-actions button,.dj-night-group,.dj-night-group>summary,.night-visibility-stats,.night-result-legend,.night-coverage,.night-occlusion-details){
-  background:var(--dj-theme-raised,#35404a)!important;
-  color:var(--dj-theme-ink,#f1f4f6)!important;
-  border-color:var(--dj-theme-line,#4d5b65)!important;
-  box-shadow:none!important;
- }
- html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(.night-visibility-float-heading span,.night-visibility-status,.night-visibility-disclaimer,.night-visibility-stat span,.night-visibility-legend,.night-visibility-top p){
-  color:var(--dj-theme-muted,#bec8d2)!important;
- }
- html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(.night-visibility-stat strong,.night-visibility-top>strong,.night-visibility-radius-label,.night-visibility-checkbox,.night-result-legend span){
-  color:var(--dj-theme-ink,#f1f4f6)!important;
- }
- html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(#night-visibility-radius-value,.night-visibility-top li button){
-  color:var(--dj-theme-accent,#79dec5)!important;
- }
- html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(input[type="range"],input[type="checkbox"],input[type="radio"]){
-  accent-color:var(--dj-theme-accent,#79dec5)!important;
- }
- html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float .dj-night-group>summary::after{
-  color:var(--dj-theme-muted,#bec8d2)!important;
- }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 }
 
 
