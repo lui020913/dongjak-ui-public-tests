@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.267",
+  "application_version": "9.2.268",
   "public_work_branch": "main",
-  "purpose": "Public facility site classification: support actual town_hall and civic tags/names, use existing verified Dongjak district office anchor to identify an unnamed generic mapped parcel only, gray #D1D1CD, no synthetic geometry or building changes. Restore transport-click regression compatibility without changing grouping behavior. Direct visual protected production.",
-  "attempt": 509,
+  "purpose": "Use the single complete mapped Sillim alignment after checking all eleven stations; remove duplicate schematic chord in Seoul transit and local safety rail display, retain original curves and station identities and previous map fixes. Direct visual protected production.",
+  "attempt": 510,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

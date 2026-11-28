@@ -1,5 +1,6 @@
 import {mergeOfficialRail} from './rail-official-shapes.js';
 import {repairRailDisplayContinuity} from './rail-display-continuity.mjs';
+import {completeSillimPath,replaceSillimDisplay} from './sillim-single-alignment.mjs';
 export const MAPPED_RAIL_ASSET='/data/transport/seoul-rail-network-single-fa75e12.geojson';
 const codes=new Set(['1','2','4','7','9','신림']);
 export function mappedLocalRailPaths(data){
@@ -16,7 +17,8 @@ export async function fetchMappedLocalRailPaths(fetcher=globalThis.fetch){
 export function preferMappedLocalRail(base,mapped=[],remote=[]){
  const official=mergeOfficialRail(base,remote);
  const local=mergeOfficialRail(official.collection,mapped);
- return {collection:local.collection,lines:[...new Set([...official.lines,...local.lines])]};
+ const sillim=completeSillimPath(mapped);
+ return {collection:replaceSillimDisplay(local.collection,sillim),lines:[...new Set([...official.lines,...local.lines,...(sillim?['신림']:[])])]};
 }
 export function displayRailCollection(collection,approximate){
  // Surveyed/mapped track geometry is the visual authority. Do not distort it

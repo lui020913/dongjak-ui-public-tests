@@ -1,4 +1,5 @@
 import {distanceFromDongjakMeters,railEndpointFadeMeters} from './fixed-rail-lines.js';
+import {completeSillimPath} from './sillim-single-alignment.mjs';
 // Reuse the exact currently displayed local geometry, including its mapped
 // curves. The city dataset supplies ONLY the uncovered portions of each line.
 const X=88300,Y=111320,CELL=200,STEP=35,JOIN=180;
@@ -37,10 +38,16 @@ function extensions(raw,local){
 }
 export const CITY_RAIL_FADE_METERS=1400;
 export function buildExtendedCityRail(raw,localCollection,geometry,isInside,colors){
- const local=localCollection?.features||[],features=[];
+ const rawFeatures=raw?.features||[];
+ const sillim=completeSillimPath(rawFeatures.filter(f=>f.geometry?.type==='LineString').map(f=>({line:f.properties?.line,coordinates:f.geometry.coordinates})));
+ // A complete single mapped route owns Sillim across the whole city, including
+ // places where the old station chord and mapped curve diverge by hundreds of metres.
+ const local=(localCollection?.features||[]).filter(f=>!sillim||f.properties?.line!=='신림선'),features=[];
+ const extensionSource=sillim?{...raw,features:rawFeatures.filter(f=>f.properties?.line!=='신림선')}:raw;
+ const singleSillim=sillim?rawFeatures.filter(f=>f.properties?.line==='신림선'):[];
  const localColors=new Map(local.map(f=>[f.properties?.line,f.properties?.color]));
  const opacity=p=>isInside(p[0],p[1],geometry)?.97:.97*(1-railEndpointFadeMeters(distanceFromDongjakMeters(p,geometry),CITY_RAIL_FADE_METERS));
- for(const f of [...local,...extensions(raw,local)]){
+ for(const f of [...local,...extensions(extensionSource,local),...singleSillim]){
   const line=f.properties?.line,color=localColors.get(line)||colors[line],pts=f.geometry?.coordinates;if(!color||f.geometry?.type!=='LineString'||!pts?.length)continue;
   let run=null;const flush=()=>{if(run?.geometry.coordinates.length>1)features.push(run);run=null;};
   for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],n=Math.max(1,Math.ceil(meters(a,b)/75));for(let j=0;j<n;j++){const start=j===0?a:mix(a,b,j/n),end=j===n-1?b:mix(a,b,(j+1)/n),alpha=+opacity(mix(start,end,.5)).toFixed(3);if(alpha<.006){flush();continue;}if(run&&Math.abs(run.properties.opacity-alpha)<=.018){run.geometry.coordinates.push(end);}else{flush();run={type:'Feature',properties:{...f.properties,line,color,opacity:alpha},geometry:{type:'LineString',coordinates:[start,end]}};}}}
