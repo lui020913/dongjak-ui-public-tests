@@ -26,7 +26,7 @@ export function repairRailDisplayContinuity(collection){
   const ends=[...nodes.values()].filter(n=>n.neighbors.size===1&&local(n.p)&&(n.props.opacity??1)>.18);
   const nearest=new Map();
   for(const a of ends)for(const b of ends){
-   if(a===b||root(key(a.p))===root(key(b.p)))continue;
+   if(a===b)continue; // a circular line can have a local gap despite belonging to one component
    const d=distance(a.p,b.p);if(d<.15||d>MAX_GAP)continue;
    const av=metric([...a.neighbors.values()][0],a.p),bv=metric([...b.neighbors.values()][0],b.p),ab=metric(a.p,b.p),ba=metric(b.p,a.p);
    const da=dot(av,ab),db=dot(bv,ba);

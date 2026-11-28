@@ -89,3 +89,10 @@ export function busTileFallbackFilter(stops=[],center=null,{limit=100,radiusMete
     type:'MultiPolygon',coordinates:selected.map(p=>[ringAroundStop(p,radiusMeters)])
   }]]];
 }
+
+// Safety map context includes nearby stops on either side of the district border.
+export const BUS_BORDER_BUFFER_METERS=350;
+export function busFilterNearDistrict(filter,geometry){
+ if(!['Polygon','MultiPolygon'].includes(geometry?.type)||!Array.isArray(geometry.coordinates))return ['==',1,0];
+ return ['all',filter,['any',['within',{type:geometry.type,coordinates:geometry.coordinates}],['<=',['distance',{type:geometry.type,coordinates:geometry.coordinates}],BUS_BORDER_BUFFER_METERS]]];
+}

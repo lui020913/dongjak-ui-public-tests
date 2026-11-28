@@ -32,7 +32,7 @@ import {fetchOfficialRailPaths,withMappedLine4} from './rail-official-shapes.js'
 import {setDisplayedRailPaths} from './features/liveTransit/geometry.js';
 import {isMedianBusStopName,medianStopBaseName,busStopDisplayName} from './median-bus-stops.js';
 import {busCoverageSamples} from './bus-coverage-grid.js';
-import {deduplicateBusStops,busTileFallbackFilter,busFilterInsideDistrict} from './bus-stop-dedup.js';
+import {deduplicateBusStops,busTileFallbackFilter,busFilterInsideDistrict,busFilterNearDistrict,BUS_BORDER_BUFFER_METERS} from './bus-stop-dedup.js';
 import {officialStaticBusPlaces} from './static-bus-stops.js';
 import {busLastServiceStatus} from './bus-last-service.js';
 import {operatorTimetableResources} from './metro-operator-timetables.js';
@@ -1391,9 +1391,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const scopeContains=(lng,lat)=>cityScope()?inSeoul(lng,lat):isDongjak(lng,lat)===true;
   const adjacentMetroScope=makeMetroDisplayScope(officialMetro,{normalizeName:normalizeStationQueryName,normalizeLine:normalizeLineName,isDistrict:isDongjak});
   const stationScope=(name,line,lng,lat)=>cityScope()?inSeoul(lng,lat):adjacentMetroScope(name,line,lng,lat);
-  const busScopeContains=(lng,lat)=>cityScope()?inSeoul(lng,lat):isDongjak(lng,lat)===true||isNearBoundary(lng,lat)===true;
+  const busScopeContains=(lng,lat)=>cityScope()?inSeoul(lng,lat):isDongjak(lng,lat)===true||isNearBoundary(lng,lat,BUS_BORDER_BUFFER_METERS)===true;
   const placeInDisplayScope=p=>p.kind==='subway'?(p.lines||[]).some(line=>stationScope(p.name,normalizeLineName(line),p.lng,p.lat)):busScopeContains(p.lng,p.lat);
-  let streamedRows=[],activeStreamKeys=new Set(),streamPending=0,streamFailed=0,streamReady=false,routeStopCoordinates=[];
+  let streamedRows=[],activeStreamKeys=new Set(),requestedStreamKeys=new Set(),streamPending=0,streamFailed=0,streamReady=false,routeStopCoordinates=[];
   const overlapsRouteStop=(lng,lat,kind)=>routeStopCoordinates.some(([x,y])=>meterDistance([lng,lat],[x,y])<=(kind==='bus'?22:40));
   const inActiveCell=p=>activeStreamKeys.has((p.kind==='bus'?'bus':'rail')+'_'+cellKey(p.lng,p.lat));
   let stops=new Map();
@@ -1932,8 +1932,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   function updateTileBusFallbackFilter(){
     if(!map.getLayer?.('dj-basemap-bus-pictogram')||!map.setFilter)return;
     const center=map.getCenter?.();
-    const filter=busFilterInsideDistrict(
-      streamReady&&streamFailed===0?['==',1,0]:busTileFallbackFilter(currentVisibleBusStops,center),cityScope()?getSeoulBoundary():getDistrictGeometry());
+    const base=streamReady&&streamFailed===0?['==',1,0]:busTileFallbackFilter(currentVisibleBusStops,center);
+    const filter=cityScope()?busFilterInsideDistrict(base,getSeoulBoundary()):busFilterNearDistrict(base,getDistrictGeometry());
     const signature=JSON.stringify(filter);
     if(lastTileFallbackFilter===signature)return;
     try{map.setFilter('dj-basemap-bus-pictogram',filter);lastTileFallbackFilter=signature;}
@@ -1941,11 +1941,19 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   }
   let lastStopDataSignature='',lastBusSourceSignature='',lastRailSourceSignature='',lastMetroInputSignature='';
   let busRoadIndex=null,busRoadViewKey='';
+  const stableBusDisplayCoords=new Map();
   function roadsideBusPlaces(items){
     if(!items.some(p=>p.kind==='bus'))return items;
+    if(items.every(p=>p.kind!=='bus'||stableBusDisplayCoords.has(String(p.id)+'|'+p.lng+'|'+p.lat)))return items.map(p=>p.kind==='bus'?{...p,displayCoords:stableBusDisplayCoords.get(String(p.id)+'|'+p.lng+'|'+p.lat)}:p);
     const b=map.getBounds?.();const key=b?[b.getWest(),b.getSouth(),b.getEast(),b.getNorth()].map(v=>v.toFixed(4)).join('|')+':'+Math.floor(map.getZoom?.()||0):'';
     if(!busRoadIndex||key!==busRoadViewKey||!busRoadIndex.size){busRoadIndex=visibleBusRoadIndex(map);busRoadViewKey=key;}
-    return items.map(p=>p.kind==='bus'?{...p,displayCoords:busRoadIndex.place(p)}:p);
+    return items.map(p=>{
+      if(p.kind!=='bus')return p;
+      const id=String(p.id)+'|'+p.lng+'|'+p.lat;
+      if(!stableBusDisplayCoords.has(id)&&busRoadIndex.size){const coord=busRoadIndex.place(p);if(coord[0]!==p.lng||coord[1]!==p.lat)stableBusDisplayCoords.set(id,coord);}
+      if(stableBusDisplayCoords.size>2000)stableBusDisplayCoords.delete(stableBusDisplayCoords.keys().next().value);
+      return {...p,displayCoords:stableBusDisplayCoords.get(id)||[p.lng,p.lat]};
+    });
   }
   function showStops(items){
     if(map.isMoving?.()){stopPublish.request();return;}
@@ -1987,7 +1995,11 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       return response.json();
     },
     onChange:(rows,{pending,failed})=>{
-      streamReady=true;streamedRows=rows;streamPending=pending;streamFailed=failed;officialStaticStopCount=rows.filter(p=>p.kind==='bus').length;
+      streamPending=pending;
+      // Keep the last complete viewport visible until every requested cell settles.
+      // Never publish partial empty batches during a pan or zoom.
+      if(pending>0)return;
+      activeStreamKeys=new Set(requestedStreamKeys);streamReady=true;streamedRows=rows;streamFailed=failed;officialStaticStopCount=rows.filter(p=>p.kind==='bus').length;
       refreshStops();
     }
   });
@@ -1998,12 +2010,12 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(center)previousStreamCenter={lng:center.lng,lat:center.lat};
     const bounds={west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()};
     const geometry=cityScope()?getSeoulBoundary():getDistrictGeometry();
-    if(geometry){const polygons=geometry.type==='Polygon'?[geometry.coordinates]:geometry.coordinates;let w=Infinity,e=-Infinity,s=Infinity,n=-Infinity;for(const polygon of polygons)for(const [x,y] of polygon[0]){w=Math.min(w,x);e=Math.max(e,x);s=Math.min(s,y);n=Math.max(n,y);}const pad=cityScope()?0:175;bounds.west=Math.max(bounds.west,w-pad/88300);bounds.east=Math.min(bounds.east,e+pad/88300);bounds.south=Math.max(bounds.south,s-pad/111320);bounds.north=Math.min(bounds.north,n+pad/111320);}
+    if(geometry){const polygons=geometry.type==='Polygon'?[geometry.coordinates]:geometry.coordinates;let w=Infinity,e=-Infinity,s=Infinity,n=-Infinity;for(const polygon of polygons)for(const [x,y] of polygon[0]){w=Math.min(w,x);e=Math.max(e,x);s=Math.min(s,y);n=Math.max(n,y);}const pad=cityScope()?0:BUS_BORDER_BUFFER_METERS;bounds.west=Math.max(bounds.west,w-pad/88300);bounds.east=Math.min(bounds.east,e+pad/88300);bounds.south=Math.max(bounds.south,s-pad/111320);bounds.north=Math.min(bounds.north,n+pad/111320);}
     const zoom=map.getZoom(),city=cityScope();
     const keys=bounds.west<=bounds.east&&bounds.south<=bounds.north?viewportKeys(bounds,zoom,{bus:streamApp?.dataset.baseBus!=='off',rail:city},streamDirection):[];
     // Adjacent safety-map stations have their own curated scope. Do not clip their cells at the district border.
     if(!city&&streamApp?.dataset.baseMetro!=='off')keys.push(...viewportKeys({west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()},zoom,{bus:false,rail:true},streamDirection).filter(k=>officialMetro.some(p=>placeInDisplayScope(p)&&k==='rail_'+cellKey(p.lng,p.lat))));
-    activeStreamKeys=new Set(keys);cellStream.update(keys);refreshStops();
+    requestedStreamKeys=new Set(keys);cellStream.update(keys);
   }
   const streamViewportWork=coalesceViewportWork(refreshTransitViewport,{delay:110,isMoving:()=>map.isMoving?.()===true});
   map.on('moveend',()=>streamViewportWork.request());
