@@ -929,7 +929,7 @@ async function loadOneBuildingSheet(sheet){
     const footprintStyle=buildingFootprintPaint(visualTheme.currentTheme(),0);
     footprintStyle['fill-opacity']=buildingZoomOpacityExpression(footprintStyle['fill-opacity']); // hidden until sheet owns this area
     const outlineStyle=buildingFootprintOutlinePaint(visualTheme.currentTheme(),map.getPitch());
-    const firstSymbol=map.getStyle().layers.find(l=>l.type==='symbol')?.id;
+    const firstSymbol=map.getStyle().layers.find(l=>l.type==='symbol'||l.id.startsWith('transport-schematic-subway')||l.id.startsWith('transport-real-rail-overview')||l.id==='dj-city-transit-rail')?.id;
     map.addLayer({id:footprintFillId,type:'fill',source:sourceId,minzoom:BUILDING_ZOOM_MIN,
       layout:{visibility:'none'},paint:footprintStyle},firstSymbol);
     map.addLayer({id:footprintLineId,type:'line',source:sourceId,minzoom:BUILDING_ZOOM_MIN,

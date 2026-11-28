@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.255",
+  "application_version": "9.2.256",
   "public_work_branch": "main",
-  "purpose": "District-wide exclusive GIS building sheet ownership; gate both plan and extrusion layout visibility until full sheet readiness, including through theme recoloring. Preserve original zoom fade and add ownership regression. Keep site colors, redevelopment names, roads, transit and safety layers unchanged. Existing direct visual release path with exact successful build and independent Preview QA. Correct legacy mode regression assertion to verify owned/unowned 2D/3D truth table; preserve production source unchanged.",
-  "attempt": 497,
+  "purpose": "Light ground #E7E7E5 and apartment site #DDD4C8 only; align Namseong station display and nearby line 7 visual geometry to mapped entrance midpoint while preserving surveyed/raw routing coordinates; ensure late GIS footprints remain beneath transit rails. Keep exclusive building ownership, all other colors, safety layers and existing direct-visual protected release gates.",
+  "attempt": 498,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

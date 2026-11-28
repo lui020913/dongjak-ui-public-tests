@@ -1,4 +1,5 @@
 import {installMetroStationAccess} from './metro-station-access.mjs';
+import {NAMSEONG_DISPLAY_CENTER,alignNamseongDisplayRail} from './namseong-display-alignment.mjs';
 import {pointInStationDistrict} from './station-district-scope.mjs';
 import {paintBusBadge} from './bus-route-colors.mjs';
 import {visibleBusRoadIndex} from './bus-roadside-placement.mjs';
@@ -687,7 +688,8 @@ export function metroLineMarkerPlacements(name,lines,lng,lat,renderedRailPaths=n
   // schematic curve. Limit displacement to avoid teleporting to a distant branch.
   if(renderedRailPaths instanceof Map){
     for(const p of placements){
-      const match=nearestRenderedRail([p.lng,p.lat],renderedRailPaths.get(p.line));
+      const stationDisplayCenter=station==='남성'&&p.line==='7호선'?nearestRenderedRail(NAMSEONG_DISPLAY_CENTER,renderedRailPaths.get(p.line)):null;
+      const match=stationDisplayCenter&&stationDisplayCenter.distance<1?stationDisplayCenter:nearestRenderedRail([p.lng,p.lat],renderedRailPaths.get(p.line));
       if(match&&match.distance<=220){
         p.lng=match.point[0];p.lat=match.point[1];
         p.source='rendered-rail-geometry';
@@ -1630,11 +1632,11 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   map.addSource('transport-rail-tracks',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
   map.addSource('transport-rail-platforms',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
   const localRailGeometry=withMappedLine4(fixedRailCollection(boundaryGeometry));
-  let displayedLocalRail=localRailGeometry;
-  let renderedRailPaths=indexRenderedMetroRail(localRailGeometry);
+  let displayedLocalRail=alignNamseongDisplayRail(localRailGeometry);
+  let renderedRailPaths=indexRenderedMetroRail(displayedLocalRail);
   let lastMetroMarkerItems=[];
-  map.addSource('transport-schematic-connections',{type:'geojson',data:localRailGeometry,tolerance:0,buffer:128,maxzoom:19});
-  setDisplayedRailPaths(map,renderedRailPaths,renderedRailQuality(localRailGeometry));
+  map.addSource('transport-schematic-connections',{type:'geojson',data:displayedLocalRail,tolerance:0,buffer:128,maxzoom:19});
+  setDisplayedRailPaths(map,indexRenderedMetroRail(localRailGeometry),renderedRailQuality(localRailGeometry));
   // 실제 노선 공간정보(행안부 2026) 우선: 도로·하천의 실제 굴곡과 교차점을 보존합니다.
   // 공식 API에 없는 신림선 또는 조회 실패한 호선은 오프라인 안내용 선형을 유지합니다.
   // 외부 자료를 기다리느라 기존 지도를 중단하지 않습니다.
@@ -1646,11 +1648,11 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       if(!result.lines.length)return;
       const source=map.getSource('transport-schematic-connections');
       if(!source)return;
-      source.setData(result.collection);
-      displayedLocalRail=result.collection;cityRail.sync();
+      displayedLocalRail=alignNamseongDisplayRail(result.collection);
+      source.setData(displayedLocalRail);cityRail.sync();
       // Keep station badges anchored to the actual displayed official curves.
-      renderedRailPaths=indexRenderedMetroRail(result.collection);
-      setDisplayedRailPaths(map,renderedRailPaths,renderedRailQuality(result.collection));
+      renderedRailPaths=indexRenderedMetroRail(displayedLocalRail);
+      setDisplayedRailPaths(map,indexRenderedMetroRail(result.collection),renderedRailQuality(result.collection));
       if(lastMetroMarkerItems.length)renderMetroMarkers(lastMetroMarkerItems);
       const dataSources=[...new Set(result.collection.features.filter(f=>!f.properties?.schematic).map(f=>f.properties?.source).filter(Boolean))];
        console.info('[지하철 노선] 실제 지형 선형 적용:',result.lines.map(k=>k==='신림'?'신림선':`${k}호선`).join(', '),'출처:',dataSources.join(', '));
