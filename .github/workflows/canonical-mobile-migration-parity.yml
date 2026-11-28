@@ -123,15 +123,10 @@ jobs:
           cat "$RUNNER_TEMP/retired-theme/module-consumers.txt" | cut -c1-320
           git grep -n -I -E 'BUILDING_VISUAL_PALETTE|buildingVisualPalette|buildingFootprintPaint|buildingExtrusionAppearance|busStopLabelPalette|districtExteriorThemePaint|GREEN_PALETTE|vegetationPalette' -- app/src app/tests app/platforms tests frontend scripts > "$RUNNER_TEMP/retired-theme/map-palette-consumers.txt" || test "$?" -eq 1
           cat "$RUNNER_TEMP/retired-theme/map-palette-consumers.txt" | cut -c1-320
-          git grep -l -I -E 'data-theme[[:space:]]*=[[:space:]]*["'\'']?dark|prefers-color-scheme:[[:space:]]*dark|data-sangdo-night' -- app/src app/platforms | grep -E '\.css
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: retired-theme-references-${{ github.sha }}
-          path: ${{ runner.temp }}/retired-theme
-          if-no-files-found: ignore
- > "$RUNNER_TEMP/retired-theme/all-css-consumers.txt" || test "$?" -eq 1
+          git grep -l -I -E 'data-theme[[:space:]]*=[[:space:]]*["'\'' ]?dark|prefers-color-scheme:[[:space:]]*dark|data-sangdo-night' -- 'app/src/*.css' 'app/platforms/*.css' > "$RUNNER_TEMP/retired-theme/all-css-consumers.txt" || test "$?" -eq 1
           cat "$RUNNER_TEMP/retired-theme/all-css-consumers.txt"
+          git grep -n -I -E 'data-theme.*dark|prefers-color-scheme.*dark|data-sangdo-night|#22282e|#2c343d|#35404a|#79dec5|#285b50' -- app/tests tests frontend scripts > "$RUNNER_TEMP/retired-theme/css-test-consumers.txt" || test "$?" -eq 1
+          cat "$RUNNER_TEMP/retired-theme/css-test-consumers.txt" | cut -c1-360
       - uses: actions/upload-artifact@v4
         if: always()
         with:
