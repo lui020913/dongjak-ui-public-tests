@@ -115,6 +115,10 @@ export const BUILDING_VISUAL_PALETTE=Object.freeze({
   light:Object.freeze({footprint:'#fafafa',footprintOpacity:1,obliqueOpacity:0.12,extrusion:'#f1f3f1',nearOpacity:0.38,farOpacity:0.22}),
   dark:Object.freeze({footprint:'#444d56',footprintOpacity:0.74,obliqueOpacity:0.07,extrusion:'#525d66',nearOpacity:0.94,farOpacity:0.89})
 });
+export const MOBILE_DARK_BUILDING_PALETTE=BUILDING_VISUAL_PALETTE.dark;
+export function buildingVisualPalette(theme='light',phone=Boolean(globalThis.window?.matchMedia?.('(max-width:699px)')?.matches)){
+  return theme==='dark'&&phone?MOBILE_DARK_BUILDING_PALETTE:BUILDING_VISUAL_PALETTE[theme==='dark'?'dark':'light'];
+}
 export function nativeBuildingFootprint(layer={}){
   if(layer.type!=='fill'||String(layer.id||'').startsWith('dongjak-buildings-'))return false;
   const id=String(layer.id||'').toLowerCase();
@@ -156,7 +160,7 @@ export function buildingZoomOpacityExpression(maxOpacity=1){
   return ['interpolate',['linear'],['zoom'],BUILDING_ZOOM_FADE_START,0,BUILDING_ZOOM_FADE_END,opacity];
 }
 export function buildingFootprintPaint(theme='light',pitch=0){
-  const p=BUILDING_VISUAL_PALETTE[theme==='dark'?'dark':'light'];
+  const p=buildingVisualPalette(theme);
   return {'fill-color':p.footprint,
     ...(theme==='dark'?{}:{'fill-outline-color':'#e2e2e2'}),
     // Subtle overhead footprints, transparent for dark mode and off in 3D view.
@@ -169,7 +173,7 @@ export function buildingFootprintOutlinePaint(theme='light',pitch=0){
     'line-width':0.4};
 }
 export function buildingExtrusionAppearance(theme='light',pitch=30,start=10,full=30){
-  const p=BUILDING_VISUAL_PALETTE[theme==='dark'?'dark':'light'];
+  const p=buildingVisualPalette(theme);
   const fade=Math.max(0,Math.min(1,(pitch-start)/Math.max(1,full-start)));
   return {color:p.extrusion,opacity:Number((p.nearOpacity-(p.nearOpacity-p.farOpacity)*fade).toFixed(3))};
 }

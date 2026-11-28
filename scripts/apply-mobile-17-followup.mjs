@@ -10,41 +10,12 @@ function replace(path,from,to){
 for(const ext of ['css','js'])copyFileSync(resolve(publicRoot,'frontend/production/mobile-17-followup.'+ext),resolve(root,'src/mobile-17-followup.'+ext));
 replace('src/main.js',"import './mobile-first-overhaul.css';","import './mobile-first-overhaul.css';\nimport './mobile-17-followup.css';\nimport {installMobileFollowup} from './mobile-17-followup.js';");
 replace('src/main.js','installMobileMapControls({app,map});','installMobileMapControls({app,map});\ninstallMobileFollowup({app,map,maplibregl});');
-replace('src/public-ui-mobile-surface-coordinator.js','    if(query&&query.placeholder!==placeholder)query.placeholder=placeholder;','    // The native rotating search placeholder is the sole phone writer.\n    if(!win.matchMedia("(max-width:699px)").matches&&query&&query.placeholder!==placeholder)query.placeholder=placeholder;');
 // Pilot clipping is now canonical in app source. Do not re-inject retired TOPIS/S-DoT handlers.
 const pilotSource=readFileSync(resolve(root,'src/dongjak-verified-data-layers.js'),'utf8');
 for(const required of ['const SANGDO1_ANALYSIS=new Set(Object.keys(EXTRA_LAYER_DEFS));','getSangdo1Boundary():boundary','filteredDistrictPoints(raw,viewBoundary)']){
  if(!pilotSource.includes(required))throw Error('Canonical pilot scope contract missing: '+required);
 }
 if(/'road-incidents':\s*\{|\'sdot-environment\':\s*\{/.test(pilotSource))throw Error('Retired public feed definitions must not be injected');
-// Production must NOT override the user-approved translucent dark building palette.
-replace('src/map-appearance.js','export function nativeBuildingFootprint(layer={}){',`export const MOBILE_DARK_BUILDING_PALETTE=BUILDING_VISUAL_PALETTE.dark;
-export function buildingVisualPalette(theme='light',phone=Boolean(globalThis.window?.matchMedia?.('(max-width:699px)')?.matches)){
-  return theme==='dark'&&phone?MOBILE_DARK_BUILDING_PALETTE:BUILDING_VISUAL_PALETTE[theme==='dark'?'dark':'light'];
-}
-export function nativeBuildingFootprint(layer={}){`);
-const appearancePath=resolve(root,'src/map-appearance.js');
-const appearance=readFileSync(appearancePath,'utf8');
-const paletteRead="const p=BUILDING_VISUAL_PALETTE[theme==='dark'?'dark':'light'];";
-if(appearance.split(paletteRead).length!==3)throw Error('Building paint anchors changed');
-writeFileSync(appearancePath,appearance.replaceAll(paletteRead,'const p=buildingVisualPalette(theme);'));
-replace('src/place-details.js','  if(mem.has(id))return mem.get(id);',`  if(mem.has(id))return mem.get(id);
-  // First use the app's same-origin facility proxy; validate name and distance.
-  if(p.name.length>=2&&p.name.length<=40&&!signal?.aborted){
-    const child=new AbortController(),abort=()=>child.abort();
-    signal?.addEventListener('abort',abort,{once:true});
-    const timer=setTimeout(abort,10000);
-    try{
-      const response=await fetch('/api/osm-name-search?q='+encodeURIComponent(p.name),{signal:child.signal});
-      if(response.ok){
-        const answer=matchingOsmContact((await response.json()).elements||[],p);
-        if(answer.phone||answer.website||answer.address){mem.set(id,answer);return answer;}
-      }
-    }catch{}finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);}
-  }`);
-replace('src/v824-favorites-cloud.js','    const popup=redirectOnly?null:openKakaoPopup(window);',"    window.dispatchEvent(new Event('dj:mobile-kakao-start'));\n    const popup=redirectOnly?null:openKakaoPopup(window);");
-replace('src/v824-favorites-cloud.js','      if(!linkExisting)await sendPendingKakaoNotice(session);',"      if(!linkExisting)await sendPendingKakaoNotice(session);\n      window.dispatchEvent(new Event('dj:mobile-kakao-completed'));");
-replace('src/v824-favorites-cloud.js','      try{popup?.close();}catch{}',"      window.dispatchEvent(new Event('dj:mobile-kakao-cancelled'));\n      try{popup?.close();}catch{}");
 // Add safety and the remaining registered windows to the shared expansion lifecycle.
 const controller='src/dj-v8212-sheet-controller.js';
 const controllerFile=resolve(root,controller);

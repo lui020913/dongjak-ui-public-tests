@@ -36,7 +36,11 @@ test('the guest tour is a full-screen mobile surface without the old brand or En
 });
 
 test('the Start action closes the tour first and then opens the map gesture guide once',()=>{
-  assert.match(onboarding,/index===ONBOARDING_SLIDES\.length-1\)close\(\{afterClose:showMapGuide\}\)/);
+  // The released flow closes first, then either requests mobile permissions or opens the guide directly.
+  assert.match(onboarding,/index===ONBOARDING_SLIDES\.length-1\)\{/);
+  assert.match(onboarding,/close\(\{afterClose:\(\)=>win\.dispatchEvent\(new CustomEvent\('dj-next:permission-intro',\{detail:\{continue:showMapGuide\}\}\)\)\}\)/);
+  assert.match(onboarding,/else close\(\{afterClose:showMapGuide\}\)/);
+  assert.match(onboarding,/else move\(1\)/);
   assert.match(onboarding,/function showMapGuide\(\)/);
   assert.match(onboarding,/dongjak:open-map-guide/);
   assert.doesNotMatch(onboarding,/trigger\.click\(\)/);
