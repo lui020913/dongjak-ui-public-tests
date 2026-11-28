@@ -105,9 +105,10 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  const dockObserved=new WeakSet();
  const dockResize=typeof win.ResizeObserver==='function'?new win.ResizeObserver(()=>scheduleActiveDock()):null;
  function scheduleActiveDock(){
-  if(dockFrame)return;
+  if(dockFrame||activeLayers.hidden)return;
   dockFrame=win.requestAnimationFrame(()=>{
    dockFrame=0;
+   if(activeLayers.hidden)return;
    const nav=$('bottom-nav'),tip=$('dj840-map-tip'),bus=$('dj-bus-route-map-clear'),route=q('.dj-bus-detail-dock'),header=q('.topbar'),toolbar=$('djNext-toolbar');
    const nodes=[nav,tip,bus,route,header,toolbar];
    for(const n of nodes)if(n&&!dockObserved.has(n)){dockObserved.add(n);dockResize?.observe(n);}
@@ -179,9 +180,9 @@ export function installPhoneToolbar({app,doc=document,win=window}){
   const metroState=list.querySelector('[data-layer-key="livemetro"] .djNext-layer-state'),metroSource=q('[data-live-vehicle="metro"]');if(metroState&&metroSource){const label=metroSource.dataset.liveQuota==='true'?'조회 한도 초과':metroSource.getAttribute('aria-pressed')==='true'?'표시 중':'꺼짐';if(metroState.textContent!==label)metroState.textContent=label;}for(const n of rail.querySelectorAll('[data-source]')){const b=q(n.dataset.source);const state=b?.getAttribute('aria-pressed')??b?.getAttribute('aria-expanded');if(state!==null&&state!==undefined&&n.getAttribute('aria-pressed')!==state)n.setAttribute('aria-pressed',state)}
   const native=$('dj-v794-weather'),caption=native?.querySelector('.dj910-weather-temp'),type=native?.querySelector('.dj910-weather-icon')?.dataset.dj912WeatherIcon;
   const label=$('weather-label');
-  if(weather){const span=weather.querySelector('span');const state=label?.dataset.djWeatherState;const temperature=label?.dataset.djWeatherTemperature;const value=temperature||(state==='error'?'조회 실패':state==='loading'?'조회 중':caption?.textContent||'날씨');if(span.textContent!==value)span.textContent=value;weather.setAttribute('aria-label','날씨 '+value+(temperature&&state==='loading'?' · 이전 값, 갱신 중':temperature&&state==='error'?' · 이전 값, 갱신 실패':''));weather.dataset.weatherState=state||'idle';const symbol=type==='sun'?'sun':type&&type!=='unknown'?'cloud':'sun';if(weather.dataset.symbol!==symbol){weather.querySelector('svg').outerHTML=phoneIcon(symbol);weather.dataset.symbol=symbol}}
+  if(weather){const span=weather.querySelector('span');const state=label?.dataset.djWeatherState;const temperature=label?.dataset.djWeatherTemperature;const value=temperature||(state==='error'?'조회 실패':state==='loading'?'조회 중':caption?.textContent||'날씨');if(span.textContent!==value)span.textContent=value;const aria='날씨 '+value+(temperature&&state==='loading'?' · 이전 값, 갱신 중':temperature&&state==='error'?' · 이전 값, 갱신 실패':'');if(weather.getAttribute('aria-label')!==aria)weather.setAttribute('aria-label',aria);if(weather.dataset.weatherState!==(state||'idle'))weather.dataset.weatherState=state||'idle';const symbol=type==='sun'?'sun':type&&type!=='unknown'?'cloud':'sun';if(weather.dataset.symbol!==symbol){weather.querySelector('svg').outerHTML=phoneIcon(symbol);weather.dataset.symbol=symbol}}
  }
- function refreshRailEdges(){if(!toolScroll)return;const max=Math.max(0,toolScroll.scrollWidth-toolScroll.clientWidth);const x=Math.max(0,toolScroll.scrollLeft);toolScroll.dataset.scrollable=String(max>1);toolScroll.dataset.overflowLeft=String(x>1);toolScroll.dataset.overflowRight=String(max-x>1);}
+ function refreshRailEdges(){if(!toolScroll)return;const max=Math.max(0,toolScroll.scrollWidth-toolScroll.clientWidth);const x=Math.max(0,toolScroll.scrollLeft);for(const [key,value] of [['scrollable',max>1],['overflowLeft',x>1],['overflowRight',max-x>1]]){const next=String(value);if(toolScroll.dataset[key]!==next)toolScroll.dataset[key]=next;}}
  function renderRail(){if(!rail||!toolScroll)return;const previousX=toolScroll.scrollLeft;toolScroll.replaceChildren();rail.querySelector('#djNext-layers')?.remove();
   const near=button('주변정보','near',()=>invoke('#ped-nearby-open'));near.id='djNext-near';near.setAttribute('aria-label','주변 안전정보');
   weather=button('날씨','sun',()=>invoke('#weather-label'));weather.id='djNext-weather';
@@ -195,7 +196,12 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  if(!host){host=doc.createElement('nav');host.id='djNext-toolbar';host.setAttribute('aria-label','모바일 지도 주요 기능');rail=doc.createElement('div');rail.id='djNext-rail';rail.setAttribute('role','group');rail.setAttribute('aria-label','주요 지도 기능');toolScroll=doc.createElement('div');toolScroll.id='djNext-scroll';toolScroll.setAttribute('role','group');toolScroll.setAttribute('aria-label','지도 기능 및 바로가기');toolScroll.addEventListener('scroll',refreshRailEdges,{passive:true});rail.append(toolScroll);host.append(rail);app.append(host);if(typeof win.ResizeObserver==='function')new win.ResizeObserver(refreshRailEdges).observe(toolScroll);win.addEventListener('resize',refreshRailEdges,{passive:true});renderRail()}else refresh()
  }
  const schedule=()=>{if(scheduled)return;scheduled=true;win.requestAnimationFrame(sync)};
- new MutationObserver(schedule).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['data-active','aria-pressed','aria-expanded','data-dj912-weather-icon','data-live-quota','data-dj-weather-state','data-dj-weather-temperature','disabled','data-dj-pri-mode']});
+ // Our rendered toolbar, layer list and active dock are outputs, not native
+ // inputs. Ignore their own mutations so a mirrored state change cannot
+ // schedule an additional full refresh. Native controls remain observed.
+ new MutationObserver(records=>{
+  if(records.some(r=>![host,panel,activeLayers].some(n=>n?.contains(r.target))))schedule();
+ }).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['data-active','aria-pressed','aria-expanded','data-dj912-weather-icon','data-live-quota','data-dj-weather-state','data-dj-weather-temperature','disabled','data-dj-pri-mode']});
  // The independent phone rail owns its click before legacy document-level
  // overlay/gesture delegates. Do not intercept native or map-surface events.
  win.addEventListener('click',e=>{
