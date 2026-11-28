@@ -18,7 +18,9 @@ test('Balanced Dark is slightly deeper, while mint retains distinct selected/CTA
   assert.match(css,/--dj-brand-mint-selected:#285b50/);
   assert.match(css,/--dj-brand-mint:#79dec5/);
   assert.match(read('public/manifest-dark.webmanifest'),/"theme_color": "#22282e"/);
-  assert.match(read('src/mobile-pwa-status-tone-v793.css'),/--dj-pwa-native-edge:#22282e/);
+  const status=read('src/mobile-pwa-status-tone-v793.css');
+  assert.match(status,/--dj-pwa-native-edge:#edf3ef/);
+  assert.doesNotMatch(status,/--dj-pwa-native-edge:#22282e|data-theme=/);
 });
 
 test('Building geometry fades smoothly over two zoom levels, with near-opaque dark mass',()=>{
