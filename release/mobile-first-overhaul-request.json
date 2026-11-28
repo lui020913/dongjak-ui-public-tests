@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.292",
+  "application_version": "9.2.293",
   "public_work_branch": "main",
-  "purpose": "Replace all screenshot-derived exit coordinates with 89 published WGS84 map-link coordinates across 16 stations; retain unmatched MOIS exit records, source provenance and existing display scope, preserve safety pictograms and prior building/bus fixes.",
-  "attempt": 534,
+  "purpose": "Replace all screenshot-derived exit coordinates with 89 published WGS84 map-link coordinates across 16 stations; retain unmatched MOIS exit records, source provenance and existing display scope, preserve safety pictograms and prior building/bus fixes.; Render all numbered subway entrances as atomic cached circle+number images, no independently missing glyphs or unnumbered empty circles, preserve all exit coordinates.",
+  "attempt": 535,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

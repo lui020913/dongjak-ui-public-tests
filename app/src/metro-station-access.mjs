@@ -17,7 +17,7 @@ async function loadStationAccessFile(fetcher){
 export const STATION_ACCESS_ZOOM=16.2;
 export const STATION_PASSAGE_ZOOM=16.65;
 const SOURCE='dj-metro-station-access',X=88300,Y=111320;
-const ids=[SOURCE+'-exit-circle',SOURCE+'-exit-label'];
+const EXIT_LAYER=SOURCE+'-exit-label';
 const empty=()=>({type:'FeatureCollection',features:[]});
 const valid=p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite);
 const distance=(a,b)=>Math.hypot((a[0]-b[0])*X,(a[1]-b[1])*Y);
@@ -63,6 +63,34 @@ export function buildStationAccess(elements,stations,colors,railPaths=new Map(),
  }
  return {type:'FeatureCollection',features:result};
 }
+// Bake the exit number and circle into one image. No independent glyph layer,
+// font-server request or label collision can leave an empty circle on screen.
+export function registerExitBadge(map,number,color,doc=globalThis.document){
+ const n=String(number||'').trim();
+ if(!/^[0-9]{1,2}[A-Za-z]?(?:[-·][0-9A-Za-z]+)?$/.test(n))return null;
+ const stroke=/^#[0-9a-f]{6}$/i.test(color||'')?color:'#718b7b';
+ const id='dj-exit-badge-'+stroke.slice(1).toLowerCase()+'-'+n;
+ if(map.hasImage?.(id))return id;
+ try{
+  const c=doc?.createElement('canvas');if(!c)return null;c.width=c.height=64;
+  const ctx=c.getContext('2d');if(!ctx)return null;
+  ctx.beginPath();ctx.arc(32,32,28,0,Math.PI*2);ctx.fillStyle='#fff6d7';ctx.fill();
+  ctx.strokeStyle=stroke;ctx.lineWidth=5;ctx.stroke();
+  ctx.fillStyle='#534d31';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font='700 '+(n.length>2?23:34)+'px Arial, sans-serif';
+  ctx.fillText(n,32,33,47);
+  map.addImage(id,{width:64,height:64,data:ctx.getImageData(0,0,64,64).data},{pixelRatio:2});
+  return id;
+ }catch(error){console.warn('[지하철 출구 아이콘]',error?.message);return null;}
+}
+export function prepareExitBadges(map,data,doc=globalThis.document){
+ const features=[];
+ for(const f of data.features||[]){
+  const icon=registerExitBadge(map,f.properties.number,f.properties.color,doc);
+  if(icon)features.push({...f,properties:{...f.properties,icon}});
+ }
+ return {...data,features};
+}
 export function stationAccessQuery(b,kind='all'){
  const box=b.map(x=>x.toFixed(6)).join(',');
  const exits='node["railway"="subway_entrance"]('+box+');node["subway"="yes"]["entrance"]('+box+');';
@@ -80,12 +108,13 @@ export function installMetroStationAccess({map,app,getStations,getRailPaths,colo
  function setup(){
   if(map.getSource(SOURCE))return;
   map.addSource(SOURCE,{type:'geojson',data:empty(),attribution:'MOIS public subway entrance data; © OpenStreetMap contributors (ODbL); K-SUB mapped exit coordinates'});
-  const add=l=>map.addLayer(l);
-  add({id:ids[0],type:'circle',source:SOURCE,minzoom:STATION_ACCESS_ZOOM,filter:['==',['get','kind'],'exit'],paint:{'circle-radius':['interpolate',['linear'],['zoom'],16.2,6.5,20,10],'circle-color':'#fff6d7','circle-stroke-color':['get','color'],'circle-stroke-width':1.5}});
-  add({id:ids[1],type:'symbol',source:SOURCE,minzoom:STATION_ACCESS_ZOOM,filter:['==',['get','kind'],'exit'],layout:{'text-field':['get','label'],'text-font':['Noto Sans Bold','Open Sans Semibold'],'text-size':['interpolate',['linear'],['zoom'],16.2,9,20,12],'text-allow-overlap':true,'text-ignore-placement':true,'text-padding':1},paint:{'text-color':'#534d31'}});
-  initialized=true;
+  map.addLayer({id:EXIT_LAYER,type:'symbol',source:SOURCE,minzoom:STATION_ACCESS_ZOOM,filter:['all',['==',['get','kind'],'exit'],['has','icon']],
+    layout:{'icon-image':['get','icon'],'icon-size':['interpolate',['linear'],['zoom'],16.2,.46,20,.68],
+      'icon-anchor':'center','icon-allow-overlap':true,'icon-ignore-placement':true,'icon-padding':1,
+      'icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport'}});
+  initialized=true;last='';
  }
- function publish(data){if(map.isMoving?.())return;setup();const sig=JSON.stringify(data);if(sig!==last){map.getSource(SOURCE)?.setData(data);last=sig;}}
+ function publish(data){if(map.isMoving?.())return;setup();const ready=prepareExitBadges(map,data);const sig=JSON.stringify(ready);if(sig!==last){map.getSource(SOURCE)?.setData(ready);last=sig;}}
  function refresh(){
   if(map.isMoving?.())return;
   if(!map.isStyleLoaded?.()&&typeof map.isStyleLoaded==='function'){map.once?.('idle',request);return;}
