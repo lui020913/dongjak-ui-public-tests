@@ -32,4 +32,5 @@ test('public artwork, iOS status bar and land palette do not react to old dark s
  assert.doesNotMatch(read('src/onboarding-status-surface.js'),/appTheme|rootTheme|#22282e/);
  assert.doesNotMatch(read('src/v860-onboarding.css'),/data-theme="dark"/);
  assert.doesNotMatch(read('src/v7120-settings.js'),/dongjak-dark-|isDark|syncTheme/);
+ assert.doesNotMatch(read('src/theme-contract.css'),/data-theme="dark"|color-scheme:dark/);
 });

@@ -1,5 +1,5 @@
 /* Single palette owner shared by the application and native-root controls.
-   Light/dark tokens change in one style recalculation, with no page mask. */
+   The public UI uses one light palette, with no page mask. */
 :root[data-theme="light"] {
     --dj-theme-bg:#edf3ef;
     --dj-theme-surface:#ffffff;
@@ -9,16 +9,6 @@
     --dj-theme-line:#d3e0d8;
     --dj-theme-selected:#dfeae5;
     --dj-theme-accent:#285b4f;
-}
-:root[data-theme="dark"] {
-    --dj-theme-bg:#22282e;
-    --dj-theme-surface:#2c343d;
-    --dj-theme-raised:#35404a;
-    --dj-theme-ink:#f1f4f6;
-    --dj-theme-muted:#bec8d2;
-    --dj-theme-line:#4d5b65;
-    --dj-theme-selected:#285b50;
-    --dj-theme-accent:#79dec5;
 }
 
 /* Theme contract 2026-11-22: visual surfaces only. Do NOT recolor safety
@@ -72,339 +62,11 @@
     --mf-line:#d3e0d8!important;
     color-scheme:light!important;
   }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] {
-    /* Balanced charcoal hierarchy with emerald-mint interaction accents. */
-    --dj9272-page:#22282e!important;
-    --dj9272-surface:#2c343d!important;
-    --dj9272-ink:#f1f4f6!important;
-    --dj9272-muted:#bec8d2!important;
-    --dj9272-line:#4d5b65!important;
-    --dj9272-tint:#35404a!important;
-    --dj-v4-selected:#285b50!important;
-    --dj-v4-accent:#a0f0da!important;
-    --djNext-surface:#2c343d!important;
-    --djNext-raised:#35404a!important;
-    --djNext-text:#f1f4f6!important;
-    --djNext-muted:#bec8d2!important;
-    --djNext-border:#4d5b65!important;
-    --djNext-active:#79dec5!important;
-    --djNext-tile:#343a43!important;
-    --djNext-tile-ink:#e0e8f0!important;
-    --djNext-tool-face:#35404a!important;
-    --djNext-tool-edge:#4d5b65!important;
-    --djNext-tool-soft-face:#353b44!important;
-    --djNext-tool-selected-face:#404b59!important;
-    --djNext-tool-selected-ink:#f1f4f6!important;
-    --dj-primary-page-bg:#22282e!important;
-    --dj-primary-page-ink:#f1f4f6!important;
-    --dj-primary-page-edge:#373c44!important;
-    --dj800-surface:#2c343d!important;
-    --dj800-elevated:#35404a!important;
-    --dj800-text:#f1f4f6!important;
-    --dj800-muted:#bec8d2!important;
-    --dj800-border:#4d5b65!important;
-    --dj800-accent:#79dec5!important;
-    --surface:#2c343d!important;
-    --card:#2c343d!important;
-    --panel:#2c343d!important;
-    --text:#f1f4f6!important;
-    --muted:#bec8d2!important;
-    --border:#4d5b65!important;
-    --mf-bg:#22282e!important;
-    --mf-surface:#2c343d!important;
-    --mf-surface-muted:#35404a!important;
-    --mf-surface-raised:#35404a!important;
-    --mf-ink:#f1f4f6!important;
-    --mf-muted:#bec8d2!important;
-    --mf-line:#4d5b65!important;
-    --mf-accent:#79dec5!important;
-    --mf-accent-soft:#285b50!important;
-    color:#f1f4f6!important;
-    background-color:#22282e!important;
-    color-scheme:dark!important;
-  }
-  html[data-theme="dark"],html[data-theme="dark"] body {
-    color-scheme:dark!important;
-    background-color:#22282e!important;
-  }
   html[data-theme="light"],html[data-theme="light"] body {
     color-scheme:light!important;
   }
-  /* Fixed page roots, full-height tab pages and safe-area footer surfaces. */
-  html body #app#app#app#app#app#app#app[data-theme="dark"]:is([data-tab="route"],[data-tab="participate"],[data-tab="news"],[data-tab="mine"]),
-  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]),
-  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > :is(.dj836-sheet-body,.dj-sheet-chrome),
-  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden])::after,
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #dj910-route-footer {
-    background:#22282e!important;
-    background-color:#22282e!important;
-    background-image:none!important;
-    border-color:#373c44!important;
-    color:#f1f4f6!important;
-  }
-  /* My info / settings / route cards / list sheets / community / news. */
-  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-    #mine-panel .dj834-profile-card,#mine-panel .dj834-settings-group,
-    .dj834-records-container,.dj877-pref-group,.dj877-pref-row,
-    .dj-map-settings-card,.dj-map-settings-group,.dj-map-settings-footer,
-    #dj-mobile-utilities,.dj-mobile-utilities-body,.dj854-more-head,
-    .dj-place-detail,.dj-place-header,.dj-place-info-card,.dj-place-favorites-section,
-    .route-card,.transport-sheet,#transport-sheet,.transport-arrival-row,
-    .dj-place-detail-popup .maplibregl-popup-content,
-    .dj833-night-dialog,#dj840-theme-confirm .dj840-dialog,
-    #dj854-weather-sheet,.dj860-onboarding .dj860-content
-  ) {
-    background:#2c343d!important;
-    background-color:#2c343d!important;
-    background-image:none!important;
-    border-color:#4d5b65!important;
-    color:#f1f4f6!important;
-    box-shadow:0 4px 15px rgba(0,0,0,.14)!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #mine-panel :is(
-    .dj834-profile-card,.dj834-settings-group,.dj834-settings-group>button
-  ) {
-    background:#2c343d!important;
-    border-color:#4d5b65!important;
-    color:#f1f4f6!important;
-    -webkit-text-fill-color:#f1f4f6!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #mine-panel :is(
-    .dj834-setting-icon,.dj834-user-avatar,.dj834-profile-symbol
-  ) {
-    background:#353b44!important;
-    color:#bdcbd9!important;
-    -webkit-text-fill-color:#bdcbd9!important;
-    border-color:#49515c!important;
-    box-shadow:none!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-    #mine-panel .dj834-profile-name,#mine-panel .dj834-detail-title,
-    #mine-panel .dj834-settings-group>button>span,
-    #route-panel .dj-sheet-chrome,#news-panel .dj-sheet-chrome,
-    #participation-panel .dj-sheet-chrome,.dj-map-settings-head h2,
-    .dj-map-settings-group h3,.dj877-pref-group strong
-  ) {
-    color:#f1f4f6!important;
-    -webkit-text-fill-color:#f1f4f6!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-    #mine-panel .dj834-profile-meta small,#mine-panel .dj834-group-title,
-    #mine-panel .dj834-current-theme,#mine-panel .dj834-chevron,
-    #mine-panel .dj834-help,.dj-map-settings-group p,
-    .dj-map-settings-head p,.dj877-pref-row small,
-    .dj-place-kicker,.dj834-detail-back
-  ) {
-    color:#bec8d2!important;
-    -webkit-text-fill-color:#bec8d2!important;
-  }
-  /* Opaque, neutral map header; preserve topbar geometry and AI position. */
-  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-    .topbar .map-quick-search-form,#map-quick-search .map-quick-search-form,
-    #map-quick-search-dropdown:not([hidden]),.map-quick-search-results,
-    #dj890-ai-orb,#dj800-ai-search-trigger
-  ) {
-    background:#2c343d!important;
-    background-color:#2c343d!important;
-    background-image:none!important;
-    border-color:#4d5b65!important;
-    color:#f1f4f6!important;
-    box-shadow:0 4px 13px rgba(0,0,0,.18)!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-    #map-quick-search-query,.map-quick-search-form input,
-    #dj890-ai-orb .dj890-ai-orb-text
-  ) {
-    color:#f1f4f6!important;
-    -webkit-text-fill-color:#f1f4f6!important;
-    caret-color:#eef1f7!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #map-quick-search-query::placeholder {
-    color:#bec8d2!important;
-    -webkit-text-fill-color:#bec8d2!important;
-    opacity:1!important;
-  }
-  /* Toolbar, floating map controls, weather tiles, layer controls. */
-  @media(max-width:699px){
-    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-      #dj-v794-toolbar .dj832-native,#dj-v794-toolbar .dj832-feature,
-      #dj-v794-toolbar #dj-v794-weather,#dj-v794-more,
-      #dj-v794-toolbar .dj-v794-tool,.map-controls button,
-      .maplibregl-ctrl button,#dj-v794-night,#dj-v794-toolbar .dj832-feature-label
-    ) {
-      background-color:#35404a!important;
-      background-image:none!important;
-      border-color:#4d5b65!important;
-      color:#f1f4f6!important;
-      -webkit-text-fill-color:#f1f4f6!important;
-    }
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] > #bottom-nav:not([hidden]) {
-    background:#2c343d!important;
-    background-color:#2c343d!important;
-    background-image:none!important;
-    border-color:#4d5b65!important;
-    box-shadow:0 3px 15px rgba(0,0,0,.25)!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab {
-    background:transparent!important;
-    color:#b8c0ca!important;
-    -webkit-text-fill-color:#b8c0ca!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab.active {
-    background:#285b50!important;
-    color:#a0f0da!important;
-    -webkit-text-fill-color:#a0f0da!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab :is(span,svg) {
-    color:inherit!important;
-    -webkit-text-fill-color:currentColor!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-    .dj-map-settings-card input:not([type="checkbox"]),
-    .dj-map-settings-card select,#mine-panel input,#mine-panel select,
-    #dj-mobile-utilities input,#dj-mobile-utilities select
-  ) {
-    background:#35404a!important;
-    border-color:#4d5b65!important;
-    color:#f1f4f6!important;
-    -webkit-text-fill-color:#f1f4f6!important;
-    color-scheme:dark!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-    #dj-map-settings button,#mine-panel button,.dj-map-settings-card button
-  ):focus-visible {
-    outline:2px solid #79dec5!important;
-    outline-offset:2px!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] .dj860-onboarding {
-    --dj860-bg:#22282e!important;
-    --dj860-fg:#f1f4f6!important;
-    --dj860-muted:#bec8d2!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] .map-startup-overlay {
-    --start-bg:#22282e!important;
-    --start-fg:#f1f4f6!important;
-    --start-muted:#bec8d2!important;
-    --start-track:#4d5b65!important;
-    background:#22282e!important;
-  }
-  html.dj-ios-home-pwa[data-theme="dark"] {
-    --dj-pwa-land-tone:#22282e!important;
-    --dj-pwa-land-tone-rgb:23,25,29!important;
-    --dj-pwa-native-edge:#22282e!important;
-    --dj-pwa-status-color:#22282e!important;
-    background-color:#22282e!important;
-  }
-  html.dj-ios-home-pwa[data-theme="dark"] body #app #dj-ios-pwa-map-seam,
-  html.dj-ios-home-pwa[data-theme="dark"] body #dj-ios-pwa-status-sample {
-    background-color:#22282e!important;
-    background:#22282e!important;
-  }
-  html.dj-ios-home-pwa[data-theme="dark"] body #app .topbar .map-quick-search-form {
-    background:#2c343d!important;
-    border-color:#4d5b65!important;
-  }
-}
-/* No extra full-screen mask is introduced by theme changes. */
-@media(prefers-reduced-motion:reduce){
-  #app .dj-theme-switch-flash{animation:none!important;transition:none!important;}
 }
 
-/* AI dialog belongs to <body>, outside #app's inherited variables. */
-@layer request-completion {
-  @media(max-width:699px) {
-    html body:has(#app[data-theme="dark"]) #dj-ai-search-modal {
-      --djNext-surface:#2c343d!important;
-      --djNext-text:#f1f4f6!important;
-      --djNext-muted:#bec8d2!important;
-      --djNext-border:#4d5b65!important;
-      --dj800-surface:#2c343d!important;
-      --dj800-surface-soft:#35404a!important;
-      --dj800-text:#f1f4f6!important;
-      color-scheme:dark!important;
-      background:#2c343d!important;
-      color:#f1f4f6!important;
-      border-color:#4d5b65!important;
-    }
-    html body:has(#app[data-theme="dark"]) #dj-ai-search-modal :is(
-      .dj-ai-search-content,.dj-ai-search-header,.dj-ai-search-body,
-      .dj-ai-search-history,.dj-ai-search-input,.dj-ai-answer,
-      textarea,input:not([type="checkbox"]),select
-    ) {
-      background-color:#2c343d!important;
-      color:#f1f4f6!important;
-      border-color:#4d5b65!important;
-    }
-    html body:has(#app[data-theme="dark"]) #dj-ai-search-modal :is(
-      .dj-ai-muted,.dj-ai-message-meta,small
-    ) {color:#bec8d2!important;}
-  }
-}
-
-/* Keep production mobile controls and secondary windows in the same charcoal
-   semantic tokens; positioning, ARIA, animations and gesture styles untouched. */
-@layer request-completion {
-  @media(max-width:699px) {
-    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-      #djNext-toolbar #djNext-rail button.djNext-tool,
-      #djNext-toolbar #djNext-layers,
-      #djNext-toolbar #djNext-scroll .djNext-tool,
-      .map-actions > button,#dj840-map-tip,#dj-browser-webapp-tip
-    ) {
-      --djNext-tool-face:#35404a!important;
-      --djNext-tool-soft-face:#343a43!important;
-      --djNext-tool-edge:#4d5b65!important;
-      --djNext-text:#f1f4f6!important;
-      color:#f1f4f6!important;
-      -webkit-text-fill-color:#f1f4f6!important;
-      border-color:#4d5b65!important;
-    }
-    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-      #dj854-weather-sheet,#djNext-layer-panel .djNext-modal-body,
-      #dj-mobile-utilities,#map-gesture-guide,#route-map-card,
-      #dj834-map-settings,#version-history-modal .version-history-dialog,
-      #djNext-permissions .djNext-modal-body
-    ) {
-      --djNext-surface:#2c343d!important;
-      --djNext-text:#f1f4f6!important;
-      --djNext-muted:#bec8d2!important;
-      --djNext-border:#4d5b65!important;
-      --dj9272-page:#22282e!important;
-      --dj9272-surface:#2c343d!important;
-      --dj9272-ink:#f1f4f6!important;
-      --dj9272-muted:#bec8d2!important;
-      --dj9272-line:#4d5b65!important;
-      color:#f1f4f6!important;
-      border-color:#4d5b65!important;
-    }
-    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-      #route-panel,#participation-panel,#news-panel,#mine-panel,
-      #dj854-weather-sheet,#djNext-layer-panel,#dj-map-settings
-    ) :is(input:not([type="checkbox"]),textarea,select) {
-      background-color:#35404a!important;
-      color:#f1f4f6!important;
-      caret-color:#f1f4f6!important;
-      border-color:#4d5b65!important;
-    }
-    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-      #route-panel,#participation-panel,#news-panel,#mine-panel,
-      #dj854-weather-sheet,#djNext-layer-panel,#dj-map-settings
-    ) :is(input,textarea)::placeholder {
-      color:#bec8d2!important;opacity:1!important;
-    }
-    /* Explicit state only: never paint route-line, warning, PRI or transport
-       colors with the general monochrome UI palette. */
-    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-      .dj-sheet-chrome-close,.djNext-close,#transport-close,
-      #dj-mobile-utilities-close,#dj-settings-close
-    ) {
-      background-color:#35404a!important;
-      color:#f1f4f6!important;
-      border-color:#4d5b65!important;
-    }
-  }
-}
 
 @media (prefers-reduced-motion:no-preference) {
   /* Never animate the map, full-screen pages, or sheet geometry. */
@@ -417,267 +79,36 @@
   }
 }
 
-/* Institutional protection-gap research layer: neutral UI in both modes.
+/* Institutional protection-gap research layer: neutral light UI.
    Semantic 0..100 road-score gradient and gray NULL remain unchanged. */
 @layer request-completion {
-  html body #app[data-theme="light"] #pza3-panel,
-  html body #app[data-theme="dark"] #pza3-panel {
+  html body #app[data-theme="light"] #pza3-panel {
     background:var(--dj-theme-surface)!important;
     color:var(--dj-theme-ink)!important;
     border-color:var(--dj-theme-line)!important;
   }
-  html body #app[data-theme="light"] #pza3-panel :is(p,#pza3-status,#pza3-ticks),
-  html body #app[data-theme="dark"] #pza3-panel :is(p,#pza3-status,#pza3-ticks) {
-    color:var(--dj-theme-muted)!important;
-  }
-  html body #app[data-theme="dark"] #pza3-panel :is(#pza3-toggle,#pza3-modes button){
-    color:var(--dj-theme-ink)!important;
-    background:var(--dj-theme-raised)!important;
-    border:1px solid var(--dj-theme-line)!important;
-  }
-  html body #app[data-theme="dark"] #pza3-panel :is(#pza3-toggle,#pza3-modes button)[aria-pressed="true"]{
-    color:#f1f4f6!important;
-    background:var(--dj-theme-selected)!important;
-    border-color:#677583!important;
-  }
-  html body #app[data-theme="dark"] #pza3-panel :is(#pza3-toggle,#pza3-modes button):focus-visible {
-    outline:2px solid var(--dj-theme-accent)!important;
-    outline-offset:2px!important;
-  }
-  html body #app[data-theme="dark"] .maplibregl-popup:has(.pza3-popup) .maplibregl-popup-content {
-    background:var(--dj-theme-surface)!important;
-    color:var(--dj-theme-ink)!important;
-    border:1px solid var(--dj-theme-line)!important;
-  }
-  html body #app[data-theme="dark"] .maplibregl-popup:has(.pza3-popup) .maplibregl-popup-tip {
-    border-top-color:var(--dj-theme-surface)!important;
-  }
-  html body #app[data-theme="dark"] .maplibregl-popup:has(.pza3-popup) .maplibregl-popup-close-button {
-    color:var(--dj-theme-ink)!important;
-  }
-  html body #app[data-theme="dark"] .pza3-popup {
-    color:var(--dj-theme-ink)!important;
-  }
-  html body #app[data-theme="dark"] .pza3-popup :is(dt,p){
+  html body #app[data-theme="light"] #pza3-panel :is(p,#pza3-status,#pza3-ticks) {
     color:var(--dj-theme-muted)!important;
   }
 }
 
 
-/* Dark phone secondary surfaces: the existing theme contract, not an
-   additional stylesheet. These rules change paint only, never layout,
-   button event handling, map severity colors, or route geometry. */
-@layer request-completion {
- @media(max-width:699px) {
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel :is(
-    .dongjak-news-tabs,.dongjak-news-item,.news-empty
-  ){
-    background:#2c343d!important;background-image:none!important;
-    border-color:#4d5b65!important;color:#f1f4f6!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-tabs > button:not(.active){
-    background:#35404a!important;background-image:none!important;
-    color:#d4dde5!important;-webkit-text-fill-color:#d4dde5!important;
-    border:1px solid #4d5b65!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-tabs > button.active{
-    background:#79dec5!important;background-image:none!important;
-    color:#17232c!important;-webkit-text-fill-color:#17232c!important;
-    border:1px solid #79dec5!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel :is(
-    #dongjak-news-refresh,.dongjak-news-open,.dongjak-news-links a
-  ){
-    background:#35404a!important;background-image:none!important;
-    color:#e1ebf5!important;-webkit-text-fill-color:#e1ebf5!important;
-    border-color:#505b66!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-item strong{
-    color:#f1f4f6!important;-webkit-text-fill-color:#f1f4f6!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel :is(
-    .dongjak-news-item-meta,.dongjak-news-status
-  ){color:#bec8d2!important;-webkit-text-fill-color:#bec8d2!important;}
-
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
-    .community-post,.community-comments,.community-post-preview,.community-post-detail
-  ){
-    background:#2c343d!important;background-image:none!important;
-    color:#f1f4f6!important;border-color:#4d5b65!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
-    .community-post-title,.community-post-body,.community-post-actions button
-  ){
-    background:transparent!important;background-image:none!important;
-    color:#f1f4f6!important;-webkit-text-fill-color:#f1f4f6!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
-    .community-post-meta,.community-summary-count,.community-form-note
-  ){color:#bec8d2!important;-webkit-text-fill-color:#bec8d2!important;}
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
-    .community-filter:not(.active),#community-sort,#community-notifications-toggle,
-    #community-saved-toggle:not([aria-pressed="true"]),.dj-community-refresh
-  ){
-    background:#35404a!important;background-image:none!important;
-    border-color:#505861!important;color:#e1e8f0!important;
-    -webkit-text-fill-color:#e1e8f0!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
-    .community-filter.active,#community-saved-toggle[aria-pressed="true"],#community-compose-toggle
-  ){
-    background:#79dec5!important;background-image:none!important;
-    border-color:#79dec5!important;color:#17232c!important;
-    -webkit-text-fill-color:#17232c!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
-    .community-post-category,.community-location-link
-  ){
-    background:#285b50!important;background-image:none!important;
-    border-color:#576575!important;color:#e2ecf5!important;
-    -webkit-text-fill-color:#e2ecf5!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
-    .community-post-actions,.community-comment-row
-  ){border-color:#4d5b65!important;}
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #route-panel :is(
-    .route-mini-btn,.route-gps-btn,#dj832-waypoint-toggle
-  ):not(:disabled){
-    background:#35404a!important;background-image:none!important;
-    border-color:#525b66!important;color:#e1eaf2!important;
-    -webkit-text-fill-color:#e1eaf2!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #route-panel #route-calc:disabled{
-    background:#404a54!important;background-image:none!important;
-    color:#b5c1ce!important;-webkit-text-fill-color:#b5c1ce!important;
-    border:1px solid #505965!important;opacity:1!important;
-    box-shadow:none!important;cursor:not-allowed!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #mine-panel .dj834-setting-icon{
-    background:#285b50!important;color:#d7e4ef!important;
-    -webkit-text-fill-color:#d7e4ef!important;border-color:#525d6a!important;
-  }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab.active{
-    background:#285b50!important;color:#a0f0da!important;
-    -webkit-text-fill-color:#a0f0da!important;
-  }
- }
-}
-
-/* Balanced Dark: emerald-mint is the interaction affordance, never a
-   substitute for PRI severity, transit line or road-risk semantics.
-   Dark-ink on the bright mint CTA meets text contrast; selected tabs use
-   the deeper mint surface and lighter mint glyph. Light mode is unchanged. */
-@layer request-completion {
-  html body #app#app#app#app#app#app#app[data-theme="dark"] {
-    --dj-brand-mint:#79dec5!important;
-    --dj-brand-mint-ink:#17332d!important;
-    --dj-brand-mint-selected:#285b50!important;
-    --dj-brand-mint-selected-ink:#a0f0da!important;
-  }
-  @media(max-width:699px) {
-    html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab:is(.active,[aria-current="page"]) {
-      background:#285b50!important;
-      color:#a0f0da!important;
-      -webkit-text-fill-color:#a0f0da!important;
-    }
-    html body #app#app#app#app#app#app#app[data-theme="dark"] #route-panel #route-calc:not(:disabled),
-    html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel #community-compose-toggle,
-    html body #app#app#app#app#app#app#app[data-theme="dark"] #djNext-permissions .djNext-continue {
-      background:#79dec5!important;
-      background-image:none!important;
-      border-color:#79dec5!important;
-      color:#17332d!important;
-      -webkit-text-fill-color:#17332d!important;
-    }
-    html body #app#app#app#app#app#app#app[data-theme="dark"] #djNext-layer-panel .djNext-shortcut-switch[aria-checked="true"] .djNext-switch-track {
-      background:#79dec5!important;
-    }
-    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-      #dj890-ai-orb .dj890-ai-orb-glyph,
-      #dj-v794-weather .dj832-tool-icon
-    ) {
-      color:#79dec5!important;
-    }
-  }
-}
 
 /* 2026-11-22 screenshot follow-up: readable body-level PRI dialog and restrained slate-teal accent. */
 :root[data-theme="light"] {
   --dj-theme-accent:#0d8875;
   --dj-theme-selected:#e1ecec;
 }
-:root[data-theme="dark"] {
-  --dj-theme-accent:#a5c7cb;
-  --dj-theme-selected:#31535b;
-}
 @layer request-completion {
-  /* PRI dialog is appended directly to body, OUTSIDE #app. App-scoped
-     dark rules never applied to it; the result was dark-green illegible ink. */
-  html[data-theme="dark"] body > #dj-pri-dialog,
-  html[data-theme="dark"] body > .dj-pri-dialog {
-    background:#2c343d!important;background-color:#2c343d!important;
-    background-image:none!important;color:#f1f4f6!important;
-    -webkit-text-fill-color:#f1f4f6!important;
-    border:1px solid #46525e!important;
-    box-shadow:0 14px 36px rgba(0,0,0,.42)!important;
-    color-scheme:dark!important;
-  }
-  html[data-theme="dark"] body > .dj-pri-dialog :is(h2,p,strong,span,small,label,summary,.dj-pri-status,.dj-pri-model-note){
-    color:#e1e9ed!important;-webkit-text-fill-color:#e1e9ed!important;
-  }
-  html[data-theme="dark"] body > .dj-pri-dialog :is(.dj-pri-button,.dj-pri-actions button){
-    background:#35404a!important;background-image:none!important;
-    color:#f1f4f6!important;-webkit-text-fill-color:#f1f4f6!important;
-    border:1px solid #48535c!important;box-shadow:none!important;
-  }
-  html[data-theme="dark"] body > .dj-pri-dialog :is(.dj-pri-button,.dj-pri-actions button):disabled{
-    opacity:1!important;color:#aebcc6!important;
-    -webkit-text-fill-color:#aebcc6!important;background:#303942!important;
-    border-color:#48535c!important;
-  }
-  html[data-theme="dark"] body > .dj-pri-dialog .dj-pri-button[aria-pressed="true"]{
-    color:#f1f4f6!important;-webkit-text-fill-color:#f1f4f6!important;
-    background:#31535b!important;border-color:#50717a!important;
-  }
-  html[data-theme="dark"] body > .dj-pri-dialog :is(.dj-pri-button,summary):focus-visible{
-    outline:2px solid #a5c7cb!important;outline-offset:2px!important;
-  }
-
-  /* Single dark base behind iOS status strip, full-screen sheet header,
-     scrolling body and fixed footer. Borders remain darker than text. */
-  html[data-theme="dark"] body #app#app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > .dj-sheet-chrome {
-    background:#22282e!important;background-color:#22282e!important;
-    background-image:none!important;color:#f1f4f6!important;
-    border-bottom:1px solid #3e4954!important;
-  }
-  html[data-theme="dark"] body #app#app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel) .dj-sheet-chrome :is(h1,h2,strong,span){
-    color:#f1f4f6!important;-webkit-text-fill-color:#f1f4f6!important;
-  }
-
-  html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] {
-    --dj-v4-selected:#31535b!important;--dj-v4-accent:#a5c7cb!important;
-    --djNext-active:#a5c7cb!important;--dj800-accent:#a5c7cb!important;
-    --djNext-tool-primary:#31535b!important;
-    --djNext-tool-selected-face:#31535b!important;
-    --djNext-tool-selected-ink:#f1f4f6!important;
-  }
   html body #app#app#app#app#app#app#app#app#app[data-theme="light"]{
     --djNext-active:#0d8875!important;
     --djNext-tool-primary:#0d8875!important;
   }
-  html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab.active{
-    background:#31535b!important;background-color:#31535b!important;
-    color:#f1f4f6!important;-webkit-text-fill-color:#f1f4f6!important;
-  }
-  html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab.active :is(span,svg){
-    color:#f1f4f6!important;-webkit-text-fill-color:#f1f4f6!important;
-  }
-  html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(.djNext-continue,button.primary-btn:not(:disabled),#route-panel .route-gps-btn:focus-visible){
-    border-color:#4d6d75!important;
-  }
 }
 
 
+/* Explicit state only: never paint route-line, warning, PRI or transport
+   colors with the general UI palette. */
 /* Unified undimmed-window and weather-card policy.
    The map remains visible behind floating cards; only the top status/header
    can use its existing blur treatment. Safety-severity map paints are intact. */
@@ -703,13 +134,6 @@
     -webkit-backdrop-filter:none!important;
     backdrop-filter:none!important;
   }
-  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
-    .dj833-night-dialog,.dj840-dialog,.djNext-modal-body,
-    #overview-sheet,#dj832-data-sheet,#dj854-weather-sheet,
-    #transport-sheet,.dj-place-detail-popup .maplibregl-popup-content
-  ):not([hidden]) {
-    box-shadow:0 8px 22px rgba(0,0,0,.28)!important;
-  }
   /* Seven-day tiles get symmetric inset space at both scroll boundaries. */
   html body #app#app#app#app#app#app#app #dj854-weather-sheet .dj9274-weather-week {
     box-sizing:border-box!important;
@@ -731,7 +155,7 @@
   html body #app#app#app#app#app#app#app #dj854-weather-sheet .dj-weather-edge-drag {
     display:none!important;
   }
-  /* A light-theme dialog must not inherit the charcoal palette after switching. */
+  /* Body-level dialogs use the same light palette. */
   html[data-theme="light"] body > :is(#dj-pri-dialog,.dj-pri-dialog,#dj-ai-search-modal) {
     --djNext-surface:#ffffff!important;
     --djNext-raised:#e9f2ed!important;
@@ -788,17 +212,6 @@
       -webkit-backdrop-filter:none!important;
       backdrop-filter:none!important;
       touch-action:manipulation;
-    }
-    html[data-theme="dark"] body #app#app#app :is(
-      #dj854-weather-sheet .dj854-weather-close,
-      .page-panel .dj-sheet-chrome-close,
-      #djNext-layer-panel .djNext-close
-    ),
-    html[data-theme="dark"] body > #dj-ai-search-modal .dj-ai-close {
-      background-color:#35404a!important;
-      color:#f1f4f6!important;
-      border-color:#4d5b65!important;
-      box-shadow:0 2px 9px rgba(0,0,0,.22)!important;
     }
     html body :is(
       #dj854-weather-sheet .dj854-weather-close,

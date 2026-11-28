@@ -49,13 +49,14 @@ test('guest onboarding reappears on a new signed-out session',()=>{
   assert.ok(tour.includes("if(!auto)overlay.dataset.dj860Manual='true'"));
 });
 
-test('shared color tokens protect legacy dark selectors and leave safety semantics',()=>{
+test('shared light color tokens preserve safety semantics',()=>{
   const css=read('src/theme-contract.css');
   const isolated=new URL('../src/mobile-next.css',import.meta.url);
   const prod=readFileSync(isolated,'utf8');
   const layout=read('src/mobile-first-layout.css');
   const material=read('src/button-material.css');
-  for(const c of ['#22282e','#2c343d','#35404a','#f1f4f6','#bec8d2','#79dec5','#285b50'])assert.ok(css.includes(c),c);
+  for(const c of ['#edf3ef','#ffffff','#e9f2ed','#20312e','#53675e','#0d8875','#e1ecec'])assert.ok(css.includes(c),c);
+  assert.doesNotMatch(css,/data-theme="dark"|color-scheme:dark/);
   for(const token of ['--dj-theme-bg','--dj-theme-surface','--dj-theme-ink','--dj-theme-muted','--dj-theme-line','--dj-theme-accent'])assert.ok(css.includes(token));
   assert.ok(prod.includes('--dj9272-surface:var(--dj-theme-surface'));
   assert.ok(prod.includes('--dj-v4-selected:var(--dj-theme-selected'));
@@ -74,22 +75,21 @@ test('iOS PWA status controller owns the status-area meta rather than two writer
   assert.equal(JSON.parse(read('public/manifest-light.webmanifest')).theme_color,'#edf3ef');
 });
 
-test('mobile full-height primary pages retain the charcoal status-edge base',()=>{
+test('mobile full-height primary pages retain the light status-edge base',()=>{
   const css=readPrimaryPhoneCss();
   const contract=read('src/theme-contract.css');
-  assert.match(css,/--dj-primary-page-bg:#22282e/);
-  assert.match(contract,/--dj-theme-bg:#22282e/);
-  assert.match(contract,/--dj-primary-page-bg:#22282e!important/);
+  assert.match(css,/--dj-primary-page-bg:#edf3ef/);
+  assert.match(contract,/--dj-theme-bg:#edf3ef/);
+  assert.match(contract,/--dj-primary-page-bg:#edf3ef!important/);
 });
 
-test('dark phone actions use readable selected text and route disabled colors',()=>{
+test('light phone actions keep the selected news and disabled route states',()=>{
+ const mobile=read('src/mobile-next.css');
  const contract=read('src/theme-contract.css');
- assert.match(contract,/#news-panel \.dongjak-news-tabs > button\.active/);
- assert.match(contract,/#participation-panel :is\(/);
- assert.match(contract,/\.community-post-category,\.community-location-link/);
- assert.match(contract,/#route-panel #route-calc:disabled/);
- assert.match(contract,/background:#404a54!important/);
- assert.match(contract,/color:#17232c!important/);
+ assert.match(mobile,/#news-panel \.dongjak-news-tabs \[data-news-source\]\.active\{background:var\(--djNext-active\)!important;color:#fff!important/);
+ assert.match(mobile,/#route-panel #route-calc:disabled\{opacity:\.52!important;cursor:not-allowed!important;box-shadow:none!important/);
+ assert.match(contract,/--djNext-active:#0d8875!important/);
+ assert.doesNotMatch(contract,/data-theme="dark"/);
 });
 
 test('MapLibre labels stay readable in light mode, while PRI TIP is hidden and route footer hugs dock',()=>{
@@ -110,8 +110,8 @@ test('MapLibre labels stay readable in light mode, while PRI TIP is hidden and r
   assert.ok(ui.includes('html[data-dj-pri-active="true"]'));
   assert.ok(ui.includes("padding-bottom:var(--dj910-dock-bottom"));
   assert.ok(ui.includes("#route-panel #route-calc"));
-  assert.ok(contract.includes("body > .dj-pri-dialog"));
-  assert.ok(contract.includes("color:#f1f4f6!important"));
+  assert.ok(contract.includes("body > :is(#dj-pri-dialog,.dj-pri-dialog)"));
+  assert.ok(contract.includes("color:#20312e!important"));
   assert.ok(html.includes("var displayTheme='light'"));
   assert.ok(!html.includes("localStorage.getItem('dongjak_safety_color_theme_v1')"));
 });

@@ -8,15 +8,14 @@ import {districtExteriorThemePaint} from '../src/ui-environment.js';
 
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('Balanced Dark is slightly deeper, while mint retains distinct selected/CTA roles',()=>{
+test('Light palette retains distinct selected/CTA roles and a matching status edge',()=>{
   const css=read('src/theme-contract.css');
-  const root=css.split(':root[data-theme="light"]')[1].split(':root[data-theme="dark"]')[0];
-  const dark=css.split(':root[data-theme="dark"]')[1].split('/* Theme contract')[0];
-  assert.match(root,/--dj-theme-bg:#edf3ef/);
-  for(const token of ['--dj-theme-bg:#22282e','--dj-theme-surface:#2c343d','--dj-theme-raised:#35404a','--dj-theme-accent:#79dec5'])
-    assert.ok(dark.includes(token),token);
-  assert.match(css,/--dj-brand-mint-selected:#285b50/);
-  assert.match(css,/--dj-brand-mint:#79dec5/);
+  const root=css.split(':root[data-theme="light"]')[1].split('}')[0];
+  for(const token of ['--dj-theme-bg:#edf3ef','--dj-theme-surface:#ffffff','--dj-theme-raised:#e9f2ed'])
+    assert.ok(root.includes(token),token);
+  assert.match(css,/--dj-theme-selected:#e1ecec/);
+  assert.match(css,/--dj-theme-accent:#0d8875/);
+  assert.doesNotMatch(css,/data-theme="dark"|color-scheme:dark/);
   assert.match(read('public/manifest-light.webmanifest'),/"theme_color": "#edf3ef"/);
   const status=read('src/mobile-pwa-status-tone-v793.css');
   assert.match(status,/--dj-pwa-native-edge:#edf3ef/);
