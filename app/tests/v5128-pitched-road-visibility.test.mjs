@@ -26,7 +26,7 @@ test('overhead remains opaque; GIS plan switches by extrusion eligibility',()=>{
 });
 
 test('offline road dataset supplies clear, obstructed, and out-of-range segments',()=>{
-  const roads=JSON.parse(read('public/data/sangdo1-night/occlusion-road-samples.json'));
+  const roads=JSON.parse(read('tests/fixtures/night-occlusion/occlusion-road-samples.json'));
   const segments=occlusionLineFeatures(analyzeOcclusion(roads.lines,20,5).segments).features;
   const counts=segments.reduce((acc,f)=>(acc[f.properties.category]=(acc[f.properties.category]||0)+1,acc),{});
   assert.ok(counts.clear>50);

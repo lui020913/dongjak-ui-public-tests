@@ -5,7 +5,7 @@ import {isReachDataset,trimReach,annotateVisibility,analyzeOcclusion,occlusionLi
 const root=new URL('../',import.meta.url);
 const read=p=>readFileSync(new URL(p,root),'utf8');
 test('the precomputed source has exactly the supplied 419 light locations and model metadata',()=>{
- const data=JSON.parse(read('public/data/sangdo1-night/occlusion-light-reach.geojson'));
+ const data=JSON.parse(read('tests/fixtures/night-occlusion/occlusion-light-reach.geojson'));
  assert.ok(isReachDataset(data,419));
  assert.ok(data.metadata.buildingCount>1000);
  assert.ok(data.metadata.sourceInsideBuildingCount>0);
