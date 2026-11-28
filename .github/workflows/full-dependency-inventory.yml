@@ -1,0 +1,25 @@
+name: Read-only full dependency inventory
+on:
+  push:
+    branches: ['audit/full-dependency-inventory-20261128']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inventory:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/audit/full-dependency-inventory-20261128'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Inventory every tracked file and reference
+        run: python3 scripts/audit-full-dependencies.py --out dependency-audit-output
+      - name: Upload complete per-file inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-inventory
+          path: dependency-audit-output/
+          if-no-files-found: error
+          retention-days: 30
