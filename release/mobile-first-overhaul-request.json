@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.265",
+  "application_version": "9.2.266",
   "public_work_branch": "main",
-  "purpose": "Delay confirmed redevelopment/reconstruction overview names to zoom 15.5 and detailed planned occupancy labels to zoom 17. Preserve site masks, old-building exclusions, all other labels and prior localized terrain corrections. Direct visual protected production.",
-  "attempt": 507,
+  "purpose": "Group nearby same-name distinct official bus boarding points within 100m below zoom 18.4, split at close zoom. Group tap zooms to choose an actual boarding stop, preserves source/ARS and route data. Retain existing bus icon styles, previous localized terrain and map fixes. Direct visual protected production.",
+  "attempt": 508,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

@@ -33,6 +33,7 @@ import {setDisplayedRailPaths} from './features/liveTransit/geometry.js';
 import {isMedianBusStopName,medianStopBaseName,busStopDisplayName} from './median-bus-stops.js';
 import {busCoverageSamples} from './bus-coverage-grid.js';
 import {deduplicateBusStops,busTileFallbackFilter,busFilterInsideDistrict,busFilterNearDistrict,BUS_BORDER_BUFFER_METERS} from './bus-stop-dedup.js';
+import {busDisplayGrouping,BUS_GROUP_SPLIT_ZOOM,BUS_GROUP_EXPAND_ZOOM} from './bus-display-grouping.mjs';
 import {officialStaticBusPlaces} from './static-bus-stops.js';
 import {busLastServiceStatus} from './bus-last-service.js';
 import {operatorTimetableResources} from './metro-operator-timetables.js';
@@ -750,7 +751,9 @@ function featureCollection(items){return {type:'FeatureCollection',features:item
   type:'Feature', geometry:{type:'Point',coordinates:x.kind==='bus'&&x.displayCoords?x.displayCoords:[x.lng,x.lat]}, properties:{
     osmId:x.id,
     name:x.name,
-    label: x.kind==='bus' ? (x.name && !['이름 미등록','정류장명 미등록'].includes(x.name) ? busStopDisplayName(x) : (x.arsId ? `정류장 · ${x.arsId}` : '정류장명 미등록')) : x.name,
+    groupCount:x.groupCount||0,
+    rawLng:x.lng,rawLat:x.lat,
+    label: x.groupCount>1?x.name:x.kind==='bus' ? (x.name && !['이름 미등록','정류장명 미등록'].includes(x.name) ? busStopDisplayName(x) : (x.arsId ? `정류장 · ${x.arsId}` : '정류장명 미등록')) : x.name,
     direction:x.direction||'',
     median:Boolean(x.median),
     kind:x.kind,
@@ -1396,7 +1399,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   let streamedRows=[],activeStreamKeys=new Set(),requestedStreamKeys=new Set(),streamPending=0,streamFailed=0,streamReady=false,routeStopCoordinates=[];
   const overlapsRouteStop=(lng,lat,kind)=>routeStopCoordinates.some(([x,y])=>meterDistance([lng,lat],[x,y])<=(kind==='bus'?22:40));
   const inActiveCell=p=>activeStreamKeys.has((p.kind==='bus'?'bus':'rail')+'_'+cellKey(p.lng,p.lat));
-  let stops=new Map();
+  let stops=new Map(),displayBusGroups=new Map(),lastBusGroupingMode=null;
   let selected=null;
   const routeStatus=el('div','transport-empty');
   routeStatus.hidden=true;routeStatus.setAttribute('role','status');
@@ -1958,15 +1961,19 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   function showStops(items){
     if(map.isMoving?.()){stopPublish.request();return;}
     const filtered=roadsideBusPlaces(items.filter(x=>placeInDisplayScope(x)&&inActiveCell(x)).sort((a,b)=>String(a.id).localeCompare(String(b.id))));
-    const signature=JSON.stringify(filtered);
+    const grouped=map.getZoom()<BUS_GROUP_SPLIT_ZOOM;
+    const signature=JSON.stringify([filtered,grouped]);
+    lastBusGroupingMode=grouped;
     if(signature===lastStopDataSignature){updateTileBusFallbackFilter();return;}
     lastStopDataSignature=signature;
     stops=new Map(filtered.map(x=>[x.id,x]));
     cachedTransportPlaces=filtered;
     const bus=filtered.filter(x=>x.kind==='bus'&&!overlapsRouteStop(x.lng,x.lat,'bus'));
     const rail=filtered.filter(x=>x.kind==='subway');
-    const busSignature=JSON.stringify(bus),railSignature=JSON.stringify(rail);
-    if(busSignature!==lastBusSourceSignature){map.getSource('transport-bus').setData(featureCollection(bus));lastBusSourceSignature=busSignature;}
+    const displayBus=busDisplayGrouping(bus,map.getZoom());
+    displayBusGroups=new Map(displayBus.filter(p=>p.groupCount>1).map(p=>[p.id,p]));
+    const busSignature=JSON.stringify(displayBus),railSignature=JSON.stringify(rail);
+    if(busSignature!==lastBusSourceSignature){map.getSource('transport-bus').setData(featureCollection(displayBus));lastBusSourceSignature=busSignature;}
     if(railSignature!==lastRailSourceSignature){map.getSource('transport-subway').setData(featureCollection(rail));lastRailSourceSignature=railSignature;}
     const metroSignature=JSON.stringify([railSignature,cityScope(),routeStopCoordinates]);
     if(metroSignature!==lastMetroInputSignature){renderMetroMarkers(rail);lastMetroInputSignature=metroSignature;}
@@ -2019,7 +2026,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   }
   const streamViewportWork=coalesceViewportWork(refreshTransitViewport,{delay:110,isMoving:()=>map.isMoving?.()===true});
   map.on('moveend',()=>streamViewportWork.request());
-  map.on('zoomend',()=>streamViewportWork.request());
+  map.on('zoomend',()=>{streamViewportWork.request();if(lastBusGroupingMode!==(map.getZoom()<BUS_GROUP_SPLIT_ZOOM))refreshStops();});
   map.on('resize',()=>streamViewportWork.request());
   map.on('dongjak:boundary-updated',()=>{lastStopDataSignature='';lastMetroInputSignature='';streamViewportWork.request();});
   globalThis.window?.addEventListener?.('dongjak:transit-stream-scope',()=>{cityRail.sync();lastStopDataSignature='';lastMetroInputSignature='';streamViewportWork.request();});
@@ -3085,6 +3092,12 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     map.on('click',layerId,event=>{
       if(!canPickRoute()&&!canOpen())return;
       const id=event.features?.[0]?.properties?.osmId;
+      const group=displayBusGroups.get(id);
+      if(group){
+        // A group is not a boardable stop. Zoom to separate directions first.
+        if(!canPickRoute()&&map.getZoom()<BUS_GROUP_SPLIT_ZOOM){event.originalEvent?.stopPropagation?.();map.easeTo({center:group.displayCoords,zoom:BUS_GROUP_EXPAND_ZOOM,duration:350});}
+        return;
+      }
       const place=stops.get(id);
       if(place && placeInDisplayScope(place)){
         event.originalEvent?.stopPropagation();

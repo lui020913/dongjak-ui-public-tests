@@ -1,4 +1,5 @@
 import {registerLocalTerrainProtocol,LOCAL_TERRAIN_URL} from './local-terrain-surface.mjs';
+import {BUS_GROUP_EXPAND_ZOOM} from './bus-display-grouping.mjs';
 import {installSiteLanduse} from './site-landuse-palette.mjs';
 import {loadSeoulBoundary,getSeoulBoundary} from './seoul-transit-boundary.mjs';
 import {sameBusTransfer,transitFollowFix} from './transit-transfer-guidance.mjs';
@@ -3224,7 +3225,7 @@ function transitAtMapClick(point,lngLat) {
       const lng=Number(coordinates?.[0]),lat=Number(coordinates?.[1]);
       const kind=props.kind;
       if((kind==='bus'||kind==='subway') && Number.isFinite(lng)&&Number.isFinite(lat)){
-        place={name:String(props.name||'정류장'),lng,lat,kind,arsId:String(props.arsId||''),direction:String(props.direction||''),
+        place={name:String(props.name||'정류장'),lng,lat,kind,groupCount:Number(props.groupCount||0),arsId:String(props.arsId||''),direction:String(props.direction||''),
           lines:String(props.lines||'').split(',').map(x=>x.trim()).filter(Boolean)};
       }
     } else if(['poi_transit','dj-basemap-bus-pictogram'].includes(feature.layer?.id)) place=baseMapTransitPlace(feature,lngLat);
@@ -3472,6 +3473,7 @@ function pickRouteLocation(lngLat,point) {
     if(routePickMode!==which||app.dataset.tab!=='map'||!document.getElementById('route-transit-confirm').hidden)return;
     if(app.dataset.djTransitMode==='transit'&&!transitPointInScope(lngLat)){toast('서울특별시 안의 위치를 선택해 주세요.');return;}
     const transit=transitAtMapClick(point,lngLat);
+    if(transit?.groupCount>1){map.easeTo({center:[transit.lng,transit.lat],zoom:BUS_GROUP_EXPAND_ZOOM,duration:350});return;}
     if(transit){showTransitRouteConfirmation(transit);return;}
     showTransitRouteConfirmation({kind:'point',name:'지도에서 선택한 위치',lng:lngLat.lng,lat:lngLat.lat,lines:[]});
   });
