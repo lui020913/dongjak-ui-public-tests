@@ -35,7 +35,7 @@ jobs:
           src=src.replace('<link rel="stylesheet" href="./maplibre-gl.css">','')
           old='<script src="./maplibre-gl.js"></script><script>'
           assert src.count(old)==1
-          src=src.replace(old,'<script type="module">\nimport maplibregl from "maplibre-gl";\nimport "maplibre-gl/dist/maplibre-gl.css";\n')
+          src=src.replace(old,'<script type="module">\nimport * as maplibregl from "maplibre-gl";\nimport "maplibre-gl/dist/maplibre-gl.css";\n')
           Path('app/.native-lab-web/index.html').write_text(src)
           Path('app/.native-lab-web/vite.config.mjs').write_text('export default {base:"./",build:{target:"es2022"}};')
           PY
