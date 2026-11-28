@@ -1,5 +1,6 @@
 import {installMetroStationAccess} from './metro-station-access.mjs';
 import {NAMSEONG_DISPLAY_CENTER,alignNamseongDisplayRail} from './namseong-display-alignment.mjs';
+import {fetchMappedLocalRailPaths,preferMappedLocalRail,displayRailCollection} from './mapped-local-rail.mjs';
 import {pointInStationDistrict} from './station-district-scope.mjs';
 import {paintBusBadge} from './bus-route-colors.mjs';
 import {visibleBusRoadIndex} from './bus-roadside-placement.mjs';
@@ -689,7 +690,7 @@ export function metroLineMarkerPlacements(name,lines,lng,lat,renderedRailPaths=n
   if(renderedRailPaths instanceof Map){
     for(const p of placements){
       const stationDisplayCenter=station==='남성'&&p.line==='7호선'?nearestRenderedRail(NAMSEONG_DISPLAY_CENTER,renderedRailPaths.get(p.line)):null;
-      const match=stationDisplayCenter&&stationDisplayCenter.distance<1?stationDisplayCenter:nearestRenderedRail([p.lng,p.lat],renderedRailPaths.get(p.line));
+      const match=stationDisplayCenter&&stationDisplayCenter.distance<=70?stationDisplayCenter:nearestRenderedRail([p.lng,p.lat],renderedRailPaths.get(p.line));
       if(match&&match.distance<=220){
         p.lng=match.point[0];p.lat=match.point[1];
         p.source='rendered-rail-geometry';
@@ -1640,15 +1641,15 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   // 실제 노선 공간정보(행안부 2026) 우선: 도로·하천의 실제 굴곡과 교차점을 보존합니다.
   // 공식 API에 없는 신림선 또는 조회 실패한 호선은 오프라인 안내용 선형을 유지합니다.
   // 외부 자료를 기다리느라 기존 지도를 중단하지 않습니다.
-  let pendingOfficialRailPaths=null;
+  let pendingOfficialRailPaths=null,mappedRailPaths=[],remoteRailPaths=[];
   const officialRailPublish=coalesceViewportWork(()=>{
       const paths=pendingOfficialRailPaths;pendingOfficialRailPaths=null;
       if(!paths)return;
-      const result=mergeOfficialRail(localRailGeometry,paths);
+      const result=preferMappedLocalRail(localRailGeometry,mappedRailPaths,paths);
       if(!result.lines.length)return;
       const source=map.getSource('transport-schematic-connections');
       if(!source)return;
-      displayedLocalRail=alignNamseongDisplayRail(result.collection);
+      displayedLocalRail=displayRailCollection(result.collection,alignNamseongDisplayRail);
       source.setData(displayedLocalRail);cityRail.sync();
       // Keep station badges anchored to the actual displayed official curves.
       renderedRailPaths=indexRenderedMetroRail(displayedLocalRail);
@@ -1659,7 +1660,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
        window.dispatchEvent(new CustomEvent('dj:rail-geometry-loaded',{detail:{lines:result.lines,sources:dataSources}}));
   },{delay:350,isMoving:()=>map.isMoving?.()===true});
   if(typeof window!=='undefined' && /^https?:$/.test(window.location?.protocol||'')){
-    void fetchOfficialRailPaths().then(paths=>{pendingOfficialRailPaths=paths;officialRailPublish.request();}).catch(error=>{
+    void fetchMappedLocalRailPaths().then(paths=>{mappedRailPaths=paths;pendingOfficialRailPaths=remoteRailPaths;officialRailPublish.request();}).catch(error=>console.info('[정적 철도 선형]',error?.message));
+    void fetchOfficialRailPaths().then(paths=>{remoteRailPaths=paths;pendingOfficialRailPaths=paths;officialRailPublish.request();}).catch(error=>{
       console.info('[지하철 노선] 공공 GIS 조회 실패, 기존 안내선형 유지:',error?.message||error);
     });
   }
@@ -1727,7 +1729,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     }
   }
   bringRailToForeground();
-  const cityRail=installCityTransitRail({map,app:streamApp,colors:SUBWAY_LINE_COLORS,getBoundary:getSeoulBoundary,isInside:inSeoul,getLocalCollection:()=>displayedLocalRail});
+  const cityRail=installCityTransitRail({map,app:streamApp,colors:SUBWAY_LINE_COLORS,getBoundary:getSeoulBoundary,isInside:inSeoul,getLocalCollection:()=>displayedLocalRail,onPublish:()=>{if(lastMetroMarkerItems.length)renderMetroMarkers(lastMetroMarkerItems);}});
   const refreshNearbyBusStopNames=()=>syncNearbyBusStopNameFilters(map,cityScope()?getSeoulBoundary():getDistrictGeometry());
   refreshNearbyBusStopNames();
   const viewportLabels=coalesceViewportWork(full=>{refreshNearbyBusStopNames();if(full)updateTileBusFallbackFilter();},{delay:100,isMoving:()=>map.isMoving?.()===true});
@@ -1855,7 +1857,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const geo=metroMarkerGeojson(items,{
       canonicalStations:officialMetro.filter(p=>inActiveCell(p)&&placeInDisplayScope(p)),
       normalizeName:normalizeStationQueryName,normalizeLine:normalizeLineName,
-      placements:(name,lines,lng,lat)=>officialMetro.some(p=>normalizeStationQueryName(p.name)===normalizeStationQueryName(name))?metroLineMarkerPlacements(name,lines,lng,lat,renderedRailPaths):lines.map(line=>({line,lng,lat})),
+      placements:(name,lines,lng,lat)=>metroLineMarkerPlacements(name,lines,lng,lat,cityScope()&&cityRail.getCollection()?indexRenderedMetroRail(cityRail.getCollection()):renderedRailPaths),
       colors:SUBWAY_LINE_COLORS,
       radiusPredicate:(lng,lat)=>cityScope()?inSeoul(lng,lat):withinMetroRadius(lng,lat),
       isDistrict:scopeContains,

@@ -1,4 +1,4 @@
-// Cartographic access context only, never a routing graph. Approximation is explicitly dashed.
+// Numbered station exits only. Never render underground passage or platform geometry.
 export const STATION_ACCESS_SNAPSHOT='/data/transport/dongjak-station-access-v1.json';
 let sharedSnapshot=null;
 export function fetchStationAccessSnapshot(fetcher=globalThis.fetch){
@@ -16,7 +16,7 @@ async function loadStationAccessFile(fetcher){
 export const STATION_ACCESS_ZOOM=16.2;
 export const STATION_PASSAGE_ZOOM=16.65;
 const SOURCE='dj-metro-station-access',X=88300,Y=111320;
-const ids=[SOURCE+'-platform',SOURCE+'-passage',SOURCE+'-approximate',SOURCE+'-approximate-label',SOURCE+'-exit-circle',SOURCE+'-exit-label'];
+const ids=[SOURCE+'-exit-circle',SOURCE+'-exit-label'];
 const empty=()=>({type:'FeatureCollection',features:[]});
 const valid=p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite);
 const distance=(a,b)=>Math.hypot((a[0]-b[0])*X,(a[1]-b[1])*Y);
@@ -40,7 +40,7 @@ function stationAt(p,stations,tag=''){
 function lineColor(s,colors){return colors[s.lines?.[0]]||'#718b7b';}
 function feature(type,coordinates,properties){return {type:'Feature',geometry:{type,coordinates},properties};}
 export function buildStationAccess(elements,stations,colors,railPaths=new Map(),allow=()=>true){
- const result=[],exits=[],paths=[],seen=new Set();
+ const result=[],seen=new Set();
  for(const e of elements||[]){const t=e.tags||{};
   if(e.type!=='node'||!(t.railway==='subway_entrance'||t.subway==='yes'&&t.entrance))continue;
   const p=pointOf(e);if(!valid(p)||!allow(...p))continue;
@@ -51,27 +51,7 @@ export function buildStationAccess(elements,stations,colors,railPaths=new Map(),
   const station=named||(isOfficial?{name:officialName,lng:p[0],lat:p[1],lines:line?[line]:[]}:stationAt(p,stations));if(!station)continue;
   const n=number(t),key=normalized(station.name)+'|'+(n||e.id)+'|'+p.map(v=>v.toFixed(5)).join(',');if(seen.has(key))continue;seen.add(key);
   const props={kind:'exit',station:station.name,number:n,label:n||'출입구',color:colors[line]||lineColor(station,colors),quality:'mapped',source:t.source||'OpenStreetMap'};
-  result.push(feature('Point',p,props));exits.push({p,station,props});
- }
- for(const e of elements||[]){if(e.type!=='way')continue;const t=e.tags||{},p=coordinates(e);if(p.length<2||!p.every(q=>allow(...q)))continue;
-  const subwayPlatform=t.railway==='platform'||t.public_transport==='platform'&&t.subway==='yes';
-  const passage=t.indoor==='corridor'||t.highway==='footway'&&(t.tunnel==='yes'||t.location==='underground')||t.highway==='steps'&&Number(t.level)<0;
-  if(!subwayPlatform&&!passage)continue;
-  const station=stationAt(p[Math.floor(p.length/2)],stations);if(!station)continue;
-  // Exclude unrelated underground walkways and above-ground platforms without a station connection.
-  if(!subwayPlatform&&!exits.some(x=>x.station.name===station.name&&(nearest(x.p,p)?.distance??Infinity)<=35)&&!p.some(q=>distance(q,[station.lng,station.lat])<=45))continue;
-  const props={kind:subwayPlatform?'platform':'passage',station:station.name,color:lineColor(station,colors),quality:'mapped',source:'OpenStreetMap'};
-  const closed=p.length>=4&&distance(p[0],p.at(-1))<.1;
-  result.push(feature(subwayPlatform&&closed?'Polygon':'LineString',subwayPlatform&&closed?[p]:p,props));
-  if(passage)paths.push({station,p});
- }
- for(const x of exits){
-  if(paths.some(y=>y.station.name===x.station.name&&(nearest(x.p,y.p)?.distance??Infinity)<15))continue;
-  let best=null;
-  for(const line of x.station.lines||[])for(const path of railPaths.get(line)||[]){const q=nearest(x.p,path);if(q&&distance(q.point,[x.station.lng,x.station.lat])<=190&&(!best||q.distance<best.distance))best={...q,line};}
-  // Use mapped track geometry when available; no invented exit positions.
-  if(!best||best.distance<5||best.distance>130||!allow(...best.point))continue;
-  result.push(feature('LineString',[x.p,best.point],{kind:'approximate',station:x.station.name,color:colors[best.line]||x.props.color,quality:'schematic',label:'개략 통로',source:'역·출입구 좌표 기반 개략 표시'}));
+  result.push(feature('Point',p,props));
  }
  return {type:'FeatureCollection',features:result};
 }
@@ -92,14 +72,9 @@ export function installMetroStationAccess({map,app,getStations,getRailPaths,colo
  function setup(){
   if(map.getSource(SOURCE))return;
   map.addSource(SOURCE,{type:'geojson',data:empty(),attribution:'MOIS public subway entrance data; © OpenStreetMap contributors (ODbL)'});
-  const style=map.getStyle()?.layers||[],before=style.find(l=>l.id==='dj-metro-detail-icon')?.id||style.find(l=>l.type==='symbol')?.id;
-  const add=l=>map.addLayer(l,l.id===ids[4]||l.id===ids[5]?undefined:before);
-  add({id:ids[0],type:'fill',source:SOURCE,minzoom:STATION_PASSAGE_ZOOM,filter:['all',['==',['get','kind'],'platform'],['==',['geometry-type'],'Polygon']],paint:{'fill-color':['get','color'],'fill-opacity':.18,'fill-outline-color':['get','color']}});
-  add({id:ids[1],type:'line',source:SOURCE,minzoom:STATION_PASSAGE_ZOOM,filter:['all',['in',['get','kind'],['literal',['passage','platform']]],['==',['geometry-type'],'LineString']],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':['get','color'],'line-opacity':.52,'line-width':['interpolate',['linear'],['zoom'],16.65,3,20,8]}});
-  add({id:ids[2],type:'line',source:SOURCE,minzoom:STATION_PASSAGE_ZOOM,filter:['==',['get','kind'],'approximate'],layout:{'line-cap':'round'},paint:{'line-color':['get','color'],'line-opacity':.45,'line-width':2.5,'line-dasharray':[2,2]}});
-  add({id:ids[3],type:'symbol',source:SOURCE,minzoom:18.7,filter:['==',['get','kind'],'approximate'],layout:{'symbol-placement':'line-center','text-field':['get','label'],'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':9,'text-optional':true,'text-padding':3},paint:{'text-color':'#65796e','text-halo-color':'#fff','text-halo-width':1}});
-  add({id:ids[4],type:'circle',source:SOURCE,minzoom:STATION_ACCESS_ZOOM,filter:['==',['get','kind'],'exit'],paint:{'circle-radius':['interpolate',['linear'],['zoom'],16.2,6.5,20,10],'circle-color':'#fff6d7','circle-stroke-color':['get','color'],'circle-stroke-width':1.5}});
-  add({id:ids[5],type:'symbol',source:SOURCE,minzoom:STATION_ACCESS_ZOOM,filter:['==',['get','kind'],'exit'],layout:{'text-field':['get','label'],'text-font':['Noto Sans Bold','Open Sans Semibold'],'text-size':['interpolate',['linear'],['zoom'],16.2,9,20,12],'text-allow-overlap':true,'text-ignore-placement':true,'text-padding':1},paint:{'text-color':'#534d31'}});
+  const add=l=>map.addLayer(l);
+  add({id:ids[0],type:'circle',source:SOURCE,minzoom:STATION_ACCESS_ZOOM,filter:['==',['get','kind'],'exit'],paint:{'circle-radius':['interpolate',['linear'],['zoom'],16.2,6.5,20,10],'circle-color':'#fff6d7','circle-stroke-color':['get','color'],'circle-stroke-width':1.5}});
+  add({id:ids[1],type:'symbol',source:SOURCE,minzoom:STATION_ACCESS_ZOOM,filter:['==',['get','kind'],'exit'],layout:{'text-field':['get','label'],'text-font':['Noto Sans Bold','Open Sans Semibold'],'text-size':['interpolate',['linear'],['zoom'],16.2,9,20,12],'text-allow-overlap':true,'text-ignore-placement':true,'text-padding':1},paint:{'text-color':'#534d31'}});
   initialized=true;
  }
  function publish(data){if(map.isMoving?.())return;setup();const sig=JSON.stringify(data);if(sig!==last){map.getSource(SOURCE)?.setData(data);last=sig;}}
@@ -115,11 +90,9 @@ export function installMetroStationAccess({map,app,getStations,getRailPaths,colo
   if(!snapshot){loadSnapshot();return;}
   const rows=snapshot.filter(e=>{
    if(e.type==='node'){const [x,y]=pointOf(e);return x>=w-pad&&x<=eBound+pad&&y>=s-pad&&y<=n+pad;}
-   if(map.getZoom()<STATION_PASSAGE_ZOOM)return false;
-   return (e.geometry||[]).some(q=>q.lon>=w-pad&&q.lon<=eBound+pad&&q.lat>=s-pad&&q.lat<=n+pad);
+   return false;
   });
-  let rail=new Map();try{rail=getRailPaths()||rail;}catch{}
-  publish(buildStationAccess(rows,stations,colors,rail,allow));
+  publish(buildStationAccess(rows,stations,colors,new Map(),allow));
  }
  function request(){clearTimeout(timer);timer=setTimeout(refresh,220);}
  map.on?.('moveend',request);map.on?.('zoomend',request);

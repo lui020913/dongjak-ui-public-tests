@@ -1,6 +1,6 @@
 // Use mapped site/landuse polygons only; no synthetic lots or building recoloring.
 export const SITE_LANDUSE_PALETTE=Object.freeze({
- light:Object.freeze({residential:'#ddd4c8',commercial:'#f0e5cb',education:'#dbe6ee',industrial:'#e0dce6',hospital:'#f3dfda',public:'#d8e8e3'})
+ light:Object.freeze({residential:'#ddd4c8',commercial:'#f0e5cb',education:'#dbe6ee',industrial:'#e0dce6',hospital:'#f3dfda',public:'#d1d1cd'})
 });
 const PREFIX='dj-site-use-fill-';
 // Prefer specific institutional uses over generic mixed-use classifications.
@@ -35,7 +35,7 @@ export function installSiteLanduse({map,app}){
  const ids=[];
  for(const [i,src] of [...sources.values()].entries()){
   const id=PREFIX+i;ids.push(id);if(map.getLayer(id))continue;
-  map.addLayer({id,type:'fill',...src,minzoom:13.2,filter,layout:{visibility:app?.dataset?.sangdoNight==='on'?'none':'visible'},paint:{'fill-color':siteLandusePaint(),'fill-opacity':['case',anyTag(groups[groups.length-1][1]),1,.88],'fill-antialias':true}},before);
+  map.addLayer({id,type:'fill',...src,minzoom:13.2,filter,layout:{visibility:app?.dataset?.sangdoNight==='on'?'none':'visible'},paint:{'fill-color':siteLandusePaint(),'fill-opacity':['case',['any',anyTag(groups[groups.length-1][1]),anyTag(groups[1][1])],1,.88],'fill-antialias':true}},before);
  }
  return ids;
 }

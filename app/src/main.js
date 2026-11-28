@@ -3997,6 +3997,7 @@ syncRoutePresentation();
 // v8.0.3 map-product extension: one route engine, ordered real walking legs.
 let previewRailTransit;
 routeProductTools=installMapProduct({map,maplibregl,navigate,
+  canOpenFavorite:()=>!navMode&&app.dataset.tab==='map'&&!addMode&&!routePickMode&&!communityPickMode,
   getRoutePoints:()=>routeStart&&routeEnd
     ? [routeStart,...routeWaypoints,routeEnd].map(p=>({...p,name:p.name||p.label||'선택한 장소'})) : [],
   onWaypointSearch:()=>{if(navMode){toast('안내를 종료한 뒤 경유지를 변경해 주세요.');return;}if(routeWaypoints.length>=5){toast('경유지는 최대 5곳입니다.');return;}beginRouteSearch('waypoint');},

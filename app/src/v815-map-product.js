@@ -1,11 +1,12 @@
 /** Non-invasive controls for search history, personal places and the route planner. */
 import {openPlaceDetails} from './place-details.js';
+import {installFavoriteMapMarkers} from './favorite-map-markers.mjs';
 import {recentSearchQueries,recentPlaces,savedPlaces,getPlaceFolders,createPlaceFolder,renamePlaceFolder,deletePlaceFolder,setSavedPlaceFolder,removeSavedPlace,clearRecentPlaces,recordRecentPlace,shareMapUrl,placeShareUrl,multiStopShareUrl,parseSharedPlace,parseSharedRoute} from './v815-place-store.js';
 import {installFavoritesCloud} from './v824-favorites-cloud.js';
 import {railTransferOptions} from './v815-route-planner.js';
 const el=(tag,className,text='')=>{const e=document.createElement(tag);if(className)e.className=className;if(text)e.textContent=text;return e;};
 const button=(label,onClick,className='dj815-button')=>{const b=el('button',className,label);b.type='button';b.addEventListener('click',onClick);return b;};
-export function installMapProduct({map,maplibregl,navigate,getRoutePoints,onWaypointSearch,onWaypointPick,onWaypointsChange,onTransitPreview}={}){
+export function installMapProduct({map,maplibregl,navigate,getRoutePoints,onWaypointSearch,onWaypointPick,onWaypointsChange,onTransitPreview,canOpenFavorite=()=>true}={}){
   if(typeof document==='undefined')return null;
   const quick=document.getElementById('map-quick-search'),mine=document.getElementById('mine-panel');
   const route=document.getElementById('route-panel'),routeCard=route?.querySelector('.route-card');
@@ -107,6 +108,7 @@ export function installMapProduct({map,maplibregl,navigate,getRoutePoints,onWayp
     if(!recent.length)recentList.append(el('span','dj815-helper','최근 선택한 장소 없음'));
     for(const place of recent)recentList.append(button(place.name,()=>openStored(place),'dj815-chip'));
   }
+  installFavoriteMapMarkers({map,getPlaces:savedPlaces,onOpen:openStored,canOpen:canOpenFavorite});
   window.addEventListener('dongjak:saved-places-change',renderStored);
   window.addEventListener('dongjak:recent-places-change',renderStored);
   renderStored();

@@ -15,7 +15,7 @@ export function clipCityRail(collection,geometry,isInside,colors){
  }
  return {type:'FeatureCollection',features};
 }
-export function installCityTransitRail({map,app,colors,getBoundary,isInside,getLocalCollection=()=>null,fetchFn=globalThis.fetch}){
+export function installCityTransitRail({map,app,colors,getBoundary,isInside,getLocalCollection=()=>null,onPublish=()=>{},fetchFn=globalThis.fetch}){
  let pending=null,raw=null,appliedBoundary=null,appliedLocal=null,displayedCollection=null,ready=false,active=false,waitingMove=false;
  const localVisibility=()=>app?.dataset?.baseMetro==='off'?'none':'visible';
  const setVisible=(id,v)=>{if(map.getLayer?.(id)&&(map.getLayoutProperty?.(id,'visibility')||'visible')!==v)map.setLayoutProperty?.(id,'visibility',v);};
@@ -38,7 +38,7 @@ export function installCityTransitRail({map,app,colors,getBoundary,isInside,getL
     const layout={'line-cap':'round','line-join':'round'};
     map.addLayer({id:ID,type:'line',source:ID,minzoom:8,layout,paint:{'line-color':['get','color'],'line-width':['interpolate',['linear'],['zoom'],8,1,10.2,2.9,13,4.3,17,3.8],'line-opacity':['get','opacity'],'line-blur':['interpolate',['linear'],['get','opacity'],0,.95,.18,.62,.45,.38,1,.30]}},before);
    }else map.getSource(ID).setData(data);
-   displayedCollection=data;appliedBoundary=boundary;appliedLocal=local;ready=true;
+   displayedCollection=data;appliedBoundary=boundary;appliedLocal=local;ready=true;onPublish();
   }
   if(ready){for(const id of LOCAL)setVisible(id,'none');setVisible(ID+'-casing','none');setVisible(ID,'visible');}
   else if(!pending&&typeof fetchFn==='function'){
