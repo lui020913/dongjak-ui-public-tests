@@ -453,7 +453,9 @@ test('community new post portal stays inside viewport when keyboard contracts',a
 // it does not claim to render the real iOS system keyboard/accessory bar.
 test('merged route search returns to AI keyboard without a background seam',async({page},testInfo)=>{
   test.skip(page.viewportSize().width>=700,'phone only');
-  test.setTimeout(120000);
+  // Two CI traces completed every UI assertion but exhausted the aggregate
+  // budget under software WebGL. Retain all individual action/expect deadlines.
+  test.setTimeout(180000);
   await page.addInitScript(()=>{
     Object.defineProperty(navigator,'standalone',{configurable:true,get:()=>true});
     Object.defineProperty(navigator,'platform',{configurable:true,get:()=> 'iPhone'});
