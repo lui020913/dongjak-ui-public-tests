@@ -71,9 +71,9 @@ test('portrait mobile screenshots use a 9:19.5 viewport and fallback artwork rem
   assert.match(readme,/1080 × 2340px/);
 });
 
-test('PC/mobile, light/dark and reduced-motion styles are present',()=>{
+test('PC/mobile light-only and reduced-motion styles are present',()=>{
   assert.match(css,/@media\(max-width:699px\)/);
-  assert.match(css,/#app\[data-theme="dark"\]/);
+  assert.doesNotMatch(css,/data-theme="dark"/);
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
   assert.match(css,/touch-action:pan-y/);
 });
