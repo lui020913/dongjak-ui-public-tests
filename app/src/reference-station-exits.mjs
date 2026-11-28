@@ -1,1788 +1,1250 @@
-// User-provided reference screenshots, 2026-11-28 (Media.zip).
-// Numbered marker centres manually read at width 450; scale bars measured in original 1206px images.
-// Approximate north-up translation, anchored by median matching exit coordinates or station centre.
-// Display only. Do not use these approximate coordinates for authoritative accessibility or routing.
-export const REFERENCE_EXIT_AUDIT=Object.freeze([
-  {
-    "station": "상도",
-    "image": "IMG_8097.PNG",
-    "scaleMetres": 50,
-    "scaleOriginalPixels": 233,
-    "anchor": "alternate-mapped exit median",
-    "anchorCount": 5,
-    "medianControlResidualMetres": 8,
-    "count": 5
-  },
-  {
-    "station": "장승배기",
-    "image": "IMG_8098.PNG",
-    "scaleMetres": 50,
-    "scaleOriginalPixels": 201,
-    "anchor": "official exit median",
-    "anchorCount": 6,
-    "medianControlResidualMetres": 36,
-    "count": 6
-  },
-  {
-    "station": "신대방삼거리",
-    "image": "IMG_8099.PNG",
-    "scaleMetres": 50,
-    "scaleOriginalPixels": 157,
-    "anchor": "official exit median",
-    "anchorCount": 6,
-    "medianControlResidualMetres": 18,
-    "count": 6
-  },
-  {
-    "station": "보라매",
-    "image": "IMG_8100.PNG",
-    "scaleMetres": 50,
-    "scaleOriginalPixels": 153,
-    "anchor": "official exit median",
-    "anchorCount": 2,
-    "medianControlResidualMetres": 2,
-    "count": 7
-  },
-  {
-    "station": "서울지방병무청",
-    "image": "IMG_8101.PNG",
-    "scaleMetres": 50,
-    "scaleOriginalPixels": 167,
-    "anchor": "station centre estimate",
-    "anchorCount": 0,
-    "medianControlResidualMetres": null,
-    "count": 2
-  },
-  {
-    "station": "대방",
-    "image": "IMG_8102.PNG",
-    "scaleMetres": 50,
-    "scaleOriginalPixels": 161,
-    "anchor": "official exit median",
-    "anchorCount": 6,
-    "medianControlResidualMetres": 17,
-    "count": 6
-  },
-  {
-    "station": "노량진",
-    "image": "IMG_8103.PNG",
-    "scaleMetres": 50,
-    "scaleOriginalPixels": 150,
-    "anchor": "official exit median",
-    "anchorCount": 6,
-    "medianControlResidualMetres": 14,
-    "count": 10
-  },
-  {
-    "station": "노들",
-    "image": "IMG_8104.PNG",
-    "scaleMetres": 100,
-    "scaleOriginalPixels": 240,
-    "anchor": "official exit median",
-    "anchorCount": 5,
-    "medianControlResidualMetres": 4,
-    "count": 5
-  },
-  {
-    "station": "흑석",
-    "image": "IMG_8105.PNG",
-    "scaleMetres": 50,
-    "scaleOriginalPixels": 213,
-    "anchor": "official exit median",
-    "anchorCount": 4,
-    "medianControlResidualMetres": 2,
-    "count": 4
-  },
-  {
-    "station": "숭실대입구",
-    "image": "IMG_8106.PNG",
-    "scaleMetres": 50,
-    "scaleOriginalPixels": 193,
-    "anchor": "official exit median",
-    "anchorCount": 4,
-    "medianControlResidualMetres": 17,
-    "count": 4
-  },
-  {
-    "station": "남성",
-    "image": "IMG_8107.PNG",
-    "scaleMetres": 50,
-    "scaleOriginalPixels": 169,
-    "anchor": "official exit median",
-    "anchorCount": 4,
-    "medianControlResidualMetres": 20,
-    "count": 4
-  },
-  {
-    "station": "이수",
-    "image": "IMG_8109.PNG",
-    "scaleMetres": 50,
-    "scaleOriginalPixels": 181,
-    "anchor": "official exit median",
-    "anchorCount": 10,
-    "medianControlResidualMetres": 20,
-    "count": 14
-  },
-  {
-    "station": "동작",
-    "image": "IMG_8110.PNG",
-    "scaleMetres": 100,
-    "scaleOriginalPixels": 234,
-    "anchor": "official exit median",
-    "anchorCount": 9,
-    "medianControlResidualMetres": 6,
-    "count": 9
-  },
-  {
-    "station": "보라매공원",
-    "image": "IMG_8111.PNG",
-    "scaleMetres": 50,
-    "scaleOriginalPixels": 201,
-    "anchor": "station centre estimate",
-    "anchorCount": 0,
-    "medianControlResidualMetres": null,
-    "count": 2
-  },
-  {
-    "station": "보라매병원",
-    "image": "IMG_8112.PNG",
-    "scaleMetres": 100,
-    "scaleOriginalPixels": 233,
-    "anchor": "station centre estimate",
-    "anchorCount": 0,
-    "medianControlResidualMetres": null,
-    "count": 2
-  },
-  {
-    "station": "샛강",
-    "image": "IMG_8113.PNG",
-    "scaleMetres": 100,
-    "scaleOriginalPixels": 279,
-    "anchor": "station centre estimate",
-    "anchorCount": 0,
-    "medianControlResidualMetres": null,
-    "count": 4
-  }
-]);
-export const REFERENCE_EXIT_ROWS=Object.freeze([
+// Direct map-link WGS84 points; never derive from screenshots or shift toward a road.
+// Source: K-SUB station exit map links, OpenStreetMap contributors (ODbL).
+export const MAPPED_EXIT_ROWS=Object.freeze([
   {
     "type": "node",
-    "id": "reference-8097-1",
-    "lon": 126.9476855,
-    "lat": 37.5027849,
+    "id": "mapped-sangdo-1",
+    "lon": 126.947697,
+    "lat": 37.50286,
     "tags": {
       "railway": "subway_entrance",
       "ref": "1",
       "station": "상도역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8097.PNG",
-      "referencePixel": [
-        189,
-        311
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/sangdo",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8097-2",
-    "lon": 126.9473859,
-    "lat": 37.5031517,
+    "id": "mapped-sangdo-2",
+    "lon": 126.947444,
+    "lat": 37.503267,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "상도역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8097.PNG",
-      "referencePixel": [
-        143,
-        240
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/sangdo",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8097-3",
-    "lon": 126.9478549,
+    "id": "mapped-sangdo-3",
+    "lon": 126.947814,
     "lat": 37.503441,
     "tags": {
       "railway": "subway_entrance",
       "ref": "3",
       "station": "상도역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8097.PNG",
-      "referencePixel": [
-        215,
-        184
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/sangdo",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8097-4",
+    "id": "mapped-sangdo-4",
     "lon": 126.948174,
-    "lat": 37.5035857,
+    "lat": 37.503582,
     "tags": {
       "railway": "subway_entrance",
       "ref": "4",
       "station": "상도역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8097.PNG",
-      "referencePixel": [
-        264,
-        156
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/sangdo",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8097-5",
-    "lon": 126.9481414,
-    "lat": 37.5031104,
+    "id": "mapped-sangdo-5",
+    "lon": 126.948128,
+    "lat": 37.503019,
     "tags": {
       "railway": "subway_entrance",
       "ref": "5",
       "station": "상도역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8097.PNG",
-      "referencePixel": [
-        259,
-        248
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/sangdo",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8098-1",
-    "lon": 126.9392735,
-    "lat": 37.5046506,
+    "id": "mapped-jangseungbaegi-1",
+    "lon": 126.939609,
+    "lat": 37.504906,
     "tags": {
       "railway": "subway_entrance",
       "ref": "1",
       "station": "장승배기역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8098.PNG",
-      "referencePixel": [
-        352,
-        257
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/jangseungbaegi",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8098-2",
-    "lon": 126.938677,
-    "lat": 37.5041176,
+    "id": "mapped-jangseungbaegi-2",
+    "lon": 126.939007,
+    "lat": 37.50447,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "장승배기역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8098.PNG",
-      "referencePixel": [
-        273,
-        346
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/jangseungbaegi",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8098-3",
-    "lon": 126.9376653,
-    "lat": 37.5038721,
+    "id": "mapped-jangseungbaegi-3",
+    "lon": 126.938132,
+    "lat": 37.504224,
     "tags": {
       "railway": "subway_entrance",
       "ref": "3",
       "station": "장승배기역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8098.PNG",
-      "referencePixel": [
-        139,
-        387
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/jangseungbaegi",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8098-4",
-    "lon": 126.9374841,
-    "lat": 37.5040757,
+    "id": "mapped-jangseungbaegi-4",
+    "lon": 126.937871,
+    "lat": 37.504341,
     "tags": {
       "railway": "subway_entrance",
       "ref": "4",
       "station": "장승배기역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8098.PNG",
-      "referencePixel": [
-        115,
-        353
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/jangseungbaegi",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8098-5",
-    "lon": 126.9390017,
-    "lat": 37.5053513,
+    "id": "mapped-jangseungbaegi-5",
+    "lon": 126.939347,
+    "lat": 37.505504,
     "tags": {
       "railway": "subway_entrance",
       "ref": "5",
       "station": "장승배기역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8098.PNG",
-      "referencePixel": [
-        316,
-        140
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/jangseungbaegi",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8098-6",
-    "lon": 126.9392357,
-    "lat": 37.5053094,
+    "id": "mapped-jangseungbaegi-6",
+    "lon": 126.93964,
+    "lat": 37.505496,
     "tags": {
       "railway": "subway_entrance",
       "ref": "6",
       "station": "장승배기역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8098.PNG",
-      "referencePixel": [
-        347,
-        147
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/jangseungbaegi",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8099-1",
-    "lon": 126.9292955,
-    "lat": 37.4995517,
+    "id": "mapped-sindaebangsamgeori-1",
+    "lon": 126.929198,
+    "lat": 37.499617,
     "tags": {
       "railway": "subway_entrance",
       "ref": "1",
       "station": "신대방삼거리역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8099.PNG",
-      "referencePixel": [
-        354,
-        357
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/sindaebangsamgeori",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8099-2",
-    "lon": 126.9283965,
-    "lat": 37.4994903,
+    "id": "mapped-sindaebangsamgeori-2",
+    "lon": 126.928414,
+    "lat": 37.499592,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "신대방삼거리역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8099.PNG",
-      "referencePixel": [
-        261,
-        365
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/sindaebangsamgeori",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8099-3",
-    "lon": 126.9268983,
-    "lat": 37.4996207,
+    "id": "mapped-sindaebangsamgeori-3",
+    "lon": 126.926859,
+    "lat": 37.49968,
     "tags": {
       "railway": "subway_entrance",
       "ref": "3",
       "station": "신대방삼거리역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8099.PNG",
-      "referencePixel": [
-        106,
-        348
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/sindaebangsamgeori",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8099-4",
-    "lon": 126.926937,
-    "lat": 37.4998507,
+    "id": "mapped-sindaebangsamgeori-4",
+    "lon": 126.926849,
+    "lat": 37.499851,
     "tags": {
       "railway": "subway_entrance",
       "ref": "4",
       "station": "신대방삼거리역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8099.PNG",
-      "referencePixel": [
-        110,
-        318
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/sindaebangsamgeori",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8099-5",
-    "lon": 126.9283482,
-    "lat": 37.4998353,
+    "id": "mapped-sindaebangsamgeori-5",
+    "lon": 126.928403,
+    "lat": 37.499835,
     "tags": {
       "railway": "subway_entrance",
       "ref": "5",
       "station": "신대방삼거리역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8099.PNG",
-      "referencePixel": [
-        256,
-        320
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/sindaebangsamgeori",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8099-6",
-    "lon": 126.9293051,
-    "lat": 37.4998047,
+    "id": "mapped-sindaebangsamgeori-6",
+    "lon": 126.929212,
+    "lat": 37.499805,
     "tags": {
       "railway": "subway_entrance",
       "ref": "6",
       "station": "신대방삼거리역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8099.PNG",
-      "referencePixel": [
-        355,
-        324
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/sindaebangsamgeori",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8100-2",
-    "lon": 126.9204769,
-    "lat": 37.4995856,
+    "id": "mapped-boramae-1",
+    "lon": 126.920664,
+    "lat": 37.499831,
+    "tags": {
+      "railway": "subway_entrance",
+      "ref": "1",
+      "station": "보라매역(7호선)",
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/boramae",
+      "coordinateQuality": "mapped-source"
+    }
+  },
+  {
+    "type": "node",
+    "id": "mapped-boramae-2",
+    "lon": 126.920423,
+    "lat": 37.499655,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "보라매역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8100.PNG",
-      "referencePixel": [
-        239,
-        326
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/boramae",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8100-3",
-    "lon": 126.9201198,
-    "lat": 37.4996014,
+    "id": "mapped-boramae-3",
+    "lon": 126.920202,
+    "lat": 37.499657,
     "tags": {
       "railway": "subway_entrance",
       "ref": "3",
       "station": "보라매역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8100.PNG",
-      "referencePixel": [
-        203,
-        324
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/boramae",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8100-4",
-    "lon": 126.9193462,
-    "lat": 37.4997981,
+    "id": "mapped-boramae-4",
+    "lon": 126.919338,
+    "lat": 37.49985,
     "tags": {
       "railway": "subway_entrance",
       "ref": "4",
       "station": "보라매역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8100.PNG",
-      "referencePixel": [
-        125,
-        299
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/boramae",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8100-5",
-    "lon": 126.919366,
-    "lat": 37.5000341,
+    "id": "mapped-boramae-5",
+    "lon": 126.919374,
+    "lat": 37.500012,
     "tags": {
       "railway": "subway_entrance",
       "ref": "5",
       "station": "보라매역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8100.PNG",
-      "referencePixel": [
-        127,
-        269
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/boramae",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8100-6",
-    "lon": 126.9200901,
-    "lat": 37.5000813,
+    "id": "mapped-boramae-6",
+    "lon": 126.920286,
+    "lat": 37.500238,
     "tags": {
       "railway": "subway_entrance",
       "ref": "6",
       "station": "보라매역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8100.PNG",
-      "referencePixel": [
-        200,
-        263
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/boramae",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8100-7",
-    "lon": 126.9205562,
-    "lat": 37.5001836,
+    "id": "mapped-boramae-7",
+    "lon": 126.920571,
+    "lat": 37.500287,
     "tags": {
       "railway": "subway_entrance",
       "ref": "7",
-      "station": "보라매역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8100.PNG",
-      "referencePixel": [
-        247,
-        250
-      ],
-      "coordinateQuality": "reference-estimate"
+      "station": "보라매역(신림선)",
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/boramae",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8100-8",
-    "lon": 126.9207348,
-    "lat": 37.5000184,
+    "id": "mapped-boramae-8",
+    "lon": 126.92082,
+    "lat": 37.499984,
     "tags": {
       "railway": "subway_entrance",
       "ref": "8",
-      "station": "보라매역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8100.PNG",
-      "referencePixel": [
-        265,
-        271
-      ],
-      "coordinateQuality": "reference-estimate"
+      "station": "보라매역(신림선)",
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/boramae",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8101-1",
-    "lon": 126.92289,
-    "lat": 37.5060536,
+    "id": "mapped-seoul-regional-military-manpower-administration-1",
+    "lon": 126.922854,
+    "lat": 37.505984,
     "tags": {
       "railway": "subway_entrance",
       "ref": "1",
       "station": "서울지방병무청역(신림선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8101.PNG",
-      "referencePixel": [
-        263,
-        355
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/seoul-regional-military-manpower-administration",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8101-2",
-    "lon": 126.9222994,
-    "lat": 37.5057653,
+    "id": "mapped-seoul-regional-military-manpower-administration-2",
+    "lon": 126.922502,
+    "lat": 37.505671,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "서울지방병무청역(신림선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8101.PNG",
-      "referencePixel": [
-        198,
-        395
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/seoul-regional-military-manpower-administration",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8102-1",
-    "lon": 126.9274152,
-    "lat": 37.5131092,
+    "id": "mapped-daebang-1",
+    "lon": 126.927178,
+    "lat": 37.51302,
     "tags": {
       "railway": "subway_entrance",
       "ref": "1",
       "station": "대방역(1호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8102.PNG",
-      "referencePixel": [
-        299,
-        302
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/daebang",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8102-2",
-    "lon": 126.9280185,
-    "lat": 37.5127952,
+    "id": "mapped-daebang-2",
+    "lon": 126.927245,
+    "lat": 37.512775,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "대방역(1호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8102.PNG",
-      "referencePixel": [
-        363,
-        344
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/daebang",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8102-3",
-    "lon": 126.9269345,
-    "lat": 37.5126905,
+    "id": "mapped-daebang-3",
+    "lon": 126.926865,
+    "lat": 37.512683,
     "tags": {
       "railway": "subway_entrance",
       "ref": "3",
       "station": "대방역(1호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8102.PNG",
-      "referencePixel": [
-        248,
-        358
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/daebang",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8102-4",
-    "lon": 126.9268685,
-    "lat": 37.5129746,
+    "id": "mapped-daebang-4",
+    "lon": 126.926806,
+    "lat": 37.512939,
     "tags": {
       "railway": "subway_entrance",
       "ref": "4",
       "station": "대방역(1호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8102.PNG",
-      "referencePixel": [
-        241,
-        320
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/daebang",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8102-5",
-    "lon": 126.9268874,
-    "lat": 37.5130793,
+    "id": "mapped-daebang-5",
+    "lon": 126.926761,
+    "lat": 37.51302,
     "tags": {
       "railway": "subway_entrance",
       "ref": "5",
       "station": "대방역(1호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8102.PNG",
-      "referencePixel": [
-        243,
-        306
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/daebang",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8102-7",
-    "lon": 126.9269816,
-    "lat": 37.5137073,
-    "tags": {
-      "railway": "subway_entrance",
-      "ref": "7",
-      "station": "대방역(1호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8102.PNG",
-      "referencePixel": [
-        253,
-        222
-      ],
-      "coordinateQuality": "reference-estimate"
-    }
-  },
-  {
-    "type": "node",
-    "id": "reference-8103-1",
-    "lon": 126.9424609,
-    "lat": 37.513978,
-    "tags": {
-      "railway": "subway_entrance",
-      "ref": "1",
-      "station": "노량진역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8103.PNG",
-      "referencePixel": [
-        315,
-        302
-      ],
-      "coordinateQuality": "reference-estimate"
-    }
-  },
-  {
-    "type": "node",
-    "id": "reference-8103-2",
-    "lon": 126.9427037,
-    "lat": 37.5140583,
-    "tags": {
-      "railway": "subway_entrance",
-      "ref": "2",
-      "station": "노량진역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8103.PNG",
-      "referencePixel": [
-        339,
-        292
-      ],
-      "coordinateQuality": "reference-estimate"
-    }
-  },
-  {
-    "type": "node",
-    "id": "reference-8103-3",
-    "lon": 126.9422282,
-    "lat": 37.5134885,
-    "tags": {
-      "railway": "subway_entrance",
-      "ref": "3",
-      "station": "노량진역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8103.PNG",
-      "referencePixel": [
-        292,
-        363
-      ],
-      "coordinateQuality": "reference-estimate"
-    }
-  },
-  {
-    "type": "node",
-    "id": "reference-8103-4",
-    "lon": 126.9403768,
-    "lat": 37.5134644,
-    "tags": {
-      "railway": "subway_entrance",
-      "ref": "4",
-      "station": "노량진역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8103.PNG",
-      "referencePixel": [
-        109,
-        366
-      ],
-      "coordinateQuality": "reference-estimate"
-    }
-  },
-  {
-    "type": "node",
-    "id": "reference-8103-5",
-    "lon": 126.9399923,
-    "lat": 37.5132477,
-    "tags": {
-      "railway": "subway_entrance",
-      "ref": "5",
-      "station": "노량진역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8103.PNG",
-      "referencePixel": [
-        71,
-        393
-      ],
-      "coordinateQuality": "reference-estimate"
-    }
-  },
-  {
-    "type": "node",
-    "id": "reference-8103-6",
-    "lon": 126.9395674,
-    "lat": 37.5134082,
+    "id": "mapped-daebang-6",
+    "lon": 126.926869,
+    "lat": 37.513618,
     "tags": {
       "railway": "subway_entrance",
       "ref": "6",
-      "station": "노량진역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8103.PNG",
-      "referencePixel": [
-        29,
-        373
-      ],
-      "coordinateQuality": "reference-estimate"
+      "station": "대방역(1호선)",
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/daebang",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8103-7",
-    "lon": 126.9400328,
-    "lat": 37.5137453,
+    "id": "mapped-noryangjin-1",
+    "lon": 126.942481,
+    "lat": 37.513938,
     "tags": {
       "railway": "subway_entrance",
-      "ref": "7",
-      "station": "노량진역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8103.PNG",
-      "referencePixel": [
-        75,
-        331
-      ],
-      "coordinateQuality": "reference-estimate"
+      "ref": "1",
+      "station": "노량진역(1호선)",
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/noryangjin",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8103-8",
-    "lon": 126.9421371,
-    "lat": 37.5138657,
+    "id": "mapped-noryangjin-2",
+    "lon": 126.942889,
+    "lat": 37.513942,
     "tags": {
       "railway": "subway_entrance",
-      "ref": "8",
-      "station": "노량진역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8103.PNG",
-      "referencePixel": [
-        283,
-        316
-      ],
-      "coordinateQuality": "reference-estimate"
+      "ref": "2",
+      "station": "노량진역(1호선)",
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/noryangjin",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8103-9",
-    "lon": 126.9412064,
-    "lat": 37.5147324,
+    "id": "mapped-noryangjin-3",
+    "lon": 126.942236,
+    "lat": 37.513572,
     "tags": {
       "railway": "subway_entrance",
-      "ref": "9",
+      "ref": "3",
       "station": "노량진역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8103.PNG",
-      "referencePixel": [
-        191,
-        208
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/noryangjin",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8103-3-1",
-    "lon": 126.9415402,
-    "lat": 37.5134724,
+    "id": "mapped-noryangjin-3-1",
+    "lon": 126.941541,
+    "lat": 37.513426,
     "tags": {
       "railway": "subway_entrance",
       "ref": "3-1",
       "station": "노량진역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8103.PNG",
-      "referencePixel": [
-        224,
-        365
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/noryangjin",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8104-1",
-    "lon": 126.9517813,
-    "lat": 37.5128581,
+    "id": "mapped-noryangjin-4",
+    "lon": 126.940447,
+    "lat": 37.513387,
+    "tags": {
+      "railway": "subway_entrance",
+      "ref": "4",
+      "station": "노량진역(9호선)",
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/noryangjin",
+      "coordinateQuality": "mapped-source"
+    }
+  },
+  {
+    "type": "node",
+    "id": "mapped-noryangjin-5",
+    "lon": 126.940044,
+    "lat": 37.513173,
+    "tags": {
+      "railway": "subway_entrance",
+      "ref": "5",
+      "station": "노량진역(9호선)",
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/noryangjin",
+      "coordinateQuality": "mapped-source"
+    }
+  },
+  {
+    "type": "node",
+    "id": "mapped-noryangjin-6",
+    "lon": 126.939372,
+    "lat": 37.513352,
+    "tags": {
+      "railway": "subway_entrance",
+      "ref": "6",
+      "station": "노량진역(9호선)",
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/noryangjin",
+      "coordinateQuality": "mapped-source"
+    }
+  },
+  {
+    "type": "node",
+    "id": "mapped-noryangjin-7",
+    "lon": 126.940174,
+    "lat": 37.513624,
+    "tags": {
+      "railway": "subway_entrance",
+      "ref": "7",
+      "station": "노량진역(9호선)",
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/noryangjin",
+      "coordinateQuality": "mapped-source"
+    }
+  },
+  {
+    "type": "node",
+    "id": "mapped-noryangjin-8",
+    "lon": 126.94214,
+    "lat": 37.513781,
+    "tags": {
+      "railway": "subway_entrance",
+      "ref": "8",
+      "station": "노량진역(1호선)",
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/noryangjin",
+      "coordinateQuality": "mapped-source"
+    }
+  },
+  {
+    "type": "node",
+    "id": "mapped-noryangjin-9",
+    "lon": 126.941372,
+    "lat": 37.514727,
+    "tags": {
+      "railway": "subway_entrance",
+      "ref": "9",
+      "station": "노량진역(1호선)",
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/noryangjin",
+      "coordinateQuality": "mapped-source"
+    }
+  },
+  {
+    "type": "node",
+    "id": "mapped-nodeul-1",
+    "lon": 126.951992,
+    "lat": 37.512893,
     "tags": {
       "railway": "subway_entrance",
       "ref": "1",
       "station": "노들역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8104.PNG",
-      "referencePixel": [
-        122,
-        253
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/nodeul",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8104-2",
-    "lon": 126.9541967,
-    "lat": 37.512818,
+    "id": "mapped-nodeul-2",
+    "lon": 126.954043,
+    "lat": 37.512887,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "노들역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8104.PNG",
-      "referencePixel": [
-        313,
-        257
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/nodeul",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8104-3",
-    "lon": 126.9542979,
-    "lat": 37.5122061,
+    "id": "mapped-nodeul-3",
+    "lon": 126.954362,
+    "lat": 37.512281,
     "tags": {
       "railway": "subway_entrance",
       "ref": "3",
       "station": "노들역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8104.PNG",
-      "referencePixel": [
-        321,
-        318
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/nodeul",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8104-4",
-    "lon": 126.9537415,
-    "lat": 37.5124167,
+    "id": "mapped-nodeul-4",
+    "lon": 126.953653,
+    "lat": 37.512433,
     "tags": {
       "railway": "subway_entrance",
       "ref": "4",
       "station": "노들역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8104.PNG",
-      "referencePixel": [
-        277,
-        297
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/nodeul",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8104-5",
-    "lon": 126.9522366,
-    "lat": 37.5124067,
+    "id": "mapped-nodeul-5",
+    "lon": 126.952184,
+    "lat": 37.512494,
     "tags": {
       "railway": "subway_entrance",
       "ref": "5",
       "station": "노들역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8104.PNG",
-      "referencePixel": [
-        158,
-        298
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/nodeul",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8105-1",
-    "lon": 126.9634402,
-    "lat": 37.5093879,
+    "id": "mapped-heukseok-1",
+    "lon": 126.963523,
+    "lat": 37.509302,
     "tags": {
       "railway": "subway_entrance",
       "ref": "1",
       "station": "흑석역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8105.PNG",
-      "referencePixel": [
-        186,
-        260
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/heukseok",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8105-2",
-    "lon": 126.964167,
-    "lat": 37.5085798,
+    "id": "mapped-heukseok-2",
+    "lon": 126.964175,
+    "lat": 37.508654,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "흑석역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8105.PNG",
-      "referencePixel": [
-        288,
-        403
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/heukseok",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8105-3",
-    "lon": 126.963882,
-    "lat": 37.5084215,
+    "id": "mapped-heukseok-3",
+    "lon": 126.963842,
+    "lat": 37.508398,
     "tags": {
       "railway": "subway_entrance",
       "ref": "3",
       "station": "흑석역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8105.PNG",
-      "referencePixel": [
-        248,
-        431
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/heukseok",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8105-4",
-    "lon": 126.9633833,
-    "lat": 37.5089641,
+    "id": "mapped-heukseok-4",
+    "lon": 126.963319,
+    "lat": 37.508848,
     "tags": {
       "railway": "subway_entrance",
       "ref": "4",
       "station": "흑석역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8105.PNG",
-      "referencePixel": [
-        178,
-        335
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/heukseok",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8106-1",
-    "lon": 126.954086,
-    "lat": 37.4954833,
+    "id": "mapped-soongsil-univ-1",
+    "lon": 126.954411,
+    "lat": 37.495139,
     "tags": {
       "railway": "subway_entrance",
       "ref": "1",
       "station": "숭실대입구역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8106.PNG",
-      "referencePixel": [
-        279,
-        437
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/soongsil-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8106-2",
-    "lon": 126.9535434,
-    "lat": 37.4960945,
+    "id": "mapped-soongsil-univ-2",
+    "lon": 126.953948,
+    "lat": 37.495653,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "숭실대입구역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8106.PNG",
-      "referencePixel": [
-        210,
-        339
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/soongsil-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8106-3",
-    "lon": 126.9538815,
-    "lat": 37.4963315,
+    "id": "mapped-soongsil-univ-3",
+    "lon": 126.954119,
+    "lat": 37.495959,
     "tags": {
       "railway": "subway_entrance",
       "ref": "3",
       "station": "숭실대입구역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8106.PNG",
-      "referencePixel": [
-        253,
-        301
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/soongsil-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8106-4",
-    "lon": 126.9544005,
-    "lat": 37.4957514,
+    "id": "mapped-soongsil-univ-4",
+    "lon": 126.954663,
+    "lat": 37.495304,
     "tags": {
       "railway": "subway_entrance",
       "ref": "4",
       "station": "숭실대입구역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8106.PNG",
-      "referencePixel": [
-        319,
-        394
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/soongsil-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8107-1",
-    "lon": 126.9715566,
-    "lat": 37.4841312,
+    "id": "mapped-namseong-1",
+    "lon": 126.972138,
+    "lat": 37.48413,
     "tags": {
       "railway": "subway_entrance",
       "ref": "1",
       "station": "남성역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8107.PNG",
-      "referencePixel": [
-        262,
-        394
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/namseong",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8107-2",
-    "lon": 126.9707125,
-    "lat": 37.4844944,
+    "id": "mapped-namseong-2",
+    "lon": 126.971284,
+    "lat": 37.484508,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "남성역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8107.PNG",
-      "referencePixel": [
-        168,
-        343
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/namseong",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8107-3",
-    "lon": 126.9707844,
-    "lat": 37.4847295,
+    "id": "mapped-namseong-3",
+    "lon": 126.971176,
+    "lat": 37.484777,
     "tags": {
       "railway": "subway_entrance",
       "ref": "3",
       "station": "남성역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8107.PNG",
-      "referencePixel": [
-        176,
-        310
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/namseong",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8107-4",
-    "lon": 126.9717721,
-    "lat": 37.484295,
+    "id": "mapped-namseong-4",
+    "lon": 126.972201,
+    "lat": 37.484345,
     "tags": {
       "railway": "subway_entrance",
       "ref": "4",
       "station": "남성역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8107.PNG",
-      "referencePixel": [
-        286,
-        371
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/namseong",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8109-1",
-    "lon": 126.98268,
-    "lat": 37.4884762,
+    "id": "mapped-chongshin-univ-1",
+    "lon": 126.982505,
+    "lat": 37.488296,
     "tags": {
       "railway": "subway_entrance",
       "ref": "1",
       "station": "이수역(4호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8109.PNG",
-      "referencePixel": [
-        341,
-        201
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/chongshin-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8109-2",
-    "lon": 126.982571,
-    "lat": 37.4869932,
+    "id": "mapped-chongshin-univ-2",
+    "lon": 126.982472,
+    "lat": 37.487025,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "이수역(4호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8109.PNG",
-      "referencePixel": [
-        328,
-        424
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/chongshin-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8109-3",
-    "lon": 126.9825123,
-    "lat": 37.486082,
+    "id": "mapped-chongshin-univ-3",
+    "lon": 126.982403,
+    "lat": 37.486059,
     "tags": {
       "railway": "subway_entrance",
       "ref": "3",
       "station": "이수역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8109.PNG",
-      "referencePixel": [
-        321,
-        561
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/chongshin-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8109-4",
-    "lon": 126.9827974,
-    "lat": 37.4857229,
+    "id": "mapped-chongshin-univ-4",
+    "lon": 126.982444,
+    "lat": 37.485787,
     "tags": {
       "railway": "subway_entrance",
       "ref": "4",
       "station": "이수역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8109.PNG",
-      "referencePixel": [
-        355,
-        615
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/chongshin-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8109-5",
-    "lon": 126.9827387,
-    "lat": 37.4851975,
+    "id": "mapped-chongshin-univ-5",
+    "lon": 126.982555,
+    "lat": 37.485255,
     "tags": {
       "railway": "subway_entrance",
       "ref": "5",
       "station": "이수역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8109.PNG",
-      "referencePixel": [
-        348,
-        694
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/chongshin-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8109-6",
-    "lon": 126.9824955,
-    "lat": 37.4849847,
+    "id": "mapped-chongshin-univ-6",
+    "lon": 126.982387,
+    "lat": 37.48501,
     "tags": {
       "railway": "subway_entrance",
       "ref": "6",
       "station": "이수역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8109.PNG",
-      "referencePixel": [
-        319,
-        726
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/chongshin-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8109-7",
-    "lon": 126.9818499,
-    "lat": 37.4846655,
+    "id": "mapped-chongshin-univ-7",
+    "lon": 126.981866,
+    "lat": 37.484719,
     "tags": {
       "railway": "subway_entrance",
       "ref": "7",
       "station": "이수역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8109.PNG",
-      "referencePixel": [
-        242,
-        774
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/chongshin-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8109-8",
-    "lon": 126.9815817,
-    "lat": 37.4850113,
+    "id": "mapped-chongshin-univ-8",
+    "lon": 126.981727,
+    "lat": 37.485022,
     "tags": {
       "railway": "subway_entrance",
       "ref": "8",
       "station": "이수역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8109.PNG",
-      "referencePixel": [
-        210,
-        722
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/chongshin-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8109-9",
-    "lon": 126.9809444,
-    "lat": 37.4848052,
+    "id": "mapped-chongshin-univ-9",
+    "lon": 126.980816,
+    "lat": 37.484792,
     "tags": {
       "railway": "subway_entrance",
       "ref": "9",
       "station": "이수역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8109.PNG",
-      "referencePixel": [
-        134,
-        753
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/chongshin-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8109-10",
-    "lon": 126.980324,
-    "lat": 37.4849515,
+    "id": "mapped-chongshin-univ-10",
+    "lon": 126.980376,
+    "lat": 37.484977,
     "tags": {
       "railway": "subway_entrance",
       "ref": "10",
       "station": "이수역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8109.PNG",
-      "referencePixel": [
-        60,
-        731
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/chongshin-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8109-11",
-    "lon": 126.9817242,
-    "lat": 37.485417,
+    "id": "mapped-chongshin-univ-11",
+    "lon": 126.98173,
+    "lat": 37.485531,
     "tags": {
       "railway": "subway_entrance",
       "ref": "11",
       "station": "이수역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8109.PNG",
-      "referencePixel": [
-        227,
-        661
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/chongshin-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8109-12",
-    "lon": 126.9820009,
-    "lat": 37.4858892,
+    "id": "mapped-chongshin-univ-12",
+    "lon": 126.981944,
+    "lat": 37.485802,
     "tags": {
       "railway": "subway_entrance",
       "ref": "12",
       "station": "이수역(7호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8109.PNG",
-      "referencePixel": [
-        260,
-        590
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/chongshin-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8109-13",
-    "lon": 126.982026,
-    "lat": 37.4870065,
+    "id": "mapped-chongshin-univ-13",
+    "lon": 126.982015,
+    "lat": 37.486974,
     "tags": {
       "railway": "subway_entrance",
       "ref": "13",
       "station": "이수역(4호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8109.PNG",
-      "referencePixel": [
-        263,
-        422
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/chongshin-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8109-14",
-    "lon": 126.982135,
-    "lat": 37.4885028,
+    "id": "mapped-chongshin-univ-14",
+    "lon": 126.982018,
+    "lat": 37.488301,
     "tags": {
       "railway": "subway_entrance",
       "ref": "14",
       "station": "이수역(4호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8109.PNG",
-      "referencePixel": [
-        276,
-        197
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/chongshin-univ",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8110-1",
-    "lon": 126.9808141,
-    "lat": 37.5029987,
+    "id": "mapped-dongjak-1",
+    "lon": 126.980771,
+    "lat": 37.502933,
     "tags": {
       "railway": "subway_entrance",
       "ref": "1",
       "station": "동작역(4호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8110.PNG",
-      "referencePixel": [
-        413,
-        266
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/dongjak",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8110-2",
-    "lon": 126.9788944,
-    "lat": 37.5033691,
+    "id": "mapped-dongjak-2",
+    "lon": 126.97882,
+    "lat": 37.503371,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "동작역(4호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8110.PNG",
-      "referencePixel": [
-        265,
-        230
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/dongjak",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8110-3",
-    "lon": 126.9807103,
-    "lat": 37.5017024,
+    "id": "mapped-dongjak-3",
+    "lon": 126.980686,
+    "lat": 37.501594,
     "tags": {
       "railway": "subway_entrance",
       "ref": "3",
       "station": "동작역(4호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8110.PNG",
-      "referencePixel": [
-        405,
-        392
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/dongjak",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8110-4",
-    "lon": 126.980412,
-    "lat": 37.501723,
+    "id": "mapped-dongjak-4",
+    "lon": 126.980259,
+    "lat": 37.501628,
     "tags": {
       "railway": "subway_entrance",
       "ref": "4",
       "station": "동작역(4호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8110.PNG",
-      "referencePixel": [
-        382,
-        390
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/dongjak",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8110-5",
-    "lon": 126.9769618,
-    "lat": 37.5033588,
+    "id": "mapped-dongjak-5",
+    "lon": 126.976998,
+    "lat": 37.503324,
     "tags": {
       "railway": "subway_entrance",
       "ref": "5",
       "station": "동작역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8110.PNG",
-      "referencePixel": [
-        116,
-        231
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/dongjak",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8110-6",
-    "lon": 126.9766246,
-    "lat": 37.5033177,
+    "id": "mapped-dongjak-6",
+    "lon": 126.976639,
+    "lat": 37.503247,
     "tags": {
       "railway": "subway_entrance",
       "ref": "6",
       "station": "동작역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8110.PNG",
-      "referencePixel": [
-        90,
-        235
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/dongjak",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8110-7",
-    "lon": 126.9762873,
-    "lat": 37.5030399,
+    "id": "mapped-dongjak-7",
+    "lon": 126.975998,
+    "lat": 37.503251,
     "tags": {
       "railway": "subway_entrance",
       "ref": "7",
       "station": "동작역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8110.PNG",
-      "referencePixel": [
-        64,
-        262
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/dongjak",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8110-8",
-    "lon": 126.9758593,
-    "lat": 37.5034514,
-    "tags": {
-      "railway": "subway_entrance",
-      "ref": "8",
-      "station": "동작역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8110.PNG",
-      "referencePixel": [
-        31,
-        222
-      ],
-      "coordinateQuality": "reference-estimate"
-    }
-  },
-  {
-    "type": "node",
-    "id": "reference-8110-9",
-    "lon": 126.9756777,
-    "lat": 37.5045214,
-    "tags": {
-      "railway": "subway_entrance",
-      "ref": "9",
-      "station": "동작역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8110.PNG",
-      "referencePixel": [
-        17,
-        118
-      ],
-      "coordinateQuality": "reference-estimate"
-    }
-  },
-  {
-    "type": "node",
-    "id": "reference-8111-1",
-    "lon": 126.9180978,
-    "lat": 37.4961141,
+    "id": "mapped-boramae-park-1",
+    "lon": 126.918281,
+    "lat": 37.495391,
     "tags": {
       "railway": "subway_entrance",
       "ref": "1",
       "station": "보라매공원역(신림선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8111.PNG",
-      "referencePixel": [
-        249,
-        217
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/boramae-park",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8111-2",
-    "lon": 126.917758,
-    "lat": 37.4959644,
+    "id": "mapped-boramae-park-2",
+    "lon": 126.918026,
+    "lat": 37.495357,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "보라매공원역(신림선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8111.PNG",
-      "referencePixel": [
-        204,
-        242
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/boramae-park",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8112-1",
-    "lon": 126.9236527,
-    "lat": 37.4931665,
+    "id": "mapped-boramae-medical-center-1",
+    "lon": 126.923781,
+    "lat": 37.493166,
     "tags": {
       "railway": "subway_entrance",
       "ref": "1",
       "station": "보라매병원역(신림선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8112.PNG",
-      "referencePixel": [
-        236,
-        315
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/boramae-medical-center",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8112-2",
-    "lon": 126.9246297,
-    "lat": 37.4927015,
+    "id": "mapped-boramae-medical-center-2",
+    "lon": 126.92462,
+    "lat": 37.492691,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "보라매병원역(신림선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8112.PNG",
-      "referencePixel": [
-        311,
-        360
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/boramae-medical-center",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8113-1",
-    "lon": 126.9283894,
-    "lat": 37.5176882,
+    "id": "mapped-saetgang-1",
+    "lon": 126.928279,
+    "lat": 37.517724,
     "tags": {
       "railway": "subway_entrance",
       "ref": "1",
       "station": "샛강역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8113.PNG",
-      "referencePixel": [
-        200,
-        234
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/saetgang",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8113-2",
-    "lon": 126.9292488,
-    "lat": 37.5176623,
+    "id": "mapped-saetgang-2",
+    "lon": 126.929154,
+    "lat": 37.517671,
     "tags": {
       "railway": "subway_entrance",
       "ref": "2",
       "station": "샛강역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8113.PNG",
-      "referencePixel": [
-        279,
-        237
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/saetgang",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8113-3",
-    "lon": 126.9293684,
-    "lat": 37.5173085,
+    "id": "mapped-saetgang-3",
+    "lon": 126.929191,
+    "lat": 37.517448,
     "tags": {
       "railway": "subway_entrance",
       "ref": "3",
       "station": "샛강역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8113.PNG",
-      "referencePixel": [
-        290,
-        278
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/saetgang",
+      "coordinateQuality": "mapped-source"
     }
   },
   {
     "type": "node",
-    "id": "reference-8113-4",
-    "lon": 126.9279107,
-    "lat": 37.5174207,
+    "id": "mapped-saetgang-4",
+    "lon": 126.927932,
+    "lat": 37.517518,
     "tags": {
       "railway": "subway_entrance",
       "ref": "4",
       "station": "샛강역(9호선)",
-      "source": "User reference map / estimated display position",
-      "referenceImage": "IMG_8113.PNG",
-      "referencePixel": [
-        156,
-        265
-      ],
-      "coordinateQuality": "reference-estimate"
+      "source": "OpenStreetMap contributors (ODbL), via K-SUB",
+      "sourceUrl": "https://www.k-sub.com/en/stations/saetgang",
+      "coordinateQuality": "mapped-source"
     }
   }
 ]);

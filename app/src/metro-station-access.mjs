@@ -1,4 +1,4 @@
-import {REFERENCE_EXIT_ROWS} from './reference-station-exits.mjs';
+import {MAPPED_EXIT_ROWS} from './reference-station-exits.mjs';
 // Numbered station exits only. Never render underground passage or platform geometry.
 export const STATION_ACCESS_SNAPSHOT='/data/transport/dongjak-station-access-v1.json';
 let sharedSnapshot=null;
@@ -23,10 +23,11 @@ const valid=p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite);
 const distance=(a,b)=>Math.hypot((a[0]-b[0])*X,(a[1]-b[1])*Y);
 const rawPoint=e=>[Number(e.lon??e.center?.lon),Number(e.lat??e.center?.lat)];
 const pointOf=rawPoint;
-const isReferenceExit=e=>e.tags?.coordinateQuality==='reference-estimate';
+const isMappedExit=e=>e.tags?.coordinateQuality==='mapped-source';
+const exitIdentity=e=>normalizeExitStation(e.tags?.station||e.tags?.['station:name'])+'/'+String(e.tags?.ref||'');
 export function mergeReferenceExitRows(elements=[]){
- const reviewed=new Set(REFERENCE_EXIT_ROWS.map(e=>normalizeExitStation(e.tags.station)));
- return [...elements.filter(e=>!reviewed.has(normalizeExitStation(e.tags?.station||e.tags?.['station:name']))),...REFERENCE_EXIT_ROWS];
+ const reviewed=new Set(MAPPED_EXIT_ROWS.map(exitIdentity));
+ return [...elements.filter(e=>!reviewed.has(exitIdentity(e))),...MAPPED_EXIT_ROWS];
 }
 const coordinates=e=>(e.geometry||[]).map(p=>[Number(p.lon),Number(p.lat)]).filter(valid);
 export function normalizeExitStation(s){const plain=String(s||'').normalize('NFKC').replace(/\s*\([^)]*\)\s*/g,'').replace(/\s|역$/g,'');return plain==='총신대입구'?'이수':plain;}
@@ -53,11 +54,11 @@ export function buildStationAccess(elements,stations,colors,railPaths=new Map(),
   const p=pointOf(e);if(!valid(p)||!allow(...p))continue;
   const officialName=normalized(t.station||t['station:name']||'');
   const named=stationAt(p,stations,t.station||t['station:name']||'');
-  const isOfficial=(String(t.source||'').startsWith('MOIS')||isReferenceExit(e))&&officialName;
+  const isOfficial=(String(t.source||'').startsWith('MOIS')||isMappedExit(e))&&officialName;
   const line=String(t.station||'').match(/\((\d+호선|신림선)\)/)?.[1];
   const station=named||(isOfficial?{name:officialName,lng:p[0],lat:p[1],lines:line?[line]:[]}:stationAt(p,stations));if(!station)continue;
   const n=number(t),key=normalized(station.name)+'|'+(n||e.id)+'|'+p.map(v=>v.toFixed(5)).join(',');if(seen.has(key))continue;seen.add(key);
-  const props={kind:'exit',station:station.name,number:n,label:n||'출입구',color:colors[line]||lineColor(station,colors),quality:isReferenceExit(e)?'reference-estimate':'mapped',source:t.source||'OpenStreetMap'};
+  const props={kind:'exit',station:station.name,number:n,label:n||'출입구',color:colors[line]||lineColor(station,colors),quality:isMappedExit(e)?'mapped-source':'mapped',source:t.source||'OpenStreetMap'};
   result.push(feature('Point',p,props));
  }
  return {type:'FeatureCollection',features:result};
@@ -78,7 +79,7 @@ export function installMetroStationAccess({map,app,getStations,getRailPaths,colo
  const enabled=()=>app?.dataset?.djTransitExterior==='true'||app?.dataset?.baseMetro!=='off';
  function setup(){
   if(map.getSource(SOURCE))return;
-  map.addSource(SOURCE,{type:'geojson',data:empty(),attribution:'MOIS public subway entrance data; © OpenStreetMap contributors (ODbL); user reference map estimates'});
+  map.addSource(SOURCE,{type:'geojson',data:empty(),attribution:'MOIS public subway entrance data; © OpenStreetMap contributors (ODbL); K-SUB mapped exit coordinates'});
   const add=l=>map.addLayer(l);
   add({id:ids[0],type:'circle',source:SOURCE,minzoom:STATION_ACCESS_ZOOM,filter:['==',['get','kind'],'exit'],paint:{'circle-radius':['interpolate',['linear'],['zoom'],16.2,6.5,20,10],'circle-color':'#fff6d7','circle-stroke-color':['get','color'],'circle-stroke-width':1.5}});
   add({id:ids[1],type:'symbol',source:SOURCE,minzoom:STATION_ACCESS_ZOOM,filter:['==',['get','kind'],'exit'],layout:{'text-field':['get','label'],'text-font':['Noto Sans Bold','Open Sans Semibold'],'text-size':['interpolate',['linear'],['zoom'],16.2,9,20,12],'text-allow-overlap':true,'text-ignore-placement':true,'text-padding':1},paint:{'text-color':'#534d31'}});
