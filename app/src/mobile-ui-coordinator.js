@@ -40,9 +40,11 @@ export function installMobileLayoutCoordinator({app,map}={}){
     const nh=nav?.getBoundingClientRect?.().height||0;
     const size=mobileChromeMetrics({headerBottom:hb,navHeight:nh,
       viewportHeight:window.visualViewport?.height||window.innerHeight});
-    app.style.setProperty('--dj-header-h',`${size.header}px`);
-    app.style.setProperty('--dj-mobile-nav-h',`${size.nav}px`);
-    app.style.setProperty('--dj-visible-vh',`${size.viewport}px`);
+    // Avoid style invalidations when ResizeObserver/map resize reports unchanged geometry.
+    for(const [key,value] of [['--dj-header-h',size.header],['--dj-mobile-nav-h',size.nav],['--dj-visible-vh',size.viewport]]){
+      const next=value+'px';
+      if(app.style.getPropertyValue?.(key)!==next)app.style.setProperty(key,next);
+    }
     // Never leave two modal drawers covering each other. When both are opened
     // externally, preserve the options drawer and dismiss safety consistently.
     if(app.classList.contains('map-controls-open')&&app.classList.contains('map-safety-open'))

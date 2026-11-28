@@ -20,3 +20,17 @@ test('protocol parses each stage and serves distinct batches from one fetched ti
 });
 
 test('sparse building tiles render their first features without waiting for empty stages',()=>{const name=[10,8,...new TextEncoder().encode('building')],payload=[...name,18,2,8,1,18,2,8,2],tile=Uint8Array.from([26,payload.length,...payload]);const stages=partitionBuildingTile(tile,NATIVE_BUILDING_STAGES);assert.deepEqual(stages.map(p=>(p.length-12)/4),[1,1,0,0,0]);assert.ok(NATIVE_BUILDING_STAGE_MS*NATIVE_BUILDING_STAGES<=195);});
+
+test('queued abort listeners are released as soon as a job starts or is canceled',async()=>{
+ const events=[],release=[],timers=[];
+ const controller=new AbortController(),signal=controller.signal;
+ const add=signal.addEventListener.bind(signal),remove=signal.removeEventListener.bind(signal);
+ signal.addEventListener=(type,fn,opts)=>{events.push(['add',type]);add(type,fn,opts);};
+ signal.removeEventListener=(type,fn)=>{events.push(['remove',type]);remove(type,fn);};
+ const queue=createBuildingTileQueue((url,s)=>new Promise(r=>release.push(r)),{schedule:fn=>timers.push(fn)});
+ const a=queue('a'),b=queue('b',signal);
+ assert.deepEqual(events,[['add','abort']]);
+ await Promise.resolve();release.shift()('a');await a;await Promise.resolve();timers.shift()();await Promise.resolve();
+ assert.deepEqual(events,[['add','abort'],['remove','abort']]);
+ release.shift()('b');assert.equal(await b,'b');
+});
