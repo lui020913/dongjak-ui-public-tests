@@ -1,0 +1,49 @@
+name: Read-only map runtime CPU and API cost profile
+on:
+  push:
+    branches: [audit/map-runtime-cost-20261129]
+permissions:
+  contents: read
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VITE_SUPABASE_URL: https://placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Expose map only in temporary diagnostic checkout
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('app/src/main.js')
+          s=p.read_text()
+          marker='installSolidMapLines(map);'
+          assert s.count(marker)==1
+          p.write_text(s.replace(marker,'globalThis.__qaMap=map;\n'+marker))
+          PY
+      - name: Build diagnostic version with readable functions
+        run: |
+          npm --prefix app ci --no-audit --no-fund
+          npm --prefix app run build -- --minify=false --sourcemap
+          cd app
+          npx playwright install --with-deps chromium
+      - name: Record actual pan and zoom CPU samples and synchronous API cost
+        run: |
+          set -euo pipefail
+          (cd app && npx vite preview --host 127.0.0.1 --port 4196 --strictPort) > /tmp/map-profile.log 2>&1 &
+          for i in $(seq 1 60); do curl -fsS http://127.0.0.1:4196/ >/dev/null && break; sleep 1; done
+          curl -fsS http://127.0.0.1:4196/ >/dev/null
+          PROFILE_URL=http://127.0.0.1:4196 CANDIDATE_SHA=86d795938ba1a5e4eb8bc7d4c0cf4a7537d31e77 node app/tests/map-runtime-cost-profile.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: map-runtime-cost-evidence
+          path: audit-map-gesture-output/
+          retention-days: 7
