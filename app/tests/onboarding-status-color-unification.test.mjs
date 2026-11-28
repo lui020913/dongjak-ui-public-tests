@@ -7,8 +7,10 @@ const read=file=>readFileSync(new URL('../src/'+file,import.meta.url),'utf8');
 
 test('standalone iPhone onboarding reuses the normal status color',()=>{
   const pwa=read('mobile-pwa-status-tone-v793.js');
-  assert.match(pwa,/const baselineColor=\(\)=>root\.dataset\.theme==='dark'\?'#22282e':'#edf3ef'/);
-  assert.ok(pwa.includes('(startup||onboarding)?baselineColor()'));
+  assert.match(pwa,/const baselineColor=\(\)=>'\#edf3ef'/);
+  assert.match(pwa,/const color=baselineColor\(\)/);
+  assert.match(pwa,/const theme='light'/);
+  assert.doesNotMatch(pwa,/#22282e|#f5faf7/);
   assert.ok(!pwa.includes("onboarding?(theme==='dark'?'#22282e':'#f5faf7')"));
   assert.ok(pwa.includes("themeMeta.setAttribute('content',color)"));
   assert.ok(pwa.includes("sample.style.setProperty('background-color',color,'important')"));

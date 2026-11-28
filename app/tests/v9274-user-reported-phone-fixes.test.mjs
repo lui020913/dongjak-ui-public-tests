@@ -50,8 +50,10 @@ test('map scale uses the same visibility blockers as PRI and the layer sheet',()
 
 test('iOS onboarding status sample matches first-run background and optional permission dialog does not dim it',()=>{
  const status=source('src/mobile-pwa-status-tone-v793.js');
- assert.match(status,/const onboarding=visible\('dj860-onboarding'\)/);
- assert.match(status,/\(startup\|\|onboarding\)\?baselineColor\(\)/);
+ assert.match(status,/const baselineColor=\(\)=>'#edf3ef'/);
+ assert.match(status,/root\.dataset\.djPwaDimmed='false'/);
+ assert.match(status,/const color=baselineColor\(\)/);
+ assert.match(status,/sample\.style\.setProperty\('background-color',color,'important'\)/);
  assert.doesNotMatch(status,/#f5faf7/);
  assert.doesNotMatch(status,/\['map-gesture-guide','djNext-layer-panel','djNext-permissions'/);
 });

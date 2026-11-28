@@ -18,9 +18,10 @@ test('all four primary mobile pages use the same theme surface from header throu
   assert.doesNotMatch(css,/background:#191b1f!important/);
 });
 
-test('PWA native edge samples the same colors as light/dark primary pages',()=>{
+test('PWA native edge samples the same color as light primary pages',()=>{
   assert.match(status,/#edf3ef/);
-  assert.match(status,/#22282e/);
+  assert.doesNotMatch(status,/#22282e/);
+  assert.match(status,/const color=baselineColor\(\)/);
   assert.match(css,/--dj-primary-page-ink:#203e34/);
   assert.match(css,/--dj-primary-page-ink:#f1f4f6/);
 });
