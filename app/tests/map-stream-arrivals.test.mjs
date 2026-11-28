@@ -27,3 +27,5 @@ test('incremental bus updates do not rebuild retained geometry or replay fades o
  fade.publish(fc([f(2)]));fade.publish(fc([f(1),f(2)]));assert.equal(writes.length,3);
  assert.equal(states.filter(([id,v])=>id===a&&v===.15).length,1);
 });
+
+test('authoritative bus snapshots replace all stale IDs, do not replay opacity changes and skip identical writes',()=>{const writes=[],states=[],src={setData:d=>writes.push(d),updateData:()=>assert.fail('no incremental worker updates for authoritative stops')},map={getSource:()=>src,isSourceLoaded:()=>true,on(){},setFeatureState:(...args)=>states.push(args)};const owner=createStreamArrivalFade(map,'bus',{incremental:false,fade:false});const fc=ids=>({type:'FeatureCollection',features:ids.map(osmId=>({type:'Feature',properties:{osmId},geometry:{type:'Point',coordinates:[126.94,37.5]}}))});owner.publish(fc(['native-copy','20808']));owner.publish(fc(['20808']));owner.publish(fc(['20808']));assert.equal(writes.length,2);assert.deepEqual(writes[1].features.map(f=>f.properties.osmId),['20808']);assert.equal(states.length,0);});

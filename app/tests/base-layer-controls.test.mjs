@@ -54,3 +54,5 @@ test('reapplying preferences cannot resurrect local railway lines over the Seoul
  applyBaseLayerVisibility(map,BASE_LAYER_DEFAULTS,{transitActive:true});for(const id of local)assert.equal(states.get(id),'none');
  applyBaseLayerVisibility(map,BASE_LAYER_DEFAULTS,{transitActive:false});for(const id of local)assert.equal(states.get(id),'visible');
 });
+
+test('layer preferences cannot resurrect the explicitly disabled native bus fallback',()=>{const states=new Map([['dj-basemap-bus-pictogram','none']]);const map={getLayer:()=>true,getFilter:id=>id==='dj-basemap-bus-pictogram'?['==',1,0]:null,getLayoutProperty:id=>states.get(id)||'visible',setLayoutProperty:(id,k,v)=>states.set(id,v)};applyBaseLayerVisibility(map,BASE_LAYER_DEFAULTS);assert.equal(states.get('dj-basemap-bus-pictogram'),'none');});

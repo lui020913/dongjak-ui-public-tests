@@ -1633,7 +1633,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     });
   }
   map.addSource('transport-bus',{type:'geojson',data:featureCollection([])});
-  const busArrivalFade=createStreamArrivalFade(map,'transport-bus');
+  const busArrivalFade=createStreamArrivalFade(map,'transport-bus',{incremental:false,fade:false});
   map.addSource('transport-subway',{type:'geojson',data:featureCollection([])});
   // OSM 실제 철도 선로/승강장 공간정보. 선로의 호선을 확인하지 못하면 임의로 색을 배정하지 않습니다.
   map.addSource('transport-rail-tracks',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
@@ -1749,8 +1749,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const rules=[];
     if(originalTransitFilter)rules.push(originalTransitFilter);
     const district=getDistrictGeometry();if(district)rules.push(['within',{type:district.type,coordinates:district.coordinates}]);
-    if((map.getZoom?.()??16)<14.25 || document.getElementById('app')?.dataset?.baseBus==='off')rules.push(['all',
-      ['!=',['get','class'],'bus'],['!=',['get','subclass'],'bus_stop'],['!=',['get','subclass'],'bus_station']]);
+    // Native transit POIs must never regain bus ownership on zoom or theme changes.
+    rules.push(['all',['!=',['get','class'],'bus'],['!=',['get','class'],'bus_stop'],['!=',['get','class'],'bus_station'],['!=',['get','subclass'],'bus_stop'],['!=',['get','subclass'],'bus_station']]);
     if(suppressNativeRail || (map.getZoom?.()??16)<12.45 || document.getElementById('app')?.dataset?.baseMetro==='off')rules.push(['!=',['get','class'],'rail']);
     if(typeof map.setFilter!=='function')return;
     try{const next=rules.length?['all',...rules]:null;if(JSON.stringify(map.getFilter?.('poi_transit'))!==JSON.stringify(next))map.setFilter('poi_transit',next);}catch(e){console.warn('기본 교통 아이콘 축척 제한 실패',e);}
@@ -1943,11 +1943,14 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       // Never display the native POI and its imported GeoJSON copy together,
       // even when the tile has no feature ID or its position has shifted.
       const hidden=['==',1,0],signature=JSON.stringify(hidden);
+      if(map.getLayoutProperty?.('dj-basemap-bus-pictogram','visibility')!=='none')map.setLayoutProperty?.('dj-basemap-bus-pictogram','visibility','none');
       if(lastTileFallbackFilter!==signature||JSON.stringify(map.getFilter?.('dj-basemap-bus-pictogram'))!==signature){
         try{map.setFilter('dj-basemap-bus-pictogram',hidden);lastTileFallbackFilter=signature;lastFallbackInventory='';}catch(error){console.debug('[정류장 단일 표시]',error?.message||error);}
       }
       return;
     }
+    const visibility=streamApp?.dataset.baseBus==='off'?'none':'visible';
+    if((map.getLayoutProperty?.('dj-basemap-bus-pictogram','visibility')||'visible')!==visibility)map.setLayoutProperty?.('dj-basemap-bus-pictogram','visibility',visibility);
     const boundary=cityScope()?getSeoulBoundary():getDistrictGeometry();
     const native=representedNativeBusStops(osmTransport.filter(p=>p.kind==='bus'&&p.source==='basemap-poi'),currentVisibleBusStops);
     const nativeIds=[...new Set(native.map(p=>p.nativeFeatureId).filter(Boolean))].sort();

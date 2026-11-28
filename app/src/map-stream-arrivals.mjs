@@ -18,7 +18,7 @@ export function streamFeatureDiff(previous,next){
  for(const [id,f] of current){const before=old.get(id);if(!before){add.push(f);continue;}const delta={id};if(JSON.stringify(before.geometry)!==JSON.stringify(f.geometry))delta.newGeometry=f.geometry;if(JSON.stringify(before.properties)!==JSON.stringify(f.properties)){delta.removeAllProperties=true;delta.addOrUpdateProperties=Object.entries(f.properties).map(([key,value])=>({key,value}));}if(Object.keys(delta).length>1)update.push(delta);}
  return {remove,add,update};
 }
-export function createStreamArrivalFade(map,source,{now=Date.now,schedule=setTimeout,cancel=clearTimeout}={}){
+export function createStreamArrivalFade(map,source,{now=Date.now,schedule=setTimeout,cancel=clearTimeout,incremental=true,fade=true}={}){
  let ids=new Set(),pending=new Set(),timer=null,watchdog=null,serial=0,previous=[],lastSource=null,publication=0;
  const seen=new Set();
  const numericIds=new Map();let nextId=1;
@@ -48,11 +48,11 @@ export function createStreamArrivalFade(map,source,{now=Date.now,schedule=setTim
   const diff=streamFeatureDiff(sameSource?previous:[],next.collection.features);
   if(sameSource&&!diff.add.length&&!diff.remove.length&&!diff.update.length)return;
   finish();for(const id of ids)seen.add(id);
-  pending=new Set(next.fresh);
+  pending=fade?new Set(next.fresh):new Set();
   if(supported)for(const id of pending)set(id,.15);
   const generation=++publication;
   const fallback=()=>{if(generation===publication)src.setData(next.collection);};
-  if(sameSource&&typeof src.updateData==='function'){try{const result=src.updateData(diff);if(result?.catch)result.catch(fallback);}catch{fallback();}}
+  if(incremental&&sameSource&&typeof src.updateData==='function'){try{const result=src.updateData(diff);if(result?.catch)result.catch(fallback);}catch{fallback();}}
   else src.setData(next.collection);
   previous=next.collection.features;lastSource=src;
   if(!supported){pending.clear();return;}
