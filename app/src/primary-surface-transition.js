@@ -69,7 +69,7 @@ export function createPrimarySurfaceTransition({doc,win,app,replay,reduced}){
   // frames and background tabs never renew the watchdog.
   const clock=()=>win.performance?.now?.();
   const deadline=(clock()??0)+4000;
-  const stillCurrent=()=>app.dataset.tab===destination&&!app.inert&&!(app.dataset.communityFeedLocked==='true'&&previousTab==='participate')&&doc.getElementById('dj-community-editor-portal')?.hidden!==false;
+  const stillCurrent=()=>!(app.dataset.tab!==destination||app.inert||(app.dataset.communityFeedLocked==='true'&&previousTab==='participate')||doc.getElementById('dj-community-editor-portal')?.hidden===false);
   const armWatchdog=()=>{timer=win.setTimeout(()=>{
    const now=clock();
    const stalled=Number.isFinite(now)&&now-deadline>=1000&&(previousFrame===null||now-previousFrame>=1000||lastFrameGap>=1000);
