@@ -1,0 +1,45 @@
+name: Read-only AI keyboard timeout trace audit
+on:
+  push:
+    branches: [audit/ai-keyboard-timeout-20261129]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: lui020913/dongjak-ui-public-tests
+          run-id: 46160445005
+          pattern: fix-phone-failure-46160445005-attempt-*-shard-33
+          path: evidence
+      - name: Identify last completed and pending Playwright calls
+        run: |
+          python - <<'PY'
+          import json, zipfile
+          from pathlib import Path
+          for path in Path('evidence').rglob('trace.zip'):
+              print('TRACE',path)
+              with zipfile.ZipFile(path) as z:
+                  for member in z.namelist():
+                      if not member.endswith('.trace'):continue
+                      calls={}
+                      events=[]
+                      for raw in z.read(member).splitlines():
+                          try:e=json.loads(raw)
+                          except ValueError:continue
+                          if e.get('type')=='before':
+                              calls[e.get('callId')] = e
+                          elif e.get('type')=='after':
+                              before=calls.pop(e.get('callId'),{})
+                              events.append((before,e))
+                      print('MEMBER',member)
+                      for b,e in events[-25:]:
+                          print('COMPLETE', b.get('apiName') or b.get('method'), str(b.get('params',{}).get('selector',''))[:180], 'ms', round(e.get('endTime',0)-b.get('startTime',0),1), 'error',bool(e.get('error')))
+                      for b in calls.values():
+                          print('PENDING',b.get('apiName') or b.get('method'),str(b.get('params',{}).get('selector',''))[:180], 'start', b.get('startTime'))
+          PY
