@@ -14,7 +14,7 @@ export function applyBusStopLabelTheme(map,theme='light'){
   // roughly the same street-level scale, with MapLibre collision detection.
   // Missing/older styles simply ignore this optional zoom-range adjustment.
   if(map?.getLayer?.('transport-bus-names') && typeof map.setLayerZoomRange==='function'){
-    try{map.setLayerZoomRange('transport-bus-names',16.5,18.4);}catch{}
+    try{map.setLayerZoomRange('transport-bus-names',16.0,17.8);}catch{}
   }
   let updated=0;
   for(const id of BUS_STOP_LABEL_IDS){

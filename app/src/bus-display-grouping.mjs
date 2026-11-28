@@ -1,6 +1,6 @@
 import {normalizedBusStopName,busStopMeters} from './bus-stop-dedup.js';
-export const BUS_GROUP_SPLIT_ZOOM=18.4;
-export const BUS_GROUP_EXPAND_ZOOM=18.8;
+export const BUS_GROUP_SPLIT_ZOOM=17.8;
+export const BUS_GROUP_EXPAND_ZOOM=18.2;
 export const BUS_GROUP_MAX_METERS=100;
 export function busDisplayGrouping(stops=[],zoom=19){
  if(zoom>=BUS_GROUP_SPLIT_ZOOM)return stops;

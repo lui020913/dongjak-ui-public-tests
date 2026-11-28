@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.271",
+  "application_version": "9.2.272",
   "public_work_branch": "main",
-  "purpose": "Restore Sangdo exit numbering to the original MOIS positions with small (<6m) screenshot-reviewed display offsets toward the main-road curbs; remove the earlier displaced OSM override; preserve all other stations, bus placement, exits-only view and streaming fixes. Cartographic approximation only. Direct visual protected production.",
-  "attempt": 513,
+  "purpose": "Bus visibility recovery: preload 1251 official near-Dongjak source records once, retain district stops independent of viewport cells, retain unmatched native fallback even on successful official fetch, reduce icon/name/split zooms to 15.5/16/17.8, 200ms new-marker fade with nonzero initial alpha and watchdog. Preserve district border/Seoul scopes, ARS identities and geometry. Direct visual protected production.",
+  "attempt": 514,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

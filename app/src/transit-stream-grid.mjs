@@ -3,7 +3,7 @@ export const GRID_STEP=0.01;
 export const GRID_ORIGIN=[126.7,37.4];
 export const GRID_WIDTH=55,GRID_HEIGHT=32;
 export function cellKey(lng,lat){return Math.floor((lng-GRID_ORIGIN[0])/GRID_STEP)+'_'+Math.floor((lat-GRID_ORIGIN[1])/GRID_STEP);}
-export function kindsAtZoom(z){return z>=16.4?['rail','bus']:z>=12.2?['rail']:[];}
+export function kindsAtZoom(z){return z>=15.5?['rail','bus']:z>=12.2?['rail']:[];}
 export function cellsForBounds(b,pad=1,direction={x:0,y:0}){
  if(!b||![b.west,b.east,b.south,b.north].every(Number.isFinite))return [];
  const [w,s]=cellKey(b.west,b.south).split('_').map(Number),[e,n]=cellKey(b.east,b.north).split('_').map(Number);

@@ -41,7 +41,7 @@ test('fallback map layer really renders modestly larger icons without altering g
   assert.ok(captured);
   assert.equal(captured.layer.source,'original-poi-tiles');
   assert.equal(captured.layer['source-layer'],'poi');
-  assert.equal(captured.layer.minzoom,16.4);
+  assert.equal(captured.layer.minzoom,15.5);
   assert.equal(captured.layer.maxzoom,undefined);
   assert.deepEqual(captured.layer.layout['icon-size'],newScale);
   assert.equal(captured.layer.layout['icon-allow-overlap'],true);
