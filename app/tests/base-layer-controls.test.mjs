@@ -56,3 +56,5 @@ test('reapplying preferences cannot resurrect local railway lines over the Seoul
 });
 
 test('layer preferences cannot resurrect the explicitly disabled native bus fallback',()=>{const states=new Map([['dj-basemap-bus-pictogram','none']]);const map={getLayer:()=>true,getFilter:id=>id==='dj-basemap-bus-pictogram'?['==',1,0]:null,getLayoutProperty:id=>states.get(id)||'visible',setLayoutProperty:(id,k,v)=>states.set(id,v)};applyBaseLayerVisibility(map,BASE_LAYER_DEFAULTS);assert.equal(states.get('dj-basemap-bus-pictogram'),'none');});
+
+test('startup preferences never query an uncreated bus layer or abort before boundary initialization',()=>{const layers=new Set(['district-border']),calls=[];const map={getLayer:id=>layers.has(id)?{id}:undefined,getFilter:id=>{calls.push(id);if(!layers.has(id))throw Error('Layer does not exist');return null;},getLayoutProperty:()=> 'visible',setLayoutProperty(){}};assert.doesNotThrow(()=>applyBaseLayerVisibility(map,BASE_LAYER_DEFAULTS));assert.deepEqual(calls,[]);});

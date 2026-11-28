@@ -30,10 +30,12 @@ export function applyBaseLayerVisibility(map,settings,{manageBoundary=true,trans
   const normalized=normalizeBaseLayerSettings(settings);
   for(const key of manageBoundary?['metro','bus','boundary']:['metro','bus']){
     for(const id of BASE_LAYER_IDS[key]){
-      const fallbackBlocked=id==='dj-basemap-bus-pictogram'&&JSON.stringify(map.getFilter?.(id))===JSON.stringify(['==',1,0]);
-      const desired=fallbackBlocked?'none':key==='metro'&&transitActive?(LOCAL_RAIL_LINE_IDS.includes(id)&&cityRailOwnsBackground(map,true)?'none':'visible'):(normalized[key]?'visible':'none');
       try{
         if(!map.getLayer(id))continue;
+        // Startup calls this before transport layers are created. MapLibre's
+        // getFilter may throw for an absent layer; never interrupt map setup.
+        const fallbackBlocked=id==='dj-basemap-bus-pictogram'&&JSON.stringify(map.getFilter?.(id))===JSON.stringify(['==',1,0]);
+        const desired=fallbackBlocked?'none':key==='metro'&&transitActive?(LOCAL_RAIL_LINE_IDS.includes(id)&&cityRailOwnsBackground(map,true)?'none':'visible'):(normalized[key]?'visible':'none');
         const current=map.getLayoutProperty(id,'visibility')||'visible';
         if(current!==desired)map.setLayoutProperty(id,'visibility',desired);
       }catch(error){console.debug(`[지도 표시 설정] ${id} 제외`,error);}
