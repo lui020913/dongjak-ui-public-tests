@@ -1,8 +1,8 @@
 import {partitionBuildingTile} from '../server/district-road-tile.mjs';
 const PREFIX='dj-building://';
 export const NATIVE_BUILDING_SOURCE='dj-native-building-stream';
-export const NATIVE_BUILDING_STAGE_MS=65;
-export const NATIVE_BUILDING_STAGES=3;
+export const NATIVE_BUILDING_STAGE_MS=32;
+export const NATIVE_BUILDING_STAGES=5;
 // FIFO follows MapLibre's center-first tile demand. Canceled viewport work
 // never occupies a slot. Only building tiles are throttled.
 export function createBuildingTileQueue(load,{concurrency=1,gap=65,schedule=setTimeout}={}){
@@ -34,7 +34,7 @@ export function registerNativeBuildingProtocol(maplibre,{fetcher=fetch}={}){
   const full=url.slice(PREFIX.length),match=full.match(/[?&]dj-building-stage=(\d+)$/),stage=Number(match?.[1]||0),raw=match?full.slice(0,match.index):full;
   if(stage>=NATIVE_BUILDING_STAGES)throw Error('Invalid building stage');
   if(!/^https:\/\/tiles\.openfreemap\.org\/(?:planet|backup_planet)\/[A-Za-z0-9_-]+\/\d+\/\d+\/\d+\.pbf(?:\?.*)?$/.test(raw))throw Error('Invalid building tile');
-  if(cache.has(raw))return {data:cache.get(raw)[stage].slice(0)};
+  if(cache.has(raw)){const parts=cache.get(raw);cache.delete(raw);cache.set(raw,parts);return {data:parts[stage].slice(0)};}
   const response=await fetcher(raw,{signal,cache:'force-cache'});if(!response.ok)throw Error('Building tile HTTP '+response.status);
   let bytes=new Uint8Array(await response.arrayBuffer());
   if(bytes[0]===31&&bytes[1]===139)bytes=new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());

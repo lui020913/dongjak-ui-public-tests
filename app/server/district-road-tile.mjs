@@ -31,7 +31,7 @@ export function partitionBuildingTile(input,count=3){
   const features=layer.filter(f=>f.id===2),metadata=layer.filter(f=>f.id!==2);
   // Spatial ordering by the first point of each full feature, in coarse rows.
   const ordered=features.map((f,i)=>{let x=0,y=0;try{const g=fields(f.value).find(q=>q.id===4&&q.wire===2),v=g?packed(g.value):[];if(v.length>=3){x=zig(v[1]);y=zig(v[2]);}}catch{}return {f,i,x,y};}).sort((a,b)=>Math.floor(a.y/256)-Math.floor(b.y/256)||a.x-b.x||a.y-b.y||a.i-b.i);
-  for(let i=0;i<count;i++){const start=Math.floor(i*ordered.length/count),end=Math.floor((i+1)*ordered.length/count);stages[i].push(field(3,concat([...metadata.map(f=>f.raw),...ordered.slice(start,end).map(f=>f.f.raw)])));}
+  for(let i=0;i<count;i++){const base=Math.floor(ordered.length/count),extra=ordered.length%count,start=i*base+Math.min(i,extra),end=start+base+Number(i<extra);stages[i].push(field(3,concat([...metadata.map(f=>f.raw),...ordered.slice(start,end).map(f=>f.f.raw)])));}
  }
  return stages.map(concat);
 }

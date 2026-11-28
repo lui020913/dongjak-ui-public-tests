@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.283",
+  "application_version": "9.2.284",
   "public_work_branch": "main",
-  "purpose": "Citywide bus ownership audit and duplicate suppression: preserve every distinct official ARS, match abbreviated compound names against nearby official records, suppress represented tile IDs after canonical source ready, scan all settled bus viewports, retain unmatched stops. Native building vector tiles partitioned into three spatially ordered whole-feature batches without geometry or height changes. Fix v279 label collision regression assertion. Direct visual protected production. Validate distinct stage requests and shared upstream cache; correct stage parser. Align two legacy transit regression assertions with the actual ARS-aware merge and settled viewport scan; keep all visual changes and release gates. Single-owner bus rendering after authoritative district/city coverage is ready; native tile fallback only during startup or incomplete coverage, import later tiles, regression fixture for Daebang community center ARS 20580/20861.",
-  "attempt": 525,
+  "purpose": "Citywide bus ownership audit and duplicate suppression: preserve every distinct official ARS, match abbreviated compound names against nearby official records, suppress represented tile IDs after canonical source ready, scan all settled bus viewports, retain unmatched stops. Native building vector tiles partitioned into five spatially ordered whole-feature batches without geometry or height changes. Fix v279 label collision regression assertion. Direct visual protected production. Validate distinct stage requests and shared upstream cache; correct stage parser. Align two legacy transit regression assertions with the actual ARS-aware merge and settled viewport scan; keep all visual changes and release gates. Single-owner bus rendering after authoritative district/city coverage is ready; native tile fallback only during startup or incomplete coverage, import later tiles, regression fixture for Daebang community center ARS 20580/20861.; five building batches with 32 ms queue spacing, sparse tiles front-loaded and shared upstream cache kept hot.",
+  "attempt": 526,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
