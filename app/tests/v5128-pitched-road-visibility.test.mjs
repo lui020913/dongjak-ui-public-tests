@@ -24,7 +24,7 @@ test('light overhead remains opaque, dark footprints translucent; GIS plan switc
   assert.match(main,/buildingModeVisibility\(show\)/);
   assert.doesNotMatch(main,/movementIsSlow/);
   assert.match(main,/nextBuildingPitchMode\(buildingPitchActive,pitch,PITCH_BUILDING_START,PITCH_BUILDING_EXIT\)/);
-  assert.match(main,/promoteNightAnalysisLayers\(map\)/);
+  assert.doesNotMatch(main,/promoteNightAnalysisLayers\(map\)/);
 });
 
 test('road stroke layers are re-ordered above new buildings and kept above light coverage',()=>{

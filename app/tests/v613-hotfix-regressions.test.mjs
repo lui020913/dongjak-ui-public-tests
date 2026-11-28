@@ -8,7 +8,7 @@ const load=name=>readFileSync(new URL(`../src/${name}`,import.meta.url),'utf8');
 
 test('legacy night mode cannot restore the removed public protection overlay',()=>{
   const code=load('main.js');
-  assert.match(code,/installNightVisibility\(\{map,maplibregl,app,toast,theme:visualTheme\}\)/);
+  assert.doesNotMatch(code,/installNightVisibility/);
   assert.doesNotMatch(code,/protectionOverlay\?\.disable/);
   assert.doesNotMatch(code,/installProtectionZoneMap\(/);
   const night=load('night-visibility-map.js');

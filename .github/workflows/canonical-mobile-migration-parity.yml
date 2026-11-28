@@ -25,7 +25,7 @@ jobs:
           candidate="$RUNNER_TEMP/candidate"
           mkdir "$base" "$candidate"
           git archive f0c431c00125226d682860586c20272f0069b0a9 | tar -x -C "$base"
-          git archive HEAD | tar -x -C "$candidate"
+          git archive 858a6c85fa1fb99fb715d2b9e1fcad12ced56bf4 | tar -x -C "$candidate"
           materialize() {
             local root="$1"
             local work="$root/app"
@@ -62,7 +62,10 @@ jobs:
           # These explicitly listed regression files now check already-approved behavior.
           diff -qr --exclude=mobile-next-build.test.mjs --exclude=district-building-scope.mjs --exclude=district-building-route-viewport.test.mjs --exclude=mobile-next.js --exclude=rail-exclusive-viewport.test.mjs --exclude=phone-toolbar-refresh-performance.test.mjs --exclude=transit-stream-grid.mjs --exclude=transport-map.js --exclude=transit-spatial-stream.test.mjs --exclude=main.js --exclude=progressive-building-stream.mjs --exclude=progressive-building-stream.test.mjs --exclude=audit-css-exact-duplicates.mjs --exclude=building-coverage.js --exclude=native-building-stream.mjs --exclude=mobile-ui-coordinator.js --exclude=mobile-editing-layout.mjs --exclude=native-building-stream.test.mjs --exclude=building-coverage-performance.test.mjs --exclude=README.md --exclude=mobile-first-layout-contract.test.mjs --exclude=bus-pill-insets-browser.mjs --exclude=facility-transit-render-browser.mjs --exclude=global-neutral-focus-browser.mjs --exclude=tip-search-crossfade-browser.mjs --exclude=toolbar-subtle-shadow-browser.mjs --exclude=v9269-flat-surfaces.test.mjs --exclude=mobile-primary-fullscreen.test.mjs --exclude=requested-phone-ui-20261126.test.mjs --exclude=tab-view-transition-no-white-frame.test.mjs --exclude=theme-unified-contract.test.mjs --exclude=transit-guide-retirement.test.mjs --exclude=v9251-mobile-motion-content-fit.test.mjs --exclude=v9253-mobile-header-community-metro.test.mjs --exclude=v9267-phone-surface-regressions.test.mjs --exclude=route-experience-20261123.test.mjs --exclude=v863-guest-onboarding-flow.test.mjs --exclude=phone-35-acceptance-20261122.test.mjs --exclude=protected-release-ownership-20261123.test.mjs --exclude=v611-static-bus-ai-floating.test.mjs --exclude=v711-layout-prewarm.test.mjs --exclude=v862-pc-mobile-separation.test.mjs --exclude=v880-window-stability.test.mjs "$base/app" "$candidate/app"
           node --test "$candidate/app/tests/v863-guest-onboarding-flow.test.mjs"
-          echo 'PASS: transformed application trees match except documented tests, README and explicitly tested performance modules'
+          echo 'PASS: pre-retirement transformed application trees match except documented tests, README and explicitly tested performance modules'
+          # Explicit retirement is a functional change, not part of the migration equivalence claim.
+          # Preserve every public PRI / lighting dataset and research model byte-for-byte.
+          git -C "$GITHUB_WORKSPACE" diff --exit-code f0c431c00125226d682860586c20272f0069b0a9 HEAD -- app/public/data/pri app/public/data/sangdo1-night app/src/pri-data.mjs app/src/pri-map.js app/src/night-occlusion.js app/src/night-visibility-analysis.js
       - name: Run mobile overlay contracts
         run: node --test frontend/production/mobile-first-overhaul.test.mjs tests/mobile-only-gate.test.mjs tests/mobile-qa-parallel.test.mjs tests/workflow-release-safety-contract.test.mjs
       - name: Compare pre-existing failing source contracts on baseline and candidate
@@ -102,4 +105,4 @@ jobs:
           git grep -n -I -E 'mobile-first-overhaul\.css|mobile-17-followup\.(js|css)|mobile-next\.(js|css)|apply-mobile-(17-followup|next)\.mjs' -- ':!app/package-lock.json' ':!app/public/data' ':!app/public/buildings' ':!app/src/app-version.js' ':!docs' | cut -c1-350 || true
       - name: Verify optimized map and mobile layout contracts
         working-directory: app
-        run: node --test tests/native-building-stream.test.mjs tests/building-coverage-performance.test.mjs tests/adaptive-phone-map-budget.test.mjs tests/progressive-building-stream.test.mjs tests/transit-spatial-stream.test.mjs tests/v1713-building-translucency.test.mjs tests/v5125-boundary-building-ui.test.mjs tests/v5126-building-surface.test.mjs tests/rail-exclusive-viewport.test.mjs tests/phone-toolbar-refresh-performance.test.mjs tests/district-building-route-viewport.test.mjs tests/mobile-next-build.test.mjs tests/mobile-followup-build.test.mjs
+        run: node --test tests/native-building-stream.test.mjs tests/building-coverage-performance.test.mjs tests/adaptive-phone-map-budget.test.mjs tests/progressive-building-stream.test.mjs tests/transit-spatial-stream.test.mjs tests/v1713-building-translucency.test.mjs tests/v5125-boundary-building-ui.test.mjs tests/v5126-building-surface.test.mjs tests/rail-exclusive-viewport.test.mjs tests/phone-toolbar-refresh-performance.test.mjs tests/district-building-route-viewport.test.mjs tests/mobile-next-build.test.mjs tests/mobile-followup-build.test.mjs tests/light-only-public-runtime.test.mjs

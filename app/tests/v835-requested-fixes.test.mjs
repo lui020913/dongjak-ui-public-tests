@@ -35,16 +35,10 @@ test('primary shortcut preferences persist while base layers and live vehicles r
  assert.match(toolbar,/if\(!quickToggle&&feature\[0\]!=='map-dong'\)openSheet/);
 });
 
-test('night view is intercepted until the user explicitly accepts the confirmation dialog',()=>{
- assert.match(mobile,/dj-v794-night/);
- assert.match(toolbar,/scroller\.addEventListener\('click',requestNight,true\)/);
- assert.match(toolbar,/e\.preventDefault\(\);e\.stopImmediatePropagation\(\)/);
- assert.match(toolbar,/nightConfirm\.hidden=false/);
- assert.match(toolbar,/data-choice="yes"/);
- assert.match(toolbar,/source\.click\(\)/);
- assert.match(toolbar,/data-choice="no"/);
+test('night view no longer has a public toolbar entry or consent handler',()=>{
+ assert.doesNotMatch(mobile,/id:'dj-v794-night'/);
+ assert.doesNotMatch(toolbar,/requestNight|nightConfirm\.hidden=false|data-choice="yes"/);
 });
-
 test('map search uses loaded vector POIs and verified local/official sources, then hides the keyboard on submit',()=>{
  assert.match(search,/map\.querySourceFeatures\(source,\{sourceLayer:'poi'\}\)/);
  assert.match(search,/localVectorFacilities\(text\)/);

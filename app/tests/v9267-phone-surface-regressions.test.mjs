@@ -40,12 +40,9 @@ test('fullscreen footer and My Info icons use the shared theme card surface',()=
   assert.match(css,/--dj-primary-page-bg/);
   assert.match(css,/#bottom-nav/); // this patch only documents that dock state is preserved elsewhere
 });
-test('night consent is centered, stale exit motion is cancelled and pill remains active',()=>{
-  assert.match(css,/#dj833-night-modal:not\(\[hidden\]\)/);
-  assert.match(css,/place-items:center!important/);
-  assert.match(css,/#dj-v794-night\[aria-pressed="true"\]/);
-  assert.match(night,/function openNightConfirm\(\)/);
-  assert.match(night,/DongjakWindowMotion\?\.cancel\?\.\(card\)/);
+test('retired night consent has no active public toolbar handler',()=>{
+  assert.doesNotMatch(night,/function openNightConfirm|buildNightConfirm|requestNight/);
+  assert.doesNotMatch(html,/id="night-visibility-quick-off"/);
 });
 test('iPhone manual theme switch stores camera before a single native-color refresh',()=>{
   assert.match(theme,/export function installManualThemeReload\(\)\{return \(\)=>\{\};\}/);

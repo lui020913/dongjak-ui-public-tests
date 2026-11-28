@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {NIGHT_VISUAL_PALETTE, distanceLitLineFeatures} from '../src/night-visibility-map.js';
 const read=p=>readFileSync(new URL(`../${p}`, import.meta.url),'utf8');
 
-test('three road colors are consistent across map palette, UI legend, and line widgets',()=>{
+test('archived road palette and line widgets retain semantic colors without public legend',()=>{
   const p=NIGHT_VISUAL_PALETTE;
   const html=read('index.html');
   const css=read('src/night-visibility-panel.css');
@@ -12,14 +12,14 @@ test('three road colors are consistent across map palette, UI legend, and line w
   const palette=[p.clear,p.alleyUnlit,p.pathUnlit];
   assert.equal(new Set([...palette,p.uncertain]).size,4);
   for(const label of ['조명 도달 추정','골목·차도 조명 미도달 추정','보행로 조명 미도달 추정']){
-    assert.ok(html.includes(label),label);
+    assert.ok(!html.includes(label),label);
     assert.ok(js.includes(label),label);
   }
   for(const color of palette)assert.ok(css.toLowerCase().includes(color.toLowerCase()),color);
   assert.match(js,/\['match',\['get','kind'\],'path',nv\.pathUnlit,nv\.alleyUnlit\]/);
   assert.doesNotMatch(js,/line-dasharray/);
   assert.match(js,/dj-night-lit-line/);
-  assert.match(html,/조명 미도달 추정/);
+  assert.doesNotMatch(html,/조명 미도달 추정/);
   assert.doesNotMatch(html,/골목·차도 암부|보행로 암부/);
 });
 

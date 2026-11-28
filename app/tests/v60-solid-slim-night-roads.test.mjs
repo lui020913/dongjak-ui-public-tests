@@ -33,9 +33,9 @@ test('WebGL pitch rendering has no dashed fragments, narrower core, preserved ca
   for(let n=0;n<4*6;n++)assert.equal(result.vertices[n*13+11],0,'dash mode must be disabled for all features');
 });
 
-test('user-facing legend does not imply dashed lines or classify roads as dangerous',()=>{
+test('retired standalone night legend is absent from public HTML',()=>{
   const html=read('index.html');
   assert.doesNotMatch(html,/night-occlusion-legend|분석선은 모두 실선입니다/);
-  assert.match(html,/night-result-legend/);
+  assert.doesNotMatch(html,/night-result-legend/);
   assert.doesNotMatch(html,/점선: 영향 반경 밖/);
 });

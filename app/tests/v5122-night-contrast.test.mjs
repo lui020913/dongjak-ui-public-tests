@@ -20,11 +20,11 @@ test('야간시야 고대비 팔레트는 도달·차폐·반경 밖을 구분�
   assert.doesNotMatch(js,/line-dasharray/);
   assert.doesNotMatch(js,/setPaintProperty\(.*road/);
 });
-test('거리·건물 차폐 모두 별도 영역 범례와 도로 범례를 제공한다',()=>{
+test('독립 야간 범례는 공개 UI에서 제거된다',()=>{
   const html=read('index.html');
   const css=read('src/night-visibility-panel.css');
-  assert.match(html,/night-coverage-legend/);
-  assert.match(html,/영향권 밖 또는 미확인/);
+  assert.doesNotMatch(html,/night-coverage-legend/);
+  assert.doesNotMatch(html,/영향권 밖 또는 미확인/);
   assert.match(css,/night-coverage\.street::before\{background:#ffd376/);
   assert.match(css,/night-coverage\.security::before\{background:#47e7cf/);
   assert.match(css,/night-occlusion-legend \.clear::before\{background:#79DEC1/);

@@ -20,10 +20,10 @@ test('first paint defaults to light regardless of hour, without relying on Vite 
   assert.deepEqual(runFirstPaint({hour:6}),{theme:'light',meta:'#f3f7f5'});
   assert.deepEqual(runFirstPaint({hour:7}),{theme:'light',meta:'#f3f7f5'});
 });
-test('saved manual dark mode persists across ordinary app relaunches',()=>{
+test('old saved dark preference is ignored across relaunches',()=>{
   assert.deepEqual(runFirstPaint({saved:'dark',hour:13}),{theme:'light',meta:'#f3f7f5'});
   assert.deepEqual(runFirstPaint({saved:'light',hour:23}),{theme:'light',meta:'#f3f7f5'});
-  assert.match(read('src/ui-environment.js'),/document\.documentElement\.dataset\.theme=themeState\.value/);
+  assert.match(read('src/ui-environment.js'),/document\.documentElement\.dataset\.theme=theme/);
 });
 test('logo is real transparent RGBA with no white card at loader',()=>{
   const path='public/logos/dongjak-gu.png';

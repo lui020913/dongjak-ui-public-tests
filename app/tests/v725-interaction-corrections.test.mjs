@@ -17,12 +17,12 @@ test('the app uses one mobile-first shell instead of a desktop safety rail',()=>
   assert.ok(css.includes('.map-actions'));
 });
 
-test('the search, theme and version controls share one floating header',()=>{
+test('the shared floating header omits retired theme and version controls',()=>{
   const css=source('src/mobile-first-layout.css'),environment=source('src/ui-environment.js'),html=source('index.html');
   assert.ok(css.includes('.topbar'));
   assert.ok(css.includes('#theme-toggle'));
   assert.ok(css.includes('#version-history-trigger'));
-  assert.ok(environment.includes("themeState.value==='dark'?'라이트 모드':'다크 모드'"));
+  assert.ok(environment.includes("const theme='light'"));assert.ok(!html.includes('id="theme-toggle"'));
   assert.ok(!html.includes('id="version-history-trigger"'));
 });
 

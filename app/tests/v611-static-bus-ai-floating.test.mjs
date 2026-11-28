@@ -57,7 +57,7 @@ test('floating windows have existing close actions and bounded desktop dragging'
   assert.ok(DRAGGABLE_PANELS.some(([id])=>id==='night-visibility-float'));
   assert.match(html,/id="road-width-legend-close"/);
   assert.match(html,/id="transport-close"/);
-  assert.match(html,/id="night-visibility-float-stop"[^>]*><\/button>/);
+  assert.doesNotMatch(html,/id="night-visibility-float-stop"/);
   assert.deepEqual(boundedFloatPosition(-900,-10,220,200,1200,800),{x:6,y:6});
   assert.deepEqual(boundedFloatPosition(1200,999,220,200,1200,800),{x:974,y:594});
 });

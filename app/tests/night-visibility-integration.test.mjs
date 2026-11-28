@@ -45,12 +45,12 @@ test('간선도로·횡단도·계단·공원길을 기존 분석 정의대로 �
   assert.equal(kindOf({highway:'steps'}),'path');
   assert.equal(kindOf({highway:'residential'}),'alley');
 });
-test('야간 분석 UI와 지도 연결점이 있고 원본 대중교통 코드가 유지된다',()=>{
+test('야간 분석 연구 코드는 보존하고 독립 UI 제거 및 대중교통 유지',()=>{
   const html=read('index.html'),main=read('src/main.js'),js=read('src/night-visibility-map.js');
   for(const id of ['night-visibility-toggle','night-visibility-quick-off','night-visibility-radius',
     'night-visibility-exclude-major','night-visibility-show-alley','night-visibility-show-path',
-    'night-visibility-top','night-visibility-stats'])assert.match(html,new RegExp(id));
-  assert.match(main,/installNightVisibility\(\{map,maplibregl,app,toast,theme:visualTheme\}\)/);
+    'night-visibility-top','night-visibility-stats'])assert.doesNotMatch(html,new RegExp('id="'+id+'"'));
+  assert.doesNotMatch(main,/installNightVisibility/);
   assert.match(main,/initTransportMap\(/);
   assert.match(js,/dj-night-dark-path/);
   assert.match(js,/getSangdoBoundary\(map\)/);

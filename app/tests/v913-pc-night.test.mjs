@@ -54,9 +54,9 @@ test('night isolation continues when a late style layer disappears',()=>{
  assert.equal(state.get(layers[0].id),'visible');
 });
 
-test('night enables controls only after map handlers are bound and onboarding settles after startup',()=>{
+test('retired night controls are absent and onboarding settles after startup',()=>{
  const html=read('index.html'),night=read('src/night-visibility-map.js'),tour=read('src/v860-onboarding.js');
- assert.ok(html.includes('id="night-visibility-quick-off"'));
+ assert.ok(!html.includes('id="night-visibility-quick-off"'));
  assert.ok(night.includes("app.dataset.djNightReady='true'"));
  assert.ok(night.includes('toggle.disabled=false;quickOff.disabled=false'));
  assert.ok(tour.includes("app.dataset.dj860AutoResolved='true'"));

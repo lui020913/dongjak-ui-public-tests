@@ -12,7 +12,7 @@ test('v7.0.29 landmark logo and label share one MapLibre symbol anchor',()=>{
 });
 test('v7.0.29 X buttons use accessible labels but no raw × glyph competing with CSS',()=>{
  const html=read('index.html');
- for(const id of ['overview-sheet-close','night-visibility-float-stop','map-options-desktop-close','map-options-mobile-close','news-close-to-map']){
+ for(const id of ['overview-sheet-close','map-options-desktop-close','map-options-mobile-close','news-close-to-map']){
    const m=html.match(new RegExp(`<button[^>]*id="${id}"[^>]*>([\\s\\S]*?)</button>`));
    assert.ok(m,id);
    assert.doesNotMatch(m[1],/×/);

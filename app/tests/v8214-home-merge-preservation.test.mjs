@@ -16,7 +16,7 @@ test('v8.2.14 home integration preserves the new personalized shortcuts and meta
   const toolbar=read('src/v831-swipe-feature-toolbar.js');
   assert.match(toolbar,/dongjak_mobile_shortcut_preferences_v8214/);
   assert.match(toolbar,/function buildWeather\(/);
-  assert.match(toolbar,/function requestNight\(/);
+  assert.doesNotMatch(toolbar,/function requestNight\(/);
   assert.match(toolbar,/rebuildFeatureLocations\(/);
 });
 

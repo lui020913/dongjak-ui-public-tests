@@ -25,8 +25,8 @@ test('caption expands with same-button collapse, and explanation sheet is linked
   assert.match(css,/\.dj832-feature\.dj832-expanded/);
   assert.match(css,/transition:flex-basis/);
 });
-test('native map/safety/night/weather round controls keep their actions; font moves to More',()=>{
-  for(const id of ['dj-v794-map','dj-v794-safety','dj-v794-night','dj800-type-trigger','dj-v794-weather']) assert.ok(js.includes(id));
+test('native map/safety/weather round controls keep their actions; font moves to More',()=>{
+  for(const id of ['dj-v794-map','dj-v794-safety','dj800-type-trigger','dj-v794-weather']) assert.ok(js.includes(id));
   assert.match(js,/scroller\.addEventListener\('click',nativeClicked\)/);
   assert.match(js,/native\.classList\.add\('dj832-expanded'\)/);
   assert.match(css,/\.dj832-native\.dj832-expanded::after/);

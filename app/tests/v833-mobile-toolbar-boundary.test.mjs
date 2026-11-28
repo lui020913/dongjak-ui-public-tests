@@ -33,14 +33,10 @@ test('base layers toggle immediately without explanation sheet and active icon c
   assert.match(toolbar,/if\(!quickToggle&&feature\[0\]!=='map-dong'\)openSheet\(feature,button,valid\)/);
   assert.match(toolbar,/alreadyOn&&button&&!button\.classList\.contains\('dj832-expanded'\)/);
 });
-test('weather sheet and night-mode consent have explicit close and decline controls',()=>{
+test('weather sheet retains close control without retired night consent',()=>{
   assert.match(toolbar,/function buildWeather\(\)/);
   assert.match(toolbar,/dj833-weather-close/);
-  assert.match(toolbar,/function requestNight\(e\)/);
-  assert.match(toolbar,/e\.stopImmediatePropagation\(\)/);
-  assert.match(toolbar,/data-choice="no"/);
-  assert.match(toolbar,/data-choice="yes"/);
-  assert.match(toolbar,/nightConfirm\.hidden=false/);
+  assert.doesNotMatch(toolbar,/function requestNight|nightConfirm\.hidden=false|data-choice="yes"/);
 });
 test('cluster count is positioned via a matching translate vector with the badge',()=>{
   assert.match(markers,/'circle-translate':\[13,-13\]/);

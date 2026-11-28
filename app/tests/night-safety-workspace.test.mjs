@@ -8,7 +8,7 @@ test('보행안전 메뉴가 지도 옵션 외부의 독립 제어판이며 ID�
   const mapStart=html.indexOf('id="map-advanced-controls"');
   assert.ok(panelStart>0 && mapStart>panelStart);
   const section=html.slice(panelStart,mapStart);
-  for(const id of ['night-visibility-toggle','night-visibility-controls','ped-access-toggle',
+  for(const id of ['ped-access-toggle',
     'ped-report-open','ped-nearby-open','toggle-safety-facilities','toggle-crosswalks',
     'toggle-essentials','toggle-public-facilities','toggle-station-accessibility']){
     assert.match(section,new RegExp('id="'+id+'"'));
@@ -17,14 +17,14 @@ test('보행안전 메뉴가 지도 옵션 외부의 독립 제어판이며 ID�
   assert.ok(html.indexOf('id="base-layer-controls"')>mapStart);
   assert.match(html,/id="map-safety-toggle"[^>]+aria-expanded="false"/);
 });
-test('야간 시야는 임시 테마만 변경하고 저장 테마를 복원한다',()=>{
+test('독립 야간 시야와 임시 다크 테마 실행 경로가 제거된다',()=>{
   const night=read('src/night-visibility-map.js'),theme=read('src/ui-environment.js'),main=read('src/main.js');
   assert.match(night,/applyTemporaryTheme\('dark'\)/);
   assert.match(night,/applyTemporaryTheme\(null\)/);
-  assert.match(theme,/themeState\.override\(next\)/);
+  assert.doesNotMatch(theme,/themeState\.override|setTemporaryTheme/);
   assert.match(theme,/return 'light';/);
   assert.doesNotMatch(theme,/safeStorageSet\(THEME_KEY/);
-  assert.match(main,/installNightVisibility\(\{map,maplibregl,app,toast,theme:visualTheme\}\)/);
+  assert.doesNotMatch(main,/installNightVisibility/);
 });
 test('PC 모바일 별도 배치, 안전 메뉴 숨김/접근성 스타일이 존재한다',()=>{
   const css=read('src/safety-workspace.css');

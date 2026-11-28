@@ -34,7 +34,7 @@ test('theme loading uses the existing single overlay but a new glass-card progre
 });
 test('night analysis options group original controls without recreating any input',()=>{
   const js=read('src/v7120-night-panel.js'),html=read('index.html');
-  assert.match(html,/src="\/src\/v7120-night-panel\.js"/);
+  assert.doesNotMatch(html,/src="\/src\/v7120-night-panel\.js"/);
   assert.match(js,/controls\.append\(advanced,top\)/);
   assert.match(js,/advanced\.append\(node\)/);
   assert.match(js,/top\.append\(node\)/);
@@ -44,6 +44,6 @@ test('original MapLibre entry and walk-safety layer assets remain connected',()=
   const main=read('src/main.js');
   assert.match(main,/installSafetyLayers/);
   assert.match(main,/initTransportMap/);
-  assert.match(main,/installNightVisibility/);
-  assert.ok(read('index.html').includes('id="night-visibility-radius"'));
+  assert.doesNotMatch(main,/installNightVisibility/);
+  assert.ok(!read('index.html').includes('id="night-visibility-radius"'));
 });

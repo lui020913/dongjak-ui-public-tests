@@ -11,8 +11,8 @@ test('iPhone cold-start HTML and runtime status controller use the same light ed
   // Search for the closing tag AFTER the theme script, not the first tag in HTML.
   assert.ok(start>=0);
   const startup=html.slice(start,html.indexOf('</script>',start));
-  assert.match(startup,/if\(iosHome\)\{document\.documentElement\.style\.backgroundColor=displayTheme==='dark'\?'#22282e':'#edf3ef'/);
-  assert.match(startup,/\? \(displayTheme==='dark'\?'#22282e':'#edf3ef'\)/);
+  assert.match(startup,/if\(iosHome\)\{document\.documentElement\.style\.backgroundColor='#edf3ef'/);
+  assert.match(startup,/\? \('#edf3ef'\)/);
   assert.match(tone,/theme==='dark'\?'#22282e':'#edf3ef'/);
   assert.match(css,/--dj-pwa-land-tone:#edf3ef/);
 });

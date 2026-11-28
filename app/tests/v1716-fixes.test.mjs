@@ -29,7 +29,7 @@ test('테마 전환 시 외부 음영 레이어를 갱신하며 경계 로딩 �
     readFile(new URL('../src/main.js', import.meta.url), 'utf8')
   ]);
   assert.match(theme,/getLayer\('district-exterior-fade'\)/);
-  assert.match(theme,/districtExteriorThemePaint\(themeState\.value\)/);
+  assert.match(theme,/districtExteriorThemePaint\(theme\)/);
   assert.match(main,/paint:\{\.\.\.districtExteriorThemePaint\(visualTheme\.currentTheme\(\)\)/);
   assert.doesNotMatch(main,/djTransitExterior==='true'\?\{'fill-opacity':0\}/);
   assert.match(main,/visualTheme\.refresh\(\)/);

@@ -3,14 +3,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('v8215 fix: night consent precedes theme transition capture splash',()=>{
+test('retired night consent cannot trigger theme splash',()=>{
   const src=read('src/v711-experience.js');
   const gate=src.slice(src.indexOf('const transitionClick=e=>'),src.indexOf("listen(doc,'click',transitionClick,true)"));
   assert.match(gate,/if\(target\.id!=='theme-toggle'\)return;/);
   assert.match(gate,/start\('theme'\)/);
   assert.doesNotMatch(gate,/start\(target\.id==='theme-toggle'\?'theme':'night'\)/);
   const night=read('src/v831-swipe-feature-toolbar.js');
-  assert.ok(night.lastIndexOf('nightConfirm.hidden=false')>night.indexOf('function requestNight(e)'));
+  assert.doesNotMatch(night,/nightConfirm\.hidden=false|function requestNight/);
 });
 test('v8215 fix: My Info cards are inserted into real scroll body and constrained',()=>{
   const source=read('src/v815-map-product.js');
