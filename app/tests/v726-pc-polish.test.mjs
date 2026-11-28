@@ -17,10 +17,10 @@ test('the unified mobile-first shell is the final layout layer and release metad
  assert.equal(JSON.parse(read('public/version.json')).version,APP_VERSION);
 });
 
-test('map actions, toolbar and navigation use the same light/dark surface system',()=>{
+test('map actions, toolbar and navigation use the same light surface system',()=>{
  assert.ok(css.includes('--mf-surface: #ffffff'));
  assert.ok(css.includes('--mf-accent: #13866c'));
- assert.ok(css.includes('#app#app#app#app#app[data-theme="dark"]'));
+ assert.doesNotMatch(css,/data-theme="dark"/);
  assert.ok(css.includes('.map-actions'));
  assert.ok(css.includes('#dj-v794-toolbar'));
  assert.ok(css.includes('#bottom-nav:not([hidden])'));

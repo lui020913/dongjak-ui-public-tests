@@ -122,7 +122,7 @@ test('V11 sheets and centered guide retain the established light surface token',
  const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
  assert.match(css, /#app\{--djNext-surface:#fff;/);
  assert.doesNotMatch(css, /#app\[data-theme="dark"\]\{--djNext-surface:/);
- assert.match(css, /#map-gesture-guide\{background:var\(--dj-v4-surface\)!important/);
+ assert.match(css, /#map-gesture-guide:not\(\[hidden\]\)\{[^}]*background:var\(--djNext-surface,#fff\)!important/);
  assert.doesNotMatch(css, /#191b1e\b/i);
 });
 
