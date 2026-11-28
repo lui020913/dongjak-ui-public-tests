@@ -82,7 +82,7 @@ export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
   const g=gesture;if(!g||e.pointerId!==g.id)return;gesture=null;
   if(g.dragging)blockedUntil=win.performance.now()+350;
   const dy=e.clientY-g.y;
-  const action=cancel||!g.dragging?'settle':sheetStageAction(dy,0,g.expanded);
+  const action=cancel||!g.dragging?'settle':sheetStageAction(dy,0,g.expanded,true);
   if(action==='expand'){finish(true);return;}
   if(action==='collapse'){finish(false);return;}
   if(action==='dismiss'){finish(false,true);return;}
