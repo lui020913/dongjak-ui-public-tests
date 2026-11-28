@@ -10,9 +10,19 @@ const swipe = read('../src/v831-swipe-feature-toolbar.js');
 const coordinator = read('../src/mobile-ui-coordinator.js');
 const layout = read('../src/mobile-first-layout.css');
 
-test('one shared layout stylesheet is the app shell authority', () => {
+test('shared shell and canonical phone-only overlays load once in release order', () => {
   assert.match(main, /import ['"]\.\/mobile-first-layout\.css['"]/);
-  assert.doesNotMatch(main, /import ['"]\.\/mobile-first-overhaul\.css['"]/);
+  const order=['./mobile-ui/current.css','./mobile-first-overhaul.css','./mobile-17-followup.css','./mobile-next.css'];
+  let previous=-1;
+  for(const name of order){
+    const token="import '"+name+"';";
+    assert.equal(main.split(token).length-1,1,name+' must load once');
+    const offset=main.indexOf(token);
+    assert.ok(offset>previous,name+' cascade order');
+    previous=offset;
+  }
+  assert.match(read('../src/mobile-first-overhaul.css'),/^@media \(max-width: 699px\) \{/);
+  assert.match(read('../src/mobile-next.css'),/@media\(max-width:699px\)/);
 });
 
 test('desktop and tablet layout trees are not mounted', () => {
