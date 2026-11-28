@@ -125,8 +125,8 @@ test('debug APK releases are immutable by source SHA even when Android versionNa
 test('released phone dark buildings follow the approved high-opacity charcoal palette',()=>{
  const source=read('app/src/map-appearance.js');
  const patch=read('scripts/apply-mobile-17-followup.mjs');
- const regression=read('frontend/production/mobile-followup-build.test.mjs');
- const next=read('frontend/production/mobile-next-build.test.mjs');
+ const regression=read('app/tests/mobile-followup-build.test.mjs');
+ const next=read('app/tests/mobile-next-build.test.mjs');
  assert.ok(source.includes('MOBILE_DARK_BUILDING_PALETTE=BUILDING_VISUAL_PALETTE.dark'));
  assert.ok(!patch.includes('MOBILE_DARK_BUILDING_PALETTE='),'Do not re-inject the canonical palette at release time');
  assert.ok(!source.includes('nearOpacity:0.98'));
